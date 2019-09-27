@@ -1,0 +1,27 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.6.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'java'
+}
+
+group = 'club.tp0t'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    maven{ url 'http://maven.aliyun.com/groups/public/' }
+    maven{ url 'http://maven.aliyun.com/repositories/jcenter'}
+    // maven{ url 'http://maven.aliyun.com/repositories/gradle-plugin'}
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    compile 'com.graphql-java-kickstart:graphql-spring-boot-starter'
+    compile 'com.graphql-java-kickstart:graphql-spring-tools'
+    runtimeOnly 'org.postgresql:postgresql'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
