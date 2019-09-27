@@ -17,4 +17,4 @@ Tp0t战队开发的CTF用OJ平台。
 
 ### 接口相关
 
-+ GraphQL的schema文件应当以`schema`目录下文件作为本体
++ GraphQL的schema文件定义在`server/src/resources/schema`目录下
