@@ -9,8 +9,8 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-    //maven{ url 'http://maven.aliyun.com/groups/public/' }
-    //maven{ url 'http://maven.aliyun.com/repositories/jcenter'}
+    maven{ url 'http://maven.aliyun.com/groups/public/' }
+    maven{ url 'http://maven.aliyun.com/repositories/jcenter'}
     // maven{ url 'http://maven.aliyun.com/repositories/gradle-plugin'}
     mavenCentral()
     jcenter()
