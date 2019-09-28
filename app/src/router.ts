@@ -14,6 +14,11 @@ export default new Router({
       component: Home
     },
     {
+      path:'/bulletin',
+      name: "bulletin",
+      component : ()=>import(/* webpackChunkName: "bulletin" */ "@/views/Bulletin.vue")
+    },
+    {
       path: "/about",
       name: "about",
       // route level code-splitting
