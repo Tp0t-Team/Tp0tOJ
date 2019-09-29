@@ -107,6 +107,13 @@
         </v-tab-item>
       </v-tabs>
     </v-card>
+    <v-snackbar v-model="info" right bottom :timeout="3000">
+      {{ infoText }}
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="hasInfo = false">close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -137,6 +144,9 @@ export default class Login extends Vue {
   };
 
   private loading: boolean = false;
+
+  private infoText: string = "";
+  private hasInfo: boolean = false;
 
   check() {
     if (this.regPassword != this.repeat) this.againError = "密码不一致";
