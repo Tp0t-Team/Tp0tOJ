@@ -20,14 +20,22 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // spring boot compile error with websocket
+    // implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
     compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
-    compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.0'
+    compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'
+
+    // to be added in the future, need a context to compile
     // compile 'com.alibaba:fastjson'
+
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
     // to embed GraphiQL tool
     runtime 'com.graphql-java-kickstart:graphiql-spring-boot-starter:5.10.0'
+
     // testing facilities
     testCompile 'com.graphql-java-kickstart:graphql-spring-boot-starter-test:5.10.0'
 }
