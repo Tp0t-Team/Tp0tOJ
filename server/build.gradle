@@ -26,6 +26,7 @@ dependencies {
 
     compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
     compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'
+    compile 'com.graphql-java-kickstart:graphql-java-servlet:8.0.0'
 
     // to be added in the future, need a context to compile
     // compile 'com.alibaba:fastjson'

@@ -1,0 +1,17 @@
+type Mutation {
+    register(input: RegisterInput!) : RegisterPayload!
+}
+
+input RegisterInput {
+    name: String,
+    stuNumber: String,
+    password: String,
+    department: String,
+    qq: String,
+    mail: String
+}
+
+type RegisterPayload {
+    # success, xxx already in use, invalid xxx, failed
+    message: String
+}

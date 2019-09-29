@@ -24,7 +24,7 @@ public class User {
     @NotNull
     @NotEmpty
     @Column(name = "stu_number", length = 20)
-    private long stuNumber;
+    private String stuNumber;
 
     @NotEmpty
     @Column(name = "papssword")
