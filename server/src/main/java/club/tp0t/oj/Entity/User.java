@@ -1,6 +1,5 @@
 package club.tp0t.oj.Entity;
 
-import org.checkerframework.common.aliasing.qual.Unique;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 

@@ -23,7 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
     compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.0'
-    compile 'com.alibaba:fastjson'
+    // compile 'com.alibaba:fastjson'
     runtimeOnly 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     // to embed GraphiQL tool
