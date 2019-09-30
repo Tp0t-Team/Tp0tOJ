@@ -43,12 +43,14 @@
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
-                <v-text-field
+                <v-select
                   v-model="department"
+                  :item="dep_item"
                   label="Department"
+                  chips
                   :rules="[rules.required]"
                   :disabled="loading"
-                ></v-text-field>
+                ></v-select>
                 <v-text-field v-model="qq" label="QQ" :rules="[rules.required]" :disabled="loading"></v-text-field>
                 <v-text-field
                   v-model="regPassword"
@@ -56,7 +58,7 @@
                   :append-icon="showPassword ? 'visibility' : 'visibility_off'"
                   :type="showPassword ? 'text' : 'password'"
                   @click:append="showPassword = !showPassword"
-                  :rules="[rules.required]"
+                  :rules="[rules.required,rules.length(8) , rules.password]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -76,7 +78,7 @@
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required]"
+                  :rules="[rules.require,rules.email]"
                   :disabled="loading"
                 ></v-text-field>
                 <v-text-field
@@ -122,6 +124,7 @@ import { Component, Vue } from "vue-property-decorator";
 
 @Component
 export default class Login extends Vue {
+  
   private username: string = "";
   private password: string = "";
 
@@ -136,17 +139,27 @@ export default class Login extends Vue {
 
   private loginValid: boolean = false;
   private regValid: boolean = false;
-
+  private  dep_item = ['机械工程学院','化工学院','电光学院','计算机学院','经济与管理学院','能源与动力学院','自动化学院','理学院','外国语学院','公共事务学院','材料学院','环生学院','设传学院','钱学森学院','知识产权学院','马克思主义学院','国际教育学院','中法工程师学院'];
+  private   dep_value= ['机械工程学院','化工学院','电光学院','计算机学院','经济与管理学院','能源与动力学院','自动化学院','理学院','外国语学院','公共事务学院','材料学院','环生学院','设传学院','钱学森学院','知识产权学院','马克思主义学院','国际教育学院','中法工程师学院'];
   private showPassword: boolean = false;
   private againError: string = "";
   private rules = {
-    required: (value: string) => !!value || "请填写"
+    required: (value: string) => !!value || "请填写",
+    email: (value: string) => (value || "").match(/@/) || "非法的邮箱地址",
+    length: (len: number) => (v: string) =>
+      (v || "").length >= len || `非法的密码长度，需要 ${len} 位`,
+    password: (value: string) =>
+      (value || "").match(
+        /^ (?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/
+      ) || "密码必须由大小写字母数字和特殊符号组成" //TODO: 正则好像不对
   };
 
   private loading: boolean = false;
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+
 
   check() {
     if (this.regPassword != this.repeat) this.againError = "密码不一致";
