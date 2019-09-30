@@ -45,7 +45,7 @@
                 ></v-text-field>
                 <v-select
                   v-model="department"
-                  :item="dep_item"
+                  :items="dep_item"
                   label="Department"
                   chips
                   :rules="[rules.required]"
