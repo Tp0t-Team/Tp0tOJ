@@ -34,4 +34,44 @@ public class Bulletin {
     @Column(name = "gmt_modified")
     @LastModifiedDate
     private Timestamp gmtModified;
+
+    public long getBulletinId() {
+        return bulletinId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public boolean isTopping() {
+        return topping;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setBulletinId(long bulletinId) {
+        this.bulletinId = bulletinId;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setTopping(boolean topping) {
+        this.topping = topping;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }

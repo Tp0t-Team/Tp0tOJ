@@ -5,11 +5,11 @@ type Mutation {
 }
 
 input RegisterInput {
-    name: String,
-    stuNumber: String,
-    password: String,
-    department: String,
-    qq: String,
+    name: String
+    stuNumber: String
+    password: String
+    department: String
+    qq: String
     mail: String
 }
 

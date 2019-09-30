@@ -26,4 +26,27 @@ public class Replica {
     @LastModifiedDate
     private Timestamp gmtModified;
 
+    public long getReplicaId() {
+        return replicaId;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setReplicaId(long replicaId) {
+        this.replicaId = replicaId;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }

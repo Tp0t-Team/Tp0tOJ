@@ -35,4 +35,44 @@ public class ReplicaAlloc {
     @Column(name = "gmt_modified")
     @LastModifiedDate
     private Timestamp gmtModified;
+
+    public long getReplicaAllocId() {
+        return replicaAllocId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Replica getReplica() {
+        return replica;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setReplicaAllocId(long replicaAllocId) {
+        this.replicaAllocId = replicaAllocId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setReplica(Replica replica) {
+        this.replica = replica;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }

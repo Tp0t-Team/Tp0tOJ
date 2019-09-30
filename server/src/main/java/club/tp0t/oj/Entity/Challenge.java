@@ -43,4 +43,68 @@ public class Challenge {
     @Column(name = "gmt_modified")
     @LastModifiedDate
     private Timestamp gmtModified;
+
+    public long getChallengeId() {
+        return challengeId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public long getFirstBlood() {
+        return firstBlood;
+    }
+
+    public long getSecondBlood() {
+        return secondBlood;
+    }
+
+    public long getThirdBlood() {
+        return thirdBlood;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setChallengeId(long challengeId) {
+        this.challengeId = challengeId;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setFirstBlood(long firstBlood) {
+        this.firstBlood = firstBlood;
+    }
+
+    public void setSecondBlood(long secondBlood) {
+        this.secondBlood = secondBlood;
+    }
+
+    public void setThirdBlood(long thirdBlood) {
+        this.thirdBlood = thirdBlood;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }

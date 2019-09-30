@@ -36,7 +36,7 @@ public class User {
 
     @NotEmpty
     @Column(name = "state")
-    private String state;
+    private String state;  // normal, disabled, protected
 
     @NotEmpty
     @Column(name = "QQ")
@@ -75,4 +75,124 @@ public class User {
     @NotNull
     @Column(name = "protected_time")
     private Timestamp protectedTime;
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getStuNumber() {
+        return stuNumber;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public String getQQ() {
+        return QQ;
+    }
+
+    public String getMail() {
+        return mail;
+    }
+
+    public Timestamp getJoinTime() {
+        return joinTime;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public int getTopRank() {
+        return topRank;
+    }
+
+    public Timestamp getProtectedTime() {
+        return protectedTime;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setStuNumber(String stuNumber) {
+        this.stuNumber = stuNumber;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setQQ(String QQ) {
+        this.QQ = QQ;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public void setJoinTime(Timestamp joinTime) {
+        this.joinTime = joinTime;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
+
+    public void setTopRank(int topRank) {
+        this.topRank = topRank;
+    }
+
+    public void setProtectedTime(Timestamp protectedTime) {
+        this.protectedTime = protectedTime;
+    }
 }

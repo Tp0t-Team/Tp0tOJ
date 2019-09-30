@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserMutationResolver implements GraphQLMutationResolver {
+public class UserMutation implements GraphQLMutationResolver {
     @Autowired
     private  BulletinService bulletinService;
     @Autowired

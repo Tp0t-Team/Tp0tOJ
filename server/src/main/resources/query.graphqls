@@ -1,0 +1,20 @@
+type Query {
+    users : UsersPayload
+    test: String
+}
+type UsersPayload {
+    message: String
+    userInfos: [UserInfo]
+}
+
+type UserInfo {
+    name: String
+    stuNumber: String
+    department: String
+    qq: String
+    mail: String
+    joinTime: String # Timestamp to String
+    score: String # long to String
+    topRank: Int
+    protectedTime: String # Timestamp to String
+}

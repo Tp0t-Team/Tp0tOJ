@@ -47,4 +47,68 @@ public class Submit {
     @Column(name = "gmt_modified")
     @LastModifiedDate
     private Timestamp gmtModified;
+
+    public long getSubmitId() {
+        return submitId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public int getMark() {
+        return mark;
+    }
+
+    public Timestamp getSubmitTime() {
+        return submitTime;
+    }
+
+    public String getSubmitFlag() {
+        return submitFlag;
+    }
+
+    public boolean isCorrect() {
+        return correct;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setSubmitId(long submitId) {
+        this.submitId = submitId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setMark(int mark) {
+        this.mark = mark;
+    }
+
+    public void setSubmitTime(Timestamp submitTime) {
+        this.submitTime = submitTime;
+    }
+
+    public void setSubmitFlag(String submitFlag) {
+        this.submitFlag = submitFlag;
+    }
+
+    public void setCorrect(boolean correct) {
+        this.correct = correct;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }

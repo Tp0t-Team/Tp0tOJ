@@ -40,4 +40,52 @@ public class Flag {
     @Column(name = "gmt_modified")
     @LastModifiedDate
     private Timestamp gmtModified;
+
+    public long getFlagId() {
+        return flagId;
+    }
+
+    public Challenge getChallenge() {
+        return challenge;
+    }
+
+    public Replica getReplica() {
+        return replica;
+    }
+
+    public String getFlag() {
+        return flag;
+    }
+
+    public Timestamp getGmtCreated() {
+        return gmtCreated;
+    }
+
+    public Timestamp getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setFlagId(long flagId) {
+        this.flagId = flagId;
+    }
+
+    public void setChallenge(Challenge challenge) {
+        this.challenge = challenge;
+    }
+
+    public void setReplica(Replica replica) {
+        this.replica = replica;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
+
+    public void setGmtCreated(Timestamp gmtCreated) {
+        this.gmtCreated = gmtCreated;
+    }
+
+    public void setGmtModified(Timestamp gmtModified) {
+        this.gmtModified = gmtModified;
+    }
 }
