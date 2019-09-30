@@ -17,7 +17,7 @@ export default new Router({
     {
       path:'/login',
       name: "login",
-      component : ()=>import(/* webpackChunkName: "bulletin" */ "@/views/Login.vue")
+      component : ()=>import(/* webpackChunkName: "login" */ "@/views/Login.vue")
     },
     {
       path:'/bulletin',
@@ -27,13 +27,12 @@ export default new Router({
     {
       path:'/rank/:page',
       name: "rank",
-      component : ()=>import(/* webpackChunkName: "rank" */ "@/views/Rank.vue"),
-      props: true
+      component : ()=>import(/* webpackChunkName: "rank" */ "@/views/Rank.vue")
     },
     {
       path:'/challenge',
       name: "challenge",
-      component : ()=>import(/* webpackChunkName: "bulletin" */ "@/views/Challenge.vue")
+      component : ()=>import(/* webpackChunkName: "challenge" */ "@/views/Challenge.vue")
     },
     {
       path: '*',
