@@ -35,6 +35,7 @@ public class UserQuery extends Query {
         return "hello world";
     }
 
+    // get user info
     public UsersPayload users() {
         // TODO: session check
         // not login yet

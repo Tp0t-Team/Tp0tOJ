@@ -46,13 +46,13 @@ public class User {
     @Column(name = "mail")
     private String mail;
 
-    @NotEmpty
+    @NotNull
     @Column(name = "join_time")
     private Timestamp joinTime;
 
     @NotEmpty
     @Column(name = "role")
-    private String role;
+    private String role;  // admin, member, team
 
     @NotNull
     @Column(name = "score")

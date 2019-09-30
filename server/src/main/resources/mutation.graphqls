@@ -1,7 +1,7 @@
 type Mutation {
     register(input: RegisterInput!) : RegisterPayload!
     reset (input: ResetInput!) : ResetPayload!
-
+    login (input: LoginInput!) : LoginPayload!
 }
 
 input RegisterInput {
@@ -14,7 +14,7 @@ input RegisterInput {
 }
 
 type RegisterPayload {
-    # success, xxx already in use, invalid xxx, failed, already login
+    # success, xxx already in use, invalid xxx, failed, already login, not empty error
     message: String
 }
 
@@ -26,5 +26,14 @@ input ResetInput {
 
 type ResetPayload {
     # success, no user, failed
+    message: String
+}
+
+input LoginInput {
+    name: String
+    password: String
+}
+
+type LoginPayload {
     message: String
 }

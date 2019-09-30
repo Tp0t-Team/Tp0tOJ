@@ -10,4 +10,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select u from User u where u.role='user' and u.state='normal'")
     List<User> getNormalUsers();
+
+    @Query(value = "select u from User u where u.name=?1")
+    User getUserByName(String name);
+
+    @Query(value = "select u from User u where u.stuNumber=?1")
+    User getUserByStuNumber(String stuNumber);
+
+    @Query(value = "select u from User u where u.QQ=?1")
+    User getUserByQq(String qq);
+
+    @Query(value = "select u from User u where u.mail=?1")
+    User getUserByMail(String mail);
 }
