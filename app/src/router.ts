@@ -35,6 +35,11 @@ export default new Router({
       component : ()=>import(/* webpackChunkName: "challenge" */ "@/views/Challenge.vue")
     },
     {
+      path:'/admin/challenge',
+      name: "admin-challenge",
+      component : ()=>import(/* webpackChunkName: "admin-challenge" */ "@/views/admin/Challenge.vue")
+    },
+    {
       path: '*',
       name: 'error',
       component: ErrorPage

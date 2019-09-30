@@ -10,7 +10,7 @@
               <v-card
                 :elevation="hover ? 12 : 2"
                 width="20vw"
-                height="200px"
+                height="220px"
                 class="ma-4"
                 @click="showDialog=true"
               >
@@ -20,6 +20,25 @@
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
                 <v-card-text class="description">description</v-card-text>
+                <v-card-actions>
+                  <v-row>
+                    <v-col cols="4">
+                      <v-btn fab>
+                        <v-icon>whatshot</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-btn fab>
+                        <v-icon>whatshot</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col cols="4">
+                      <v-btn fab>
+                        <v-icon>whatshot</v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-card-actions>
               </v-card>
             </v-hover>
           </v-layout>
