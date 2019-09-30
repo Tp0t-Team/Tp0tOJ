@@ -43,22 +43,6 @@
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
-                <v-text-field
-                  v-model="department"
-                  label="Department"
-                  :rules="[rules.required]"
-                  :disabled="loading"
-                ></v-text-field>
-                <v-text-field v-model="qq" label="QQ" :rules="[rules.required]" :disabled="loading"></v-text-field>
-                <v-text-field
-                  v-model="regPassword"
-                  label="Password"
-                  :append-icon="showPassword ? 'visibility' : 'visibility_off'"
-                  :type="showPassword ? 'text' : 'password'"
-                  @click:append="showPassword = !showPassword"
-                  :rules="[rules.required]"
-                  :disabled="loading"
-                ></v-text-field>
               </v-flex>
               <v-flex sm6 pl-3 pr-3>
                 <v-text-field
@@ -67,18 +51,53 @@
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex sm6 pl-3 pr-3>
+                <v-select
+                  v-model="department"
+                  :items="dep_item"
+                  label="Department"
+                  :rules="[rules.required]"
+                  :disabled="loading"
+                ></v-select>
+              </v-flex>
+              <v-flex sm6 pl-3 pr-3>
                 <v-text-field
                   v-model="grade"
                   label="Grade"
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex sm6 pl-3 pr-3>
+                <v-text-field v-model="qq" label="QQ" :rules="[rules.required]" :disabled="loading"></v-text-field>
+              </v-flex>
+              <v-flex sm6 pl-3 pr-3>
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required]"
+                  :rules="[rules.required,rules.email]"
                   :disabled="loading"
                 ></v-text-field>
+              </v-flex>
+            </v-layout>
+            <v-layout row>
+              <v-flex sm6 pl-3 pr-3>
+                <v-text-field
+                  v-model="regPassword"
+                  label="Password"
+                  :append-icon="showPassword ? 'visibility' : 'visibility_off'"
+                  :type="showPassword ? 'text' : 'password'"
+                  @click:append="showPassword = !showPassword"
+                  :rules="[rules.required,rules.passLen(8),rules.password]"
+                  :disabled="loading"
+                ></v-text-field>
+              </v-flex>
+              <v-flex sm6 pl-3 pr-3>
                 <v-text-field
                   v-model="repeat"
                   label="Repeat"
@@ -92,6 +111,8 @@
                   @blur="check"
                 ></v-text-field>
               </v-flex>
+            </v-layout>
+            <v-layout row>
               <v-spacer class="ma-3"></v-spacer>
               <v-btn
                 color="primary"
@@ -107,6 +128,13 @@
         </v-tab-item>
       </v-tabs>
     </v-card>
+    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+      {{ infoText }}
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="hasInfo = false">close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -129,14 +157,45 @@ export default class Login extends Vue {
 
   private loginValid: boolean = false;
   private regValid: boolean = false;
-
+  private dep_item = [
+    "机械工程学院",
+    "化工学院",
+    "电光学院",
+    "计算机学院",
+    "经济与管理学院",
+    "能源与动力学院",
+    "自动化学院",
+    "理学院",
+    "外国语学院",
+    "公共事务学院",
+    "材料学院",
+    "环生学院",
+    "设传学院",
+    "钱学森学院",
+    "知识产权学院",
+    "马克思主义学院",
+    "国际教育学院",
+    "中法工程师学院"
+  ];
   private showPassword: boolean = false;
   private againError: string = "";
   private rules = {
-    required: (value: string) => !!value || "请填写"
+    required: (value: string) => !!value || "请填写",
+    email: (value: string) =>
+      !!(value || "").match(/^.+@(\w+\.)+\w+$/) || "非法的邮箱地址",
+    passLen: (len: number) => (v: string) =>
+      (v || "").length >= len || `非法的密码长度，需要 ${len} 位`,
+    password: (value: string) =>
+      ((value || "").match(/[A-Z]/) &&
+        (value || "").match(/[a-z]/) &&
+        (value || "").match(/\d/)) ||
+      "密码必须由大小写字母数字和特殊符号组成" //TODO: 正则好像不对
   };
 
   private loading: boolean = false;
+
+  private infoText: string = "";
+  private hasInfo: boolean = false;
 
   check() {
     if (this.regPassword != this.repeat) this.againError = "密码不一致";
