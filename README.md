@@ -22,3 +22,12 @@ Tp0t战队开发的CTF用OJ平台。
 ### 接口相关
 
 + GraphQL的schema文件定义在`server/src/resources/schema`目录下
+
+
+
+目前为V1.0
+
+#### V2.0 预计功能：
+
+- 公告所有页面头显示banner
+- 文件上传
