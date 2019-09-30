@@ -2,7 +2,6 @@
   <v-container fill-height>
       <v-container>
           <v-row>
-              <h2>Rank</h2>
           </v-row>
             <v-row>
                 <v-col v-for="t in head" :key="t.rank" cols="12" sm="4">
