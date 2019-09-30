@@ -186,7 +186,9 @@ export default class Login extends Vue {
     passLen: (len: number) => (v: string) =>
       (v || "").length >= len || `非法的密码长度，需要 ${len} 位`,
     password: (value: string) =>
-      !!(value || "").match(/^ (?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/) ||
+      ((value || "").match(/[A-Z]/) &&
+        (value || "").match(/[a-z]/) &&
+        (value || "").match(/\d/)) ||
       "密码必须由大小写字母数字和特殊符号组成" //TODO: 正则好像不对
   };
 
