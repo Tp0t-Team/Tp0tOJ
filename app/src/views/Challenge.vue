@@ -7,8 +7,17 @@
         <v-col sm="3">
           <v-layout justify-center>
             <v-hover v-slot:default="{ hover }">
-              <v-card :elevation="hover ? 12 : 2" width="20vw" height="200px" class="ma-4" @click="showDialog=true">
-                <v-card-title class="subtitle-1 text-truncate">do you konw J language</v-card-title>
+              <v-card
+                :elevation="hover ? 12 : 2"
+                width="20vw"
+                height="200px"
+                class="ma-4"
+                @click="showDialog=true"
+              >
+                <v-badge left overlap>
+                  <template v-slot:badge>1000</template>
+                  <v-card-title class="subtitle-1 text-truncate">do you konw J language</v-card-title>
+                </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
                 <v-card-text class="description">description</v-card-text>
               </v-card>
@@ -21,7 +30,10 @@
       <v-card width="800px" height="600px">
         <v-toolbar dense>
           <v-spacer></v-spacer>
-          <v-toolbar-title>do you konw J language</v-toolbar-title>
+          <v-toolbar-title>
+            do you konw J language
+            <v-chip class="ml-2">1000pt</v-chip>
+          </v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
         <v-text-field

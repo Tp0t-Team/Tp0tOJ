@@ -57,19 +57,20 @@
               <v-flex sm6 pl-3 pr-3>
                 <v-select
                   v-model="department"
-                  :items="dep_item"
+                  :items="departmentItems"
                   label="Department"
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-select>
               </v-flex>
               <v-flex sm6 pl-3 pr-3>
-                <v-text-field
-                  v-model="grade"
+                <v-select
+                  v-model="Grade"
+                  :items="gradeItems"
                   label="Grade"
                   :rules="[rules.required]"
                   :disabled="loading"
-                ></v-text-field>
+                ></v-select>
               </v-flex>
             </v-layout>
             <v-layout row>
@@ -157,7 +158,7 @@ export default class Login extends Vue {
 
   private loginValid: boolean = false;
   private regValid: boolean = false;
-  private dep_item = [
+  private departmentItems = [
     "机械工程学院",
     "化工学院",
     "电光学院",
@@ -177,6 +178,8 @@ export default class Login extends Vue {
     "国际教育学院",
     "中法工程师学院"
   ];
+  private gradeItems: string[] = [];
+
   private showPassword: boolean = false;
   private againError: string = "";
   private rules = {
@@ -196,6 +199,15 @@ export default class Login extends Vue {
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+  created() {
+    let year = new Date().getFullYear() - 9;
+    let items = [];
+    for (let i = 0; i < 10; i++) {
+      items.push((year + i).toString());
+    }
+    this.gradeItems = items;
+  }
 
   check() {
     if (this.regPassword != this.repeat) this.againError = "密码不一致";
