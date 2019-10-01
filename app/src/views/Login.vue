@@ -1,7 +1,7 @@
 <template>
   <v-container fill-height align-center justify-center>
     <v-card width="500">
-      <v-tabs centered grow color="primary">
+      <v-tabs v-model="tab" centered grow color="primary">
         <v-tab href="#tab-login" :disabled="loading">login</v-tab>
         <v-tab href="#tab-register" :disabled="loading">register</v-tab>
         <v-tab-item value="tab-login">
@@ -141,9 +141,14 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import gql from "graphql-tag";
+import { LoginResult, Result } from "@/struct";
+import constValue from "@/constValue";
 
 @Component
 export default class Login extends Vue {
+  private tab: string = "tab-login";
+
   private username: string = "";
   private password: string = "";
 
@@ -158,26 +163,7 @@ export default class Login extends Vue {
 
   private loginValid: boolean = false;
   private regValid: boolean = false;
-  private departmentItems = [
-    "机械工程学院",
-    "化工学院",
-    "电光学院",
-    "计算机学院",
-    "经济与管理学院",
-    "能源与动力学院",
-    "自动化学院",
-    "理学院",
-    "外国语学院",
-    "公共事务学院",
-    "材料学院",
-    "环生学院",
-    "设传学院",
-    "钱学森学院",
-    "知识产权学院",
-    "马克思主义学院",
-    "国际教育学院",
-    "中法工程师学院"
-  ];
+  private departmentItems = constValue.departmentItems;
   private gradeItems: string[] = [];
 
   private showPassword: boolean = false;
@@ -219,7 +205,37 @@ export default class Login extends Vue {
       return;
     }
     this.loading = true;
-    // do the action
+    try {
+      let res = await this.$apollo.mutate<LoginResult>({
+        mutation: gql`
+          mutation {
+            login(input: $input) {
+              message
+              userId
+              role
+            }
+          }
+        `,
+        variables: {
+          input: {
+            stuNumber: this.username,
+            password: this.password
+          }
+        }
+      });
+      if (res.errors) throw res.errors.join(",");
+      if (res.data!.message) throw res.data!.message;
+      this.loading = false;
+      this.$store.commit("setUserIdAndRole", {
+        userId: res.data!.userId,
+        role: res.data!.role
+      });
+      this.$router.replace("/");
+    } catch (e) {
+      this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 
   async register() {
@@ -228,7 +244,35 @@ export default class Login extends Vue {
       return;
     }
     this.loading = true;
-    // do the action
+    try {
+      let res = await this.$apollo.mutate<Result>({
+        mutation: gql`
+          mutation {
+            register(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          input: {
+            name: this.name,
+            stuNumber: this.studentNumber,
+            password: this.regPassword,
+            department: this.department,
+            grade: this.grade,
+            qq: this.qq,
+            mail: this.mail
+          }
+        }
+      });
+      if (res.errors) throw res.errors.join(",");
+      if (res.data!.message) throw res.data!.message;
+      this.tab = "tab-login";
+    } catch (e) {
+      this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 }
 </script>

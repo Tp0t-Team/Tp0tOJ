@@ -13,6 +13,13 @@
                 </v-btn>
               </v-list-item-icon>
             </v-list-item>
+            <v-list-item @click=";">
+              <v-layout row>
+                <v-spacer></v-spacer>
+                <v-icon>add</v-icon>
+                <v-spacer></v-spacer>
+              </v-layout>
+            </v-list-item>
           </v-list>
         </v-card>
       </v-col>
