@@ -19,6 +19,8 @@ Tp0t战队开发的CTF用OJ平台。
 + **IntelliJ IDEA请在`server`目录下打开**
 + `server`目录应视同工作目录
 
+1. 数据库定期扣分回滚点设计
+
 ### 接口相关
 
 + GraphQL的schema文件定义在`server/src/resources/schema`目录下
