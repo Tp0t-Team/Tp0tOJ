@@ -1,29 +1,19 @@
 # tp0t-oj
 
-## Project setup
-```
-npm install
-```
+目前为V1.0
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+待实现：
 
-### Compiles and minifies for production
-```
-npm run build
-```
+- 创建题目时题目长度限
+- flag格式确定，创建题目不需要输入带{}flag
+- 
 
-### Run your tests
-```
-npm run test
-```
+#### V2.0 预计功能：
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- 公告所有页面头显示banner
+- 文件上传
+- 支持题目用统一格式配置文件创建
+- 用户头像功能（个人页面）rank123名、123血
+- 个人页面荣誉徽章功能
+- 题目动态积分功能
+- 分数做成遮罩层显示
