@@ -17,6 +17,11 @@ public class Replica {
     private long replicaId;
 
     @NotNull
+    @JoinColumn(name = "challenge_id", referencedColumnName = "challenge_id")
+    @ManyToOne
+    private Challenge challenge;
+
+    @NotNull
     @Column(name = "gmt_created")
     @CreatedDate
     private Timestamp gmtCreated;
@@ -48,5 +53,13 @@ public class Replica {
 
     public void setGmtModified(Timestamp gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    public void setChallenge(Challenge challenge) {
+        this.challenge = challenge;
+    }
+
+    public Challenge getChallenge() {
+        return challenge;
     }
 }

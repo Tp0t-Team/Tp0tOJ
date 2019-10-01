@@ -110,4 +110,9 @@ public class UserService {
     public User getUserById(long userId) {
         return userRepository.getOne(userId);
     }
+
+    public String getRoleByStuNumber(String stuNumber) {
+        User user = userRepository.getUserByStuNumber(stuNumber);
+        return user.getRole();
+    }
 }

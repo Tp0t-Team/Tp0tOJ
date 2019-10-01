@@ -91,9 +91,9 @@ public class UserMutation implements GraphQLMutationResolver {
     /*
     public ResetResult reset(ResetInput input) {
 
-        // TODO: validate user info
+        // validate user info
 
-        // TODO: reset password
+        // reset password
 
         // if succeeded
         return new ResetResult("success");
@@ -132,7 +132,8 @@ public class UserMutation implements GraphQLMutationResolver {
             else session.setAttribute("isAdmin", false);
 
             System.out.println("login succeeded");
-            return new LoginResult("success", Long.toString(userService.getIdByStuNumber(stuNumber)));
+            return new LoginResult("success", Long.toString(userService.getIdByStuNumber(stuNumber)),
+                    userService.getRoleByStuNumber(stuNumber));
         }
         // user password check failed
         else {
@@ -142,13 +143,62 @@ public class UserMutation implements GraphQLMutationResolver {
     }
 
     // user logout
-    public String logout(DataFetchingEnvironment environment) {
+    public LogoutResult logout(DataFetchingEnvironment environment) {
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
         session.setAttribute("isLogin", false);
-        return "success";
+        return new LogoutResult("success");
     }
+
+    // submit flag
+    /*
+    public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // not login yet
+        if(session.getAttribute("isLogin") == null || !(boolean)session.getAttribute("isLogin")) {
+            return new SubmitResult("forbidden");
+        }
+
+        // not empty
+        if(input.getChallengeId() == null || input.getFlag() == null) {
+            return new SubmitResult("not empty error");
+        }
+
+        // check flag
+        long challengeId = Long.parseLong(input.getChallengeId());
+        long userId = (long) session.getAttribute("userId");
+        String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
+        String submitFlag = input.getFlag();
+        // correct flag
+        boolean correct = false;
+        int mark = 0;
+        if(submitFlag.equals(flag)) {
+            // TODO: duplicate submit
+            if(submitService.checkDuplicateSubmit(userService.getUserById(userId), challengeId)) {
+                return new SubmitResult("duplicate submit");
+            }
+
+            correct = true;
+            // add to user score
+            // TODO: get points of challenge
+            long points = 100;
+            userService.addScore(points);
+
+            // whether first three solvers
+
+        }
+        else {
+
+        }
+
+        // save into submit table
+        submitService.submit(userService.getUserById(userId), submitFlag, correct, mark);
+    }
+    */
 
 }

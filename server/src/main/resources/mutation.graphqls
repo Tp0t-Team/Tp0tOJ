@@ -2,7 +2,7 @@ type Mutation {
     register(input: RegisterInput!) : RegisterResult!
     # reset (input: ResetInput!) : ResetResult!
     login (input: LoginInput!) : LoginResult!
-    logout : String!
+    logout : LogoutResult!
     #submit (input: SubmitInput!) : SubmitResult!
 }
 
@@ -40,13 +40,18 @@ input LoginInput {
 type LoginResult {
     message: String
     userId: String
+    role: String
+}
+
+type LogoutResult {
+    message: String
 }
 
 input SubmitInput {
-    challengeId: String
-    flag: String
+    challengeId: String!
+    flag: String!
 }
 
 type SubmitResult {
-
+    message: String
 }

@@ -48,6 +48,11 @@ public class Submit {
     @LastModifiedDate
     private Timestamp gmtModified;
 
+    @NotNull
+    @JoinColumn(name = "challenge_id", referencedColumnName = "challenge_id")
+    @ManyToOne
+    private Challenge challenge;
+
     public long getSubmitId() {
         return submitId;
     }
