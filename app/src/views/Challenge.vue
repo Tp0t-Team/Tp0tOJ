@@ -23,19 +23,31 @@
                 <v-card-actions>
                   <v-row>
                     <v-col cols="4">
-                      <v-btn fab>
-                        <v-icon>whatshot</v-icon>
-                      </v-btn>
+                      <v-layout row>
+                        <v-spacer></v-spacer>
+                        <v-btn fab>
+                          <v-icon>whatshot</v-icon>
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                      </v-layout>
                     </v-col>
                     <v-col cols="4">
-                      <v-btn fab>
-                        <v-icon>whatshot</v-icon>
-                      </v-btn>
+                      <v-layout row>
+                        <v-spacer></v-spacer>
+                        <v-btn fab>
+                          <v-icon>whatshot</v-icon>
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                      </v-layout>
                     </v-col>
                     <v-col cols="4">
-                      <v-btn fab>
-                        <v-icon>whatshot</v-icon>
-                      </v-btn>
+                      <v-layout row>
+                        <v-spacer></v-spacer>
+                        <v-btn fab>
+                          <v-icon>whatshot</v-icon>
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                      </v-layout>
                     </v-col>
                   </v-row>
                 </v-card-actions>
