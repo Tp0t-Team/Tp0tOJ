@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-row>
       <v-col cols="6" class="content-col">
         <v-data-table :headers="headers"></v-data-table>
