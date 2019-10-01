@@ -32,7 +32,7 @@
           </v-row>
           <v-row>
             <v-col cols="6">
-              <v-text-field outlined disabled type="number" label="score"></v-text-field>
+              <v-text-field outlined disabled label="score"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-menu ref="dateMenu" v-model="dateMenu" :close-on-content-click="false">
