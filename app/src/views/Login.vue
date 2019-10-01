@@ -65,7 +65,7 @@
               </v-flex>
               <v-flex sm6 pl-3 pr-3>
                 <v-select
-                  v-model="Grade"
+                  v-model="grade"
                   :items="gradeItems"
                   label="Grade"
                   :rules="[rules.required]"
