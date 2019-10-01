@@ -43,14 +43,9 @@ public class UserQuery extends Query {
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
-        // login check
-        boolean isLongin = (boolean) session.getAttribute("isLogin");
-        if(session.getAttribute("isLogin") == null) {
-            isLongin = false;
-            session.setAttribute("isLogin", false);
-        }
         // not login yet
-        if(!isLongin) {
+        if(session.getAttribute("isLogin") == null  || !(boolean)session.getAttribute("isLogin")) {
+            session.setAttribute("isLogin", false);
             return new RankResult("forbidden");
         }
 

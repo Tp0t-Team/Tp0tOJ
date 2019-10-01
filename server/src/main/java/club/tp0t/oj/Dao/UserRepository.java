@@ -23,7 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select u from User u where u.mail=?1")
     User getUserByMail(String mail);
 
-    @Query(value = "select u from User u where u.state='normal' and u.role='member' order by u.score desc ")
+    @Query(value = "select u from User u where " +
+            "(u.state='normal' or u.state='protected') and u.role='member' order by u.score desc ")
     List<User> getUsersRank();
 
     @Query(value = "select u.userId from User u where u.stuNumber=?1")

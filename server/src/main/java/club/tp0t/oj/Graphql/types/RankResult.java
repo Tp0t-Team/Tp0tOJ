@@ -14,7 +14,8 @@ public class RankResult {
 
     public void addUserInfos(List<User> users) {
         for(int i=0;i<users.size();i++) {
-            User tmpUser = users.get(i);
+            User user = users.get(i);
+            /*
             UserInfo userInfo = new UserInfo();
 
             userInfo.setUserId(Long.toString(tmpUser.getUserId()));
@@ -30,6 +31,19 @@ public class RankResult {
             userInfo.setScore(Long.toString(tmpUser.getScore()));
             userInfo.setTopRank(tmpUser.getTopRank());
             userInfo.setProtectedTime(tmpUser.getProtectedTime().toString());
+            */
+
+            // hide some attributes
+            UserInfo userInfo = new UserInfo(user.getName(),
+                    "",  // stuNumber
+                    "",  // department
+                    "",  // qq
+                    "", // mail
+                    user.getJoinTime(),
+                    user.getScore(),
+                    user.getTopRank(),
+                    user.getProtectedTime(),
+                    user.getUserId());
 
             this.userInfos.add(userInfo);
         }
