@@ -1,13 +1,16 @@
 type Query {
-    users : UsersPayload
+    userInfo(userId: String) : Profile
     test: String
+    # challenges: ChallengesResult
+    rank: RankResult
 }
-type UsersPayload {
+type Profile {
     message: String
-    userInfos: [UserInfo]
+    userInfo: UserInfo
 }
 
 type UserInfo {
+    userId: String # long to String
     name: String
     stuNumber: String
     department: String
@@ -18,3 +21,12 @@ type UserInfo {
     topRank: Int
     protectedTime: String # Timestamp to String
 }
+
+type RankResult {
+    message: String
+    userInfos: [UserInfo]
+}
+
+#type ChallengesResult {
+# TODO: descirption structure
+#}

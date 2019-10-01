@@ -13,6 +13,7 @@ public class UserInfo {
     private String score;
     private int topRank;
     private String protectedTime;
+    private String userId;
 
     public UserInfo(String name,
                     String stuNumber,
@@ -22,7 +23,8 @@ public class UserInfo {
                     Timestamp joinTime,
                     long score,
                     int topRank,
-                    Timestamp protectedTime) {
+                    Timestamp protectedTime,
+                    long userId) {
         this.name = name;
         this.stuNumber = stuNumber;
         this.department = department;
@@ -32,7 +34,7 @@ public class UserInfo {
         this.score = Long.toString(score);
         this.topRank = topRank;
         this.protectedTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(protectedTime);
-
+        this.userId = Long.toString(userId);
     }
     public UserInfo(){};
 
@@ -66,6 +68,10 @@ public class UserInfo {
 
     public int getTopRank() {
         return topRank;
+    }
+
+    public String getUserId() {
+        return this.userId;
     }
 
     public String getProtectedTime() {
@@ -106,5 +112,9 @@ public class UserInfo {
 
     public void setProtectedTime(String protectedTime) {
         this.protectedTime = protectedTime;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

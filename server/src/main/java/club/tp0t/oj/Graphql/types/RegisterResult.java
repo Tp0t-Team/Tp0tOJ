@@ -1,9 +1,9 @@
 package club.tp0t.oj.Graphql.types;
 
-public class RegisterPayload  {
+public class RegisterResult {
     private String message;
 
-    public RegisterPayload(String message) {
+    public RegisterResult(String message) {
         this.message = message;
     }
 

@@ -1,7 +1,8 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Graphql.types.UsersPayload;
+import club.tp0t.oj.Graphql.types.Profile;
+import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -35,29 +36,97 @@ public class UserQuery extends Query {
         return "hello world";
     }
 
-    // get user info
-    public UsersPayload users() {
-        // TODO: session check
+    // get user rank
+    public RankResult rank(DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login check
+        boolean isLongin = (boolean) session.getAttribute("isLogin");
+        if(session.getAttribute("isLogin") == null) {
+            isLongin = false;
+            session.setAttribute("isLogin", false);
+        }
         // not login yet
-        if(false) {
-            return new UsersPayload("forbidden");
+        if(!isLongin) {
+            return new RankResult("forbidden");
         }
 
+        /*
         // normal user
         // can only get normal users
         if(false) {
-            UsersPayload usersPayload = new UsersPayload("normal");
+            Profile profile = new Profile("normal");
             List<User> users = userService.getNormalUsers();
-            usersPayload.addNormalUserInfo(users);
-            return usersPayload;
+            profile.addNormalUserInfo(users);
+            return profile;
         }
 
         // admin
         // get admin users, disabled users
-        UsersPayload usersPayload = new UsersPayload("admin");
+        Profile profile = new Profile("admin");
         List<User> users = userService.getAllUsers();
-        usersPayload.addAllUserInfo(users);
-        return usersPayload;
+        profile.addAllUserInfo(users);
+        return profile;
+        */
+
+        RankResult rankResult = new RankResult("success");
+        List<User> users = userService.getUsersRank();
+
+        // no users
+        if(users == null) return rankResult;
+
+        rankResult.addUserInfos(users);
+        return rankResult;
+    }
+
+    // get user profile
+    public Profile userInfo(String userId, DataFetchingEnvironment environment) {
+        // TODO: not implemented
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // if not login
+        if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
+            return new Profile("forbidden");
+        }
+
+        // whether requested by user himself
+        long currentUserId = (Long) session.getAttribute("userId");
+        System.out.println("currentUserId: " + currentUserId);
+        // by himself
+        if(currentUserId == Long.parseLong(userId)) {
+            User user = userService.getUserById(Long.parseLong(userId));
+            System.out.println(user);
+            Profile profile = new Profile("requested by self");
+            profile.addOwnUserInfo(user);
+            return profile;
+
+        }
+        // if requested by other users
+        else {
+            User user = userService.getUserById(Long.parseLong(userId));
+            // user not exists
+            if(user == null) {
+                return new Profile("not found");
+            }
+            // exists
+            else {
+                Profile profile = new Profile("requested by others");
+                profile.addOthersUserInfo(user);
+                return profile;
+            }
+        }
 
     }
+
+    // get challenges
+    /*
+    public ChallengesResult challenges() {
+        // TODO: not implemented
+    }
+    */
 }

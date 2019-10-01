@@ -1,7 +1,9 @@
 type Mutation {
-    register(input: RegisterInput!) : RegisterPayload!
-    reset (input: ResetInput!) : ResetPayload!
-    login (input: LoginInput!) : LoginPayload!
+    register(input: RegisterInput!) : RegisterResult!
+    # reset (input: ResetInput!) : ResetResult!
+    login (input: LoginInput!) : LoginResult!
+    logout : String!
+    #submit (input: SubmitInput!) : SubmitResult!
 }
 
 input RegisterInput {
@@ -9,11 +11,12 @@ input RegisterInput {
     stuNumber: String
     password: String
     department: String
+    grade: String
     qq: String
     mail: String
 }
 
-type RegisterPayload {
+type RegisterResult {
     # success, xxx already in use, invalid xxx, failed, already login, not empty error
     message: String
 }
@@ -24,16 +27,26 @@ input ResetInput {
     mail: String
 }
 
-type ResetPayload {
+type ResetResult {
     # success, no user, failed
     message: String
 }
 
 input LoginInput {
-    name: String
+    stuNumber: String
     password: String
 }
 
-type LoginPayload {
+type LoginResult {
     message: String
+    userId: String
+}
+
+input SubmitInput {
+    challengeId: String
+    flag: String
+}
+
+type SubmitResult {
+
 }

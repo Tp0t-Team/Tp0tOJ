@@ -52,7 +52,10 @@ public class User {
 
     @NotEmpty
     @Column(name = "role")
-    private String role;  // admin, member, team
+    private String role;
+    // admin: administrator
+    // member: common user
+    // team: user from Tp0t team
 
     @NotNull
     @Column(name = "score")
@@ -75,6 +78,14 @@ public class User {
     @NotNull
     @Column(name = "protected_time")
     private Timestamp protectedTime;
+
+    @NotEmpty
+    @Column(name = "grade")
+    private String grade;
+
+    public String getGrade() {
+        return grade;
+    }
 
     public long getUserId() {
         return userId;
@@ -194,5 +205,9 @@ public class User {
 
     public void setProtectedTime(Timestamp protectedTime) {
         this.protectedTime = protectedTime;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 }

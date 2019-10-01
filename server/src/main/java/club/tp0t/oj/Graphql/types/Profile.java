@@ -8,24 +8,46 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class UsersPayload {
+public class Profile {
 
-    private List<UserInfo> userInfos = new ArrayList<>();
+    private UserInfo userInfo;
 
     private String message;
 
-    public UsersPayload(String message) {
+    public Profile(String message) {
         this.message = message;
     }
 
-    public String getMessage() {
-        return message;
+
+    // hide some attributes
+    public void addOthersUserInfo(User user) {
+        this.userInfo = new UserInfo(user.getName(),
+                "",  // stuNumber
+                "",  // department
+                "",  // qq
+                "", // mail
+                user.getJoinTime(),
+                user.getScore(),
+                user.getTopRank(),
+                user.getProtectedTime(),
+                user.getUserId());
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    // add all information
+    public void addOwnUserInfo(User user) {
+        this.userInfo = new UserInfo(user.getName(),
+                user.getStuNumber(),
+                user.getDepartment(),
+                user.getQQ(),
+                user.getMail(),
+                user.getJoinTime(),
+                user.getScore(),
+                user.getTopRank(),
+                user.getProtectedTime(),
+                user.getUserId());
     }
 
+    /*
     public void addNormalUserInfo(List<User> users) {
         for(int i=0;i<users.size();i++) {
             User tmpUser = users.get(i);
@@ -42,6 +64,7 @@ public class UsersPayload {
         }
     }
 
+
     public void addAllUserInfo(List<User> users) {
         for(int i=0;i<users.size();i++) {
             User tmpUser = users.get(i);
@@ -57,9 +80,21 @@ public class UsersPayload {
 
         }
     }
+    */
 
-    public List<UserInfo> getUserInfos() {
-        return userInfos;
+    public UserInfo getUserInfo() {
+        return userInfo;
     }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+
+
 
 }

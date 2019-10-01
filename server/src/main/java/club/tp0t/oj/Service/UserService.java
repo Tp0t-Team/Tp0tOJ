@@ -14,13 +14,17 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    /*
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+    */
 
+    /*
     public List<User> getNormalUsers() {
         return userRepository.getNormalUsers();
     }
+    */
 
     public boolean checkNameExistence(String name) {
         User user = userRepository.getUserByName(name);
@@ -42,7 +46,13 @@ public class UserService {
         return user != null;
     }
 
-    public boolean register(String name, String stuNumber, String password, String department, String qq, String mail) {
+    public boolean register(String name,
+                            String stuNumber,
+                            String password,
+                            String department,
+                            String qq,
+                            String mail,
+                            String grade) {
         User user = new User();
         user.setName(name);
         user.setStuNumber(stuNumber);
@@ -61,13 +71,14 @@ public class UserService {
         user.setScore(0);
         user.setState("protected");
         user.setTopRank(0);
+        user.setGrade(grade);
 
         userRepository.save(user);
         return true;
     }
 
-    public boolean login(String name, String password) {
-        User user = userRepository.getUserByName(name);
+    public boolean login(String stuNumber, String password) {
+        User user = userRepository.getUserByStuNumber(stuNumber);
 
         // user disabled
         if(user.getState().equals("disabled")) {
@@ -77,13 +88,26 @@ public class UserService {
         return password.equals(user.getPassword());
     }
 
-    public boolean adminCheck(String name) {
-        User user = userRepository.getUserByName(name);
+    public boolean adminCheck(String stuNumber) {
+        User user = userRepository.getUserByStuNumber(stuNumber);
         return user.getRole().equals("admin");
     }
 
     public long getIdByName(String name) {
         User user = userRepository.getUserByName(name);
         return user.getUserId();
+    }
+
+    public List<User> getUsersRank() {
+        return userRepository.getUsersRank();
+    }
+
+    public long getIdByStuNumber(String stuNumber) {
+        return userRepository.getUserIdByStuNumber(stuNumber);
+    }
+
+
+    public User getUserById(long userId) {
+        return userRepository.getOne(userId);
     }
 }

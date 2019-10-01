@@ -7,6 +7,7 @@ public class RegisterInput {
     private String department;
     private String qq;
     private String mail;
+    private String grade;
 
     public String getName() {
         return name;
@@ -54,5 +55,13 @@ public class RegisterInput {
 
     public void setMail(String mail) {
         this.mail = mail;
+    }
+
+    public String getGrade() {
+        return this.grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
     }
 }

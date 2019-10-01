@@ -1,14 +1,14 @@
 package club.tp0t.oj.Graphql.types;
 
-public class LoginPayload {
+public class LoginResult {
     private String message;
-    private long id;
+    private String userId;
 
-    public LoginPayload(String message, long id) {
+    public LoginResult(String message, String userId) {
         this.message = message;
-        this.id = id;
+        this.userId = userId;
     }
-    public LoginPayload(String message) {
+    public LoginResult(String message) {
         this.message = message;
     }
 
@@ -18,5 +18,9 @@ public class LoginPayload {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }

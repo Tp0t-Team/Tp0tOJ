@@ -1,9 +1,9 @@
 package club.tp0t.oj.Graphql.types;
 
-public class ResetPayload {
+public class ResetResult {
     private String message;
 
-    public ResetPayload(String message) {
+    public ResetResult(String message) {
         this.message = message;
     }
 
