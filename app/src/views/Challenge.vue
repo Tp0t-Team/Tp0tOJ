@@ -6,7 +6,7 @@
       <v-row>
         <v-col sm="3">
           <v-layout justify-center>
-            <v-hover v-slot:default="{ hover }">
+            <v-hover disabled v-slot:default="{ hover }">
               <v-card
                 :elevation="hover ? 12 : 2"
                 width="20vw"
@@ -20,12 +20,15 @@
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
                 <v-card-text class="description">description</v-card-text>
+                <v-overlay absolute :value="true" color="green" z-index="0">
+                  <v-icon>done</v-icon>
+                </v-overlay>
                 <v-card-actions>
                   <v-row>
                     <v-col cols="4">
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn fab>
+                        <v-btn fab @click.stop=";">
                           <v-icon>whatshot</v-icon>
                         </v-btn>
                         <v-spacer></v-spacer>
@@ -34,7 +37,7 @@
                     <v-col cols="4">
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn fab>
+                        <v-btn fab @click.stop=";">
                           <v-icon>whatshot</v-icon>
                         </v-btn>
                         <v-spacer></v-spacer>
@@ -43,7 +46,7 @@
                     <v-col cols="4">
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn fab>
+                        <v-btn fab @click.stop=";">
                           <v-icon>whatshot</v-icon>
                         </v-btn>
                         <v-spacer></v-spacer>
