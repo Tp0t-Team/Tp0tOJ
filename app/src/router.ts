@@ -35,6 +35,11 @@ export default new Router({
       component : ()=>import(/* webpackChunkName: "challenge" */ "@/views/Challenge.vue")
     },
     {
+      path:'/admin/user',
+      name: "admin-user",
+      component : ()=>import(/* webpackChunkName: "admin-challenge" */ "@/views/admin/User.vue")
+    },
+    {
       path:'/admin/challenge',
       name: "admin-challenge",
       component : ()=>import(/* webpackChunkName: "admin-challenge" */ "@/views/admin/Challenge.vue")
