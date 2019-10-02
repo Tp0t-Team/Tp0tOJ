@@ -136,13 +136,11 @@ public class UserMutation implements GraphQLMutationResolver {
             }
             else session.setAttribute("isTeam", false);
 
-            System.out.println("login succeeded");
             return new LoginResult("", Long.toString(userService.getIdByStuNumber(stuNumber)),
                     userService.getRoleByStuNumber(stuNumber));
         }
         // user password check failed
         else {
-            System.out.println("login failed");
             return new LoginResult("failed");
         }
     }

@@ -34,7 +34,6 @@ public class ChallengesResult {
 
     public void addChallengeInfos(List<Challenge> challenges, long userId, SubmitService submitService) {
         for(int i=0;i<challenges.size();i++) {
-            System.out.println(i);
             Challenge tmpChallenge = challenges.get(i);
             ChallengeInfo challengeInfo = new ChallengeInfo();
             challengeInfo.setChallengeId(Long.toString(tmpChallenge.getChallengeId()));

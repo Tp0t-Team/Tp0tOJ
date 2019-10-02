@@ -93,11 +93,9 @@ public class UserQuery extends Query {
 
         // whether requested by user himself
         long currentUserId = (Long) session.getAttribute("userId");
-        System.out.println("currentUserId: " + currentUserId);
         // by himself
         if(currentUserId == Long.parseLong(userId)) {
             User user = userService.getUserById(Long.parseLong(userId));
-            System.out.println(user);
             Profile profile = new Profile("requested by self");
             profile.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
             return profile;
@@ -149,8 +147,6 @@ public class UserQuery extends Query {
         if(challenges == null) return new ChallengesResult("no challenge available");
 
         ChallengesResult challengesResult = new ChallengesResult("");
-        System.out.println("have challenges: " + challenges.size());
-        System.out.println("userId: " + (long)session.getAttribute("userId"));
         challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
 
         return challengesResult;
