@@ -1,7 +1,7 @@
 type Query {
     userInfo(userId: String) : Profile
     test: String
-    # challenges: ChallengesResult
+    challenges: ChallengesResult
     rank: RankResult
 }
 type Profile {
@@ -22,6 +22,7 @@ type UserInfo {
     protectedTime: String # Timestamp to String
     role: String
     state: String
+    rank: Int
 }
 
 type RankResult {
@@ -31,7 +32,7 @@ type RankResult {
 
 type ChallengesResult {
     message: String
-    challenges: [ChallengeInfo]
+    challengeInfos: [ChallengeInfo]
 }
 
 type ChallengeInfo {

@@ -13,7 +13,7 @@ public class ChallengeService {
     @Autowired
     private ChallengeRepository challengeRepository;
 
-    public List<Challenge> getAllChallenges() {
+    public List<Challenge> getEnabledChallenges() {
         return challengeRepository.getEnabledChallenges();
     }
 

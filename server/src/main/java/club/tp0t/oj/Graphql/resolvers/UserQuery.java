@@ -135,13 +135,15 @@ public class UserQuery extends Query {
         }
 
 
-        List<Challenge> challenges = challengeService.getAllChallenges();
+        List<Challenge> challenges = challengeService.getEnabledChallenges();
 
         // no challenge
         if(challenges == null) return new ChallengesResult("no challenge available");
 
         ChallengesResult challengesResult = new ChallengesResult("success");
-        challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"));
+        System.out.println("have challenges: " + challenges.size());
+        System.out.println("userId: " + (long)session.getAttribute("userId"));
+        challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
 
         return challengesResult;
     }
