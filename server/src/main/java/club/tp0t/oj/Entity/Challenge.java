@@ -18,17 +18,20 @@ public class Challenge {
     private long challengeId;
 
     @NotEmpty
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "text")
     private String description;
 
-    @Column(name = "first_blood")
-    private long firstBlood;
+    @JoinColumn(name = "first_blood", referencedColumnName = "user_id")
+    @ManyToOne
+    private User firstBlood;
 
-    @Column(name = "second_blood")
-    private long secondBlood;
+    @JoinColumn(name = "second_blood", referencedColumnName = "user_id")
+    @ManyToOne
+    private User secondBlood;
 
-    @Column(name = "third_blood")
-    private long thirdBlood;
+    @JoinColumn(name = "third_blood", referencedColumnName = "user_id")
+    @ManyToOne
+    private User thirdBlood;
 
     @NotEmpty
     @Column(name = "state")
@@ -52,17 +55,7 @@ public class Challenge {
         return description;
     }
 
-    public long getFirstBlood() {
-        return firstBlood;
-    }
 
-    public long getSecondBlood() {
-        return secondBlood;
-    }
-
-    public long getThirdBlood() {
-        return thirdBlood;
-    }
 
     public String getState() {
         return state;
@@ -84,16 +77,28 @@ public class Challenge {
         this.description = description;
     }
 
-    public void setFirstBlood(long firstBlood) {
+    public void setFirstBlood(User firstBlood) {
         this.firstBlood = firstBlood;
     }
 
-    public void setSecondBlood(long secondBlood) {
+    public void setSecondBlood(User secondBlood) {
         this.secondBlood = secondBlood;
     }
 
-    public void setThirdBlood(long thirdBlood) {
+    public User getFirstBlood() {
+        return firstBlood;
+    }
+
+    public User getSecondBlood() {
+        return secondBlood;
+    }
+
+    public void setThirdBlood(User thirdBlood) {
         this.thirdBlood = thirdBlood;
+    }
+
+    public User getThirdBlood() {
+        return thirdBlood;
     }
 
     public void setState(String state) {

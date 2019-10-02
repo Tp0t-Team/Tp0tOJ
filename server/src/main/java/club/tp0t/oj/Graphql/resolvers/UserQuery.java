@@ -1,6 +1,9 @@
 package club.tp0t.oj.Graphql.resolvers;
 
+import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Graphql.types.ChallengeInfo;
+import club.tp0t.oj.Graphql.types.ChallengesResult;
 import club.tp0t.oj.Graphql.types.Profile;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
@@ -119,9 +122,28 @@ public class UserQuery extends Query {
     }
 
     // get challenges
-    /*
-    public ChallengesResult challenges() {
-        // TODO: not implemented
+
+    public ChallengesResult challenges(DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // if not login
+        if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
+            return new ChallengesResult("forbidden");
+        }
+
+
+        List<Challenge> challenges = challengeService.getAllChallenges();
+
+        // no challenge
+        if(challenges == null) return new ChallengesResult("no challenge available");
+
+        ChallengesResult challengesResult = new ChallengesResult("success");
+        challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"));
+
+        return challengesResult;
     }
-    */
+
 }

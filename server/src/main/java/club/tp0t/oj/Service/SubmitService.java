@@ -29,4 +29,9 @@ public class SubmitService {
         // duplicate: true
         return submit != null;
     }
+
+    public boolean checkDoneByUserId(long userId, long challengeId) {
+        Submit submit = submitRepository.checkDoneByUserId(userId, challengeId);
+        return submit != null;
+    }
 }

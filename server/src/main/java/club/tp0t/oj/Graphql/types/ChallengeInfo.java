@@ -6,12 +6,13 @@ import java.util.List;
 public class ChallengeInfo {
     private String type;
     private String name;
-    private long score;
+    private int score;
     private String description;
     private List<String> externalLink = new ArrayList<>();
     private List<String> hint = new ArrayList<>();
     private List<String> blood = new ArrayList<>();
     private boolean done;
+    private String challengeId;
 
     public void setType(String type) {
         this.type = type;
@@ -19,10 +20,6 @@ public class ChallengeInfo {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setScore(long score) {
-        this.score = score;
     }
 
     public void setDescription(String description) {
@@ -75,5 +72,17 @@ public class ChallengeInfo {
 
     public boolean isDone() {
         return done;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setChallengeId(String challengeId) {
+        this.challengeId = challengeId;
+    }
+
+    public String getChallengeId() {
+        return challengeId;
     }
 }
