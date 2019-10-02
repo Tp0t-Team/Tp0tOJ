@@ -36,6 +36,11 @@
       <v-col cols="6" class="content-col">
         <v-form>
           <v-row>
+            <v-col cols="12">
+              <v-file-input accept=".yaml, .yml" outlined label="load config file"></v-file-input>
+            </v-col>
+          </v-row>
+          <v-row>
             <v-col cols="6">
               <v-text-field outlined label="name" :disabled="loading"></v-text-field>
             </v-col>
@@ -122,6 +127,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import yaml from "js-yaml";
 
 @Component
 export default class Challenge extends Vue {
