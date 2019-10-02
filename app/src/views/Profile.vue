@@ -14,6 +14,16 @@
         <v-card class="outer">
           <v-card class="inner pa-4">
             <v-form>
+              <v-row justify="center" class="mt-4">
+                <div>
+                  <v-subheader>
+                    <span>
+                      <strong>Rank: 1</strong>
+                      <br />1000pt
+                    </span>
+                  </v-subheader>
+                </div>
+              </v-row>
               <v-row>
                 <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="name" :value="userInfo.name"></v-text-field>
@@ -42,15 +52,7 @@
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="score" :value="userInfo.score"></v-text-field>
-                </v-col>
-                <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="state" :value="userInfo.state"></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
@@ -61,22 +63,9 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="QQ" :value="userInfo.qq"></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
-                </v-col>
-              </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="top rank"
-                    :value="userInfo.topRank"
-                  ></v-text-field>
+                  <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
@@ -85,6 +74,14 @@
                     label="join time"
                     :value="userInfo.joinTime"
                   ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row v-if="$store.state.global.userId==$route.params.user_id">
+                <v-col cols="6">
+                  <v-text-field :loading="loading" readonly label="QQ" :value="userInfo.qq"></v-text-field>
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
                 </v-col>
               </v-row>
             </v-form>
@@ -179,6 +176,7 @@ export default class Profile extends Vue {
 <style lang="scss" scoped>
 .avatar {
   position: absolute;
+  left: 12px;
   width: 100%;
   z-index: 1;
 }
