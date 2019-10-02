@@ -38,3 +38,12 @@ export interface ChallengeDesc {
 }
 
 export type ChallengeResult = { challenges: ChallengeDesc[] } & Result
+
+export interface RankDesc {
+    rank: number
+    name: string
+    avatar: string
+    score: number
+}
+
+export type RankResult = { ranks: RankDesc[] } & Result

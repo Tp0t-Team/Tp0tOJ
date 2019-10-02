@@ -46,6 +46,8 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import gql from "graphql-tag";
+import { RankDesc, RankResult } from "@/struct";
 
 class Team {
     public rank: number;
@@ -58,16 +60,22 @@ class Team {
 
 @Component
 export default class Rank extends Vue {
+    ranks: RankDesc[] = [];
     page: number = 0;
-    ordinal: Array<Team> = Array.from({length: 26}, (v,k) => new Team(k + 1, String.fromCharCode(k + 97), 26 - k, ""));
-    pageCount: number = Math.ceil((this.ordinal.length - 3) / 8);
-    head: Array<Team> = this.ordinal.length > 3 ? this.ordinal.slice(0, 3) : this.ordinal;
-    get others(): Array<Team> {
-        return this.ordinal.length > 3 ? this.ordinal.slice((this.page - 1) * 8 + 3, (this.page) * 8 + 3) : [];
+    get pageCount(): number {
+        return Math.ceil((this.ranks.length - 3) / 8);
+    }
+    get head(): RankDesc[] {
+        return this.ranks.length > 3 ? this.ranks.slice(0, 3) : this.ranks;
+    }
+    get others(): RankDesc[] {
+        return this.ranks.length > 3 ? this.ranks.slice((this.page - 1) * 8 + 3, (this.page) * 8 + 3) : [];
     }
 
     mounted() {
         this.page = parseInt(this.$route.params.page);
+        this.ranks = Array.from({length: 26}, (v,k) => ({rank: k + 1, name: String.fromCharCode(k + 97), avatar: "", score: 26 - k}))
+        
     }
 }
 </script>
