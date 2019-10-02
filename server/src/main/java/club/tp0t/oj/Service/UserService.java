@@ -88,7 +88,7 @@ public class UserService {
         return password.equals(user.getPassword());
     }
 
-    public boolean adminCheck(String stuNumber) {
+    public boolean adminCheckByStuNumber(String stuNumber) {
         User user = userRepository.getUserByStuNumber(stuNumber);
         return user.getRole().equals("admin");
     }
@@ -126,8 +126,18 @@ public class UserService {
         return 0;
     }
 
-    public boolean teamCheck(String stuNumber) {
+    public boolean teamCheckByStuNumber(String stuNumber) {
         User user = userRepository.getUserByStuNumber(stuNumber);
+        return user.getRole().equals("team");
+    }
+
+    public boolean adminCheckByUserId(long userId) {
+        User user = userRepository.getOne(userId);
+        return user.getRole().equals("admin");
+    }
+
+    public boolean teamCheckByUserId(long userId) {
+        User user = userRepository.getOne(userId);
         return user.getRole().equals("team");
     }
 }

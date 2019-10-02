@@ -126,12 +126,12 @@ public class UserMutation implements GraphQLMutationResolver {
             session.setAttribute("isLogin", true);
             session.setAttribute("userId", userService.getIdByStuNumber(stuNumber));
             // admin
-            if(userService.adminCheck(stuNumber)) {
+            if(userService.adminCheckByStuNumber(stuNumber)) {
                 session.setAttribute("isAdmin", true);
             }
             else session.setAttribute("isAdmin", false);
             // team
-            if(userService.teamCheck(stuNumber)) {
+            if(userService.teamCheckByStuNumber(stuNumber)) {
                 session.setAttribute("isTeam", true);
             }
             else session.setAttribute("isTeam", false);

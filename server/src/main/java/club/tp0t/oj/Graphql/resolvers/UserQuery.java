@@ -134,8 +134,17 @@ public class UserQuery extends Query {
             return new ChallengesResult("forbidden");
         }
 
+        List<Challenge> challenges;
 
-        List<Challenge> challenges = challengeService.getEnabledChallenges();
+        // admin or team
+        long userId = (long) session.getAttribute("userId");
+        if(userService.adminCheckByUserId(userId) || userService.teamCheckByUserId(userId)) {
+            challenges = challengeService.getAllChallenges();
+        }
+        // member
+        else {
+            challenges = challengeService.getEnabledChallenges();
+        }
 
         // no challenge
         if(challenges == null) return new ChallengesResult("no challenge available");
