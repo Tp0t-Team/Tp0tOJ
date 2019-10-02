@@ -1,27 +1,27 @@
 <template>
   <v-container fill-width>
     <v-row>
-      <v-col v-for="(t,index) in topUser" :key="t.userId" cols="4">
+      <v-col v-for="(r,index) in topRank" :key="r.userId" cols="4">
         <v-hover v-slot:default="{ hover }">
           <v-card
             :elevation="hover ? 12 : 2"
             max-width="300"
             class="mx-auto d-flex flex-row mb-6 px-4"
-            @click="$router.push(`/profile/${t.userId}`)"
+            @click="$router.push(`/profile/${r.userId}`)"
           >
             <div class="pa-2 align-self-center">
               <v-avatar size="64" color="blue">
-                <span class="headline">{{ t.name[0] }}</span>
+                <span class="headline">{{ r.name[0] }}</span>
               </v-avatar>
             </div>
             <div class="pa-2">
               <v-card-title>
                 <v-chip>
                   <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
-                  {{ t.name }}
+                  {{ r.name }}
                 </v-chip>
               </v-card-title>
-              <v-card-text>{{ t.score }}pt</v-card-text>
+              <v-card-text>{{ r.score }}pt</v-card-text>
             </div>
           </v-card>
         </v-hover>
@@ -38,11 +38,11 @@
       <tbody>
         <tr
           class="table-item"
-          v-for="r in ranks"
+          v-for="(r,index) in pageRank"
           :key="r.rank"
           @click="$router.push(`/profile/${r.userId}`)"
         >
-          <td>{{ r.rank }}</td>
+          <td>{{ pageBase + index + 1 }}</td>
           <td>{{ r.name }}</td>
           <td>{{ r.score }}</td>
         </tr>
@@ -58,33 +58,57 @@
 import { Component, Vue } from "vue-property-decorator";
 import { RankDesc } from "@/struct";
 
+const UserPerPage = 10;
+
 @Component
 export default class Rank extends Vue {
   private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
 
-  private topUser: RankDesc[] = [];
   private ranks: RankDesc[] = [];
-  private pageCount: number = 2;
+  private pageCount: number = 1;
+
+  private get topRank() {
+    return this.ranks.slice(0, 3);
+  }
+  private get pageBase() {
+    return (this.page - 1) * 10 + 3;
+  }
+  private get pageRank() {
+    return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
+  }
 
   mounted() {
-    this.topUser = [
-      { rank: 1, userId: "1", name: "Zenis", score: 1000 },
-      { rank: 2, userId: "2", name: "Mio", score: 800 },
-      { rank: 3, userId: "3", name: "DRSN", score: 600 }
-    ];
     this.ranks = [
-      { rank: 4, userId: "1", name: "Zenis", score: 1000 },
-      { rank: 5, userId: "2", name: "Mio", score: 800 },
-      { rank: 6, userId: "3", name: "DRSN", score: 600 },
-      { rank: 7, userId: "1", name: "Zenis", score: 1000 },
-      { rank: 8, userId: "2", name: "Mio", score: 800 },
-      { rank: 9, userId: "3", name: "DRSN", score: 600 },
-      { rank: 10, userId: "1", name: "Zenis", score: 1000 },
-      { rank: 11, userId: "2", name: "Mio", score: 800 },
-      { rank: 12, userId: "3", name: "DRSN", score: 600 }
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 },
+      { userId: "1", name: "Zenis", score: 1000 },
+      { userId: "2", name: "Mio", score: 800 },
+      { userId: "3", name: "DRSN", score: 600 }
     ];
     this.page = parseInt(this.$route.params.page);
+    this.pageCount = Math.floor(
+      (this.ranks.length + UserPerPage - 1) / UserPerPage
+    );
   }
 }
 </script>

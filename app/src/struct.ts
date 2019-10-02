@@ -40,7 +40,6 @@ export interface ChallengeDesc {
 export type ChallengeResult = { challenges: ChallengeDesc[] } & Result
 
 export interface RankDesc {
-    rank: number
     userId: string
     name: string
     score: number
