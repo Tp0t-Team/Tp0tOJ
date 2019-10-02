@@ -2,7 +2,6 @@ package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengesResult;
 import club.tp0t.oj.Graphql.types.Profile;
 import club.tp0t.oj.Graphql.types.RankResult;
@@ -70,7 +69,7 @@ public class UserQuery extends Query {
         return profile;
         */
 
-        RankResult rankResult = new RankResult("success");
+        RankResult rankResult = new RankResult("");
         List<User> users = userService.getUsersRank();
 
         // no users
@@ -149,7 +148,7 @@ public class UserQuery extends Query {
         // no challenge
         if(challenges == null) return new ChallengesResult("no challenge available");
 
-        ChallengesResult challengesResult = new ChallengesResult("success");
+        ChallengesResult challengesResult = new ChallengesResult("");
         System.out.println("have challenges: " + challenges.size());
         System.out.println("userId: " + (long)session.getAttribute("userId"));
         challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);

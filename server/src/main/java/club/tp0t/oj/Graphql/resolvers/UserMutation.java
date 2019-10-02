@@ -79,7 +79,7 @@ public class UserMutation implements GraphQLMutationResolver {
         // register user
         // if succeeded
         if(userService.register(name, stuNumber, password, department, qq, mail, grade)) {
-            return new RegisterResult("success");
+            return new RegisterResult("");
         }
 
         // if failed
@@ -137,7 +137,7 @@ public class UserMutation implements GraphQLMutationResolver {
             else session.setAttribute("isTeam", false);
 
             System.out.println("login succeeded");
-            return new LoginResult("success", Long.toString(userService.getIdByStuNumber(stuNumber)),
+            return new LoginResult("", Long.toString(userService.getIdByStuNumber(stuNumber)),
                     userService.getRoleByStuNumber(stuNumber));
         }
         // user password check failed
@@ -154,7 +154,7 @@ public class UserMutation implements GraphQLMutationResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         session.setAttribute("isLogin", false);
-        return new LogoutResult("success");
+        return new LogoutResult("");
     }
 
     // submit flag
