@@ -2,22 +2,29 @@
   <v-container fill-width>
     <v-row>
       <v-col v-for="(t,index) in topUser" :key="t.userId" cols="4">
-        <v-card max-width="300" class="mx-auto d-flex flex-row mb-6 px-4">
-          <div class="pa-2 align-self-center">
-            <v-avatar size="64" color="blue">
-              <span class="headline">{{ t.name[0] }}</span>
-            </v-avatar>
-          </div>
-          <div class="pa-2">
-            <v-card-title>
-              <v-chip>
-                <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
-                {{ t.name }}
-              </v-chip>
-            </v-card-title>
-            <v-card-text>{{ t.score }}pt</v-card-text>
-          </div>
-        </v-card>
+        <v-hover v-slot:default="{ hover }">
+          <v-card
+            :elevation="hover ? 12 : 2"
+            max-width="300"
+            class="mx-auto d-flex flex-row mb-6 px-4"
+            @click="$router.push(`/profile/${t.userId}`)"
+          >
+            <div class="pa-2 align-self-center">
+              <v-avatar size="64" color="blue">
+                <span class="headline">{{ t.name[0] }}</span>
+              </v-avatar>
+            </div>
+            <div class="pa-2">
+              <v-card-title>
+                <v-chip>
+                  <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
+                  {{ t.name }}
+                </v-chip>
+              </v-card-title>
+              <v-card-text>{{ t.score }}pt</v-card-text>
+            </div>
+          </v-card>
+        </v-hover>
       </v-col>
     </v-row>
     <v-simple-table class="ma-4">
