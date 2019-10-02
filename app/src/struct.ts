@@ -18,6 +18,9 @@ export interface UserInfo {
     mail: string
     topRank: string
     joinTime: string
+    score: number
+    state: string
+    rank: number
 }
 
 export type UserInfoResult = { userInfo: UserInfo } & Result

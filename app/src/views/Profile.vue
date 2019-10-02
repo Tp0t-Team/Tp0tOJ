@@ -17,9 +17,13 @@
               <v-row justify="center" class="mt-4">
                 <div>
                   <v-subheader>
-                    <span>
-                      <strong>Rank: 1</strong>
-                      <br />1000pt
+                    <span class="text-center">
+                      <strong>
+                        Rank:
+                        <span v-if="userInfo.rank!=0">{{userInfo.rank}}</span>
+                        <span v-else>∞</span>
+                      </strong>
+                      <br />{{userInfo.score}}pt
                     </span>
                   </v-subheader>
                 </div>
@@ -118,26 +122,34 @@ export default class Profile extends Vue {
     qq: "",
     mail: "",
     topRank: "",
-    joinTime: ""
+    joinTime: "",
+    score: 0,
+    state: "",
+    rank: 0
   };
 
   private infoText: string = "";
   private hasInfo: boolean = false;
 
   async mounted() {
+    // example data
     this.loading = true;
     this.userInfo = {
-      name: "",
-      role: "",
-      stuNumber: "",
-      department: "",
-      grade: "",
-      protectedTime: "",
-      qq: "",
-      mail: "",
-      topRank: "",
-      joinTime: ""
+      name: "CXK",
+      role: "member",
+      stuNumber: "0001",
+      department: "xxxx",
+      grade: "2010",
+      protectedTime: "2019-10-10",
+      qq: "12345678",
+      mail: "123@test.com",
+      topRank: "∞",
+      joinTime: "2019-01-01",
+      score: 0,
+      state: "protected",
+      rank: 0
     };
+    //
     try {
       let res = await this.$apollo.query<UserInfoResult>({
         query: gql`
@@ -153,6 +165,9 @@ export default class Profile extends Vue {
               mail
               topRank
               joinTime
+              score
+              state
+              rank
             }
           }
         `,

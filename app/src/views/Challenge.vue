@@ -1,8 +1,10 @@
 <template>
   <v-container fluid>
     <div v-for="type in challengeType" :key="type">
-      <div class="type-title display-1 ml-4">{{type}}</div>
-      <v-divider color="primary"></v-divider>
+      <div v-if="challenges.filter((v)=>v.type==type).length!=0">
+        <div class="type-title display-1 ml-4">{{type}}</div>
+        <v-divider color="primary"></v-divider>
+      </div>
       <v-row>
         <v-col sm="3" v-for="item in challenges.filter((v)=>v.type==type)" :key="item.challengeId">
           <v-layout justify-center>
