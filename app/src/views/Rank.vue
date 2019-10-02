@@ -7,10 +7,15 @@
                 <v-col v-for="t in head" :key="t.rank" cols="12" sm="4">
                     <v-card max-width="300" class="mx-auto d-flex flex-row mb-6 px-4">
                         <div class="pa-2 align-self-center">
-                            <h1>{{ t.rank }}</h1>
+                            <v-avatar v-if="t.avatar" size="40px">
+                                <img alt="Avatar" src="t.avatar">
+                            </v-avatar>
+                            <v-avatar v-else size="40px" color="orange">
+                                <span class="white--text headline">{{ t.rank }}</span>
+                            </v-avatar>
                         </div>
                         <div class="pa-2">
-                            <v-card-title>{{ t.name }}</v-card-title>
+                            <v-card-title>{{ t.rank }} {{ t.name }}</v-card-title>
                             <v-card-text>{{ t.score }}</v-card-text>
                         </div>
                     </v-card>
@@ -46,19 +51,23 @@ class Team {
     public rank: number;
     public name: string;
     public score: number;
-    constructor(rank: number, name: string, score: number) {this.name = name, this.score = score, this.rank = rank}
+    public avatar: string;
+    constructor(rank: number, name: string, score: number, avatar: string) 
+    { this.name = name, this.score = score, this.rank = rank, this.avatar = avatar }
 }
 
 @Component
 export default class Rank extends Vue {
     page: number = 0;
-    ordinal: Array<Team> = Array.from({length: 26}, (v,k) => new Team(k + 1, String.fromCharCode(k + 97), 26 - k));
+    ordinal: Array<Team> = Array.from({length: 26}, (v,k) => new Team(k + 1, String.fromCharCode(k + 97), 26 - k, ""));
     pageCount: number = Math.ceil((this.ordinal.length - 3) / 8);
     head: Array<Team> = this.ordinal.length > 3 ? this.ordinal.slice(0, 3) : this.ordinal;
-    others: Array<Team> = this.ordinal.length > 3 ? this.ordinal.slice(this.page * 8 + 3, (this.page + 1) * 8 + 3) : [];
-    
+    get others(): Array<Team> {
+        return this.ordinal.length > 3 ? this.ordinal.slice((this.page - 1) * 8 + 3, (this.page) * 8 + 3) : [];
+    }
+
     mounted() {
-        console.log(this)
+        this.page = parseInt(this.$route.params.page);
     }
 }
 </script>
