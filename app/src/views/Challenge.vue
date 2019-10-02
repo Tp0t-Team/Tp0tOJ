@@ -143,12 +143,23 @@ export default class Challenge extends Vue {
       let res = await this.$apollo.query<ChallengeResult>({
         query: gql`
           query {
-            challenges
+            challenges {
+              challengeId
+              name
+              type
+              description
+              externalLink
+              hint
+              score
+              blood
+              done
+            }
           }
         `
       });
       if (res.errors) throw res.errors.join(",");
-      if (res.data!.message) throw res.data!.message;
+      if (res.data!.challenges.message) throw res.data!.challenges.message;
+      this.challenges = res.data!.challenges.challenges;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

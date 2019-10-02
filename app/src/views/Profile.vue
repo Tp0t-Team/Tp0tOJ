@@ -23,7 +23,8 @@
                         <span v-if="userInfo.rank!=0">{{userInfo.rank}}</span>
                         <span v-else>∞</span>
                       </strong>
-                      <br />{{userInfo.score}}pt
+                      <br />
+                      {{userInfo.score}}pt
                     </span>
                   </v-subheader>
                 </div>
@@ -155,19 +156,22 @@ export default class Profile extends Vue {
         query: gql`
           query {
             userInfo(userId: $userId) {
-              name
-              role
-              stuNumber
-              department
-              grade
-              protectedTime
-              qq
-              mail
-              topRank
-              joinTime
-              score
-              state
-              rank
+              message
+              userInfo {
+                name
+                role
+                stuNumber
+                department
+                grade
+                protectedTime
+                qq
+                mail
+                topRank
+                joinTime
+                score
+                state
+                rank
+              }
             }
           }
         `,
@@ -176,8 +180,8 @@ export default class Profile extends Vue {
         }
       });
       if (res.errors) throw res.errors.join(",");
-      if (res.data!.message) throw res.data!.message;
-      this.userInfo = res.data!.userInfo;
+      if (res.data!.userInfo.message) throw res.data!.userInfo.message;
+      this.userInfo = res.data!.userInfo.userInfo;
       this.loading = false;
     } catch (e) {
       this.loading = false;

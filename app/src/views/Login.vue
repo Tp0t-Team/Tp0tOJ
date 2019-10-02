@@ -142,7 +142,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { LoginResult, Result } from "@/struct";
+import { LoginResult, RegisterResult } from "@/struct";
 import constValue from "@/constValue";
 
 @Component
@@ -224,11 +224,11 @@ export default class Login extends Vue {
         }
       });
       if (res.errors) throw res.errors.join(",");
-      if (res.data!.message) throw res.data!.message;
+      if (res.data!.login.message) throw res.data!.login.message;
       this.loading = false;
       this.$store.commit("setUserIdAndRole", {
-        userId: res.data!.userId,
-        role: res.data!.role
+        userId: res.data!.login.userId,
+        role: res.data!.login.role
       });
       this.$router.replace("/");
     } catch (e) {
@@ -245,7 +245,7 @@ export default class Login extends Vue {
     }
     this.loading = true;
     try {
-      let res = await this.$apollo.mutate<Result>({
+      let res = await this.$apollo.mutate<RegisterResult>({
         mutation: gql`
           mutation {
             register(input: $input) {
@@ -266,7 +266,7 @@ export default class Login extends Vue {
         }
       });
       if (res.errors) throw res.errors.join(",");
-      if (res.data!.message) throw res.data!.message;
+      if (res.data!.register.message) throw res.data!.register.message;
       this.tab = "tab-login";
     } catch (e) {
       this.loading = false;

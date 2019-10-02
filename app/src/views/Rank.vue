@@ -51,12 +51,20 @@
     <v-row>
       <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
     </v-row>
+    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+      {{ infoText }}
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="hasInfo = false">close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { RankDesc } from "@/struct";
+import gql from "graphql-tag";
+import { RankDesc, RankResult } from "@/struct";
 
 const UserPerPage = 10;
 
@@ -68,6 +76,9 @@ export default class Rank extends Vue {
   private ranks: RankDesc[] = [];
   private pageCount: number = 1;
 
+  private infoText: string = "";
+  private hasInfo: boolean = false;
+
   private get topRank() {
     return this.ranks.slice(0, 3);
   }
@@ -78,7 +89,8 @@ export default class Rank extends Vue {
     return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
   }
 
-  mounted() {
+  async mounted() {
+    // example data
     this.ranks = [
       { userId: "1", name: "Zenis", score: 1000 },
       { userId: "2", name: "Mio", score: 800 },
@@ -105,10 +117,33 @@ export default class Rank extends Vue {
       { userId: "2", name: "Mio", score: 800 },
       { userId: "3", name: "DRSN", score: 600 }
     ];
+    //
     this.page = parseInt(this.$route.params.page);
-    this.pageCount = Math.floor(
-      (this.ranks.length + UserPerPage - 1) / UserPerPage
-    );
+    try {
+      let res = await this.$apollo.query<RankResult>({
+        query: gql`
+          query {
+            rank {
+              messages
+              userInfos {
+                userId
+                name
+                score
+              }
+            }
+          }
+        `
+      });
+      if (res.errors) throw res.errors.join(",");
+      if (res.data!.rank.message) throw res.data!.rank.message;
+      this.ranks = res.data!.rank.userInfos;
+      this.pageCount = Math.floor(
+        (this.ranks.length + UserPerPage - 1) / UserPerPage
+      );
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 }
 </script>

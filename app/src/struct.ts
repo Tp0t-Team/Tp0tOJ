@@ -3,9 +3,13 @@ export interface Result {
 }
 
 export type LoginResult = {
-    userId: string
-    role: string
-} & Result
+    login: {
+        userId: string
+        role: string
+    } & Result
+}
+
+export type RegisterResult = { register: Result }
 
 export interface UserInfo {
     name: string
@@ -23,7 +27,7 @@ export interface UserInfo {
     rank: number
 }
 
-export type UserInfoResult = { userInfo: UserInfo } & Result
+export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
 
 export interface ChallengeDesc {
     challengeId: string
@@ -37,10 +41,14 @@ export interface ChallengeDesc {
     done: boolean
 }
 
-export type ChallengeResult = { challenges: ChallengeDesc[] } & Result
+export type ChallengeResult = {
+    challenges: { challenges: ChallengeDesc[] } & Result
+}
 
 export interface RankDesc {
     userId: string
     name: string
     score: number
 }
+
+export type RankResult = { rank: { userInfos: RankDesc[] } & Result }
