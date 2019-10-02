@@ -49,15 +49,6 @@ import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import { RankDesc, RankResult } from "@/struct";
 
-class Team {
-    public rank: number;
-    public name: string;
-    public score: number;
-    public avatar: string;
-    constructor(rank: number, name: string, score: number, avatar: string) 
-    { this.name = name, this.score = score, this.rank = rank, this.avatar = avatar }
-}
-
 @Component
 export default class Rank extends Vue {
     ranks: RankDesc[] = [];
