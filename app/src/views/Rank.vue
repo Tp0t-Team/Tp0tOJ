@@ -56,15 +56,15 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { RankUser } from "@/struct";
+import { RankDesc } from "@/struct";
 
 @Component
 export default class Rank extends Vue {
   private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
 
-  private topUser: RankUser[] = [];
-  private ranks: RankUser[] = [];
+  private topUser: RankDesc[] = [];
+  private ranks: RankDesc[] = [];
   private pageCount: number = 2;
 
   mounted() {
