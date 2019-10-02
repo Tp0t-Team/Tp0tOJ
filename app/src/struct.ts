@@ -52,3 +52,17 @@ export interface RankDesc {
 }
 
 export type RankResult = { rank: { userInfos: RankDesc[] } & Result }
+
+export type BulletinPubResult = { bulletinPub: Result }
+
+export type BulletinSubResult = { bulletin: BulletinItem }
+
+export interface BulletinItem {
+    title: string
+    description: string
+    time: string
+}
+
+export type AllBulletinResult = {
+    allBulletin: { bulletin: BulletinItem[] } & Result
+}
