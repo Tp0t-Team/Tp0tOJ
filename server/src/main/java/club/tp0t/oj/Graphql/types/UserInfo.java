@@ -14,6 +14,9 @@ public class UserInfo {
     private int topRank;
     private String protectedTime;
     private String userId;
+    private String role;
+    private String state;
+    private int rank;
 
     public UserInfo(String name,
                     String stuNumber,
@@ -24,7 +27,10 @@ public class UserInfo {
                     long score,
                     int topRank,
                     Timestamp protectedTime,
-                    long userId) {
+                    long userId,
+                    String role,
+                    String state,
+                    int rank) {
         this.name = name;
         this.stuNumber = stuNumber;
         this.department = department;
@@ -35,6 +41,9 @@ public class UserInfo {
         this.topRank = topRank;
         this.protectedTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(protectedTime);
         this.userId = Long.toString(userId);
+        this.role = role;
+        this.state = state;
+        this.rank = rank;
     }
     public UserInfo(){};
 
@@ -116,5 +125,29 @@ public class UserInfo {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public int getRank() {
+        return rank;
     }
 }

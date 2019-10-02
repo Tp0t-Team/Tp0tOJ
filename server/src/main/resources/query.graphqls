@@ -20,6 +20,8 @@ type UserInfo {
     score: String # long to String
     topRank: Int
     protectedTime: String # Timestamp to String
+    role: String
+    state: String
 }
 
 type RankResult {
@@ -27,6 +29,19 @@ type RankResult {
     userInfos: [UserInfo]
 }
 
-#type ChallengesResult {
-# TODO: descirption structure
-#}
+type ChallengesResult {
+    message: String
+    challenges: [ChallengeInfo]
+}
+
+type ChallengeInfo {
+    challengeId: String
+    type: String
+    name: String
+    score: Int
+    description: String
+    externalLink: [String]
+    hint: [String]
+    blood: [String]
+    done: Boolean
+}

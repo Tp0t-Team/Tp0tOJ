@@ -97,7 +97,7 @@ public class UserQuery extends Query {
             User user = userService.getUserById(Long.parseLong(userId));
             System.out.println(user);
             Profile profile = new Profile("requested by self");
-            profile.addOwnUserInfo(user);
+            profile.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
             return profile;
 
         }
@@ -111,7 +111,7 @@ public class UserQuery extends Query {
             // exists
             else {
                 Profile profile = new Profile("requested by others");
-                profile.addOthersUserInfo(user);
+                profile.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
                 return profile;
             }
         }

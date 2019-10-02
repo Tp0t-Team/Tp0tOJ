@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface SubmitRepository extends JpaRepository<Submit, Long> {
     // TODO
-    @Query(value = "select s from Submit s where s.user=?1 and ")
+    @Query(value = "select s from Submit s where s.user=?1")
     Submit getSubmitByUserIdAndChallengeId(User user, long challengeId);
 }

@@ -43,7 +43,10 @@ public class RankResult {
                     user.getScore(),
                     user.getTopRank(),
                     user.getProtectedTime(),
-                    user.getUserId());
+                    user.getUserId(),
+                    user.getRole(),
+                    user.getState(),
+                    0);
 
             this.userInfos.add(userInfo);
         }

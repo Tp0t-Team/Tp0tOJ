@@ -20,7 +20,7 @@ public class Profile {
 
 
     // hide some attributes
-    public void addOthersUserInfo(User user) {
+    public void addOthersUserInfo(User user, int rank) {
         this.userInfo = new UserInfo(user.getName(),
                 "",  // stuNumber
                 "",  // department
@@ -30,11 +30,14 @@ public class Profile {
                 user.getScore(),
                 user.getTopRank(),
                 user.getProtectedTime(),
-                user.getUserId());
+                user.getUserId(),
+                user.getRole(),
+                user.getState(),
+                rank);
     }
 
     // add all information
-    public void addOwnUserInfo(User user) {
+    public void addOwnUserInfo(User user, int rank) {
         this.userInfo = new UserInfo(user.getName(),
                 user.getStuNumber(),
                 user.getDepartment(),
@@ -44,7 +47,10 @@ public class Profile {
                 user.getScore(),
                 user.getTopRank(),
                 user.getProtectedTime(),
-                user.getUserId());
+                user.getUserId(),
+                user.getRole(),
+                user.getState(),
+                rank);
     }
 
     /*

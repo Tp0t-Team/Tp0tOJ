@@ -115,4 +115,19 @@ public class UserService {
         User user = userRepository.getUserByStuNumber(stuNumber);
         return user.getRole();
     }
+
+    public int getRankByUserId(long userId) {
+        List<User> usersRank = userRepository.getUsersRank();
+        for(int i=0;i<usersRank.size();i++) {
+            User tmpUser = usersRank.get(i);
+            if(tmpUser.getUserId() == userId) return i+1;
+        }
+        // user not exists
+        return 0;
+    }
+
+    public boolean teamCheck(String stuNumber) {
+        User user = userRepository.getUserByStuNumber(stuNumber);
+        return user.getRole().equals("team");
+    }
 }
