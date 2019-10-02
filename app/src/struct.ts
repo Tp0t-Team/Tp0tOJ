@@ -21,3 +21,17 @@ export interface UserInfo {
 }
 
 export type UserInfoResult = { userInfo: UserInfo } & Result
+
+export interface ChallengeDesc {
+    challengeId: string
+    type: string
+    name: string
+    score: number
+    description: string
+    externalLink: string[]
+    hint: string[]
+    blood: string[]
+    done: boolean
+}
+
+export type ChallengeResult = { challenges: ChallengeDesc[] } & Result

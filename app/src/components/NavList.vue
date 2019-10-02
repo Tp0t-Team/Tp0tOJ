@@ -16,7 +16,10 @@
         <v-list-item-title>Announcement</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item v-if="!!$store.state.global.userId" @click="$router.push('/challenge')">
+    <v-list-item
+      v-if="!!$store.state.global.userId"
+      @click="$router.push({path:'/challenge',query:{time:Date.now().toLocaleString()}})"
+    >
       <v-list-item-action>
         <v-icon>list_alt</v-icon>
       </v-list-item-action>

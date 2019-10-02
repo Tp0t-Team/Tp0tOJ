@@ -18,7 +18,8 @@ const constValue = {
         '马克思主义学院',
         '国际教育学院',
         '中法工程师学院'
-    ]
+    ],
+    challengeType: ['WEB', 'RE', 'PWN', 'MISC', 'CRYPTO']
 }
 
 export default constValue

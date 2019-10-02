@@ -10,7 +10,7 @@
     </v-app-bar>
 
     <v-content>
-      <router-view />
+      <router-view :key="$route.query.time" />
     </v-content>
 
     <v-footer app padless>
