@@ -30,6 +30,11 @@ export default new Router({
       component : ()=>import(/* webpackChunkName: "rank" */ "@/views/Rank.vue")
     },
     {
+      path:'/profile/:user_id',
+      name: "profile",
+      component : ()=>import(/* webpackChunkName: "profile" */ "@/views/Profile.vue")
+    },
+    {
       path:'/challenge',
       name: "challenge",
       component : ()=>import(/* webpackChunkName: "challenge" */ "@/views/Challenge.vue")
