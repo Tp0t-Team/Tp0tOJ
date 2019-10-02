@@ -17,7 +17,7 @@
                 @click="openDetial(item.challengeId)"
               >
                 <v-badge left overlap class="score">
-                  <template v-slot:badge>1000</template>
+                  <template v-slot:badge>{{item.score}}</template>
                   <v-card-title class="subtitle-1 text-truncate">do you konw J language</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
@@ -133,7 +133,7 @@ export default class Challenge extends Vue {
         description: "qwerty",
         externalLink: ["http://www.baidu.com"],
         hint: [],
-        score: 1000,
+        score: 800,
         blood: ["1"],
         done: false
       }
