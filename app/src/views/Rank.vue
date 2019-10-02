@@ -1,73 +1,89 @@
 <template>
-  <v-container fill-height>
-      <v-container>
-          <v-row>
-          </v-row>
-            <v-row>
-                <v-col v-for="t in head" :key="t.rank" cols="12" sm="4">
-                    <v-card max-width="300" class="mx-auto d-flex flex-row mb-6 px-4">
-                        <div class="pa-2 align-self-center">
-                            <v-avatar v-if="t.avatar" size="40px">
-                                <img alt="Avatar" src="t.avatar">
-                            </v-avatar>
-                            <v-avatar v-else size="40px" color="orange">
-                                <span class="white--text headline">{{ t.rank }}</span>
-                            </v-avatar>
-                        </div>
-                        <div class="pa-2">
-                            <v-card-title>{{ t.rank }} {{ t.name }}</v-card-title>
-                            <v-card-text>{{ t.score }}</v-card-text>
-                        </div>
-                    </v-card>
-                </v-col>
-            </v-row>
-            <v-simple-table class="ma-4">
-                <template v-slot:default>
-                <thead>
-                    <tr>
-                        <th class="text-left">Rank</th>
-                        <th class="text-left">Team/Individual Name</th>
-                        <th class="text-left">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="t in others" :key="t.rank">
-                        <td>{{ t.rank }}</td>
-                        <td>{{ t.name }}</td>
-                        <td>{{ t.score }}</td>
-                    </tr>
-                </tbody>
-                </template>
-            </v-simple-table>
-            <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
-      </v-container>
+  <v-container fill-width>
+    <v-row>
+      <v-col v-for="(t,index) in topUser" :key="t.userId" cols="4">
+        <v-card max-width="300" class="mx-auto d-flex flex-row mb-6 px-4">
+          <div class="pa-2 align-self-center">
+            <v-avatar size="64" color="blue">
+              <span class="headline">{{ t.name[0] }}</span>
+            </v-avatar>
+          </div>
+          <div class="pa-2">
+            <v-card-title>
+              <v-chip>
+                <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
+                {{ t.name }}
+              </v-chip>
+            </v-card-title>
+            <v-card-text>{{ t.score }}pt</v-card-text>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
+    <v-simple-table class="ma-4">
+      <thead>
+        <tr>
+          <th class="text-left">Rank</th>
+          <th class="text-left">Name</th>
+          <th class="text-left">Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          class="table-item"
+          v-for="r in ranks"
+          :key="r.rank"
+          @click="$router.push(`/profile/${r.userId}`)"
+        >
+          <td>{{ r.rank }}</td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.score }}</td>
+        </tr>
+      </tbody>
+    </v-simple-table>
+    <v-row>
+      <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
+    </v-row>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-
-class Team {
-    public rank: number;
-    public name: string;
-    public score: number;
-    public avatar: string;
-    constructor(rank: number, name: string, score: number, avatar: string) 
-    { this.name = name, this.score = score, this.rank = rank, this.avatar = avatar }
-}
+import { RankUser } from "@/struct";
 
 @Component
 export default class Rank extends Vue {
-    page: number = 0;
-    ordinal: Array<Team> = Array.from({length: 26}, (v,k) => new Team(k + 1, String.fromCharCode(k + 97), 26 - k, ""));
-    pageCount: number = Math.ceil((this.ordinal.length - 3) / 8);
-    head: Array<Team> = this.ordinal.length > 3 ? this.ordinal.slice(0, 3) : this.ordinal;
-    get others(): Array<Team> {
-        return this.ordinal.length > 3 ? this.ordinal.slice((this.page - 1) * 8 + 3, (this.page) * 8 + 3) : [];
-    }
+  private rankColor = ["amber", "light-blue", "green"];
+  private page: number = 1;
 
-    mounted() {
-        this.page = parseInt(this.$route.params.page);
-    }
+  private topUser: RankUser[] = [];
+  private ranks: RankUser[] = [];
+  private pageCount: number = 2;
+
+  mounted() {
+    this.topUser = [
+      { rank: 1, userId: "1", name: "Zenis", score: 1000 },
+      { rank: 2, userId: "2", name: "Mio", score: 800 },
+      { rank: 3, userId: "3", name: "DRSN", score: 600 }
+    ];
+    this.ranks = [
+      { rank: 4, userId: "1", name: "Zenis", score: 1000 },
+      { rank: 5, userId: "2", name: "Mio", score: 800 },
+      { rank: 6, userId: "3", name: "DRSN", score: 600 },
+      { rank: 7, userId: "1", name: "Zenis", score: 1000 },
+      { rank: 8, userId: "2", name: "Mio", score: 800 },
+      { rank: 9, userId: "3", name: "DRSN", score: 600 },
+      { rank: 10, userId: "1", name: "Zenis", score: 1000 },
+      { rank: 11, userId: "2", name: "Mio", score: 800 },
+      { rank: 12, userId: "3", name: "DRSN", score: 600 }
+    ];
+    this.page = parseInt(this.$route.params.page);
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+.table-item {
+  cursor: pointer;
+}
+</style>
