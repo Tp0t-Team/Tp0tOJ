@@ -29,7 +29,16 @@ public class UserMutation implements GraphQLMutationResolver {
     private  UserService userService;
 
     // user register
-    public RegisterResult register(RegisterInput registerInput) {
+    public RegisterResult register(RegisterInput registerInput, DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // already login
+        if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin"))) {
+            return new RegisterResult("already login cannot register");
+        }
 
         String name = registerInput.getName();
         String stuNumber = registerInput.getStuNumber();
@@ -109,9 +118,9 @@ public class UserMutation implements GraphQLMutationResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // already login
-        if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin"))) {
-            return new LoginResult("already login");
-        }
+        //if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin"))) {
+        //    return new LoginResult("already login");
+        //}
 
         // login check
         String stuNumber = input.getStuNumber();
@@ -152,9 +161,14 @@ public class UserMutation implements GraphQLMutationResolver {
 
     // user logout
     public LogoutResult logout(DataFetchingEnvironment environment) {
+
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
+
+        if((session.getAttribute("isLogin") == null || !(boolean)session.getAttribute("isLogin"))) {
+            return new LogoutResult("not login yet");
+        }
 
         session.setAttribute("isLogin", false);
         return new LogoutResult("");

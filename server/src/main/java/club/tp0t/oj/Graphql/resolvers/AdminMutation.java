@@ -3,8 +3,12 @@ package club.tp0t.oj.Graphql.resolvers;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpSession;
 
 @Component
 public class AdminMutation implements GraphQLMutationResolver {
@@ -24,8 +28,18 @@ public class AdminMutation implements GraphQLMutationResolver {
     private  UserService userService;
 
 
-    public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput) {
+    public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
 
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if(session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new BulletinPubResult("forbidden");
+        }
 
         String title = bulletinPubInput.getTitle();
         String content = bulletinPubInput.getContent();

@@ -98,8 +98,9 @@ public class UserQuery implements GraphQLQueryResolver {
 
         // whether requested by user himself
         long currentUserId = (Long) session.getAttribute("userId");
-        // by himself
-        if(currentUserId == Long.parseLong(userId)) {
+        // by himself or by admin
+        if(currentUserId == Long.parseLong(userId) ||
+                userService.adminCheckByUserId(currentUserId)) {
             User user = userService.getUserById(Long.parseLong(userId));
             UserInfoResult userInfoResult = new UserInfoResult("");
             userInfoResult.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
