@@ -1,8 +1,13 @@
 package club.tp0t.oj.Util;
 
+import club.tp0t.oj.Graphql.types.FlagTypeInput;
+import club.tp0t.oj.Graphql.types.ScoreTypeInput;
+import club.tp0t.oj.Graphql.types.FlagType;
+import club.tp0t.oj.Graphql.types.ScoreType;
+
 import java.util.List;
 
-public class ChallengeDescription {
+public class ChallengeConfiguration {
     private String name;
     private String type;
     private Score score;
@@ -20,9 +25,11 @@ public class ChallengeDescription {
         return type;
     }
 
-    public int getScore() {
-        return score.getBaseScore();
-    }
+//    public int getScore() {
+//        return score.getBaseScore();
+//    }
+
+    public Score getScore() { return score; }
 
     public Flag getFlag() {
         return flag;
@@ -66,6 +73,32 @@ public class ChallengeDescription {
 
     public void setHint(List<String> hint) {
         this.hint = hint;
+    }
+
+    public void setFlagEx(FlagTypeInput flagtype){
+        this.flag = new Flag();
+        flag.setDynamic(flagtype.getDynamic());
+        flag.setValue(flagtype.getValue());
+    }
+
+    public void setScoreEx(ScoreTypeInput scoretype){
+        this.score = new Score();
+        score.setBaseScore(Integer.parseInt(scoretype.getBase_score()));
+        score.setDynamic(scoretype.getDynamic());
+    }
+
+    public ScoreType getScoreEx(){
+        ScoreType scoretype =  new ScoreType();
+        scoretype.setDynamic(this.getScore().isDynamic());
+        scoretype.setBase_score(Integer.toString(this.getScore().getBaseScore()));
+        return scoretype;
+    }
+
+    public FlagType getFlagEx(){
+        FlagType flagtype =  new FlagType();
+        flagtype.setDynamic(this.getFlag().isDynamic());
+        flagtype.setValue(this.getFlag().getValue());
+        return flagtype;
     }
 }
 

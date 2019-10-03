@@ -6,6 +6,8 @@ type Mutation {
     submit (input: SubmitInput!) : SubmitResult!
     bulletinPub(input: BulletinPubInput!) :BulletinPubResult!
     userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
+    challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
+    challengeRemove(input: String!): ChallengeRemoveResult!
 }
 
 input RegisterInput {
@@ -82,4 +84,33 @@ input UserInfoUpdateInput {
 
 type UserInfoUpdateResult {
     message: String!
+}
+
+input ChallengeMutateInput {
+    challengeId: String
+    name: String
+    type: String
+    score: ScoreTypeInput
+    flag: FlagTypeInput
+    description: String
+    external_link: [String]
+    hint: [String]
+}
+
+input ScoreTypeInput {
+    dynamic: Boolean
+    base_score: String
+}
+
+input FlagTypeInput {
+    dynamic: Boolean
+    value: String
+}
+
+type ChallengeMutateResult {
+    message: String
+}
+
+type ChallengeRemoveResult {
+    message: String
 }

@@ -1,7 +1,8 @@
 type Query {
     userInfo(userId: String) : UserInfoResult
     test: String
-    challenges: ChallengesResult
+    challengeInfos: ChallengeInfosResult
+    challengeConfigs: ChallengeConfigsResult
     rank: RankResult
     allBulltin : BulletinResult
     submitHistory(userId: String): SubmitHistoryResult
@@ -33,7 +34,7 @@ type RankResult {
     rankResultDescs: [RankResultDesc]
 }
 
-type ChallengesResult {
+type ChallengeInfosResult {
     message: String
     challengeInfos: [ChallengeInfo]
 }
@@ -54,6 +55,32 @@ type ChallengeInfo {
     hint: [String]
     blood: [String]
     done: Boolean
+}
+
+type ChallengeConfigsResult {
+    message: String
+    challengeConfigs: [ChallengeConfig]
+}
+
+type ChallengeConfig {
+    challengeId: String
+    name: String
+    type: String
+    score: ScoreType
+    flag: FlagType
+    description: String
+    external_link: [String]
+    hint: [String]
+}
+
+type ScoreType {
+    dynamic: Boolean
+    base_score: String
+}
+
+type FlagType {
+    dynamic: Boolean
+    value: String
 }
 
 type BulletinResult {

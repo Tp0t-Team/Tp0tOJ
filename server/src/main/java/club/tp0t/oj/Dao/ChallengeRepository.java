@@ -13,4 +13,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     //List<Challenge> getEnabledChallenges();
 
     List<Challenge> findByState(String state);
+
+    Challenge findByChallengeId(String id);
 }

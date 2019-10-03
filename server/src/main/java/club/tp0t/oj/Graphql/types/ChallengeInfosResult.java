@@ -2,17 +2,17 @@ package club.tp0t.oj.Graphql.types;
 
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Service.SubmitService;
-import club.tp0t.oj.Util.ChallengeDescription;
+import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.alibaba.fastjson.JSON;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChallengesResult {
+public class ChallengeInfosResult {
     private String message;
     private List<ChallengeInfo> challengeInfos = new  ArrayList<>();
 
-    public ChallengesResult(String message) {
+    public ChallengeInfosResult(String message) {
         this.message = message;
     }
 
@@ -32,7 +32,7 @@ public class ChallengesResult {
         return challengeInfos;
     }
 
-    public void addChallengeInfos(List<Challenge> challenges, long userId, SubmitService submitService) {
+    public void updateChallengeInfos(List<Challenge> challenges, long userId, SubmitService submitService) {
         for(int i=0;i<challenges.size();i++) {
             Challenge tmpChallenge = challenges.get(i);
             ChallengeInfo challengeInfo = new ChallengeInfo();
@@ -49,14 +49,14 @@ public class ChallengesResult {
             challengeInfo.setDone(submitService.checkDoneByUserId(userId, tmpChallenge.getChallengeId()));
 
             // parse from description
-            String description = tmpChallenge.getDescription();
-            ChallengeDescription challengeDescription = JSON.parseObject(description, ChallengeDescription.class);
-            challengeInfo.setDescription(challengeDescription.getDescription());
-            challengeInfo.setExternalLink(challengeDescription.getExternalLink());
-            challengeInfo.setHint(challengeDescription.getHint());
-            challengeInfo.setType(challengeDescription.getType());
-            challengeInfo.setName(challengeDescription.getName());
-            challengeInfo.setScore(challengeDescription.getScore());
+            String serializedConfiguration = tmpChallenge.getConfiguration();
+            ChallengeConfiguration challengeConfiguration = JSON.parseObject(serializedConfiguration, ChallengeConfiguration.class);
+            challengeInfo.setDescription(challengeConfiguration.getDescription());
+            challengeInfo.setExternalLink(challengeConfiguration.getExternalLink());
+            challengeInfo.setHint(challengeConfiguration.getHint());
+            challengeInfo.setType(challengeConfiguration.getType());
+            challengeInfo.setName(challengeConfiguration.getName());
+            challengeInfo.setScore(Integer.parseInt(challengeConfiguration.getScoreEx().getBase_score()));
 
             this.challengeInfos.add(challengeInfo);
 

@@ -18,8 +18,8 @@ public class Challenge {
     private long challengeId;
 
     @NotEmpty
-    @Column(name = "description", columnDefinition = "text")
-    private String description;
+    @Column(name = "configuration", columnDefinition = "text")
+    private String configuration;
 
     @JoinColumn(name = "first_blood", referencedColumnName = "user_id")
     @ManyToOne
@@ -51,12 +51,6 @@ public class Challenge {
         return challengeId;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-
-
     public String getState() {
         return state;
     }
@@ -71,10 +65,6 @@ public class Challenge {
 
     public void setChallengeId(long challengeId) {
         this.challengeId = challengeId;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public void setFirstBlood(User firstBlood) {
@@ -112,4 +102,8 @@ public class Challenge {
     public void setGmtModified(Timestamp gmtModified) {
         this.gmtModified = gmtModified;
     }
+
+    public void setConfiguration(String configuration) { this.configuration = configuration;  }
+
+    public String getConfiguration() { return configuration;  }
 }

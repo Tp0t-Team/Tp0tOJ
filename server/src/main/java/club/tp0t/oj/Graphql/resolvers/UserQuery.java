@@ -3,8 +3,8 @@ package club.tp0t.oj.Graphql.resolvers;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Graphql.types.ChallengesResult;
 import club.tp0t.oj.Graphql.types.SubmitHistoryResult;
+import club.tp0t.oj.Graphql.types.ChallengeInfosResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
@@ -124,7 +124,7 @@ public class UserQuery implements GraphQLQueryResolver {
     }
 
     // get challenges
-    public ChallengesResult challenges(DataFetchingEnvironment environment) {
+    public ChallengeInfosResult challengeInfos(DataFetchingEnvironment environment) {
 
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
@@ -132,7 +132,7 @@ public class UserQuery implements GraphQLQueryResolver {
 
         // if not login
         if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
-            return new ChallengesResult("forbidden");
+            return new ChallengeInfosResult("forbidden");
         }
 
         List<Challenge> challenges;
@@ -148,12 +148,12 @@ public class UserQuery implements GraphQLQueryResolver {
         }
 
         // no challenge
-        if(challenges == null) return new ChallengesResult("no challenge available");
+        if(challenges == null) return new ChallengeInfosResult("no challenge available");
 
-        ChallengesResult challengesResult = new ChallengesResult("");
-        challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
+        ChallengeInfosResult challengeInfosResult = new ChallengeInfosResult("");
+        challengeInfosResult.updateChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
 
-        return challengesResult;
+        return challengeInfosResult;
     }
 
     // admin get user's submit history

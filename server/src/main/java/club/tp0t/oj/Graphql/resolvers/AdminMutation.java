@@ -61,4 +61,27 @@ public class AdminMutation implements GraphQLMutationResolver {
         }
         return new BulletinPubResult("Bulletin addition failed!");
     }
+
+    public ChallengeMutateResult challengeMutate(ChallengeMutateInput challengeMutate) {
+        String id = challengeMutate.getChallengeId();
+        if(id==null) return new ChallengeMutateResult("not empty error");
+        id  = id.replaceAll("\\s", "");
+        if(id.equals("")) return new ChallengeMutateResult("not empty error");
+
+        if(challengeService.checkIdExistence(id)){
+            if(!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
+            return new ChallengeMutateResult("");
+        }else{
+            if(!challengeService.checkFormat(challengeMutate)) return new ChallengeMutateResult("Challenge format not avaliable");
+            if(!challengeService.addChallenge(challengeMutate)) return new ChallengeMutateResult("Addition Error");
+            return new ChallengeMutateResult("");
+        }
+
+    }
+
+    public ChallengeRemoveResult challengeRemove(String id){
+        if(!challengeService.removeById(id)) return new ChallengeRemoveResult("Remove failed");
+        return new ChallengeRemoveResult("");
+    }
 }
+
