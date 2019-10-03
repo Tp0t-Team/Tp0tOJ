@@ -50,4 +50,8 @@ public class SubmitService {
         List<Submit> submits = submitRepository.getCorrectSubmitsByChallenge(challenge);
         return submits.size();
     }
+
+    public List<Submit> getCorrectSubmitsByUser(User user) {
+        return submitRepository.getCorrectSubmitsByUser(user);
+    }
 }

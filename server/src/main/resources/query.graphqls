@@ -64,6 +64,7 @@ type SubmitHistoryResult {
     message: String
     submitInfos: [SubmitInfo]
 }
+
 type SubmitInfo {
     submitTime: String
     challengeName: String

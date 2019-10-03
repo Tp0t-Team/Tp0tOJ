@@ -116,4 +116,12 @@ public class Submit {
     public void setGmtModified(Timestamp gmtModified) {
         this.gmtModified = gmtModified;
     }
+
+    public void setChallenge(Challenge challenge) {
+        this.challenge = challenge;
+    }
+
+    public Challenge getChallenge() {
+        return challenge;
+    }
 }

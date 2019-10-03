@@ -1,8 +1,10 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.ChallengesResult;
+import club.tp0t.oj.Graphql.types.SubmitHistoryResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
@@ -122,7 +124,6 @@ public class UserQuery implements GraphQLQueryResolver {
     }
 
     // get challenges
-
     public ChallengesResult challenges(DataFetchingEnvironment environment) {
 
         // get session from context
@@ -153,6 +154,30 @@ public class UserQuery implements GraphQLQueryResolver {
         challengesResult.addChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
 
         return challengesResult;
+    }
+
+    // admin get user's submit history
+    public SubmitHistoryResult submitHistory(String userId, DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if(session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new SubmitHistoryResult("forbidden");
+        }
+
+        User user = userService.getUserById(Long.parseLong(userId));
+        List<Submit> submits = submitService.getCorrectSubmitsByUser(user);
+
+        SubmitHistoryResult submitHistoryResult = new SubmitHistoryResult("");
+
+        submitHistoryResult.addSubmitInfos(submits);
+
+        return submitHistoryResult;
     }
 
 }

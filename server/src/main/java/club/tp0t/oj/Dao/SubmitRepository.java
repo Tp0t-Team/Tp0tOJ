@@ -22,5 +22,7 @@ public interface SubmitRepository extends JpaRepository<Submit, Long> {
     @Query(value = "select s from Submit s where s.challenge=?1 and s.correct=true")
     List<Submit> getCorrectSubmitsByChallenge(Challenge challenge);
 
+    @Query(value = "select s from Submit s where s.user=?1 and s.correct=true")
+    List<Submit> getCorrectSubmitsByUser(User user);
 }
 
