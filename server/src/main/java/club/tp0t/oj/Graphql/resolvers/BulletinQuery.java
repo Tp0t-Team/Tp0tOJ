@@ -3,12 +3,14 @@ package club.tp0t.oj.Graphql.resolvers;
 import club.tp0t.oj.Entity.Bulletin;
 import club.tp0t.oj.Graphql.types.BulletinResult;
 import club.tp0t.oj.Service.BulletinService;
-import graphql.schema.DataFetchingEnvironment;
+import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-public class BulletinQuery extends Query {
+@Component
+public class BulletinQuery implements GraphQLQueryResolver {
     @Autowired
     private BulletinService bulletinService;
 

@@ -3,7 +3,7 @@ type Mutation {
     # reset (input: ResetInput!) : ResetResult!
     login (input: LoginInput!) : LoginResult!
     logout : LogoutResult!
-    #submit (input: SubmitInput!) : SubmitResult!
+    # submit (input: SubmitInput!) : SubmitResult!
 }
 
 input RegisterInput {

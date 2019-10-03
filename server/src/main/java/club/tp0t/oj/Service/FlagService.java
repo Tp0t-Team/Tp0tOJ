@@ -8,4 +8,11 @@ import org.springframework.stereotype.Service;
 public class FlagService {
     @Autowired
     private FlagRepository flagRepository;
+
+    /*
+    public String getFlagByUserIdAndChallengeId(long userId, long challengeId) {
+        return flagRepository.getFlagByUserIdAndChallengeId(userId, challengeId);
+    }
+
+     */
 }

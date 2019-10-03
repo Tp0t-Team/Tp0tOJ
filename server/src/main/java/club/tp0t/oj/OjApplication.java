@@ -22,6 +22,7 @@ public class OjApplication {
 		SpringApplication.run(OjApplication.class, args);
 	}
 
+	/*
 	@Bean
 	public UserQuery userQuery() {
 		return new UserQuery();
@@ -36,5 +37,7 @@ public class OjApplication {
 	public BulletinQuery bulletinQuery() {
 		return new BulletinQuery();
 	}
+
+	 */
 
 }

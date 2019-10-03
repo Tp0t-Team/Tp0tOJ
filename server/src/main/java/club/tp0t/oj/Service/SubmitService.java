@@ -30,9 +30,11 @@ public class SubmitService {
         return submit != null;
     }
 
+
     public boolean checkDoneByUserId(long userId, long challengeId) {
         Submit submit = submitRepository.checkDoneByUserId(userId, challengeId);
         if(submit == null) return true;
         else return false;
     }
+
 }
