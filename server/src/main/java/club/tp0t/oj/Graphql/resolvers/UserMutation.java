@@ -161,7 +161,6 @@ public class UserMutation implements GraphQLMutationResolver {
     }
 
     // submit flag
-    /*
     public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
@@ -182,33 +181,46 @@ public class UserMutation implements GraphQLMutationResolver {
         long userId = (long) session.getAttribute("userId");
         String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
         String submitFlag = input.getFlag();
+
         // correct flag
-        boolean correct = false;
-        int mark = 0;
         if(submitFlag.equals(flag)) {
-            // TODO: duplicate submit
+            // duplicate submit
             if(submitService.checkDuplicateSubmit(userService.getUserById(userId), challengeId)) {
                 return new SubmitResult("duplicate submit");
             }
 
-            correct = true;
-            // add to user score
-            // TODO: get points of challenge
-            long points = 100;
-            userService.addScore(points);
+            // add user score
+            // TODO: get current points of challenge
+            long currentPoints = 100;
+            userService.addScore(userId, currentPoints);
+
+            // TODO: calculate new points
+            int solvedCount = submitService.getSolvedCountByChallengeId(challengeId) + 1;
+            long newPoints = 100;
+
+            // update score of user who has solved this challenge
+            if(currentPoints != newPoints) {
+                userService.updateScore(challengeId, currentPoints, newPoints);
+            }
 
             // whether first three solvers
+            int mark = 0;
+            if(solvedCount <= 3) {
+                mark = solvedCount;
+            }
 
+            // save into submit table
+            submitService.submit(userService.getUserById(userId), submitFlag, true, mark);
+
+            return new SubmitResult("correct");
         }
+        // incorrect flag
         else {
-
+            // save into submit table
+            submitService.submit(userService.getUserById(userId), submitFlag, false, 0);
+            return new SubmitResult("incorrect");
         }
 
-        // save into submit table
-        submitService.submit(userService.getUserById(userId), submitFlag, correct, mark);
     }
-
-     */
-
 
 }

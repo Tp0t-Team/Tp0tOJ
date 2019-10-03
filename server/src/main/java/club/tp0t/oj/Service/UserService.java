@@ -1,6 +1,8 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.UserRepository;
+import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,12 @@ import java.util.concurrent.TimeUnit;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SubmitService submitService;
+
+    @Autowired
+    private ChallengeService challengeService;
 
     /*
     public List<User> getAllUsers() {
@@ -144,5 +152,23 @@ public class UserService {
     public boolean checkUserIdExistence(long userId) {
         int count = userRepository.checkUserIdExistence(userId);
         return count == 1;
+    }
+
+    public void addScore(long userId, long currentPoints) {
+        User user = userRepository.getOne(userId);
+        long score = user.getScore();
+        user.setScore(score + currentPoints);
+        userRepository.save(user);
+    }
+
+    public void updateScore(long challengeId, long currentPoints, long newPoints) {
+        Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
+        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
+        for (Submit tmpSubmit : submits) {
+            User tmpUser = tmpSubmit.getUser();
+            long score = tmpUser.getScore();
+            tmpUser.setScore(score - currentPoints + newPoints);
+            userRepository.save(tmpUser);
+        }
     }
 }

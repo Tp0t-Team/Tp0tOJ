@@ -28,7 +28,7 @@ public class Flag {
     private Replica replica;
 
     @NotEmpty
-    @Column(name = "flag")
+    @Column(name = "flag", columnDefinition = "text")
     private String flag;
 
     @NotNull

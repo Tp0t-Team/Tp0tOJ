@@ -20,4 +20,8 @@ public class ChallengeService {
     public List<Challenge> getAllChallenges() {
         return challengeRepository.findAll();
     }
+
+    public Challenge getChallengeByChallengeId(long challengeId) {
+        return challengeRepository.getOne(challengeId);
+    }
 }

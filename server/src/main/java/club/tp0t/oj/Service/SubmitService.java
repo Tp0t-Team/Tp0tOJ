@@ -1,17 +1,21 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.SubmitRepository;
+import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Service
 public class SubmitService {
     @Autowired
     private SubmitRepository submitRepository;
+    @Autowired
+    private ChallengeService challengeService;
 
     public void submit(User user, String submitFlag, boolean correct, int mark) {
         Submit submit = new Submit();
@@ -37,4 +41,13 @@ public class SubmitService {
         else return false;
     }
 
+    public List<Submit> getCorrectSubmitsByChallenge(Challenge challenge) {
+        return submitRepository.getCorrectSubmitsByChallenge(challenge);
+    }
+
+    public int getSolvedCountByChallengeId(long challengeId) {
+        Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
+        List<Submit> submits = submitRepository.getCorrectSubmitsByChallenge(challenge);
+        return submits.size();
+    }
 }
