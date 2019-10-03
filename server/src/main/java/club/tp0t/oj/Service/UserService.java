@@ -35,22 +35,26 @@ public class UserService {
     */
 
     public boolean checkNameExistence(String name) {
-        User user = userRepository.getUserByName(name);
+        //User user = userRepository.getUserByName(name);
+        User user = userRepository.findByName(name);
         return user != null;
     }
 
     public boolean checkStuNumberExistence(String stuNumber) {
-        User user = userRepository.getUserByStuNumber(stuNumber);
+        //User user = userRepository.getUserByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
         return user != null;
     }
 
     public boolean checkQqExistence(String qq) {
-        User user = userRepository.getUserByQq(qq);
+        //User user = userRepository.getUserByQq(qq);
+        User user = userRepository.findByQq(qq);
         return user != null;
     }
 
     public boolean checkMailExistence(String mail) {
-        User user = userRepository.getUserByMail(mail);
+        //User user = userRepository.getUserByMail(mail);
+        User user = userRepository.findByMail(mail);
         return user != null;
     }
 
@@ -74,7 +78,7 @@ public class UserService {
         user.setProtectedTime(timestamp);
         user.setMail(mail);
         user.setPassword(password);
-        user.setQQ(qq);
+        user.setQq(qq);
         user.setRole("member");
         user.setScore(0);
         user.setState("protected");
@@ -86,7 +90,8 @@ public class UserService {
     }
 
     public boolean login(String stuNumber, String password) {
-        User user = userRepository.getUserByStuNumber(stuNumber);
+        //User user = userRepository.getUserByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
 
         // user disabled
         if(user.getState().equals("disabled")) {
@@ -97,12 +102,14 @@ public class UserService {
     }
 
     public boolean adminCheckByStuNumber(String stuNumber) {
-        User user = userRepository.getUserByStuNumber(stuNumber);
+        //User user = userRepository.getUserByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
         return user.getRole().equals("admin");
     }
 
     public long getIdByName(String name) {
-        User user = userRepository.getUserByName(name);
+        //User user = userRepository.getUserByName(name);
+        User user = userRepository.findByName(name);
         return user.getUserId();
     }
 
@@ -111,7 +118,8 @@ public class UserService {
     }
 
     public long getIdByStuNumber(String stuNumber) {
-        return userRepository.getUserIdByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
+        return user.getUserId();
     }
 
 
@@ -120,7 +128,8 @@ public class UserService {
     }
 
     public String getRoleByStuNumber(String stuNumber) {
-        User user = userRepository.getUserByStuNumber(stuNumber);
+        //User user = userRepository.getUserByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
         return user.getRole();
     }
 
@@ -135,7 +144,8 @@ public class UserService {
     }
 
     public boolean teamCheckByStuNumber(String stuNumber) {
-        User user = userRepository.getUserByStuNumber(stuNumber);
+        //User user = userRepository.getUserByStuNumber(stuNumber);
+        User user = userRepository.findByStuNumber(stuNumber);
         return user.getRole().equals("team");
     }
 
@@ -187,7 +197,7 @@ public class UserService {
         user.setDepartment(department);
         user.setGrade(grade);
         user.setProtectedTime(Timestamp.valueOf(protectedTime));
-        user.setQQ(qq);
+        user.setQq(qq);
         user.setMail(mail);
         user.setState(state);
         userRepository.save(user);

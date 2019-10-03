@@ -14,7 +14,8 @@ public class ChallengeService {
     private ChallengeRepository challengeRepository;
 
     public List<Challenge> getEnabledChallenges() {
-        return challengeRepository.getEnabledChallenges();
+        // return challengeRepository.getEnabledChallenges();
+        return challengeRepository.findByState("enabled");
     }
 
     public List<Challenge> getAllChallenges() {

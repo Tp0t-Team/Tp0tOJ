@@ -39,8 +39,8 @@ public class User {
     private String state;  // normal, disabled, protected
 
     @NotEmpty
-    @Column(name = "QQ")
-    private String QQ;
+    @Column(name = "qq")
+    private String qq;
 
     @NotEmpty
     @Column(name = "mail")
@@ -111,8 +111,8 @@ public class User {
         return state;
     }
 
-    public String getQQ() {
-        return QQ;
+    public String getQq() {
+        return qq;
     }
 
     public String getMail() {
@@ -171,8 +171,8 @@ public class User {
         this.state = state;
     }
 
-    public void setQQ(String QQ) {
-        this.QQ = QQ;
+    public void setQq(String qq) {
+        this.qq = qq;
     }
 
     public void setMail(String mail) {

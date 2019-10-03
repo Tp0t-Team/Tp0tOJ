@@ -42,7 +42,7 @@ public class UserInfoResult {
         this.userInfo = new UserInfo(user.getName(),
                 user.getStuNumber(),
                 user.getDepartment(),
-                user.getQQ(),
+                user.getQq(),
                 user.getMail(),
                 user.getJoinTime(),
                 user.getScore(),
