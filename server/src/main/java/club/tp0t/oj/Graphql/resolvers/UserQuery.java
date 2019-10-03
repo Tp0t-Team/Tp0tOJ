@@ -86,7 +86,6 @@ public class UserQuery implements GraphQLQueryResolver {
 
     // get user profile
     public UserInfoResult userInfo(String userId, DataFetchingEnvironment environment) {
-        // TODO: not implemented
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();

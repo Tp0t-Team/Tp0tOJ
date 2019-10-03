@@ -21,8 +21,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // spring boot compile error with websocket
-    // implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
     compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'
