@@ -5,6 +5,7 @@ type Mutation {
     logout : LogoutResult!
     submit (input: SubmitInput!) : SubmitResult!
     bulletinPub(input: BulletinPubInput!) :BulletinPubResult!
+    userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
 }
 
 input RegisterInput {
@@ -65,4 +66,20 @@ input BulletinPubInput {
 
 type BulletinPubResult {
     message: String
+}
+
+input UserInfoUpdateInput {
+    userId: String!
+    name: String!
+    role: String!
+    department: String!
+    grade: String!
+    protectedTime: String!
+    qq: String!
+    mail: String!
+    state: String!
+}
+
+type UserInfoUpdateResult {
+    message: String!
 }

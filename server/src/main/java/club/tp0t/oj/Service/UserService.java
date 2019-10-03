@@ -171,4 +171,25 @@ public class UserService {
             userRepository.save(tmpUser);
         }
     }
+
+    public void updateUserInfo(String userId,
+                               String name,
+                               String role,
+                               String department,
+                               String grade,
+                               String protectedTime,
+                               String qq,
+                               String mail,
+                               String state) {
+        User user = userRepository.getOne(Long.parseLong(userId));
+        user.setName(name);
+        user.setRole(role);
+        user.setDepartment(department);
+        user.setGrade(grade);
+        user.setProtectedTime(Timestamp.valueOf(protectedTime));
+        user.setQQ(qq);
+        user.setMail(mail);
+        user.setState(state);
+        userRepository.save(user);
+    }
 }

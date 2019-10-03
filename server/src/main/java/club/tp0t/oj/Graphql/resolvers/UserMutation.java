@@ -223,4 +223,38 @@ public class UserMutation implements GraphQLMutationResolver {
 
     }
 
+    // admin update user info
+    public UserInfoUpdateResult userInfoUpdate(UserInfoUpdateInput input, DataFetchingEnvironment environment) {
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if(session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new UserInfoUpdateResult("forbidden");
+        }
+
+        // cannot change one's own role
+        long userId = (long) session.getAttribute("userId");
+        if(userService.adminCheckByUserId(userId) &&
+                Long.parseLong(input.getUserId())==userId && !input.getRole().equals("admin")) {
+            return new UserInfoUpdateResult("downgrade not permitted");
+        }
+
+        userService.updateUserInfo(input.getUserId(),
+                input.getName(),
+                input.getRole(),
+                input.getDepartment(),
+                input.getGrade(),
+                input.getProtectedTime(),
+                input.getQq(),
+                input.getMail(),
+                input.getState());
+
+        return new UserInfoUpdateResult("");
+
+    }
+
 }
