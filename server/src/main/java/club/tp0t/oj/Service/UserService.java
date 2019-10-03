@@ -160,7 +160,8 @@ public class UserService {
     }
 
     public boolean checkUserIdExistence(long userId) {
-        int count = userRepository.checkUserIdExistence(userId);
+        //int count = userRepository.checkUserIdExistence(userId);
+        long count = userRepository.countByUserId(userId);
         return count == 1;
     }
 
