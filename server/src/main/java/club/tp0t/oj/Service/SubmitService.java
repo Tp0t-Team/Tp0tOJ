@@ -4,7 +4,6 @@ import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import jdk.internal.loader.AbstractClassLoaderValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

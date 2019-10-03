@@ -51,10 +51,10 @@ public class UserQuery implements GraphQLQueryResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // not login yet
-        if(session.getAttribute("isLogin") == null  || !(boolean)session.getAttribute("isLogin")) {
-            session.setAttribute("isLogin", false);
-            return new RankResult("forbidden");
-        }
+        //if(session.getAttribute("isLogin") == null  || !(boolean)session.getAttribute("isLogin")) {
+        //    session.setAttribute("isLogin", false);
+        //    return new RankResult("forbidden");
+        //}
 
         /*
         // normal user
@@ -80,7 +80,7 @@ public class UserQuery implements GraphQLQueryResolver {
         // no users
         if(users == null) return rankResult;
 
-        rankResult.addUserInfos(users);
+        rankResult.addRankResultDescs(users);
         return rankResult;
     }
 

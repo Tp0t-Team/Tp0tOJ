@@ -7,12 +7,12 @@ import java.util.List;
 
 public class RankResult {
     private String message;
-    private List<UserInfo> userInfos = new ArrayList<>();
+    private List<RankResultDesc> rankResultDescs = new ArrayList<>();
     public RankResult(String message) {
         this.message = message;
     }
 
-    public void addUserInfos(List<User> users) {
+    public void addRankResultDescs(List<User> users) {
         for(int i=0;i<users.size();i++) {
             User user = users.get(i);
             /*
@@ -34,22 +34,12 @@ public class RankResult {
             */
 
             // hide some attributes
-            UserInfo userInfo = new UserInfo(user.getName(),
-                    "",  // stuNumber
-                    "",  // department
-                    "",  // qq
-                    "", // mail
-                    user.getJoinTime(),
-                    user.getScore(),
-                    user.getTopRank(),
-                    user.getProtectedTime(),
-                    user.getUserId(),
-                    user.getRole(),
-                    user.getState(),
-                    0,
-                    user.getGrade());
+            RankResultDesc rankResultDesc = new RankResultDesc();
+            rankResultDesc.setName(user.getName());
+            rankResultDesc.setScore(Long.toString(user.getScore()));
+            rankResultDesc.setUserId(Long.toString(user.getUserId()));
 
-            this.userInfos.add(userInfo);
+            this.rankResultDescs.add(rankResultDesc);
         }
     }
 }

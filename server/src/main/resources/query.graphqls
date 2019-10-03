@@ -30,12 +30,18 @@ type UserInfo {
 
 type RankResult {
     message: String
-    userInfos: [UserInfo]
+    rankResultDescs: [RankResultDesc]
 }
 
 type ChallengesResult {
     message: String
     challengeInfos: [ChallengeInfo]
+}
+
+type RankResultDesc {
+    userId: String
+    name: String
+    score: Int
 }
 
 type ChallengeInfo {
