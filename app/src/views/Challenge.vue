@@ -144,22 +144,25 @@ export default class Challenge extends Vue {
         query: gql`
           query {
             challenges {
-              challengeId
-              name
-              type
-              description
-              externalLink
-              hint
-              score
-              blood
-              done
+              messages
+              challengeInfos {
+                challengeId
+                name
+                type
+                description
+                externalLink
+                hint
+                score
+                blood
+                done
+              }
             }
           }
         `
       });
       if (res.errors) throw res.errors.join(",");
       if (res.data!.challenges.message) throw res.data!.challenges.message;
-      this.challenges = res.data!.challenges.challenges;
+      this.challenges = res.data!.challenges.challengeInfos;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

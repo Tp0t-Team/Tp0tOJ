@@ -2,18 +2,23 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card>
-          <v-toolbar dense>web</v-toolbar>
+        <v-card class="ma-4" v-for="type in challengeType" :key="type">
+          <v-toolbar dense>{{type}}</v-toolbar>
           <v-list dense>
-            <v-list-item @click=";" :disabled="loading">
-              <v-list-item-content>123</v-list-item-content>
+            <v-list-item
+              v-for="conf in challengeConfigs.filter((c)=>c.type==type)"
+              :key="conf.challengeId"
+              @click="editChallenge(conf.challengeId)"
+              :disabled="loading"
+            >
+              <v-list-item-content>{{conf.name}}</v-list-item-content>
               <v-list-item-icon>
-                <v-btn icon :disabled="loading" @click="showDialog=true">
+                <v-btn icon :disabled="loading" @click.stop="tryDelete(conf.challengeId)">
                   <v-icon>close</v-icon>
                 </v-btn>
               </v-list-item-icon>
             </v-list-item>
-            <v-list-item @click=";">
+            <v-list-item @click="newChallenge(type)" :disabled="loading">
               <v-layout row>
                 <v-spacer></v-spacer>
                 <v-icon>add</v-icon>
@@ -23,116 +28,186 @@
           </v-list>
         </v-card>
       </v-col>
-      <v-dialog v-model="showDialog" width="300px">
+      <v-dialog v-model="showDiscardDialog" width="300px">
+        <v-card>
+          <v-card-title>Are you sure to discard changes?</v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="showDiscardDialog=false">cancel</v-btn>
+            <v-btn text color="primary" @click="continueChange">sure</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showDeleteDialog" width="300px">
         <v-card>
           <v-card-title>Are you sure to delete this challenge?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text>cancel</v-btn>
-            <v-btn text color="primary">accept</v-btn>
+            <v-btn text @click="showDeleteDialog=false">cancel</v-btn>
+            <v-btn text color="primary" @click="deleteConfig">accept</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
       <v-col cols="6" class="content-col">
-        <v-form>
-          <v-row>
-            <v-col cols="12">
-              <v-file-input accept=".yaml, .yml" outlined label="load config file"></v-file-input>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="6">
-              <v-text-field outlined label="name" :disabled="loading"></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field outlined label="type" readonly value="web" :disabled="loading"></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="6">
-              <v-text-field outlined label="score" type="number" :disabled="loading"></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field outlined label="flag" :disabled="loading"></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12">
-              <v-textarea outlined label="description" :disabled="loading"></v-textarea>
-            </v-col>
-            <!--  -->
-            <v-col cols="12">
-              <v-card>
-                <v-list dense>
-                  <v-list-item>
-                    <v-text-field
-                      label="external link"
-                      append-icon="add"
-                      @click:append=";"
-                      :disabled="loading"
-                    ></v-text-field>
-                  </v-list-item>
-                  <v-list-item @click=";">
-                    <v-list-item-content>http://www.google.com/</v-list-item-content>
-                    <v-list-item-icon>
-                      <v-btn icon :disabled="loading">
-                        <v-icon>close</v-icon>
-                      </v-btn>
-                    </v-list-item-icon>
-                  </v-list-item>
-                </v-list>
-              </v-card>
-            </v-col>
-            <!--  -->
-            <v-col cols="12">
-              <v-card>
-                <v-list dense>
-                  <v-list-item>
-                    <v-text-field
-                      label="hint"
-                      append-icon="add"
-                      @click:append=";"
-                      :disabled="loading"
-                    ></v-text-field>
-                  </v-list-item>
-                  <v-list-item @click=";">
-                    <v-list-item-content>http://www.google.com/</v-list-item-content>
-                    <v-list-item-icon>
-                      <v-btn icon :disabled="loading">
-                        <v-icon>close</v-icon>
-                      </v-btn>
-                    </v-list-item-icon>
-                  </v-list-item>
-                </v-list>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-form>
-        <v-btn
-          fab
-          absolute
-          right
-          bottom
-          color="primary"
+        <challenge-editor
+          :config="currentConfig"
+          :disabled="withoutInit"
           :loading="loading"
-          :disabled="loading"
-          @click="loading=true"
-        >
-          <v-icon>done</v-icon>
-        </v-btn>
+          :changed="changed"
+          @error="error"
+          @change="Changed"
+          @submit="submit"
+          :key="currentConfig && currentConfig.challengeId || ''"
+        ></challenge-editor>
       </v-col>
     </v-row>
+    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+      {{ infoText }}
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="hasInfo = false">close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import yaml from "js-yaml";
+import { Component, Vue, Watch } from "vue-property-decorator";
+import gql from "graphql-tag";
+import {
+  ChallengeConfig,
+  ChallengeConfigWithId,
+  ChallengeConfigResult
+} from "@/struct";
+import constValue from "@/constValue";
+import ChallengeEditor from "@/components/ChallengeEditor.vue";
 
-@Component
+@Component({
+  components: {
+    ChallengeEditor
+  }
+})
 export default class Challenge extends Vue {
-  private showDialog: boolean = false;
+  private challengeType = constValue.challengeType;
+
+  private showDiscardDialog: boolean = false;
+  private showDeleteDialog: boolean = false;
+  private withoutInit: boolean = true;
   private loading: boolean = false;
+  private changed: boolean = false;
+
+  private challengeConfigs: ChallengeConfigWithId[] = [];
+  private currentConfig: ChallengeConfigWithId | null = null;
+  private tempConfig: ChallengeConfigWithId | null = null;
+  private tempChallengeId: string = "";
+
+  private infoText: string = "";
+  private hasInfo: boolean = false;
+
+  async mounted() {
+    this.challengeConfigs = [
+      {
+        challengeId: "1",
+        type: "WEB",
+        name: "easy_php",
+        score: { dynamic: false, base_score: 1000 },
+        flag: { dynamic: false, value: "qweertytryrty" },
+        description: "123456",
+        external_link: ["http://www.google.com"],
+        hint: ["123456"]
+      }
+    ];
+    try {
+      let res = await this.$apollo.query<ChallengeConfigResult>({
+        query: gql`
+          query {
+            challenges {
+              message
+              challengeInfos {
+                challengeId
+                type
+                name
+                score
+                flag
+                description
+                externalLink
+                hint
+              }
+            }
+          }
+        `
+      });
+      if (res.errors) throw res.errors.join(",");
+      if (res.data!.challenges.message) throw res.data!.challenges.message;
+      this.challengeConfigs = res.data!.challenges.challengeInfos;
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
+
+  error(error: string) {
+    this.infoText = error;
+    this.hasInfo = true;
+  }
+
+  Changed() {
+    this.changed = true;
+  }
+
+  async submit(config: ChallengeConfigWithId) {
+    this.loading = true;
+  }
+
+  editChallenge(id: string) {
+    let config = this.challengeConfigs.find(v => v.challengeId == id);
+    if (!config) return;
+    if (this.changed) {
+      this.tempConfig = config;
+      this.showDiscardDialog = true;
+    } else {
+      this.changed = false;
+      this.withoutInit = false;
+      this.currentConfig = config;
+    }
+  }
+
+  newChallenge(type: string) {
+    let config = {
+      challengeId: "-" + Date.now().toLocaleString(),
+      type: type,
+      name: "",
+      score: { dynamic: false, base_score: 0 },
+      flag: { dynamic: false, value: "" },
+      description: "",
+      external_link: [],
+      hint: []
+    };
+    if (this.changed) {
+      this.tempConfig = config;
+      this.showDiscardDialog = true;
+    } else {
+      this.changed = false;
+      this.withoutInit = false;
+      this.currentConfig = config;
+    }
+  }
+
+  continueChange() {
+    this.showDiscardDialog = false;
+    this.changed = false;
+    this.withoutInit = false;
+    this.currentConfig = this.tempConfig;
+  }
+
+  tryDelete(id: string) {
+    this.tempChallengeId = id;
+    this.showDeleteDialog = true;
+  }
+
+  async deleteConfig() {
+    console.log(this.tempChallengeId);
+  }
 }
 </script>
 

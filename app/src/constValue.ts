@@ -19,7 +19,9 @@ const constValue = {
         '国际教育学院',
         '中法工程师学院'
     ],
-    challengeType: ['WEB', 'RE', 'PWN', 'MISC', 'CRYPTO']
+    challengeType: ['WEB', 'RE', 'PWN', 'MISC', 'CRYPTO'],
+    roleType: ['member', 'team', 'admin'],
+    stateType: ['normal', 'protected', 'disabled']
 }
 
 export default constValue

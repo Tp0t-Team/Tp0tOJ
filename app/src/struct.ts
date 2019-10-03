@@ -42,7 +42,7 @@ export interface ChallengeDesc {
 }
 
 export type ChallengeResult = {
-    challenges: { challenges: ChallengeDesc[] } & Result
+    challenges: { challengeInfos: ChallengeDesc[] } & Result
 }
 
 export interface RankDesc {
@@ -65,4 +65,34 @@ export interface BulletinItem {
 
 export type AllBulletinResult = {
     allBulletin: { bulletin: BulletinItem[] } & Result
+}
+
+export interface ChallengeConfig {
+    name: string
+    type: string
+    score: {
+        dynamic: boolean
+        base_score: number
+    }
+    flag: {
+        dynamic: boolean
+        value: string
+    }
+    description: string
+    external_link: string[]
+    hint: string[]
+}
+
+export type ChallengeConfigWithId = { challengeId: string } & ChallengeConfig
+
+export type ChallengeConfigResult = {
+    challenges: {
+        challengeInfos: ChallengeConfigWithId[]
+    } & Result
+}
+
+export interface ResolveInfo {
+    submitTime: string
+    challengeName: string
+    mark: number
 }
