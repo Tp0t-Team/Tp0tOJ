@@ -25,6 +25,7 @@ type UserInfo {
     role: String
     state: String
     rank: Int
+    grade: String
 }
 
 type RankResult {

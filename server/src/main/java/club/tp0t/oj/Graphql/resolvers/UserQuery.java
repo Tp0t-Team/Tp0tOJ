@@ -101,7 +101,7 @@ public class UserQuery implements GraphQLQueryResolver {
         // by himself
         if(currentUserId == Long.parseLong(userId)) {
             User user = userService.getUserById(Long.parseLong(userId));
-            UserInfoResult userInfoResult = new UserInfoResult("requested by self");
+            UserInfoResult userInfoResult = new UserInfoResult("");
             userInfoResult.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
             return userInfoResult;
 
@@ -115,7 +115,7 @@ public class UserQuery implements GraphQLQueryResolver {
             // exists
             else {
                 User user = userService.getUserById(Long.parseLong(userId));
-                UserInfoResult userInfoResult = new UserInfoResult("requested by others");
+                UserInfoResult userInfoResult = new UserInfoResult("");
                 userInfoResult.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
                 return userInfoResult;
             }

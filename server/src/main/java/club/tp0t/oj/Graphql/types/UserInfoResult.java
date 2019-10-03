@@ -33,7 +33,8 @@ public class UserInfoResult {
                 user.getUserId(),
                 user.getRole(),
                 user.getState(),
-                rank);
+                rank,
+                user.getGrade());
     }
 
     // add all information
@@ -50,7 +51,8 @@ public class UserInfoResult {
                 user.getUserId(),
                 user.getRole(),
                 user.getState(),
-                rank);
+                rank,
+                user.getGrade());
     }
 
     /*

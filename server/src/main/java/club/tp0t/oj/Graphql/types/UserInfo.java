@@ -17,6 +17,7 @@ public class UserInfo {
     private String role;
     private String state;
     private int rank;
+    private String grade;
 
     public UserInfo(String name,
                     String stuNumber,
@@ -30,7 +31,8 @@ public class UserInfo {
                     long userId,
                     String role,
                     String state,
-                    int rank) {
+                    int rank,
+                    String grade) {
         this.name = name;
         this.stuNumber = stuNumber;
         this.department = department;
@@ -44,6 +46,7 @@ public class UserInfo {
         this.role = role;
         this.state = state;
         this.rank = rank;
+        this.grade = grade;
     }
     public UserInfo(){};
 

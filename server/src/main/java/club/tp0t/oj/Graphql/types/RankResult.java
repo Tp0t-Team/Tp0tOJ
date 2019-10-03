@@ -46,7 +46,8 @@ public class RankResult {
                     user.getUserId(),
                     user.getRole(),
                     user.getState(),
-                    0);
+                    0,
+                    user.getGrade());
 
             this.userInfos.add(userInfo);
         }
