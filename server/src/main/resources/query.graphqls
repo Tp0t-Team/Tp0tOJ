@@ -4,6 +4,7 @@ type Query {
     challenges: ChallengesResult
     rank: RankResult
     allBulltin : BulletinResult
+    submitHistory(userId: String): SubmitHistoryResult
 }
 type UserInfoResult {
     message: String
@@ -57,4 +58,14 @@ type Bulletin {
     title: String
     content: String
     publishTime: String
+}
+
+type SubmitHistoryResult {
+    message: String
+    submitInfos: [SubmitInfo]
+}
+type SubmitInfo {
+    submitTime: String
+    challengeName: String
+    mark: Int
 }
