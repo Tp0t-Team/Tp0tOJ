@@ -67,7 +67,13 @@
         ></v-select>
       </v-col>
       <v-col cols="6">
-        <v-select v-model="grade" :disabled="loading || disabled" outlined label="grade"></v-select>
+        <v-select
+          v-model="grade"
+          :disabled="loading || disabled"
+          outlined
+          label="grade"
+          :items="gradeItems"
+        ></v-select>
       </v-col>
     </v-row>
     <v-row>
@@ -111,6 +117,7 @@ export default class UserEditor extends Vue {
   private roleType = constValue.roleType;
   private stateType = constValue.stateType;
   private departmentItems = constValue.departmentItems;
+  private gradeItems: string[] = [];
 
   @Prop() user!: UserInfo | null;
   @Prop() disabled!: boolean;
@@ -132,6 +139,15 @@ export default class UserEditor extends Vue {
   private joinTime: string = "";
 
   private dateMenu: boolean = false;
+
+  created() {
+    let year = new Date().getFullYear() - 9;
+    let items = [];
+    for (let i = 0; i < 10; i++) {
+      items.push((year + i).toString());
+    }
+    this.gradeItems = items;
+  }
 
   mounted() {
     if (!this.user) return;
