@@ -109,7 +109,7 @@ public class UserMutation implements GraphQLMutationResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // already login
-        if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin")) {
+        if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin"))) {
             return new LoginResult("already login");
         }
 
