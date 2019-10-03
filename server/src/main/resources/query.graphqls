@@ -3,6 +3,7 @@ type Query {
     test: String
     challenges: ChallengesResult
     rank: RankResult
+    allBulltin : BulletinResult
 }
 type UserInfoResult {
     message: String
@@ -45,4 +46,15 @@ type ChallengeInfo {
     hint: [String]
     blood: [String]
     done: Boolean
+}
+
+type BulletinResult {
+    message: String
+    bulletins: [Bulletin]
+}
+
+type Bulletin {
+    title: String
+    content: String
+    publishTime: String
 }

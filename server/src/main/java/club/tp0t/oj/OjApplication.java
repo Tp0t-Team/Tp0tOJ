@@ -4,6 +4,7 @@ import club.tp0t.oj.Graphql.resolvers.AdminMutation;
 import club.tp0t.oj.Graphql.resolvers.AdminQuery;
 import club.tp0t.oj.Graphql.resolvers.UserMutation;
 import club.tp0t.oj.Graphql.resolvers.UserQuery;
+import club.tp0t.oj.Graphql.resolvers.BulletinQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
@@ -29,6 +30,11 @@ public class OjApplication {
 	@Bean
 	public AdminQuery adminQuery() {
 		return new AdminQuery();
+	}
+
+	@Bean
+	public BulletinQuery bulletinQuery() {
+		return new BulletinQuery();
 	}
 
 }

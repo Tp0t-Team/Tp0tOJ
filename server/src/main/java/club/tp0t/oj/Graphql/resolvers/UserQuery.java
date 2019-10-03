@@ -8,7 +8,6 @@ import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
-import org.graalvm.compiler.nodes.java.MethodCallTargetNode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
