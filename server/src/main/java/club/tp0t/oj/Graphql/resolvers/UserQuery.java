@@ -6,14 +6,17 @@ import club.tp0t.oj.Graphql.types.ChallengesResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
+import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
-public class UserQuery extends Query {
+@Component
+public class UserQuery implements GraphQLQueryResolver {
     @Autowired
     private BulletinService bulletinService;
     @Autowired

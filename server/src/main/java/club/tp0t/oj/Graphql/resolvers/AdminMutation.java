@@ -3,7 +3,9 @@ package club.tp0t.oj.Graphql.resolvers;
 import club.tp0t.oj.Service.*;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AdminMutation implements GraphQLMutationResolver {
     @Autowired
     private BulletinService bulletinService;

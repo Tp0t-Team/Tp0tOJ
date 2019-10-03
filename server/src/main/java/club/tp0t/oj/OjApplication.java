@@ -22,19 +22,4 @@ public class OjApplication {
 		SpringApplication.run(OjApplication.class, args);
 	}
 
-	@Bean
-	public UserQuery userQuery() {
-		return new UserQuery();
-	}
-
-	@Bean
-	public AdminQuery adminQuery() {
-		return new AdminQuery();
-	}
-
-	@Bean
-	public BulletinQuery bulletinQuery() {
-		return new BulletinQuery();
-	}
-
 }

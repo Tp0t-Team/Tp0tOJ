@@ -1,9 +1,12 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Service.*;
+import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class AdminQuery extends Query {
+@Component
+public class AdminQuery  implements GraphQLQueryResolver {
     @Autowired
     private BulletinService bulletinService;
     @Autowired
