@@ -3,11 +3,12 @@ package club.tp0t.oj.Graphql.resolvers;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.ChallengesResult;
-import club.tp0t.oj.Graphql.types.Profile;
+import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
+import org.graalvm.compiler.nodes.java.MethodCallTargetNode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpSession;
@@ -80,7 +81,7 @@ public class UserQuery extends Query {
     }
 
     // get user profile
-    public Profile userInfo(String userId, DataFetchingEnvironment environment) {
+    public UserInfoResult userInfo(String userId, DataFetchingEnvironment environment) {
         // TODO: not implemented
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
@@ -88,7 +89,7 @@ public class UserQuery extends Query {
 
         // if not login
         if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
-            return new Profile("forbidden");
+            return new UserInfoResult("forbidden");
         }
 
         // whether requested by user himself
@@ -96,23 +97,23 @@ public class UserQuery extends Query {
         // by himself
         if(currentUserId == Long.parseLong(userId)) {
             User user = userService.getUserById(Long.parseLong(userId));
-            Profile profile = new Profile("requested by self");
-            profile.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
-            return profile;
+            UserInfoResult userInfoResult = new UserInfoResult("requested by self");
+            userInfoResult.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
+            return userInfoResult;
 
         }
         // if requested by other users
         else {
-            User user = userService.getUserById(Long.parseLong(userId));
             // user not exists
-            if(user == null) {
-                return new Profile("not found");
+            if(!userService.checkUserIdExistence(Long.parseLong(userId))) {
+                return new UserInfoResult("not found");
             }
             // exists
             else {
-                Profile profile = new Profile("requested by others");
-                profile.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
-                return profile;
+                User user = userService.getUserById(Long.parseLong(userId));
+                UserInfoResult userInfoResult = new UserInfoResult("requested by others");
+                userInfoResult.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
+                return userInfoResult;
             }
         }
 

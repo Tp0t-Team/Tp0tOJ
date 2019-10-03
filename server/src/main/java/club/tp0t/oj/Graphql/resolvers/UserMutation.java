@@ -108,6 +108,11 @@ public class UserMutation implements GraphQLMutationResolver {
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
+        // already login
+        if((session.getAttribute("isLogin") != null && (boolean)session.getAttribute("isLogin")) {
+            return new LoginResult("already login");
+        }
+
         // login check
         String stuNumber = input.getStuNumber();
         String password = input.getPassword();

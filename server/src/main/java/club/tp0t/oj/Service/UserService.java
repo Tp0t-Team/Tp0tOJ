@@ -140,4 +140,9 @@ public class UserService {
         User user = userRepository.getOne(userId);
         return user.getRole().equals("team");
     }
+
+    public boolean checkUserIdExistence(long userId) {
+        int count = userRepository.checkUserIdExistence(userId);
+        return count == 1;
+    }
 }

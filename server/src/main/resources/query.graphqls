@@ -1,10 +1,10 @@
 type Query {
-    userInfo(userId: String) : Profile
+    userInfo(userId: String) : UserInfoResult
     test: String
     challenges: ChallengesResult
     rank: RankResult
 }
-type Profile {
+type UserInfoResult {
     message: String
     userInfo: UserInfo
 }

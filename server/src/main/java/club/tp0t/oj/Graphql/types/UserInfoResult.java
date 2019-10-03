@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Profile {
+public class UserInfoResult {
 
     private UserInfo userInfo;
 
     private String message;
 
-    public Profile(String message) {
+    public UserInfoResult(String message) {
         this.message = message;
     }
 
