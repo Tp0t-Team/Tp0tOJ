@@ -1,9 +1,9 @@
 <template>
   <v-container class="bulletin-list">
     <v-card v-for="item in bulletins" :key="item.time">
-      <span class="bulletin-time ma-4">{{item.time}}</span>
+      <span class="bulletin-time ma-4">{{item.publishTime}}</span>
       <v-card-title>{{item.title}}</v-card-title>
-      <v-card-text>{{item.description}}</v-card-text>
+      <v-card-text>{{item.content}}</v-card-text>
     </v-card>
     <v-btn
       v-if="$store.state.global.role=='admin'||$store.state.global.role=='team'"
@@ -54,6 +54,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import {
+  BulletinPubInput,
   BulletinPubResult,
   AllBulletinResult,
   BulletinItem,
@@ -79,25 +80,29 @@ export default class Bulletin extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
+    await this.loadBulletin();
+  }
+
+  async loadBulletin() {
     try {
-      let res = await this.$apollo.query<AllBulletinResult>({
+      let res = await this.$apollo.query<AllBulletinResult, {}>({
         query: gql`
           query {
             allBulltin {
               message
-              bulletin {
+              bulletins {
                 title
-                description
-                time
+                content
+                publishTime
               }
             }
           }
         `
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.allBulletin.message) throw res.data!.allBulletin.message;
-      this.bulletins = res.data!.allBulletin.bulletin;
-      const observer = this.$apollo.subscribe<BulletinSubResult>({
+      this.bulletins = res.data!.allBulletin.bulletins;
+      const observer = this.$apollo.subscribe<BulletinSubResult, {}>({
         query: gql`
           subscription {
             bulletin {
@@ -132,9 +137,9 @@ export default class Bulletin extends Vue {
     }
     this.loading = true;
     try {
-      let res = await this.$apollo.mutate<BulletinPubResult>({
+      let res = await this.$apollo.mutate<BulletinPubResult, BulletinPubInput>({
         mutation: gql`
-          mutation {
+          mutation($input: BulletinPubInput!) {
             bulletinPub(input: $input) {
               message
             }
@@ -143,15 +148,16 @@ export default class Bulletin extends Vue {
         variables: {
           input: {
             title: this.title,
-            description: this.description
+            content: this.description,
+            topping: false
           }
         }
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.bulletinPub.message) throw res.data!.bulletinPub.message;
       this.loading = false;
       this.edit = false;
-      // maybe do refresh
+      await this.loadBulletin();
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

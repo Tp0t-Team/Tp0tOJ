@@ -114,6 +114,7 @@ import gql from "graphql-tag";
 export default class Profile extends Vue {
   private loading: boolean = false;
   private userInfo: UserInfo = {
+    userId: "",
     name: "",
     role: "",
     stuNumber: "",
@@ -136,6 +137,7 @@ export default class Profile extends Vue {
     // example data
     this.loading = true;
     this.userInfo = {
+      userId: "1",
       name: "CXK",
       role: "member",
       stuNumber: "0001",
@@ -154,10 +156,11 @@ export default class Profile extends Vue {
     try {
       let res = await this.$apollo.query<UserInfoResult>({
         query: gql`
-          query {
+          query($userId: String!) {
             userInfo(userId: $userId) {
               message
               userInfo {
+                userId
                 name
                 role
                 stuNumber
@@ -179,7 +182,7 @@ export default class Profile extends Vue {
           userId: this.$route.params.user_id
         }
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.userInfo.message) throw res.data!.userInfo.message;
       this.userInfo = res.data!.userInfo.userInfo;
       this.loading = false;

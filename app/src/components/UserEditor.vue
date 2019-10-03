@@ -168,6 +168,7 @@ export default class UserEditor extends Vue {
   @Emit("submit")
   EmitSubmit() {
     return {
+      userId: this.user!.userId,
       name: this.name,
       role: this.role,
       stuNumber: this.user!.stuNumber,

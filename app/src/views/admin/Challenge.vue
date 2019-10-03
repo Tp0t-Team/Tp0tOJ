@@ -105,6 +105,7 @@ export default class Challenge extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
+    // example data
     this.challengeConfigs = [
       {
         challengeId: "1",
@@ -114,9 +115,11 @@ export default class Challenge extends Vue {
         flag: { dynamic: false, value: "qweertytryrty" },
         description: "123456",
         external_link: ["http://www.google.com"],
-        hint: ["123456"]
+        hint: ["123456"],
+        state: "enabled"
       }
     ];
+    //
     try {
       let res = await this.$apollo.query<ChallengeConfigResult>({
         query: gql`
@@ -132,12 +135,13 @@ export default class Challenge extends Vue {
                 description
                 externalLink
                 hint
+                state
               }
             }
           }
         `
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challenges.message) throw res.data!.challenges.message;
       this.challengeConfigs = res.data!.challenges.challengeInfos;
     } catch (e) {
@@ -157,6 +161,14 @@ export default class Challenge extends Vue {
 
   async submit(config: ChallengeConfigWithId) {
     this.loading = true;
+    try {
+      let res = await this.$apollo.mutate({
+        mutation: gql``,
+        variables: {}
+      })
+    } catch (e) {
+      this.loading = false;
+    }
   }
 
   editChallenge(id: string) {
@@ -173,7 +185,7 @@ export default class Challenge extends Vue {
   }
 
   newChallenge(type: string) {
-    let config = {
+    let config: ChallengeConfigWithId = {
       challengeId: "-" + Date.now().toLocaleString(),
       type: type,
       name: "",
@@ -181,7 +193,8 @@ export default class Challenge extends Vue {
       flag: { dynamic: false, value: "" },
       description: "",
       external_link: [],
-      hint: []
+      hint: [],
+      state: "disabled"
     };
     if (this.changed) {
       this.tempConfig = config;

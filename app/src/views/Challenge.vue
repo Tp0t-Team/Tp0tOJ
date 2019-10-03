@@ -103,7 +103,12 @@
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { ChallengeDesc, ChallengeResult } from "@/struct";
+import {
+  ChallengeDesc,
+  ChallengeResult,
+  SubmitResult,
+  SubmitInput
+} from "@/struct";
 import constValue from "@/constValue";
 
 @Component
@@ -144,7 +149,7 @@ export default class Challenge extends Vue {
         query: gql`
           query {
             challenges {
-              messages
+              message
               challengeInfos {
                 challengeId
                 name
@@ -160,7 +165,7 @@ export default class Challenge extends Vue {
           }
         `
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challenges.message) throw res.data!.challenges.message;
       this.challenges = res.data!.challenges.challengeInfos;
     } catch (e) {
@@ -196,9 +201,22 @@ export default class Challenge extends Vue {
     if (!!this.submitError) return;
     this.loading = true;
     try {
-      throw "未实现";
-      // do submit
-      this.loading = false;
+      let res = await this.$apollo.mutate<SubmitResult, SubmitInput>({
+        mutation: gql`
+          mutation($input: SubmitInput!) {
+            submit(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          challengeId: this.currentChallenge!.challengeId,
+          flag: this.sumbitFlag
+        }
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.submit.message) throw res.data!.submit.message;
+      throw "提交成功";
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

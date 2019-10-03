@@ -96,7 +96,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { Result } from "@/struct";
+import { LogoutResult } from "@/struct";
 
 @Component
 export default class NavList extends Vue {
@@ -116,7 +116,7 @@ export default class NavList extends Vue {
 
   async logout() {
     try {
-      let res = await this.$apollo.mutate<Result>({
+      let res = await this.$apollo.mutate<LogoutResult, {}>({
         mutation: gql`
           mutation {
             logout {
@@ -125,8 +125,8 @@ export default class NavList extends Vue {
           }
         `
       });
-      if (res.errors) throw res.errors.join(",");
-      if (res.data!.message) throw res.data!.message;
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.logout.message) throw res.data!.logout.message;
       this.$store.commit("global/resetUserIdAndRole");
       sessionStorage.removeItem("user_id");
       sessionStorage.removeItem("role");

@@ -49,13 +49,26 @@
         </v-simple-table>
       </v-col>
     </v-row>
+    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+      {{ infoText }}
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon @click="hasInfo = false">close</v-icon>
+      </v-btn>
+    </v-snackbar>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import gql from "graphql-tag";
 import UserEditor from "@/components/UserEditor.vue";
-import { UserInfo, ResolveInfo } from "@/struct";
+import {
+  UserInfo,
+  ResolveInfo,
+  UserInfoUpdateInput,
+  UserInfoUpdateResult
+} from "@/struct";
 
 @Component({
   components: {
@@ -81,9 +94,13 @@ export default class User extends Vue {
 
   private resolves: ResolveInfo[] = [];
 
+  private infoText: string = "";
+  private hasInfo: boolean = false;
+
   async mounted() {
     this.users = [
       {
+        userId: "1",
         name: "DRSN",
         role: "team",
         stuNumber: "9161",
@@ -108,12 +125,46 @@ export default class User extends Vue {
   }
 
   refresh() {
-    console.log(this.currentUser!.stuNumber);
+    console.log(this.currentUser!.userId);
   }
 
-  submit(info: UserInfo) {
+  async submit(info: UserInfo) {
     this.loading = true;
-    console.log(info);
+    try {
+      let res = await this.$apollo.mutate<
+        UserInfoUpdateResult,
+        UserInfoUpdateInput
+      >({
+        mutation: gql`
+          mutation($input: UserInfoUpdateInput!) {
+            userInfoUpdate(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          input: {
+            userId: info.userId,
+            name: info.name,
+            role: info.role,
+            department: info.department,
+            grade: info.grade,
+            protectedTime: info.protectedTime,
+            qq: info.qq,
+            mail: info.mail,
+            state: info.state
+          }
+        }
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.userInfoUpdate.message)
+        throw res.data!.userInfoUpdate.message;
+      this.loading = false;
+    } catch (e) {
+      this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 }
 </script>

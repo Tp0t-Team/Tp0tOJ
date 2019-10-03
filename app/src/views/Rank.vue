@@ -124,7 +124,7 @@ export default class Rank extends Vue {
         query: gql`
           query {
             rank {
-              messages
+              message
               userInfos {
                 userId
                 name
@@ -134,7 +134,7 @@ export default class Rank extends Vue {
           }
         `
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
       this.ranks = res.data!.rank.userInfos;
       this.pageCount = Math.floor(

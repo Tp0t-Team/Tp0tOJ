@@ -1,13 +1,25 @@
 <template>
   <v-form>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="6">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="state"
+            label="enabled"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+      <v-col cols="6">
         <v-file-input
           v-model="configFile"
           accept=".yaml, .yml"
           outlined
           label="load config file"
-          :disabled="loading ||disabled"
+          :disabled="loading || disabled"
           @change="Changed"
         ></v-file-input>
       </v-col>
@@ -18,7 +30,7 @@
           v-model="name"
           outlined
           label="name"
-          :disabled="loading ||disabled"
+          :disabled="loading || disabled"
           @change="Changed"
         ></v-text-field>
       </v-col>
@@ -53,7 +65,7 @@
           v-model="description"
           outlined
           label="description"
-          :disabled="loading ||disabled"
+          :disabled="loading || disabled"
           @change="Changed"
         ></v-textarea>
       </v-col>
@@ -139,6 +151,7 @@ export default class ChallengeEditor extends Vue {
   private configFile: File | null = null;
   private reader: FileReader = new FileReader();
 
+  private state: boolean = false;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
@@ -167,6 +180,7 @@ export default class ChallengeEditor extends Vue {
         this.links = config.external_link || this.links;
         this.hints = config.hint || this.hints;
         this.setValue = false;
+        this.state = false;
       } catch (e) {
         this.EmitError(e.toString());
       }
@@ -179,6 +193,7 @@ export default class ChallengeEditor extends Vue {
     this.description = this.description;
     this.links = this.config.external_link;
     this.hints = this.config.hint;
+    this.state = this.config.state == "enabled";
   }
 
   @Emit("error")
@@ -199,7 +214,8 @@ export default class ChallengeEditor extends Vue {
       flag: { dynamic: false, value: this.flag },
       description: this.description,
       external_link: this.links,
-      hint: this.hints
+      hint: this.hints,
+      state: this.state ? "enabled" : "disabled"
     } as ChallengeConfigWithId;
   }
 

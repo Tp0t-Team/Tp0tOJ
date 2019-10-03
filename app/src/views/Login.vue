@@ -142,7 +142,12 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { LoginResult, RegisterResult } from "@/struct";
+import {
+  LoginInput,
+  LoginResult,
+  RegisterInput,
+  RegisterResult
+} from "@/struct";
 import constValue from "@/constValue";
 
 @Component
@@ -206,9 +211,9 @@ export default class Login extends Vue {
     }
     this.loading = true;
     try {
-      let res = await this.$apollo.mutate<LoginResult>({
+      let res = await this.$apollo.mutate<LoginResult, LoginInput>({
         mutation: gql`
-          mutation {
+          mutation($input: LoginInput!) {
             login(input: $input) {
               message
               userId
@@ -223,7 +228,7 @@ export default class Login extends Vue {
           }
         }
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.login.message) throw res.data!.login.message;
       this.loading = false;
       this.$store.commit("setUserIdAndRole", {
@@ -245,9 +250,9 @@ export default class Login extends Vue {
     }
     this.loading = true;
     try {
-      let res = await this.$apollo.mutate<RegisterResult>({
+      let res = await this.$apollo.mutate<RegisterResult, RegisterInput>({
         mutation: gql`
-          mutation {
+          mutation($input: RegisterInput!) {
             register(input: $input) {
               message
             }
@@ -265,7 +270,7 @@ export default class Login extends Vue {
           }
         }
       });
-      if (res.errors) throw res.errors.join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.register.message) throw res.data!.register.message;
       this.tab = "tab-login";
     } catch (e) {
