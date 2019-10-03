@@ -92,30 +92,30 @@ export default class Rank extends Vue {
   async mounted() {
     // example data
     this.ranks = [
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 },
-      { userId: "1", name: "Zenis", score: 1000 },
-      { userId: "2", name: "Mio", score: 800 },
-      { userId: "3", name: "DRSN", score: 600 }
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" },
+      { userId: "1", name: "Zenis", score: "1000" },
+      { userId: "2", name: "Mio", score: "800" },
+      { userId: "3", name: "DRSN", score: "600" }
     ];
     //
     this.page = parseInt(this.$route.params.page);
@@ -136,7 +136,7 @@ export default class Rank extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
-      this.ranks = res.data!.rank.userInfos;
+      this.ranks = res.data!.rank.rankResultDescs;
       this.pageCount = Math.floor(
         (this.ranks.length + UserPerPage - 1) / UserPerPage
       );

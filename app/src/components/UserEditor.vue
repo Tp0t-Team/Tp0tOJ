@@ -155,7 +155,7 @@ export default class UserEditor extends Vue {
     this.studentNumber = this.user.stuNumber;
     this.role = this.user.role;
     this.state = this.user.state;
-    this.score = this.user.score;
+    this.score = parseInt(this.user.score);
     this.protectedTime = this.user.protectedTime;
     this.department = this.user.department;
     this.grade = this.user.grade;
@@ -179,7 +179,7 @@ export default class UserEditor extends Vue {
       mail: this.mail,
       topRank: this.user!.topRank,
       joinTime: this.user!.joinTime,
-      score: this.user!.score,
+      score: this.user!.score.toString(),
       state: this.state,
       rank: this.user!.rank
     } as UserInfo;

@@ -125,7 +125,7 @@ export default class Profile extends Vue {
     mail: "",
     topRank: "",
     joinTime: "",
-    score: 0,
+    score: "0",
     state: "",
     rank: 0
   };
@@ -148,13 +148,13 @@ export default class Profile extends Vue {
       mail: "123@test.com",
       topRank: "∞",
       joinTime: "2019-01-01",
-      score: 0,
+      score: "0",
       state: "protected",
       rank: 0
     };
     //
     try {
-      let res = await this.$apollo.query<UserInfoResult>({
+      let res = await this.$apollo.query<UserInfoResult, { userId: string }>({
         query: gql`
           query($userId: String!) {
             userInfo(userId: $userId) {

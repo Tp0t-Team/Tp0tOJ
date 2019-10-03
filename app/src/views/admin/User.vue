@@ -65,9 +65,10 @@ import gql from "graphql-tag";
 import UserEditor from "@/components/UserEditor.vue";
 import {
   UserInfo,
-  ResolveInfo,
+  SubmitInfo,
   UserInfoUpdateInput,
-  UserInfoUpdateResult
+  UserInfoUpdateResult,
+  SubmitHistoryResult
 } from "@/struct";
 
 @Component({
@@ -92,7 +93,7 @@ export default class User extends Vue {
   private users: UserInfo[] = [];
   private currentUser: UserInfo | null = null;
 
-  private resolves: ResolveInfo[] = [];
+  private resolves: SubmitInfo[] = [];
 
   private infoText: string = "";
   private hasInfo: boolean = false;
@@ -111,7 +112,7 @@ export default class User extends Vue {
         mail: "test@test.com",
         topRank: "1",
         joinTime: "2018-01-01",
-        score: 1000,
+        score: "1000",
         state: "normal",
         rank: 1
       }
@@ -124,8 +125,34 @@ export default class User extends Vue {
     this.resolves = [];
   }
 
-  refresh() {
-    console.log(this.currentUser!.userId);
+  async refresh() {
+    try {
+      let res = await this.$apollo.query<
+        SubmitHistoryResult,
+        { userId: string }
+      >({
+        query: gql`
+          query($userId: string) {
+            submitHistory(userId: $userId) {
+              message
+              submitInfos {
+                submitTime
+                challengeName
+                mark
+              }
+            }
+          }
+        `
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.submitHistory.message)
+        throw res.data!.submitHistory.message;
+      this.resolves = res.data!.submitHistory.submitInfos;
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+    // TODO: console.log(this.currentUser!.userId);
   }
 
   async submit(info: UserInfo) {

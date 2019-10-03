@@ -14,7 +14,7 @@ export interface UserInfo {
     mail: string
     topRank: string
     joinTime: string
-    score: number
+    score: string
     state: string
     rank: number
 }
@@ -34,7 +34,7 @@ export interface ChallengeDesc {
 export interface RankDesc {
     userId: string
     name: string
-    score: number
+    score: string
 }
 
 export interface BulletinItem {
@@ -64,6 +64,12 @@ export type ChallengeConfigWithId = {
     state: string
 } & ChallengeConfig
 
+export interface SubmitInfo {
+    submitTime: String
+    challengeName: String
+    mark: number
+}
+
 // query userInfo
 export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
 
@@ -73,7 +79,7 @@ export type ChallengeResult = {
 }
 
 // query rank
-export type RankResult = { rank: { userInfos: RankDesc[] } & Result }
+export type RankResult = { rank: { rankResultDescs: RankDesc[] } & Result }
 
 // mutation login
 export interface LoginInput {
@@ -92,6 +98,11 @@ export type LoginResult = {
 // query allBulletin
 export type AllBulletinResult = {
     allBulletin: { bulletins: BulletinItem[] } & Result
+}
+
+// query submitHistory
+export type SubmitHistoryResult = {
+    submitHistory: { submitInfos: SubmitInfo[] } & Result
 }
 
 // mutation register
@@ -156,10 +167,4 @@ export type ChallengeConfigResult = {
     challenges: {
         challengeInfos: ChallengeConfigWithId[]
     } & Result
-}
-
-export interface ResolveInfo {
-    submitTime: string
-    challengeName: string
-    mark: number
 }
