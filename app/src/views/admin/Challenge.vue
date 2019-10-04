@@ -206,7 +206,7 @@ export default class Challenge extends Vue {
       challengeId: "-" + Date.now().toLocaleString(),
       type: type,
       name: "",
-      score: { dynamic: false, base_score: 0 },
+      score: { dynamic: false, base_score: "0" },
       flag: { dynamic: false, value: "" },
       description: "",
       external_link: [],
@@ -236,7 +236,9 @@ export default class Challenge extends Vue {
   }
 
   async deleteConfig() {
-    console.log(this.tempChallengeId);
+    // console.log(this.tempChallengeId);
+    this.infoText = "功能暂未实现";
+    this.hasInfo = true;
   }
 }
 </script>

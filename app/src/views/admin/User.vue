@@ -152,7 +152,6 @@ export default class User extends Vue {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
-    // TODO: console.log(this.currentUser!.userId);
   }
 
   async submit(info: UserInfo) {
