@@ -166,8 +166,8 @@ export default class Challenge extends Vue {
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.challenges.message) throw res.data!.challenges.message;
-      this.challenges = res.data!.challenges.challengeInfos;
+      if (res.data!.challengeInfos.message) throw res.data!.challengeInfos.message;
+      this.challenges = res.data!.challengeInfos.challengeInfos;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

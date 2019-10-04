@@ -48,7 +48,7 @@ export interface ChallengeConfig {
     type: string
     score: {
         dynamic: boolean
-        base_score: number
+        base_score: string | number
     }
     flag: {
         dynamic: boolean
@@ -75,11 +75,28 @@ export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
 
 // query challenges
 export type ChallengeResult = {
-    challenges: { challengeInfos: ChallengeDesc[] } & Result
+    challengeInfos: { challengeInfos: ChallengeDesc[] } & Result
+}
+
+// query challengeConfig
+export type ChallengeConfigResult = {
+    challengeConfigs: {
+        challengeConfigs: ChallengeConfigWithId[]
+    } & Result
 }
 
 // query rank
 export type RankResult = { rank: { rankResultDescs: RankDesc[] } & Result }
+
+// query allBulletin
+export type AllBulletinResult = {
+    allBulletin: { bulletins: BulletinItem[] } & Result
+}
+
+// query submitHistory
+export type SubmitHistoryResult = {
+    submitHistory: { submitInfos: SubmitInfo[] } & Result
+}
 
 // mutation login
 export interface LoginInput {
@@ -93,16 +110,6 @@ export type LoginResult = {
         userId: string
         role: string
     } & Result
-}
-
-// query allBulletin
-export type AllBulletinResult = {
-    allBulletin: { bulletins: BulletinItem[] } & Result
-}
-
-// query submitHistory
-export type SubmitHistoryResult = {
-    submitHistory: { submitInfos: SubmitInfo[] } & Result
 }
 
 // mutation register
@@ -141,9 +148,6 @@ export interface BulletinPubInput {
 }
 export type BulletinPubResult = { bulletinPub: Result }
 
-// subscription bulletin
-export type BulletinSubResult = { bulletin: BulletinItem }
-
 // mutation userInfoUpdate
 export interface UserInfoUpdateInput {
     input: {
@@ -160,11 +164,8 @@ export interface UserInfoUpdateInput {
 }
 export type UserInfoUpdateResult = { userInfoUpdate: Result }
 
-// TODO:
+// mutation challengeMutate
+export type ChallengeMutateResult = { challengeMutate: Result }
 
-// query challengeConfig
-export type ChallengeConfigResult = {
-    challenges: {
-        challengeInfos: ChallengeConfigWithId[]
-    } & Result
-}
+// subscription bulletin
+export type BulletinSubResult = { bulletin: BulletinItem }

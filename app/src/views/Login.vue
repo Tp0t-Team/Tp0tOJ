@@ -176,7 +176,9 @@ export default class Login extends Vue {
   private rules = {
     required: (value: string) => !!value || "请填写",
     email: (value: string) =>
-      !!(value || "").match(/^.+@(\w+\.)+\w+$/) || "非法的邮箱地址",
+      !!(value || "").match(
+        /^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$/
+      ) || "非法的邮箱地址",
     passLen: (len: number) => (v: string) =>
       (v || "").length >= len || `非法的密码长度，需要 ${len} 位`,
     password: (value: string) =>

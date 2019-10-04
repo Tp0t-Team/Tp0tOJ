@@ -174,7 +174,7 @@ export default class ChallengeEditor extends Vue {
         if (config.type != this.type) throw "不可修改类型";
         this.setValue = true;
         this.name = config.name || this.name;
-        this.score = config.score.base_score || this.score;
+        this.score = (config.score.base_score as number) || this.score;
         this.flag = config.flag.value || this.flag;
         this.description = config.description || this.description;
         this.links = config.external_link || this.links;
@@ -188,7 +188,7 @@ export default class ChallengeEditor extends Vue {
     if (!this.config) return;
     this.name = this.config.name;
     this.type = this.config.type;
-    this.score = this.config.score.base_score;
+    this.score = parseInt(this.config.score.base_score as string);
     this.flag = this.config.flag.value;
     this.description = this.description;
     this.links = this.config.external_link;
@@ -210,7 +210,7 @@ export default class ChallengeEditor extends Vue {
       challengeId: (this.config && this.config.challengeId) || "",
       name: this.name,
       type: this.type,
-      score: { dynamic: false, base_score: this.score },
+      score: { dynamic: false, base_score: this.score.toString() },
       flag: { dynamic: false, value: this.flag },
       description: this.description,
       external_link: this.links,

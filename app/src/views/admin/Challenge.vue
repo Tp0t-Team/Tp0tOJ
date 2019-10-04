@@ -77,7 +77,8 @@ import gql from "graphql-tag";
 import {
   ChallengeConfig,
   ChallengeConfigWithId,
-  ChallengeConfigResult
+  ChallengeConfigResult,
+  ChallengeMutateResult
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
@@ -142,8 +143,9 @@ export default class Challenge extends Vue {
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.challenges.message) throw res.data!.challenges.message;
-      this.challengeConfigs = res.data!.challenges.challengeInfos;
+      if (res.data!.challengeConfigs.message)
+        throw res.data!.challengeConfigs.message;
+      this.challengeConfigs = res.data!.challengeConfigs.challengeConfigs;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
@@ -161,13 +163,28 @@ export default class Challenge extends Vue {
 
   async submit(config: ChallengeConfigWithId) {
     this.loading = true;
+    let tempConfig = JSON.parse(JSON.stringify(config));
+    tempConfig.challengeId =
+      tempConfig.challengeId[0] == "-" ? "" : tempConfig.challengeId;
     try {
-      let res = await this.$apollo.mutate({
-        mutation: gql``,
-        variables: {}
-      })
+      let res = await this.$apollo.mutate<
+        ChallengeMutateResult,
+        ChallengeConfigWithId
+      >({
+        mutation: gql`
+          mutation($input: ChallengeMutateInput) {
+            challengeMutate(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: config
+      });
+      this.loading = false;
     } catch (e) {
       this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
     }
   }
 
