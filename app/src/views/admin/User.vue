@@ -104,7 +104,7 @@ export default class User extends Vue {
       let res = await this.$apollo.query<AllUserInfoResult, {}>({
         query: gql`
           query {
-              allUserInfo {
+              allUserInfos {
                 message
                 allUserInfos {
                   userId
@@ -127,8 +127,8 @@ export default class User extends Vue {
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.allUserInfo.message) throw res.data!.allUserInfo.message;
-      this.users = res.data!.allUserInfo.allUserInfos;
+      if (res.data!.allUserInfos.message) throw res.data!.allUserInfos.message;
+      this.users = res.data!.allUserInfos.allUserInfos;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

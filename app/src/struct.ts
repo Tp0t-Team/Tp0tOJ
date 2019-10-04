@@ -74,7 +74,7 @@ export interface SubmitInfo {
 export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
 
 export type AllUserInfoResult = {
-    allUserInfo: { allUserInfos: UserInfo[] } & Result
+    allUserInfos: { allUserInfos: UserInfo[] } & Result
 }
 
 // query challenges
