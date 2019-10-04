@@ -41,20 +41,18 @@ public class AdminMutation implements GraphQLMutationResolver {
             return new BulletinPubResult("forbidden");
         }
 
+        if(!bulletinPubInput.checkPass()) return new BulletinPubResult("not empty error");
+
         String title = bulletinPubInput.getTitle();
         String content = bulletinPubInput.getContent();
-        String topping = bulletinPubInput.getTopping();
+        boolean topping = bulletinPubInput.getTopping();
 
-        if(title==null) return new BulletinPubResult("not empty error");
-        title = title.replaceAll("\\s", "");
-        if(title.equals("")) return new BulletinPubResult("not empty error");
-        if(bulletinService.checkTitleExistence(title)) return new BulletinPubResult("Title Already Exist");
-
-        if(content==null) return new BulletinPubResult("not empty error");
-        content = content.replaceAll("\\s", "");
-        if(content.equals("")) return new BulletinPubResult("not empty error");
-
-        if(topping==null) topping = "False";
+//        if(title==null) return new BulletinPubResult("not empty error");
+//        title = title.trim();
+//        if(title.equals("")) return new BulletinPubResult("not empty error");
+//        if(content==null) return new BulletinPubResult("not empty error");
+//        content = content.trim();
+//        if(content.equals("")) return new BulletinPubResult("not empty error");
 
         if(bulletinService.addBulletin(title, content, topping)) {
             return new BulletinPubResult("");
@@ -62,22 +60,36 @@ public class AdminMutation implements GraphQLMutationResolver {
         return new BulletinPubResult("Bulletin addition failed!");
     }
 
-    public ChallengeMutateResult challengeMutate(ChallengeMutateInput challengeMutate) {
+    public ChallengeMutateResult challengeMutate(ChallengeMutateInput challengeMutate, DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if(session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new ChallengeMutateResult("forbidden");
+        }
+
         String id = challengeMutate.getChallengeId();
-        if(challengeService.checkIdExistence(id)){
+        if(!id.equals("") && challengeService.checkIdExistence(id)){
+            if(!challengeMutate.checkPass()) return new ChallengeMutateResult("Challenge format not avaliable");
             if(!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
             return new ChallengeMutateResult("");
         }else{
-            if(!challengeService.checkFormat(challengeMutate)) return new ChallengeMutateResult("Challenge format not avaliable");
+            if(!challengeMutate.checkPass()) return new ChallengeMutateResult("Challenge format not avaliable");
             if(!challengeService.addChallenge(challengeMutate)) return new ChallengeMutateResult("Addition Error");
             return new ChallengeMutateResult("");
         }
-
     }
 
     public ChallengeRemoveResult challengeRemove(String id){
-        if(!challengeService.removeById(id)) return new ChallengeRemoveResult("Remove failed");
-        return new ChallengeRemoveResult("");
+        return new ChallengeRemoveResult("Can't remove any challenge");
+        // TODO:
+//        if(!challengeService.removeById(id)) return new ChallengeRemoveResult("Remove failed");
+//        return new ChallengeRemoveResult("");
     }
 }
 

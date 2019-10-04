@@ -1,8 +1,8 @@
 package club.tp0t.oj.Graphql.types;
 
 public class FlagType {
-    Boolean dynamic;
-    String value;
+    private Boolean dynamic;
+    private String value;
 
     public Boolean getDynamic() {
         return dynamic;

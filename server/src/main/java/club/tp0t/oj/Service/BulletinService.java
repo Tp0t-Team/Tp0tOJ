@@ -16,22 +16,20 @@ public class BulletinService {
 
     public List<Bulletin> getAllBulletin() { return bulletinRepository.findAll(); }
 
-    public boolean addBulletin(String title, String content, String topping){
+    public boolean addBulletin(String title, String content, boolean topping){
         Bulletin bulletin = new Bulletin();
         bulletin.setTitle(title);
         bulletin.setContent(content);
         bulletin.setGmtCreated(new Timestamp(System.currentTimeMillis()));
         bulletin.setGmtModified(new Timestamp(System.currentTimeMillis()));
         bulletin.setPublishTime(new Timestamp(System.currentTimeMillis()));
-        if (topping.equals("True") ) bulletin.setTopping(true);
-        else if (topping.equals("False")) bulletin.setTopping(false);
-        else return false;
+        bulletin.setTopping(topping);
         bulletinRepository.save(bulletin);
         return true;
     }
 
-    public boolean checkTitleExistence(String title) {
-        Bulletin bulletin = bulletinRepository.findByTitle(title);
-        return bulletin != null;
-    }
+//    public boolean checkTitleExistence(String title) {
+//        Bulletin bulletin = bulletinRepository.findByTitle(title);
+//        return bulletin != null;
+//    }
 }

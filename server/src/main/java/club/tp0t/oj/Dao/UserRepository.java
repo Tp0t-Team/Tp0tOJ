@@ -38,8 +38,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //@Query(value = "select u.userId from User u where u.stuNumber=?1")
     //long getUserIdByStuNumber(String stuNumber);
 
-    @Query(value = "select count(u.userId) from User u where u.userId=?1")
-    int checkUserIdExistence(long userId);
+//    @Query(value = "select count(u.userId) from User u where u.userId=?1")
+//    int checkUserIdExistence(long userId);
 
     long countByUserId(long userId);
 }

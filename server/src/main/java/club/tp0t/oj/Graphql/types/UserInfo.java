@@ -41,7 +41,7 @@ public class UserInfo {
         this.joinTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(joinTime);
         this.score = Long.toString(score);
         this.topRank = topRank;
-        this.protectedTime = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(protectedTime);
+        this.protectedTime = new SimpleDateFormat("yyyy-MM-dd").format(protectedTime);
         this.userId = Long.toString(userId);
         this.role = role;
         this.state = state;

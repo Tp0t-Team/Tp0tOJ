@@ -1,11 +1,11 @@
 type Query {
-    userInfo(userId: String) : UserInfoResult
+    userInfo(userId: String!) : UserInfoResult
     test: String
     challengeInfos: ChallengeInfosResult
     challengeConfigs: ChallengeConfigsResult
     rank: RankResult
     allBulltin : BulletinResult
-    submitHistory(userId: String): SubmitHistoryResult
+    submitHistory(userId: String!): SubmitHistoryResult
 }
 type UserInfoResult {
     message: String

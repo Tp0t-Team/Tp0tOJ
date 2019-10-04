@@ -11,13 +11,13 @@ type Mutation {
 }
 
 input RegisterInput {
-    name: String
-    stuNumber: String
-    password: String
-    department: String
-    grade: String
-    qq: String
-    mail: String
+    name: String!
+    stuNumber: String!
+    password: String!
+    department: String!
+    grade: String!
+    qq: String!
+    mail: String!
 }
 
 type RegisterResult {
@@ -25,20 +25,20 @@ type RegisterResult {
     message: String
 }
 
-input ResetInput {
-    name: String
-    stuNumber: String
-    mail: String
-}
-
-type ResetResult {
-    # success, no user, failed
-    message: String
-}
+#input ResetInput {
+#    name: String
+#    stuNumber: String
+#    mail: String
+#}
+#
+#type ResetResult {
+#    # success, no user, failed
+#    message: String
+#}
 
 input LoginInput {
-    stuNumber: String
-    password: String
+    stuNumber: String!
+    password: String!
 }
 
 type LoginResult {
@@ -61,9 +61,9 @@ type SubmitResult {
 }
 
 input BulletinPubInput {
-    title: String
-    content: String
-    topping: String
+    title: String!
+    content: String!
+    topping: Boolean!
 }
 
 type BulletinPubResult {
@@ -87,25 +87,25 @@ type UserInfoUpdateResult {
 }
 
 input ChallengeMutateInput {
-    challengeId: String
-    name: String
-    type: String
-    score: ScoreTypeInput
-    flag: FlagTypeInput
-    description: String
-    external_link: [String]
-    hint: [String]
-    state: String
+    challengeId: String!
+    name: String!
+    type: String!
+    score: ScoreTypeInput!
+    flag: FlagTypeInput!
+    description: String!
+    external_link: [String]!
+    hint: [String]!
+    state: String!
 }
 
 input ScoreTypeInput {
-    dynamic: Boolean
-    base_score: String
+    dynamic: Boolean!
+    base_score: String!
 }
 
 input FlagTypeInput {
-    dynamic: Boolean
-    value: String
+    dynamic: Boolean!
+    value: String!
 }
 
 type ChallengeMutateResult {

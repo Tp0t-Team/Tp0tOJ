@@ -27,7 +27,7 @@ public class FlagService {
         // get user entity by userId
         User user = userService.getUserById(userId);
         // user's replicas
-        List<ReplicaAlloc> replicaAllocs = replicaAllocService.getReplicaAllocByUserId(user);
+        List<ReplicaAlloc> replicaAllocs = replicaAllocService.getReplicaAllocByUser(user);
         // get challenge entity by challengeId
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
         // challenge's replicas

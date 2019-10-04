@@ -19,4 +19,10 @@ public class SubmitInput {
     public void setFlag(String flag) {
         this.flag = flag;
     }
+
+    public boolean checkPass() {
+        flag = flag.replaceAll("\\s", "");
+
+        return !flag.equals("");
+    }
 }

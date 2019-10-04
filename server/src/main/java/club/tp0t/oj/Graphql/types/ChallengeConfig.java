@@ -3,15 +3,15 @@ package club.tp0t.oj.Graphql.types;
 import java.util.List;
 
 public class ChallengeConfig {
-    String challengeId;
-    String name;
-    String type;
-    ScoreType score;
-    FlagType flag;
-    String description;
-    List<String> external_link;
-    List<String> hint;
-    String state;
+    private String challengeId;
+    private String name;
+    private String type;
+    private ScoreType score;
+    private FlagType flag;
+    private String description;
+    private List<String> external_link;
+    private List<String> hint;
+    private String state;
 
     public void setChallengeId(String challengeId) {
         this.challengeId = challengeId;

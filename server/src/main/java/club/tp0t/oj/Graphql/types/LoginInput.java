@@ -19,4 +19,10 @@ public class LoginInput {
     public String getStuNumber() {
         return stuNumber;
     }
+
+    public boolean checkPass() {
+        stuNumber = stuNumber.replaceAll("\\s", "");
+
+        return !stuNumber.equals("");
+    }
 }

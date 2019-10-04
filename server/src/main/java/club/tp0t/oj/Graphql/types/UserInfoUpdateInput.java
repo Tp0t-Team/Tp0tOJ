@@ -1,5 +1,10 @@
 package club.tp0t.oj.Graphql.types;
 
+import club.tp0t.oj.Util.CheckHelper;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 public class UserInfoUpdateInput {
 
     private String userId;
@@ -82,5 +87,40 @@ public class UserInfoUpdateInput {
 
     public String getState() {
         return state;
+    }
+
+    public boolean checkPass() {
+        name = name.replaceAll("\\s", "");
+        role = role.replaceAll("\\s", "");
+        department = department.replaceAll("\\s", "");
+        grade = grade.replaceAll("\\s", "");
+        qq = qq.replaceAll("\\s", "");
+        mail = mail.replaceAll("\\s", "");
+        state = state.replaceAll("\\s", "");
+
+        try {
+            DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            protectedTime = outputFormat.format(inputFormat.parse(protectedTime));
+        } catch (Exception e) {
+            return false;
+        }
+
+        return !name.equals("") &&
+                checkRole(role) &&
+                !department.equals("") &&
+                CheckHelper.checkGrade(grade) &&
+                !qq.equals("") &&
+                !mail.equals("") &&
+                CheckHelper.MAIL_PATTERN.matcher(mail).matches() &&
+                checkState(state);
+    }
+
+    private static boolean checkRole(String role) {
+        return role.matches("^(member|team|admin)$");
+    }
+
+    private static boolean checkState(String state) {
+        return state.matches("^(normal|protected|disabled)$");
     }
 }

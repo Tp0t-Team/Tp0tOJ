@@ -6,6 +6,7 @@ import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -44,7 +45,7 @@ public class SubmitService {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
         //Submit submit = submitRepository.checkDoneByUserId(userId, challengeId);
         Submit submit = submitRepository.findByUserAndChallengeAndCorrect(user, challenge, true);
-        if(submit == null) return true;
+        if (submit == null) return true;
         else return false;
     }
 
@@ -53,11 +54,28 @@ public class SubmitService {
         return submitRepository.findByChallengeAndCorrect(challenge, true);
     }
 
-    public int getSolvedCountByChallengeId(long challengeId) {
+    @Transactional
+    public int updateSolvedCountByChallengeId(long challengeId, User user) {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
         //List<Submit> submits = submitRepository.getCorrectSubmitsByChallenge(challenge);
         List<Submit> submits = submitRepository.findByChallengeAndCorrect(challenge, true);
-        return submits.size();
+        switch (submits.size()) {
+            case 0:
+                challenge.setFirstBlood(user);
+                challengeService.updateChallengeBlood(challenge);
+                break;
+            case 1:
+                challenge.setSecondBlood(user);
+                challengeService.updateChallengeBlood(challenge);
+                break;
+            case 2:
+                challenge.setThirdBlood(user);
+                challengeService.updateChallengeBlood(challenge);
+                break;
+            default:
+                break;
+        }
+        return submits.size() + 1;
     }
 
     public List<Submit> getCorrectSubmitsByUser(User user) {

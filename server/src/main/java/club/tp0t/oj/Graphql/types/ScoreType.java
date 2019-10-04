@@ -1,8 +1,8 @@
 package club.tp0t.oj.Graphql.types;
 
 public class ScoreType {
-    Boolean dynamic;
-    String base_score;
+    private Boolean dynamic;
+    private String base_score;
 
     public Boolean getDynamic() {
         return dynamic;

@@ -13,7 +13,7 @@ public class ReplicaAllocService {
     @Autowired
     private ReplicaAllocRepository replicaAllocRepository;
 
-    public List<ReplicaAlloc> getReplicaAllocByUserId(User user) {
+    public List<ReplicaAlloc> getReplicaAllocByUser(User user) {
         return replicaAllocRepository.findByUser(user);
     }
 }

@@ -6,9 +6,12 @@ import club.tp0t.oj.Graphql.types.ChallengeConfigsResult;
 import club.tp0t.oj.Service.*;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import graphql.schema.DataFetchingEnvironment;
+import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,29 +32,40 @@ public class AdminQuery implements GraphQLQueryResolver {
     @Autowired
     private  UserService userService;
 
-    public ChallengeConfigsResult challengeConfigs(){
+    public ChallengeConfigsResult challengeConfigs(DataFetchingEnvironment environment){
 
-        List<ChallengeConfig> challengeconfigs = new ArrayList<>();
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if(session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new ChallengeConfigsResult("forbidden");
+        }
+
+        List<ChallengeConfig> challengeConfigs = new ArrayList<>();
         ChallengeConfigsResult res = new ChallengeConfigsResult("");
         List<Challenge> challenges = challengeService.getAllChallenges();
 
         for (Challenge challenge:challenges){
             ChallengeConfiguration challengeconfiguration  = challengeService.getConfiguration(challenge);
-            ChallengeConfig challengeconfig = new ChallengeConfig();
+            ChallengeConfig challengeConfig = new ChallengeConfig();
 
-            challengeconfig.setChallengeId(Long.toString(challenge.getChallengeId()));
-            challengeconfig.setState(challenge.getState());
-            challengeconfig.setName(challengeconfiguration.getName());
-            challengeconfig.setType(challengeconfiguration.getType());
-            challengeconfig.setDescription(challengeconfiguration.getDescription());
-            challengeconfig.setExternal_link(challengeconfiguration.getExternalLink());
-            challengeconfig.setHint(challengeconfiguration.getHint());
-            challengeconfig.setFlag(challengeconfiguration.getFlagEx());
-            challengeconfig.setScore(challengeconfiguration.getScoreEx());
+            challengeConfig.setChallengeId(Long.toString(challenge.getChallengeId()));
+            challengeConfig.setState(challenge.getState());
+            challengeConfig.setName(challengeconfiguration.getName());
+            challengeConfig.setType(challengeconfiguration.getType());
+            challengeConfig.setDescription(challengeconfiguration.getDescription());
+            challengeConfig.setExternal_link(challengeconfiguration.getExternalLink());
+            challengeConfig.setHint(challengeconfiguration.getHint());
+            challengeConfig.setFlag(challengeconfiguration.getFlagEx());
+            challengeConfig.setScore(challengeconfiguration.getScoreEx());
 
-            challengeconfigs.add(challengeconfig);
+            challengeConfigs.add(challengeConfig);
         }
-        res.setChallengeConfigs(challengeconfigs);
+        res.setChallengeConfigs(challengeConfigs);
 
         return res;
     }

@@ -1,8 +1,8 @@
 package club.tp0t.oj.Graphql.types;
 
 public class FlagTypeInput {
-    Boolean dynamic;
-    String value;
+    private Boolean dynamic;
+    private String value;
 
     public Boolean getDynamic() {
         return dynamic;
@@ -20,5 +20,9 @@ public class FlagTypeInput {
         this.value = value;
     }
 
+    public boolean checkPass() {
+        value = value.trim();
+        return !value.equals("");
+    }
 }
 

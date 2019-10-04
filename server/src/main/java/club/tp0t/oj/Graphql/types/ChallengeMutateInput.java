@@ -3,15 +3,15 @@ package club.tp0t.oj.Graphql.types;
 import java.util.List;
 
 public class ChallengeMutateInput {
-    String challengeId;
-    String name;
-    String type;
-    ScoreTypeInput score;
-    FlagTypeInput flag;
-    String description;
-    List<String> external_link;
-    List<String> hint;
-    String state;
+    private String challengeId;
+    private String name;
+    private String type;
+    private ScoreTypeInput score;
+    private FlagTypeInput flag;
+    private String description;
+    private List<String> external_link;
+    private List<String> hint;
+    private String state;
 
     public void setChallengeId(String challengeId) {
         this.challengeId = challengeId;
@@ -83,5 +83,20 @@ public class ChallengeMutateInput {
 
     public String getState() {
         return state;
+    }
+
+    public boolean checkPass() {
+//        if (name == null || type == null || score == null || flag == null || description == null || external_link == null || hint == null || state == null) return false;
+        name = name.trim();
+        description = description.trim();
+        return !name.equals("") && IsChallengeType(type) && score.checkPass() && flag.checkPass() && !description.equals("") && IsState(state);
+    }
+
+    private static boolean IsChallengeType(String type) {
+        return type.matches("^(WEB|RE|PWN|MISC|CRYPTO)$");
+    }
+
+    private static boolean IsState(String state) {
+        return state.matches("^(enabled|disabled)$");
     }
 }

@@ -1,6 +1,9 @@
 package club.tp0t.oj.Graphql.types;
 
+import club.tp0t.oj.Util.CheckHelper;
+
 public class RegisterInput {
+
     private String name;
     private String stuNumber;
     private String password;
@@ -63,5 +66,19 @@ public class RegisterInput {
 
     public void setGrade(String grade) {
         this.grade = grade;
+    }
+
+    public boolean checkPass() {
+        name = name.replaceAll("\\s", "");
+        stuNumber = stuNumber.replaceAll("\\s", "");
+        qq = qq.replaceAll("\\s", "");
+        mail = mail.replaceAll("\\s", "");
+        grade = grade.replaceAll("\\s", "");
+
+        return !name.equals("") &&
+                !stuNumber.equals("") &&
+                !qq.equals("") &&
+                !mail.equals("") &&
+                CheckHelper.checkGrade(grade);
     }
 }
