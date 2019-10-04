@@ -1,4 +1,5 @@
 type Query {
+    allUserInfos: AllUserInfoResult
     userInfo(userId: String!) : UserInfoResult
     test: String
     challengeInfos: ChallengeInfosResult
@@ -27,6 +28,11 @@ type UserInfo {
     state: String
     rank: Int
     grade: String
+}
+
+type AllUserInfoResult {
+    message: String
+    allUserInfos: [UserInfo]
 }
 
 type RankResult {

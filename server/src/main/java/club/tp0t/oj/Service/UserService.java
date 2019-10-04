@@ -122,6 +122,9 @@ public class UserService {
         return user.getUserId();
     }
 
+    public List<User> getAllUser() {
+        return userRepository.findAll();
+    }
 
     public User getUserById(long userId) {
         return userRepository.getOne(userId);

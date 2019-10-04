@@ -1,8 +1,11 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Graphql.types.AllUserInfoResult;
 import club.tp0t.oj.Graphql.types.ChallengeConfig;
 import club.tp0t.oj.Graphql.types.ChallengeConfigsResult;
+import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Service.*;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
@@ -28,18 +31,38 @@ public class AdminQuery implements GraphQLQueryResolver {
     @Autowired
     private ReplicaAllocService replicaAllocService;
     @Autowired
-    private  SubmitService submitService;
+    private SubmitService submitService;
     @Autowired
-    private  UserService userService;
+    private UserService userService;
 
-    public ChallengeConfigsResult challengeConfigs(DataFetchingEnvironment environment){
+    public AllUserInfoResult allUserInfo(DataFetchingEnvironment environment) {
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if (session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new AllUserInfoResult("forbidden");
+        }
+
+        AllUserInfoResult res = new AllUserInfoResult("");
+
+        List<User> users = userService.getAllUser();
+        if(users == null) users = new ArrayList<>();
+        res.addAllUserInfo(users);
+
+        return res;
+    }
+
+    public ChallengeConfigsResult challengeConfigs(DataFetchingEnvironment environment) {
 
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // login & admin check
-        if(session.getAttribute("isLogin") == null ||
+        if (session.getAttribute("isLogin") == null ||
                 !((boolean) session.getAttribute("isLogin")) ||
                 !(boolean) session.getAttribute("isAdmin")) {
             return new ChallengeConfigsResult("forbidden");
@@ -49,8 +72,8 @@ public class AdminQuery implements GraphQLQueryResolver {
         ChallengeConfigsResult res = new ChallengeConfigsResult("");
         List<Challenge> challenges = challengeService.getAllChallenges();
 
-        for (Challenge challenge:challenges){
-            ChallengeConfiguration challengeconfiguration  = challengeService.getConfiguration(challenge);
+        for (Challenge challenge : challenges) {
+            ChallengeConfiguration challengeconfiguration = challengeService.getConfiguration(challenge);
             ChallengeConfig challengeConfig = new ChallengeConfig();
 
             challengeConfig.setChallengeId(Long.toString(challenge.getChallengeId()));

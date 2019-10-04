@@ -7,6 +7,7 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -17,6 +18,7 @@ public class BulletinQuery implements GraphQLQueryResolver {
     public BulletinResult allBulltin(){
         List<Bulletin> bulletins = bulletinService.getAllBulletin();
         BulletinResult  bulletinresult = new BulletinResult ("");
+        if(bulletins == null) bulletins = new ArrayList<>();
         bulletinresult.setBulletin(bulletins);
         return bulletinresult;
     }

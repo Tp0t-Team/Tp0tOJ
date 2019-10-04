@@ -11,7 +11,6 @@ public class BulletinResult {
 
     public BulletinResult(String message) {
         this.message = message;
-        this.bulletins = new ArrayList<>();
     }
 
     public List<Bulletin> getBulletin() {
