@@ -107,7 +107,7 @@ export default class Challenge extends Vue {
 
   async mounted() {
     try {
-      let res = await this.$apollo.query<ChallengeConfigResult>({
+      let res = await this.$apollo.query<ChallengeConfigResult, {}>({
         query: gql`
           query {
             challengeConfigs {
@@ -116,8 +116,14 @@ export default class Challenge extends Vue {
                 challengeId
                 type
                 name
-                score
-                flag
+                score {
+                  dynamic
+                  base_score
+                }
+                flag {
+                  dynamic
+                  value
+                }
                 description
                 external_link
                 hint
@@ -157,7 +163,7 @@ export default class Challenge extends Vue {
         ChallengeConfigWithId
       >({
         mutation: gql`
-          mutation($input: ChallengeMutateInput) {
+          mutation($input: ChallengeMutateInput!) {
             challengeMutate(input: $input) {
               message
             }

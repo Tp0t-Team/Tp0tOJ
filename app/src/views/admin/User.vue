@@ -64,6 +64,8 @@ import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserEditor from "@/components/UserEditor.vue";
 import {
+  RankResult,
+  UserInfoResult,
   UserInfo,
   SubmitInfo,
   UserInfoUpdateInput,
@@ -115,9 +117,9 @@ export default class User extends Vue {
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.rank.emssage) throw res.data!.rank.emssage;
+      if (res.data!.rank.message) throw res.data!.rank.message;
       let infos: UserInfo[] = [];
-      for (let r of res.data!.rank) {
+      for (let r of res.data!.rank.rankResultDescs) {
         let infoRes = await this.$apollo.query<
           UserInfoResult,
           { userId: string }
@@ -149,9 +151,9 @@ export default class User extends Vue {
             userId: r.userId
           }
         });
-        if (res.errors) throw res.errors.map(v => v.message).join(",");
-        if (res.data!.userInfo.emssage) throw res.data!.userInfo.emssage;
-        infos.push(res.data!.userInfo.userInfo);
+        if (infoRes.errors) throw infoRes.errors.map(v => v.message).join(",");
+        if (infoRes.data!.userInfo.message) throw infoRes.data!.userInfo.message;
+        infos.push(infoRes.data!.userInfo.userInfo);
       }
       this.users = infos;
     } catch (e) {
