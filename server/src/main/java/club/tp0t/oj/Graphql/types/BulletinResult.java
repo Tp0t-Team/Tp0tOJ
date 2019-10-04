@@ -2,6 +2,7 @@ package club.tp0t.oj.Graphql.types;
 
 import club.tp0t.oj.Entity.Bulletin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BulletinResult {
@@ -10,6 +11,7 @@ public class BulletinResult {
 
     public BulletinResult(String message) {
         this.message = message;
+        this.bulletins = new ArrayList<>();
     }
 
     public List<Bulletin> getBulletin() {
