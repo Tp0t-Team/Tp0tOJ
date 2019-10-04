@@ -15,7 +15,7 @@ public class BulletinQuery implements GraphQLQueryResolver {
     @Autowired
     private BulletinService bulletinService;
 
-    public BulletinResult allBulltin(){
+    public BulletinResult allBulletin(){
         List<Bulletin> bulletins = bulletinService.getAllBulletin();
         BulletinResult  bulletinresult = new BulletinResult ("");
         if(bulletins == null) bulletins = new ArrayList<>();

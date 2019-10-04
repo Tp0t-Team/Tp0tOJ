@@ -5,7 +5,7 @@ type Query {
     challengeInfos: ChallengeInfosResult
     challengeConfigs: ChallengeConfigsResult
     rank: RankResult
-    allBulltin : BulletinResult
+    allBulletin : BulletinResult
     submitHistory(userId: String!): SubmitHistoryResult
 }
 type UserInfoResult {
