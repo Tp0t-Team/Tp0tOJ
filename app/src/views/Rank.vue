@@ -7,7 +7,7 @@
             :elevation="hover ? 12 : 2"
             max-width="300"
             class="mx-auto d-flex flex-row mb-6 px-4"
-            @click="$router.push(`/profile/${r.userId}`)"
+            @click="if(!!$store.state.global.userId)$router.push(`/profile/${r.userId}`)"
           >
             <div class="pa-2 align-self-center">
               <v-avatar size="64" color="blue">
