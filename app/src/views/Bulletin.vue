@@ -88,7 +88,7 @@ export default class Bulletin extends Vue {
       let res = await this.$apollo.query<AllBulletinResult, {}>({
         query: gql`
           query {
-            allBulltin {
+            allBulletin {
               message
               bulletins {
                 title
