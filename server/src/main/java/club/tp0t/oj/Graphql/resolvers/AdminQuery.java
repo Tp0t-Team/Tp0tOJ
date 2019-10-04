@@ -35,7 +35,7 @@ public class AdminQuery implements GraphQLQueryResolver {
     @Autowired
     private UserService userService;
 
-    public AllUserInfoResult allUserInfo(DataFetchingEnvironment environment) {
+    public AllUserInfoResult allUserInfos(DataFetchingEnvironment environment) {
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
