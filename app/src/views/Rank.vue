@@ -108,7 +108,9 @@ export default class Rank extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
-      this.ranks = res.data!.rank.rankResultDescs;
+      this.ranks = res.data!.rank.rankResultDescs.sort(
+        (a, b) => parseInt(b.score) - parseInt(a.score)
+      );
       this.pageCount = Math.floor(
         (this.ranks.length + UserPerPage - 1) / UserPerPage
       );
