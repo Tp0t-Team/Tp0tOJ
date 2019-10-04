@@ -7,7 +7,7 @@ Vue.use(VueApollo)
 
 const options = {
     link: createHttpLink({
-        uri: 'http://localhost/graphql'
+        uri: '/graphql'
     }),
     cache: new InMemoryCache()
 }
