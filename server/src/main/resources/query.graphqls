@@ -71,6 +71,7 @@ type ChallengeConfig {
     description: String
     external_link: [String]
     hint: [String]
+    state: String
 }
 
 type ScoreType {

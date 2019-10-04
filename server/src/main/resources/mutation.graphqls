@@ -95,6 +95,7 @@ input ChallengeMutateInput {
     description: String
     external_link: [String]
     hint: [String]
+    state: String
 }
 
 input ScoreTypeInput {

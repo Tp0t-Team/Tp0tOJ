@@ -11,6 +11,7 @@ public class ChallengeConfig {
     String description;
     List<String> external_link;
     List<String> hint;
+    String state;
 
     public void setChallengeId(String challengeId) {
         this.challengeId = challengeId;
@@ -75,4 +76,8 @@ public class ChallengeConfig {
     public String getChallengeId() {
         return challengeId;
     }
+
+    public void setState(String state) { this.state = state; }
+
+    public String getState() {  return state; }
 }

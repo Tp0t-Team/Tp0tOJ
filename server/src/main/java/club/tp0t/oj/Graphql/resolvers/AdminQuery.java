@@ -40,6 +40,7 @@ public class AdminQuery implements GraphQLQueryResolver {
             ChallengeConfig challengeconfig = new ChallengeConfig();
 
             challengeconfig.setChallengeId(Long.toString(challenge.getChallengeId()));
+            challengeconfig.setState(challenge.getState());
             challengeconfig.setName(challengeconfiguration.getName());
             challengeconfig.setType(challengeconfiguration.getType());
             challengeconfig.setDescription(challengeconfiguration.getDescription());
@@ -50,7 +51,7 @@ public class AdminQuery implements GraphQLQueryResolver {
 
             challengeconfigs.add(challengeconfig);
         }
-//        res.setChallengeConfigs(challengeconfigs);
+        res.setChallengeConfigs(challengeconfigs);
 
         return res;
     }

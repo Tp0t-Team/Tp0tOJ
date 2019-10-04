@@ -41,36 +41,36 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findByChallengeId(id);
         return challenge != null;
     }
-    public Boolean updateChallenge(ChallengeMutateInput challengeconfig){
-        Challenge challenge = challengeRepository.findByChallengeId(challengeconfig.getChallengeId());
+    public Boolean updateChallenge(ChallengeMutateInput challengemutate){
+        Challenge challenge = challengeRepository.findByChallengeId(challengemutate.getChallengeId());
 
         String configuration = challenge.getConfiguration();
         ChallengeConfiguration challengeConfiguration = JSON.parseObject(configuration, ChallengeConfiguration.class);
 
-        if(challengeconfig.getName() != null) challengeConfiguration.setName(challengeconfig.getName());
-        if(challengeconfig.getType() != null) challengeConfiguration.setType(challengeconfig.getType());
-        if(challengeconfig.getScore()!= null)challengeConfiguration.setScoreEx(challengeconfig.getScore());
-        if(challengeconfig.getFlag()!= null) challengeConfiguration.setFlagEx(challengeconfig.getFlag());
-        if(challengeconfig.getDescription()!= null) challengeConfiguration.setDescription(challengeconfig.getDescription());
-        if(challengeconfig.getExternal_link()!= null) challengeConfiguration.setExternalLink(challengeconfig.getExternal_link());
-        if(challengeconfig.getHint()!= null) challengeConfiguration.setHint(challengeconfig.getHint());
+        if(challengemutate.getName() != null) challengeConfiguration.setName(challengemutate.getName());
+        if(challengemutate.getType() != null) challengeConfiguration.setType(challengemutate.getType());
+        if(challengemutate.getScore()!= null)challengeConfiguration.setScoreEx(challengemutate.getScore());
+        if(challengemutate.getFlag()!= null) challengeConfiguration.setFlagEx(challengemutate.getFlag());
+        if(challengemutate.getDescription()!= null) challengeConfiguration.setDescription(challengemutate.getDescription());
+        if(challengemutate.getExternal_link()!= null) challengeConfiguration.setExternalLink(challengemutate.getExternal_link());
+        if(challengemutate.getHint()!= null) challengeConfiguration.setHint(challengemutate.getHint());
 
         String configurationUpdated = JSON.toJSONString(challengeConfiguration);
         challenge.setConfiguration(configurationUpdated);
+        if(challengemutate.getState() != null) challenge.setState(challengemutate.getState());
 
-//        if (challengeconfig.getState() != null) challenge.setState(challengeconfig.getState());
         challengeRepository.save(challenge);
         return true;
     }
-    public Boolean checkFormat(ChallengeMutateInput challengeconfig){
+    public Boolean checkFormat(ChallengeMutateInput challengemutate){
 
-        String name = challengeconfig.getName();
-        String type = challengeconfig.getType();
-        ScoreTypeInput score = challengeconfig.getScore();
-        FlagTypeInput flag = challengeconfig.getFlag();
-        String description = challengeconfig.getDescription();
-//        List<String> links = challengeconfig.getExternal_link();
-//        List<String> hints = challengeconfig.getHint();
+        String name = challengemutate.getName();
+        String type = challengemutate.getType();
+        ScoreTypeInput score = challengemutate.getScore();
+        FlagTypeInput flag = challengemutate.getFlag();
+        String description = challengemutate.getDescription();
+//        List<String> links = challengemutate.getExternal_link();
+//        List<String> hints = challengemutate.getHint();
 
         name = name.replaceAll("\\s", "");
         type = type.replaceAll("\\s", "");
@@ -82,23 +82,22 @@ public class ChallengeService {
         return true;
     }
 
-    public Boolean addChallenge(ChallengeMutateInput challengeconfig){
+    public Boolean addChallenge(ChallengeMutateInput challengemutate){
 
         ChallengeConfiguration challengeConfiguration = new ChallengeConfiguration();
-        challengeConfiguration.setName(challengeconfig.getName());
-        challengeConfiguration.setType(challengeconfig.getType());
-        challengeConfiguration.setDescription(challengeconfig.getDescription());
-        challengeConfiguration.setFlagEx(challengeconfig.getFlag());
-        challengeConfiguration.setScoreEx(challengeconfig.getScore());
-        challengeConfiguration.setExternalLink(challengeconfig.getExternal_link());
-        challengeConfiguration.setHint(challengeconfig.getHint());
+        challengeConfiguration.setName(challengemutate.getName());
+        challengeConfiguration.setType(challengemutate.getType());
+        challengeConfiguration.setDescription(challengemutate.getDescription());
+        challengeConfiguration.setFlagEx(challengemutate.getFlag());
+        challengeConfiguration.setScoreEx(challengemutate.getScore());
+        challengeConfiguration.setExternalLink(challengemutate.getExternal_link());
+        challengeConfiguration.setHint(challengemutate.getHint());
 
         String configuration = JSON.toJSONString(challengeConfiguration);
         Challenge challenge = new Challenge();
         challenge.setConfiguration(configuration);
 
-//        challenge.setState(challengeconfig.getState());
-        challenge.setState("Disabled");
+        challenge.setState(challengemutate.getState());
 
         challenge.setGmtCreated(new Timestamp(System.currentTimeMillis()));
         challenge.setGmtModified(new Timestamp(System.currentTimeMillis()));

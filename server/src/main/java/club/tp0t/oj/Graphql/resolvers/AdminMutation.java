@@ -64,10 +64,6 @@ public class AdminMutation implements GraphQLMutationResolver {
 
     public ChallengeMutateResult challengeMutate(ChallengeMutateInput challengeMutate) {
         String id = challengeMutate.getChallengeId();
-        if(id==null) return new ChallengeMutateResult("not empty error");
-        id  = id.replaceAll("\\s", "");
-        if(id.equals("")) return new ChallengeMutateResult("not empty error");
-
         if(challengeService.checkIdExistence(id)){
             if(!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
             return new ChallengeMutateResult("");
