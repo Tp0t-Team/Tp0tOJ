@@ -119,7 +119,7 @@ export default class Challenge extends Vue {
                 score
                 flag
                 description
-                externalLink
+                external_link
                 hint
                 state
               }

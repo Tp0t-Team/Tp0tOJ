@@ -166,6 +166,9 @@ export default class Profile extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.userInfo.message) throw res.data!.userInfo.message;
       this.userInfo = res.data!.userInfo.userInfo;
+      this.userInfo.joinTime = new Date(
+        this.userInfo.joinTime + " UTC"
+      ).toLocaleString();
       this.loading = false;
     } catch (e) {
       this.loading = false;

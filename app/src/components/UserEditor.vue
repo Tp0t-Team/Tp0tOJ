@@ -162,7 +162,7 @@ export default class UserEditor extends Vue {
     this.qq = this.user.qq;
     this.mail = this.user.mail;
     this.topRank = this.user.topRank;
-    this.joinTime = this.user.joinTime;
+    this.joinTime = new Date(this.user.joinTime + " UTC").toLocaleString();
   }
 
   @Emit("submit")

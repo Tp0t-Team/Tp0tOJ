@@ -99,7 +99,65 @@ export default class User extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
-    await this.refresh();
+    try {
+      let res = await this.$apollo.query<RankResult, {}>({
+        query: gql`
+          query {
+            rank {
+              message
+              rankResultDescs {
+                userId
+                name
+                score
+              }
+            }
+          }
+        `
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.rank.emssage) throw res.data!.rank.emssage;
+      let infos: UserInfo[] = [];
+      for (let r of res.data!.rank) {
+        let infoRes = await this.$apollo.query<
+          UserInfoResult,
+          { userId: string }
+        >({
+          query: gql`
+            query($userId: String!) {
+              userInfo(userId: $userId) {
+                message
+                userInfo {
+                  userId
+                  name
+                  role
+                  stuNumber
+                  department
+                  grade
+                  protectedTime
+                  qq
+                  mail
+                  topRank
+                  joinTime
+                  score
+                  state
+                  rank
+                }
+              }
+            }
+          `,
+          variables: {
+            userId: r.userId
+          }
+        });
+        if (res.errors) throw res.errors.map(v => v.message).join(",");
+        if (res.data!.userInfo.emssage) throw res.data!.userInfo.emssage;
+        infos.push(res.data!.userInfo.userInfo);
+      }
+      this.users = infos;
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 
   select(user: UserInfo) {

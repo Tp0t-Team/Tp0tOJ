@@ -25,7 +25,7 @@ export interface ChallengeDesc {
     name: string
     score: number
     description: string
-    externalLink: string[]
+    external_link: string[]
     hint: string[]
     blood: string[]
     done: boolean
