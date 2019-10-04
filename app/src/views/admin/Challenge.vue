@@ -106,28 +106,13 @@ export default class Challenge extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
-    // example data
-    this.challengeConfigs = [
-      {
-        challengeId: "1",
-        type: "WEB",
-        name: "easy_php",
-        score: { dynamic: false, base_score: 1000 },
-        flag: { dynamic: false, value: "qweertytryrty" },
-        description: "123456",
-        external_link: ["http://www.google.com"],
-        hint: ["123456"],
-        state: "enabled"
-      }
-    ];
-    //
     try {
       let res = await this.$apollo.query<ChallengeConfigResult>({
         query: gql`
           query {
-            challenges {
+            challengeConfigs {
               message
-              challengeInfos {
+              challengeConfigs {
                 challengeId
                 type
                 name

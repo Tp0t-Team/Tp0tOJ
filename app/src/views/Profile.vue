@@ -134,25 +134,6 @@ export default class Profile extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
-    // example data
-    this.loading = true;
-    this.userInfo = {
-      userId: "1",
-      name: "CXK",
-      role: "member",
-      stuNumber: "0001",
-      department: "xxxx",
-      grade: "2010",
-      protectedTime: "2019-10-10",
-      qq: "12345678",
-      mail: "123@test.com",
-      topRank: "∞",
-      joinTime: "2019-01-01",
-      score: "0",
-      state: "protected",
-      rank: 0
-    };
-    //
     try {
       let res = await this.$apollo.query<UserInfoResult, { userId: string }>({
         query: gql`

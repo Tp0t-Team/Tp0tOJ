@@ -99,24 +99,7 @@ export default class User extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
-    this.users = [
-      {
-        userId: "1",
-        name: "DRSN",
-        role: "team",
-        stuNumber: "9161",
-        department: "计算机学院",
-        grade: "2016",
-        protectedTime: "2019-01-01",
-        qq: "784227594",
-        mail: "test@test.com",
-        topRank: "1",
-        joinTime: "2018-01-01",
-        score: "1000",
-        state: "normal",
-        rank: 1
-      }
-    ];
+    await this.refresh();
   }
 
   select(user: UserInfo) {

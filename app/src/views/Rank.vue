@@ -90,34 +90,6 @@ export default class Rank extends Vue {
   }
 
   async mounted() {
-    // example data
-    this.ranks = [
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" },
-      { userId: "1", name: "Zenis", score: "1000" },
-      { userId: "2", name: "Mio", score: "800" },
-      { userId: "3", name: "DRSN", score: "600" }
-    ];
-    //
     this.page = parseInt(this.$route.params.page);
     try {
       let res = await this.$apollo.query<RankResult>({
@@ -125,7 +97,7 @@ export default class Rank extends Vue {
           query {
             rank {
               message
-              userInfos {
+              rankResultDescs {
                 userId
                 name
                 score

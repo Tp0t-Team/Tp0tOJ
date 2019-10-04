@@ -8,7 +8,7 @@
           <v-form v-model="loginValid" class="pa-6" ref="loginForm">
             <v-text-field
               v-model="username"
-              label="User"
+              label="Student Number"
               :rules="[rules.required]"
               :disabled="loading"
             ></v-text-field>
@@ -233,10 +233,12 @@ export default class Login extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.login.message) throw res.data!.login.message;
       this.loading = false;
-      this.$store.commit("setUserIdAndRole", {
+      this.$store.commit("global/setUserIdAndRole", {
         userId: res.data!.login.userId,
         role: res.data!.login.role
       });
+      sessionStorage.setItem("user_id", res.data!.login.userId);
+      sessionStorage.setItem("role", res.data!.login.role);
       this.$router.replace("/");
     } catch (e) {
       this.loading = false;
@@ -274,6 +276,7 @@ export default class Login extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.register.message) throw res.data!.register.message;
+      this.loading = false;
       this.tab = "tab-login";
     } catch (e) {
       this.loading = false;

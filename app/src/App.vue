@@ -1,7 +1,7 @@
 <template>
   <v-app id="app">
     <v-navigation-drawer v-model="drawer" app clipped>
-      <nav-list></nav-list>
+      <nav-list :isLogin="!!$store.state.global.userId"></nav-list>
     </v-navigation-drawer>
 
     <v-app-bar app clipped-left>

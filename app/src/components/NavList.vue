@@ -17,7 +17,7 @@
       </v-list-item-content>
     </v-list-item>
     <v-list-item
-      v-if="!!$store.state.global.userId"
+      v-if="isLogin"
       @click="$router.push({path:'/challenge',query:{time:Date.now().toLocaleString()}})"
     >
       <v-list-item-action>
@@ -35,7 +35,7 @@
         <v-list-item-title>Rank</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item v-if="!!$store.state.global.userId" @click="$router.push(`/profile/1`)">
+    <v-list-item v-if="isLogin" @click="$router.push(`/profile/${$store.state.global.userId}`)">
       <v-list-item-action>
         <v-icon>person</v-icon>
       </v-list-item-action>
@@ -43,7 +43,7 @@
         <v-list-item-title>Profile</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item v-if="!!$store.state.global.userId" @click="logout">
+    <v-list-item v-if="isLogin" @click="logout">
       <v-list-item-action>
         <v-icon>exit_to_app</v-icon>
       </v-list-item-action>
@@ -51,7 +51,7 @@
         <v-list-item-title>Logout</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item v-if="!$store.state.global.userId" @click="$router.push(`/login`)">
+    <v-list-item v-if="!isLogin" @click="$router.push(`/login`)">
       <v-list-item-action>
         <v-icon>person</v-icon>
       </v-list-item-action>
@@ -94,12 +94,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 import gql from "graphql-tag";
 import { LogoutResult } from "@/struct";
 
 @Component
 export default class NavList extends Vue {
+  @Prop() isLogin!: boolean;
   private settings: string[] = [];
 
   created() {
