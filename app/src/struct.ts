@@ -73,6 +73,10 @@ export interface SubmitInfo {
 // query userInfo
 export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
 
+export type AllUserInfoResult = {
+    allUserInfo: { allUserInfos: UserInfo[] } & Result
+}
+
 // query challenges
 export type ChallengeResult = {
     challengeInfos: { challengeInfos: ChallengeDesc[] } & Result

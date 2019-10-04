@@ -64,9 +64,8 @@ import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserEditor from "@/components/UserEditor.vue";
 import {
-  RankResult,
-  UserInfoResult,
   UserInfo,
+  AllUserInfoResult,
   SubmitInfo,
   UserInfoUpdateInput,
   UserInfoUpdateResult,
@@ -102,33 +101,12 @@ export default class User extends Vue {
 
   async mounted() {
     try {
-      let res = await this.$apollo.query<RankResult, {}>({
+      let res = await this.$apollo.query<AllUserInfoResult, {}>({
         query: gql`
           query {
-            rank {
-              message
-              rankResultDescs {
-                userId
-                name
-                score
-              }
-            }
-          }
-        `
-      });
-      if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.rank.message) throw res.data!.rank.message;
-      let infos: UserInfo[] = [];
-      for (let r of res.data!.rank.rankResultDescs) {
-        let infoRes = await this.$apollo.query<
-          UserInfoResult,
-          { userId: string }
-        >({
-          query: gql`
-            query($userId: String!) {
-              userInfo(userId: $userId) {
+              allUserInfo {
                 message
-                userInfo {
+                allUserInfos {
                   userId
                   name
                   role
@@ -146,16 +124,11 @@ export default class User extends Vue {
                 }
               }
             }
-          `,
-          variables: {
-            userId: r.userId
-          }
-        });
-        if (infoRes.errors) throw infoRes.errors.map(v => v.message).join(",");
-        if (infoRes.data!.userInfo.message) throw infoRes.data!.userInfo.message;
-        infos.push(infoRes.data!.userInfo.userInfo);
-      }
-      this.users = infos;
+        `
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.allUserInfo.message) throw res.data!.allUserInfo.message;
+      this.users = res.data!.allUserInfo.allUserInfos;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
