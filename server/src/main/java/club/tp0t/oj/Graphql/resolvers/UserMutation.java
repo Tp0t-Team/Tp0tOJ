@@ -212,8 +212,7 @@ public class UserMutation implements GraphQLMutationResolver {
         // check flag
         long challengeId = Long.parseLong(input.getChallengeId());
         long userId = (long) session.getAttribute("userId");
-        //String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
-        String flag = replicaService.getFlagByUserIdAndChallengeId(userId, challengeId);
+        String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
         String submitFlag = input.getFlag();
 
         if (flag == null) return new SubmitResult("No replica for you");
