@@ -138,14 +138,14 @@ public class UserQuery implements GraphQLQueryResolver {
         List<Challenge> challenges;
 
         // admin or team
-        long userId = (long) session.getAttribute("userId");
-        if(userService.adminCheckByUserId(userId) || userService.teamCheckByUserId(userId)) {
-            challenges = challengeService.getAllChallenges();
-        }
+//        long userId = (long) session.getAttribute("userId");
+//        if(userService.adminCheckByUserId(userId) || userService.teamCheckByUserId(userId)) {
+//            challenges = challengeService.getAllChallenges();
+//        }
         // member
-        else {
-            challenges = challengeService.getEnabledChallenges();
-        }
+//        else {
+        challenges = challengeService.getEnabledChallenges();
+//        }
 
         // no challenge
         if(challenges == null) return new ChallengeInfosResult("no challenge available");
