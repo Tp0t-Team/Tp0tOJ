@@ -72,7 +72,7 @@
           @focus="submitError = ''"
           @blur="check"
         ></v-text-field>
-        <div class="dialog-discription pa-6">{{currentChallenge.description}}</div>
+        <div class="dialog-discription pa-6">{{formatedHint + currentChallenge.description}}</div>
         <div class="url-list">
           <v-chip
             color="primary"
@@ -127,6 +127,14 @@ export default class Challenge extends Vue {
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+  private get formatedHint() {
+    if (!this.currentChallenge) return "";
+    return this.currentChallenge.hint.reduce(
+      (pre: string, cur: string) => `Hint: ${cur}\npre`,
+      ""
+    );
+  }
 
   async mounted() {
     try {

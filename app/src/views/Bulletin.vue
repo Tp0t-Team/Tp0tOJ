@@ -1,7 +1,9 @@
 <template>
   <v-container class="bulletin-list">
     <v-card v-for="item in bulletins" :key="item.time">
-      <span class="bulletin-time ma-4">{{item.publishTime}}</span>
+      <span
+        class="bulletin-time ma-4"
+      >{{new Date(item.publishTime.toString() + " UTC").toLocaleString()}}</span>
       <v-card-title>{{item.title}}</v-card-title>
       <v-card-text>{{item.content}}</v-card-text>
     </v-card>
