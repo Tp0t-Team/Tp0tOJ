@@ -6,6 +6,7 @@ import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -58,13 +59,23 @@ public class UserService {
         return user != null;
     }
 
+    @Transactional
     public User register(String name,
-                            String stuNumber,
-                            String password,
-                            String department,
-                            String qq,
-                            String mail,
-                            String grade) {
+                         String stuNumber,
+                         String password,
+                         String department,
+                         String qq,
+                         String mail,
+                         String grade) {
+        if (checkStuNumberExistence(stuNumber)) {
+            return null;
+        }
+        if (checkQqExistence(qq)) {
+            return null;
+        }
+        if (checkMailExistence(mail)) {
+            return null;
+        }
         User user = new User();
         user.setName(name);
         user.setStuNumber(stuNumber);
@@ -74,7 +85,7 @@ public class UserService {
         user.setJoinTime(new Timestamp(System.currentTimeMillis()));
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         // set protected time 100 days
-        timestamp.setTime(timestamp.getTime() + TimeUnit.MINUTES.toMillis(100*24*60));
+        timestamp.setTime(timestamp.getTime() + TimeUnit.MINUTES.toMillis(100 * 24 * 60));
         user.setProtectedTime(timestamp);
         user.setMail(mail);
         user.setPassword(password);
@@ -94,7 +105,7 @@ public class UserService {
         User user = userRepository.findByStuNumber(stuNumber);
 
         // user disabled
-        if(user.getState().equals("disabled")) {
+        if (user.getState().equals("disabled")) {
             return false;
         }
         // password matches
@@ -138,9 +149,9 @@ public class UserService {
 
     public int getRankByUserId(long userId) {
         List<User> usersRank = userRepository.getUsersRank();
-        for(int i=0;i<usersRank.size();i++) {
+        for (int i = 0; i < usersRank.size(); i++) {
             User tmpUser = usersRank.get(i);
-            if(tmpUser.getUserId() == userId) return i+1;
+            if (tmpUser.getUserId() == userId) return i + 1;
         }
         // user not exists
         return 0;

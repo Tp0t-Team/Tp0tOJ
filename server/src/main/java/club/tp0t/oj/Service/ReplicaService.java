@@ -41,4 +41,9 @@ public class ReplicaService {
         if (replicas == null) return null;
         return replicas.get(new Random().nextInt(replicas.size()));
     }
+
+    public void updateReplicaFlag(Replica replica, String flag) {
+        replica.setFlag(flag);
+        replicaRepository.save(replica);
+    }
 }

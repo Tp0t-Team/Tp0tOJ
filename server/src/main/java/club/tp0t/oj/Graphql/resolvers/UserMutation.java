@@ -12,6 +12,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -83,15 +84,15 @@ public class UserMutation implements GraphQLMutationResolver {
         }
 
         // check duplicated user
-        if (userService.checkStuNumberExistence(stuNumber)) {
-            return new RegisterResult("stuNumber already in use");
-        }
-        if (userService.checkQqExistence(qq)) {
-            return new RegisterResult("qq already in use");
-        }
-        if (userService.checkMailExistence(mail)) {
-            return new RegisterResult("mail already in use");
-        }
+//        if (userService.checkStuNumberExistence(stuNumber)) {
+//            return new RegisterResult("stuNumber already in use");
+//        }
+//        if (userService.checkQqExistence(qq)) {
+//            return new RegisterResult("qq already in use");
+//        }
+//        if (userService.checkMailExistence(mail)) {
+//            return new RegisterResult("mail already in use");
+//        }
 
         // register user
         // if failed
@@ -190,6 +191,8 @@ public class UserMutation implements GraphQLMutationResolver {
     }
 
     // submit flag
+    // need to move into service
+    @Transactional
     public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();

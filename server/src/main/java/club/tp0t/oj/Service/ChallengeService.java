@@ -2,6 +2,7 @@ package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.ChallengeRepository;
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
 import club.tp0t.oj.Graphql.types.FlagTypeInput;
 import club.tp0t.oj.Graphql.types.ScoreTypeInput;
@@ -9,6 +10,7 @@ import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -17,6 +19,8 @@ import java.util.List;
 public class ChallengeService {
     @Autowired
     private ChallengeRepository challengeRepository;
+    @Autowired
+    private ReplicaService replicaService;
 
     public List<Challenge> getEnabledChallenges() {
         // return challengeRepository.getEnabledChallenges();
@@ -42,6 +46,7 @@ public class ChallengeService {
         return challenge != null;
     }
 
+    @Transactional
     public Boolean updateChallenge(ChallengeMutateInput challengeMutate) {
         Challenge challenge = challengeRepository.findByChallengeId(Long.parseLong(challengeMutate.getChallengeId()));
 
@@ -63,6 +68,14 @@ public class ChallengeService {
         if (challengeMutate.getState() != null) challenge.setState(challengeMutate.getState());
 
         challengeRepository.save(challenge);
+
+        List<Replica> replicas = replicaService.getReplicaByChallenge(challenge);
+        if (replicas != null) {
+            for (Replica replica : replicas) {
+                replicaService.updateReplicaFlag(replica, challengeConfiguration.getFlag().getValue());
+            }
+        }
+
         return true;
     }
 
