@@ -151,7 +151,8 @@ export default class Challenge extends Vue {
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.challengeInfos.message) throw res.data!.challengeInfos.message;
+      if (res.data!.challengeInfos.message)
+        throw res.data!.challengeInfos.message;
       this.challenges = res.data!.challengeInfos.challengeInfos;
     } catch (e) {
       this.infoText = e.toString();
@@ -195,8 +196,10 @@ export default class Challenge extends Vue {
           }
         `,
         variables: {
-          challengeId: this.currentChallenge!.challengeId,
-          flag: this.sumbitFlag
+          input: {
+            challengeId: this.currentChallenge!.challengeId,
+            flag: this.sumbitFlag
+          }
         }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");

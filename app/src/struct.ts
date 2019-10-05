@@ -135,8 +135,10 @@ export type LogoutResult = { logout: Result }
 
 // mutation sumbit
 export interface SubmitInput {
-    challengeId: string
-    flag: string
+    input: {
+        challengeId: string
+        flag: string
+    }
 }
 export type SubmitResult = {
     submit: Result
