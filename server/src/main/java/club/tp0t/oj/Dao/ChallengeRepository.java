@@ -14,5 +14,5 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     List<Challenge> findByState(String state);
 
-    Challenge findByChallengeId(String id);
+    Challenge findByChallengeId(long id);
 }

@@ -37,13 +37,13 @@ public class ChallengeService {
         return challengeConfiguration;
     }
 
-    public Boolean checkIdExistence(String id) {
+    public Boolean checkIdExistence(long id) {
         Challenge challenge = challengeRepository.findByChallengeId(id);
         return challenge != null;
     }
 
     public Boolean updateChallenge(ChallengeMutateInput challengeMutate) {
-        Challenge challenge = challengeRepository.findByChallengeId(challengeMutate.getChallengeId());
+        Challenge challenge = challengeRepository.findByChallengeId(Long.parseLong(challengeMutate.getChallengeId()));
 
         String configuration = challenge.getConfiguration();
         ChallengeConfiguration challengeConfiguration = JSON.parseObject(configuration, ChallengeConfiguration.class);
