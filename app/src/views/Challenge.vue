@@ -72,7 +72,7 @@
           @focus="submitError = ''"
           @blur="check"
         ></v-text-field>
-        <div class="dialog-discription pa-6">{{formatedHint + currentChallenge.description}}</div>
+        <div class="dialog-discription pa-6"><pre>{{formatedHint + currentChallenge.description}}</pre></div>
         <div class="url-list">
           <v-chip
             color="primary"
