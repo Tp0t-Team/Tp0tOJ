@@ -18,7 +18,7 @@
               >
                 <v-badge left overlap class="score">
                   <template v-slot:badge>{{item.score}}</template>
-                  <v-card-title class="subtitle-1 text-truncate">do you konw J language</v-card-title>
+                  <v-card-title class="subtitle-1 text-truncate">{{item.name}}</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
                 <v-card-text class="description">description</v-card-text>
