@@ -149,7 +149,7 @@ export default class User extends Vue {
     try {
       let res = await this.$apollo.query<
         SubmitHistoryResult,
-        { input: { userId: string } }
+        { input: string }
       >({
         query: gql`
           query($input: String!) {
@@ -164,9 +164,7 @@ export default class User extends Vue {
           }
         `,
         variables: {
-          input: {
-            userId: this.currentUser!.userId
-          }
+          input: this.currentUser!.userId
         }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
