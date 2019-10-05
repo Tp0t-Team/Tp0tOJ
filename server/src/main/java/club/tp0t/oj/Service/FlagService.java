@@ -34,16 +34,14 @@ public class FlagService {
         List<Replica> replicas = replicaService.getReplicaByChallenge(challenge);
 
         Replica matchReplica = null;
-        for(int i=0;i<replicaAllocs.size();i++) {
-            ReplicaAlloc tmpReplicaAlloc = replicaAllocs.get(i);
-            for(int j=0;j<replicas.size();j++) {
-                Replica tmpReplica = replicas.get(j);
-                if(tmpReplicaAlloc.getReplica().getReplicaId() == tmpReplica.getReplicaId()) {
+        for (ReplicaAlloc tmpReplicaAlloc : replicaAllocs) {
+            for (Replica tmpReplica : replicas) {
+                if (tmpReplicaAlloc.getReplica().getReplicaId() == tmpReplica.getReplicaId()) {
                     matchReplica = tmpReplica;
                     break;
                 }
             }
-            if(matchReplica != null) break;
+            if (matchReplica != null) break;
         }
         Flag flag = flagRepository.findByReplica(matchReplica);
         return flag.getFlag();

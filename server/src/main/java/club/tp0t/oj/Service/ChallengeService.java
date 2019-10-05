@@ -28,7 +28,7 @@ public class ChallengeService {
     }
 
     public Challenge getChallengeByChallengeId(long challengeId) {
-        return challengeRepository.getOne(challengeId);
+        return challengeRepository.findByChallengeId(challengeId);
     }
 
     public ChallengeConfiguration getConfiguration(Challenge challenge) {
