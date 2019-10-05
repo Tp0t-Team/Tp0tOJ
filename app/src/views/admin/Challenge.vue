@@ -2,7 +2,7 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="type in challengeType" :key="type">
+        <v-card class="ma-4" v-for="type in challengeType" :key="type + Date.now().toString()">
           <v-toolbar dense>{{type}}</v-toolbar>
           <v-list dense>
             <v-list-item
@@ -180,6 +180,8 @@ export default class Challenge extends Vue {
         throw res.data!.challengeMutate.message;
       this.loading = false;
       this.changed = false;
+      this.currentConfig = null;
+      this.withoutInit = true;
       await this.loadAll();
     } catch (e) {
       this.loading = false;
