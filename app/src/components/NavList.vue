@@ -126,12 +126,13 @@ export default class NavList extends Vue {
           }
         `
       });
-      if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.logout.message) throw res.data!.logout.message;
       this.$store.commit("global/resetUserIdAndRole");
       sessionStorage.removeItem("user_id");
       sessionStorage.removeItem("role");
       this.$router.push("/");
+      // must logout success
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.logout.message) throw res.data!.logout.message;
     } catch (e) {
       console.log(e.toString());
     }
