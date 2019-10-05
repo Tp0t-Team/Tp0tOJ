@@ -45,8 +45,9 @@ public class SubmitService {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
         //Submit submit = submitRepository.checkDoneByUserId(userId, challengeId);
         Submit submit = submitRepository.findByUserAndChallengeAndCorrect(user, challenge, true);
-        if (submit == null) return true;
-        else return false;
+//        if (submit == null) return true;
+//        else return false;
+        return submit != null;
     }
 
     public List<Submit> getCorrectSubmitsByChallenge(Challenge challenge) {
