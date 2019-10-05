@@ -190,7 +190,7 @@ export default class ChallengeEditor extends Vue {
     this.type = this.config.type;
     this.score = parseInt(this.config.score.base_score as string);
     this.flag = this.config.flag.value;
-    this.description = this.description;
+    this.description = this.config.description;
     this.links = this.config.external_link;
     this.hints = this.config.hint;
     this.state = this.config.state == "enabled";
