@@ -179,6 +179,7 @@ export default class Challenge extends Vue {
       if (res.data!.challengeMutate.message)
         throw res.data!.challengeMutate.message;
       this.loading = false;
+      this.changed = false;
       await this.loadAll();
     } catch (e) {
       this.loading = false;
