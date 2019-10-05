@@ -1,0 +1,117 @@
+type Mutation {
+    register(input: RegisterInput!) : RegisterResult!
+    # reset (input: ResetInput!) : ResetResult!
+    login (input: LoginInput!) : LoginResult!
+    logout : LogoutResult!
+    submit (input: SubmitInput!) : SubmitResult!
+    bulletinPub(input: BulletinPubInput!) :BulletinPubResult!
+    userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
+    challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
+    challengeRemove(input: String!): ChallengeRemoveResult!
+}
+
+input RegisterInput {
+    name: String!
+    stuNumber: String!
+    password: String!
+    department: String!
+    grade: String!
+    qq: String!
+    mail: String!
+}
+
+type RegisterResult {
+    # success, xxx already in use, invalid xxx, failed, already login, not empty error
+    message: String
+}
+
+#input ResetInput {
+#    name: String
+#    stuNumber: String
+#    mail: String
+#}
+#
+#type ResetResult {
+#    # success, no user, failed
+#    message: String
+#}
+
+input LoginInput {
+    stuNumber: String!
+    password: String!
+}
+
+type LoginResult {
+    message: String
+    userId: String
+    role: String
+}
+
+type LogoutResult {
+    message: String
+}
+
+input SubmitInput {
+    challengeId: String!
+    flag: String!
+}
+
+type SubmitResult {
+    message: String
+}
+
+input BulletinPubInput {
+    title: String!
+    content: String!
+    topping: Boolean!
+}
+
+type BulletinPubResult {
+    message: String
+}
+
+input UserInfoUpdateInput {
+    userId: String!
+    name: String!
+    role: String!
+    department: String!
+    grade: String!
+    protectedTime: String!
+    qq: String!
+    mail: String!
+    state: String!
+}
+
+type UserInfoUpdateResult {
+    message: String!
+}
+
+input ChallengeMutateInput {
+    challengeId: String!
+    name: String!
+    type: String!
+    score: ScoreTypeInput!
+    flag: FlagTypeInput!
+    description: String!
+    external_link: [String]!
+    hint: [String]!
+    state: String!
+}
+
+input ScoreTypeInput {
+    dynamic: Boolean!
+    base_score: String!
+}
+
+input FlagTypeInput {
+    dynamic: Boolean!
+    value: String!
+}
+
+type ChallengeMutateResult {
+    message: String
+}
+
+type ChallengeRemoveResult {
+    message: String
+}

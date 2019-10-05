@@ -9,19 +9,38 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-    maven{ url 'http://maven.aliyun.com/groups/public/' }
-    maven{ url 'http://maven.aliyun.com/repositories/jcenter'}
+    maven { url 'http://maven.aliyun.com/groups/public/' }
+    maven { url 'http://maven.aliyun.com/repositories/jcenter' }
     // maven{ url 'http://maven.aliyun.com/repositories/gradle-plugin'}
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
-    compile 'com.graphql-java-kickstart:graphql-spring-boot-starter'
-    compile 'com.graphql-java-kickstart:graphql-spring-tools'
-    runtimeOnly 'org.postgresql:postgresql'
+
+    compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
+    compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'
+
+    compile 'com.alibaba:fastjson:1.2.61'
+
+    compile 'org.postgresql:postgresql'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // to embed GraphiQL tool
+//    runtime 'com.graphql-java-kickstart:graphiql-spring-boot-starter:5.10.0'
+
+    // testing facilities
+    testCompile 'com.graphql-java-kickstart:graphql-spring-boot-starter-test:5.10.0'
+}
+
+bootJar {
+    status 'release'
+    manifest {
+        version '1.0.0'
+    }
 }
