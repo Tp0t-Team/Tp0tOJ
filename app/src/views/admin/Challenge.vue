@@ -2,11 +2,11 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="type in challengeType" :key="type">
-          <v-toolbar dense>{{type}}</v-toolbar>
+        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.type">
+          <v-toolbar dense>{{item.type}}</v-toolbar>
           <v-list dense>
             <v-list-item
-              v-for="conf in challengeConfigFiltered[type]"
+              v-for="conf in item.items"
               :key="conf.challengeId"
               @click="editChallenge(conf.challengeId)"
               :disabled="loading"
@@ -18,7 +18,7 @@
                 </v-btn>
               </v-list-item-icon>
             </v-list-item>
-            <v-list-item @click="newChallenge(type)" :disabled="loading">
+            <v-list-item @click="newChallenge(item.type)" :disabled="loading">
               <v-layout row>
                 <v-spacer></v-spacer>
                 <v-icon>add</v-icon>
@@ -106,11 +106,10 @@ export default class Challenge extends Vue {
   private hasInfo: boolean = false;
 
   private get challengeConfigFiltered() {
-    let result: { [x: string]: ChallengeConfigWithId[] } = {};
-    for (let type of this.challengeType) {
-      result[type] = this.challengeConfigs.filter(c => c.type == type);
-    }
-    return result;
+    return this.challengeType.map(v => ({
+      type: v,
+      items: this.challengeConfigs.filter(c => c.type == v)
+    }));
   }
 
   async mounted() {

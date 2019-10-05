@@ -70,7 +70,9 @@
             <v-list-item-title>Users</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item @click="$router.push('/admin/challenge')">
+        <v-list-item
+          @click="$router.push({path:'/admin/challenge',query:{time:Date.now().toLocaleString()}})"
+        >
           <v-list-item-content>
             <v-list-item-title>Challenges</v-list-item-title>
           </v-list-item-content>
