@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -172,6 +173,7 @@ public class UserQuery implements GraphQLQueryResolver {
 
         User user = userService.getUserById(Long.parseLong(userId));
         List<Submit> submits = submitService.getCorrectSubmitsByUser(user);
+        if(submits == null) submits = new ArrayList<>();
 
         SubmitHistoryResult submitHistoryResult = new SubmitHistoryResult("");
 

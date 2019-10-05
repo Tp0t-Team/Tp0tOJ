@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ReplicaRepository extends JpaRepository<Replica, Long> {
     List<Replica> findByChallenge(Challenge challenge);
+
+    List<Replica> findAllByChallenge(Challenge challenge);
 }

@@ -58,7 +58,7 @@ public class UserService {
         return user != null;
     }
 
-    public boolean register(String name,
+    public User register(String name,
                             String stuNumber,
                             String password,
                             String department,
@@ -86,7 +86,7 @@ public class UserService {
         user.setGrade(grade);
 
         userRepository.save(user);
-        return true;
+        return user;
     }
 
     public boolean login(String stuNumber, String password) {

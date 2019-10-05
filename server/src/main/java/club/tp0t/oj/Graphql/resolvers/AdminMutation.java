@@ -1,5 +1,7 @@
 package club.tp0t.oj.Graphql.resolvers;
 
+import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Component
 public class AdminMutation implements GraphQLMutationResolver {
@@ -81,7 +84,10 @@ public class AdminMutation implements GraphQLMutationResolver {
             if (!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
             return new ChallengeMutateResult("");
         } else {
-            if (!challengeService.addChallenge(challengeMutate)) return new ChallengeMutateResult("Addition Error");
+            Challenge challenge = challengeService.addChallenge(challengeMutate);
+            if (challenge == null) return new ChallengeMutateResult("Addition Error");
+            List<Replica> replicas = replicaService.createReplicas(challenge, 1);
+            replicaAllocService.allocReplicasForAll(replicas);
             return new ChallengeMutateResult("");
         }
     }

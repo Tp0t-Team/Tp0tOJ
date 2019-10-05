@@ -4,6 +4,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
@@ -20,6 +21,10 @@ public class Replica {
     @JoinColumn(name = "challenge_id", referencedColumnName = "challenge_id")
     @ManyToOne
     private Challenge challenge;
+
+    @NotEmpty
+    @Column(name = "flag", columnDefinition = "text")
+    private String flag;
 
     @NotNull
     @Column(name = "gmt_created")
@@ -57,6 +62,14 @@ public class Replica {
 
     public void setChallenge(Challenge challenge) {
         this.challenge = challenge;
+    }
+
+    public String getFlag() {
+        return flag;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
     }
 
     public Challenge getChallenge() {

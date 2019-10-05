@@ -90,7 +90,7 @@ public class ChallengeService {
 //        return true;
 //    }
 
-    public Boolean addChallenge(ChallengeMutateInput challengemutate) {
+    public Challenge addChallenge(ChallengeMutateInput challengemutate) {
 
         ChallengeConfiguration challengeConfiguration = new ChallengeConfiguration();
         challengeConfiguration.setName(challengemutate.getName());
@@ -110,7 +110,7 @@ public class ChallengeService {
         challenge.setGmtCreated(new Timestamp(System.currentTimeMillis()));
         challenge.setGmtModified(new Timestamp(System.currentTimeMillis()));
         challengeRepository.save(challenge);
-        return true;
+        return challenge;
     }
 
 //    public Boolean removeById(String id) {

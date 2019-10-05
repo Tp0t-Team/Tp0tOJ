@@ -1,5 +1,7 @@
 package club.tp0t.oj.Graphql.resolvers;
 
+import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.*;
@@ -12,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -91,13 +94,18 @@ public class UserMutation implements GraphQLMutationResolver {
         }
 
         // register user
-        // if succeeded
-        if (userService.register(name, stuNumber, password, department, qq, mail, grade)) {
-            return new RegisterResult("");
+        // if failed
+        User user = userService.register(name, stuNumber, password, department, qq, mail, grade);
+        if (user == null) {
+            return new RegisterResult("failed");
         }
 
-        // if failed
-        return new RegisterResult("failed");
+        List<Replica> replicas = new ArrayList<>();
+        for (Challenge challenge : challengeService.getAllChallenges()) {
+            replicas.add(replicaService.getRandomReplicaByChallenge(challenge));
+        }
+        replicaAllocService.allocReplicasForUser(replicas, user);
+        return new RegisterResult("");
     }
 
     // user password reset
@@ -200,6 +208,8 @@ public class UserMutation implements GraphQLMutationResolver {
         long userId = (long) session.getAttribute("userId");
         String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
         String submitFlag = input.getFlag();
+
+        if (flag == null) return new SubmitResult("No replica for you");
 
         // correct flag
         if (submitFlag.equals(flag)) {
