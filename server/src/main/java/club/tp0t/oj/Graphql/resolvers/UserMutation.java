@@ -102,9 +102,12 @@ public class UserMutation implements GraphQLMutationResolver {
 
         List<Replica> replicas = new ArrayList<>();
         for (Challenge challenge : challengeService.getAllChallenges()) {
-            replicas.add(replicaService.getRandomReplicaByChallenge(challenge));
+            Replica replica = replicaService.getRandomReplicaByChallenge(challenge);
+            if (replica == null) continue;
+            replicas.add(replica);
         }
         replicaAllocService.allocReplicasForUser(replicas, user);
+
         return new RegisterResult("");
     }
 
@@ -211,10 +214,20 @@ public class UserMutation implements GraphQLMutationResolver {
 
         if (flag == null) return new SubmitResult("No replica for you");
 
+        if ((boolean) session.getAttribute("isAdmin") || (boolean) session.getAttribute("isTeam")) {
+            if (submitFlag.equals(flag)) {
+                return new SubmitResult("correct");
+            } else {
+                return new SubmitResult("incorrect");
+            }
+        }
+
+        Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
+        User user = userService.getUserById(userId);
+
         // correct flag
         if (submitFlag.equals(flag)) {
             // duplicate submit
-            User user = userService.getUserById(userId);
             if (submitService.checkDuplicateSubmit(user, challengeId)) {
                 return new SubmitResult("duplicate submit");
             }
@@ -247,14 +260,14 @@ public class UserMutation implements GraphQLMutationResolver {
             }
 
             // save into submit table
-            submitService.submit(userService.getUserById(userId), submitFlag, true, mark);
+            submitService.submit(user, challenge, submitFlag, true, mark);
 
             return new SubmitResult("correct");
         }
         // incorrect flag
         else {
             // save into submit table
-            submitService.submit(userService.getUserById(userId), submitFlag, false, 0);
+            submitService.submit(user, challenge, submitFlag, false, 0);
             return new SubmitResult("incorrect");
         }
 

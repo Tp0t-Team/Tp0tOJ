@@ -14,7 +14,7 @@ public interface SubmitRepository extends JpaRepository<Submit, Long> {
     //@Query(value = "select s from Submit s where s.user=?1")
     //Submit getSubmitByUserIdAndChallengeId(User user, long challengeId);
 
-    Submit findByUserAndChallengeAndCorrect(User user, Challenge challenge, boolean b);
+    Submit findByUserAndChallengeAndCorrect(User user, Challenge challenge, boolean correct);
 
     //@Query(value = "select s from Submit s Join s.user su Join s.challenge sc " +
     //       "where su.userId=:userId and sc.challengeId=:challengeId and s.correct=true ")
@@ -24,12 +24,12 @@ public interface SubmitRepository extends JpaRepository<Submit, Long> {
     //@Query(value = "select s from Submit s where s.challenge=?1 and s.correct=true")
     //List<Submit> getCorrectSubmitsByChallenge(Challenge challenge);
 
-    List<Submit> findByChallengeAndCorrect(Challenge challenge, boolean b);
+    List<Submit> findAllByChallengeAndCorrect(Challenge challenge, boolean correct);
 
     //@Query(value = "select s from Submit s where s.user=?1 and s.correct=true")
     //List<Submit> getCorrectSubmitsByUser(User user);
 
-    List<Submit> findByUserAndCorrect(User user, boolean b);
+    List<Submit> findAllByUserAndCorrect(User user, boolean correct);
 
 }
 

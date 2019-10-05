@@ -127,7 +127,7 @@ public class UserService {
     }
 
     public User getUserById(long userId) {
-        return userRepository.getOne(userId);
+        return userRepository.findByUserId(userId);
     }
 
     public String getRoleByStuNumber(String stuNumber) {

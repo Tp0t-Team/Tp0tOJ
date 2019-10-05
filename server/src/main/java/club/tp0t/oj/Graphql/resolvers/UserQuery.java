@@ -8,6 +8,7 @@ import club.tp0t.oj.Graphql.types.ChallengeInfosResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Service.*;
+import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -172,8 +173,10 @@ public class UserQuery implements GraphQLQueryResolver {
         }
 
         User user = userService.getUserById(Long.parseLong(userId));
+        if(user == null) return new SubmitHistoryResult("no such user");
         List<Submit> submits = submitService.getCorrectSubmitsByUser(user);
         if(submits == null) submits = new ArrayList<>();
+//        submits = new ArrayList<>();
 
         SubmitHistoryResult submitHistoryResult = new SubmitHistoryResult("");
 

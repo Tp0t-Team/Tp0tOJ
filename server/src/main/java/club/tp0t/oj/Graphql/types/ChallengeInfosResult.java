@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ChallengeInfosResult {
     private String message;
-    private List<ChallengeInfo> challengeInfos = new  ArrayList<>();
+    private List<ChallengeInfo> challengeInfos = new ArrayList<>();
 
     public ChallengeInfosResult(String message) {
         this.message = message;
@@ -33,16 +33,19 @@ public class ChallengeInfosResult {
     }
 
     public void updateChallengeInfos(List<Challenge> challenges, long userId, SubmitService submitService) {
-        for(int i=0;i<challenges.size();i++) {
+        for (int i = 0; i < challenges.size(); i++) {
             Challenge tmpChallenge = challenges.get(i);
             ChallengeInfo challengeInfo = new ChallengeInfo();
             challengeInfo.setChallengeId(Long.toString(tmpChallenge.getChallengeId()));
 
             // get blood
             List<String> blood = new ArrayList<>();
-            if(tmpChallenge.getFirstBlood() != null) blood.add(tmpChallenge.getFirstBlood().getName());
-            if(tmpChallenge.getSecondBlood() != null) blood.add(tmpChallenge.getSecondBlood().getName());
-            if(tmpChallenge.getThirdBlood() != null) blood.add(tmpChallenge.getThirdBlood().getName());
+            if (tmpChallenge.getFirstBlood() != null)
+                blood.add(Long.toString(tmpChallenge.getFirstBlood().getUserId()));
+            if (tmpChallenge.getSecondBlood() != null)
+                blood.add(Long.toString(tmpChallenge.getSecondBlood().getUserId()));
+            if (tmpChallenge.getThirdBlood() != null)
+                blood.add(Long.toString(tmpChallenge.getThirdBlood().getUserId()));
             challengeInfo.setBlood(blood);
 
             // whether solved by user

@@ -6,6 +6,7 @@ import club.tp0t.oj.Entity.Replica;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -27,6 +28,8 @@ public class ReplicaService {
             Replica replica = new Replica();
             replica.setChallenge(challenge);
             replica.setFlag(challengeService.getConfiguration(challenge).getFlag().getValue());
+            replica.setGmtCreated(new Timestamp(System.currentTimeMillis()));
+            replica.setGmtModified(new Timestamp(System.currentTimeMillis()));
             res.add(replica);
             replicaRepository.save(replica);
         }

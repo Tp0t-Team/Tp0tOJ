@@ -20,7 +20,7 @@ public class SubmitService {
     @Autowired
     private UserService userService;
 
-    public void submit(User user, String submitFlag, boolean correct, int mark) {
+    public void submit(User user, Challenge challenge, String submitFlag, boolean correct, int mark) {
         Submit submit = new Submit();
         submit.setCorrect(correct);
         submit.setGmtCreated(new Timestamp(System.currentTimeMillis()));
@@ -29,6 +29,9 @@ public class SubmitService {
         submit.setSubmitFlag(submitFlag);
         submit.setSubmitTime(new Timestamp(System.currentTimeMillis()));
         submit.setUser(user);
+        submit.setChallenge(challenge);
+
+        submitRepository.save(submit);
     }
 
     public boolean checkDuplicateSubmit(User user, long challengeId) {
@@ -52,14 +55,14 @@ public class SubmitService {
 
     public List<Submit> getCorrectSubmitsByChallenge(Challenge challenge) {
         //return submitRepository.getCorrectSubmitsByChallenge(challenge);
-        return submitRepository.findByChallengeAndCorrect(challenge, true);
+        return submitRepository.findAllByChallengeAndCorrect(challenge, true);
     }
 
     @Transactional
     public int updateSolvedCountByChallengeId(long challengeId, User user) {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
         //List<Submit> submits = submitRepository.getCorrectSubmitsByChallenge(challenge);
-        List<Submit> submits = submitRepository.findByChallengeAndCorrect(challenge, true);
+        List<Submit> submits = submitRepository.findAllByChallengeAndCorrect(challenge, true);
         switch (submits.size()) {
             case 0:
                 challenge.setFirstBlood(user);
@@ -81,6 +84,6 @@ public class SubmitService {
 
     public List<Submit> getCorrectSubmitsByUser(User user) {
         //return submitRepository.getCorrectSubmitsByUser(user);
-        return submitRepository.findByUserAndCorrect(user, true);
+        return submitRepository.findAllByUserAndCorrect(user, true);
     }
 }

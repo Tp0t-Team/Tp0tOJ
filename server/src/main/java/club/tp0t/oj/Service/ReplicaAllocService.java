@@ -7,6 +7,7 @@ import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -22,12 +23,15 @@ public class ReplicaAllocService {
 
     public void allocReplicasForAll(List<Replica> replicas) {
         List<User> users = userService.getAllUser();
+        if(users == null) return;
         int userPerReplica = replicas.size() / users.size();
         for (int i = 0; i < replicas.size(); i++) {
             for (int j = 0; j < userPerReplica; j++) {
                 ReplicaAlloc replicaAlloc = new ReplicaAlloc();
                 replicaAlloc.setReplica(replicas.get(i));
                 replicaAlloc.setUser(users.get(i * userPerReplica + j));
+                replicaAlloc.setGmtCreated(new Timestamp(System.currentTimeMillis()));
+                replicaAlloc.setGmtModified(new Timestamp(System.currentTimeMillis()));
                 replicaAllocRepository.save(replicaAlloc);
             }
         }
@@ -35,6 +39,8 @@ public class ReplicaAllocService {
             ReplicaAlloc replicaAlloc = new ReplicaAlloc();
             replicaAlloc.setReplica(replicas.get(0));
             replicaAlloc.setUser(users.get(i));
+            replicaAlloc.setGmtCreated(new Timestamp(System.currentTimeMillis()));
+            replicaAlloc.setGmtModified(new Timestamp(System.currentTimeMillis()));
             replicaAllocRepository.save(replicaAlloc);
         }
     }
@@ -44,6 +50,8 @@ public class ReplicaAllocService {
             ReplicaAlloc replicaAlloc = new ReplicaAlloc();
             replicaAlloc.setReplica(replica);
             replicaAlloc.setUser(user);
+            replicaAlloc.setGmtCreated(new Timestamp(System.currentTimeMillis()));
+            replicaAlloc.setGmtModified(new Timestamp(System.currentTimeMillis()));
             replicaAllocRepository.save(replicaAlloc);
         }
     }

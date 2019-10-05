@@ -10,20 +10,20 @@ import java.util.List;
 
 public class SubmitHistoryResult {
     private String message;
-    private List<SubmitInfo> submitInfos = new ArrayList<>();
+    private List<SubmitInfo> submitInfos;
 
     public SubmitHistoryResult(String message) {
         this.message = message;
+        this.submitInfos = new ArrayList<>();
     }
 
     public void addSubmitInfos(List<Submit> submits) {
-        for(int i=0;i<submits.size();i++) {
-            Submit tmpSubmit = submits.get(i);
+        for (Submit tmpSubmit : submits) {
             SubmitInfo tmpSubmitInfo = new SubmitInfo();
             Challenge tmpChallenge = tmpSubmit.getChallenge();
 
             // parse from json
-            String description = tmpChallenge.getConfiguration();
+            String description =  tmpChallenge.getConfiguration();
             ChallengeConfiguration challengeConfiguration = JSON.parseObject(description, ChallengeConfiguration.class);
 
             tmpSubmitInfo.setChallengeName(challengeConfiguration.getName());
