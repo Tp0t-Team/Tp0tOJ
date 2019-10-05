@@ -131,7 +131,7 @@ export default class Challenge extends Vue {
   private get formatedHint() {
     if (!this.currentChallenge) return "";
     return this.currentChallenge.hint.reduce(
-      (pre: string, cur: string) => `Hint: ${cur}\npre`,
+      (pre: string, cur: string) => `Hint: ${cur}\n${pre}`,
       ""
     );
   }

@@ -149,11 +149,11 @@ export default class User extends Vue {
     try {
       let res = await this.$apollo.query<
         SubmitHistoryResult,
-        { userId: string }
+        { input: { userId: string } }
       >({
         query: gql`
-          query($userId: String!) {
-            submitHistory(userId: $userId) {
+          query($input: String!) {
+            submitHistory(userId: $input) {
               message
               submitInfos {
                 submitTime
@@ -162,7 +162,12 @@ export default class User extends Vue {
               }
             }
           }
-        `
+        `,
+        variables: {
+          input: {
+            userId: this.currentUser!.userId
+          }
+        }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.submitHistory.message)
