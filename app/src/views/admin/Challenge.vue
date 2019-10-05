@@ -106,6 +106,10 @@ export default class Challenge extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
+    await this.loadAll();
+  }
+
+  async loadAll() {
     try {
       let res = await this.$apollo.query<ChallengeConfigResult, {}>({
         query: gql`
@@ -160,7 +164,7 @@ export default class Challenge extends Vue {
     try {
       let res = await this.$apollo.mutate<
         ChallengeMutateResult,
-        ChallengeConfigWithId
+        { input: ChallengeConfigWithId }
       >({
         mutation: gql`
           mutation($input: ChallengeMutateInput!) {
@@ -169,9 +173,13 @@ export default class Challenge extends Vue {
             }
           }
         `,
-        variables: config
+        variables: { input: tempConfig }
       });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.challengeMutate.message)
+        throw res.data!.challengeMutate.message;
       this.loading = false;
+      await this.loadAll();
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

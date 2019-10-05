@@ -73,12 +73,7 @@
                   <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="join time"
-                    :value="userInfo.joinTime"
-                  ></v-text-field>
+                  <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
                 </v-col>
               </v-row>
               <v-row v-if="$store.state.global.userId==$route.params.user_id">
@@ -133,6 +128,12 @@ export default class Profile extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
+  private get showJoinTime() {
+    return new Date(
+      this.userInfo.joinTime.toString() + " UTC"
+    ).toLocaleString();
+  }
+
   async mounted() {
     try {
       let res = await this.$apollo.query<UserInfoResult, { userId: string }>({
@@ -166,9 +167,6 @@ export default class Profile extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.userInfo.message) throw res.data!.userInfo.message;
       this.userInfo = res.data!.userInfo.userInfo;
-      this.userInfo.joinTime = new Date(
-        this.userInfo.joinTime + " UTC"
-      ).toLocaleString();
       this.loading = false;
     } catch (e) {
       this.loading = false;

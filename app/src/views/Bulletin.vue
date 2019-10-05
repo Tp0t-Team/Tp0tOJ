@@ -80,10 +80,10 @@ export default class Bulletin extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
-    await this.loadBulletin();
+    await this.loadAll();
   }
 
-  async loadBulletin() {
+  async loadAll() {
     try {
       let res = await this.$apollo.query<AllBulletinResult, {}>({
         query: gql`
@@ -157,7 +157,7 @@ export default class Bulletin extends Vue {
       if (res.data!.bulletinPub.message) throw res.data!.bulletinPub.message;
       this.loading = false;
       this.edit = false;
-      await this.loadBulletin();
+      await this.loadAll();
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

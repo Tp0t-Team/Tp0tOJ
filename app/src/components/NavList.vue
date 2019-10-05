@@ -8,7 +8,7 @@
         <v-list-item-title>Home</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item @click="$router.push('/bulletin')">
+    <v-list-item @click="$router.push({path:'/bulletin',query:{time:Date.now().toLocaleString()}})">
       <v-list-item-action>
         <v-icon>notifications</v-icon>
       </v-list-item-action>

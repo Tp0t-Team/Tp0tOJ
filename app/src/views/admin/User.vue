@@ -100,30 +100,34 @@ export default class User extends Vue {
   private hasInfo: boolean = false;
 
   async mounted() {
+    await this.loadAll();
+  }
+
+  async loadAll() {
     try {
       let res = await this.$apollo.query<AllUserInfoResult, {}>({
         query: gql`
           query {
+            allUserInfos {
+              message
               allUserInfos {
-                message
-                allUserInfos {
-                  userId
-                  name
-                  role
-                  stuNumber
-                  department
-                  grade
-                  protectedTime
-                  qq
-                  mail
-                  topRank
-                  joinTime
-                  score
-                  state
-                  rank
-                }
+                userId
+                name
+                role
+                stuNumber
+                department
+                grade
+                protectedTime
+                qq
+                mail
+                topRank
+                joinTime
+                score
+                state
+                rank
               }
             }
+          }
         `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
@@ -202,6 +206,7 @@ export default class User extends Vue {
       if (res.data!.userInfoUpdate.message)
         throw res.data!.userInfoUpdate.message;
       this.loading = false;
+      await this.loadAll();
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();
