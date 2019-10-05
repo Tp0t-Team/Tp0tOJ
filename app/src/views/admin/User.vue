@@ -152,7 +152,7 @@ export default class User extends Vue {
         { userId: string }
       >({
         query: gql`
-          query($userId: String) {
+          query($userId: String!) {
             submitHistory(userId: $userId) {
               message
               submitInfos {
