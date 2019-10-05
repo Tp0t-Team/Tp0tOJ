@@ -31,6 +31,10 @@ public class Replica {
     @LastModifiedDate
     private Timestamp gmtModified;
 
+    @NotNull
+    @Column(name = "flag", columnDefinition = "text")
+    private String flag;
+
     public long getReplicaId() {
         return replicaId;
     }
@@ -61,5 +65,13 @@ public class Replica {
 
     public Challenge getChallenge() {
         return challenge;
+    }
+
+    public void setFlag(String flag) {
+        this.flag = flag;
+    }
+
+    public String getFlag() {
+        return flag;
     }
 }
