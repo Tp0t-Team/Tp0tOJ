@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="scrollable">
     <div v-for="type in challengeType" :key="type">
       <div v-if="challenges.filter((v)=>v.type==type).length!=0">
         <div class="type-title display-1 ml-4">{{type}}</div>
@@ -16,12 +16,12 @@
                 class="ma-4"
                 @click="openDetial(item.challengeId)"
               >
-                <v-badge left overlap class="score">
+                <v-badge left overlap class="score" z-index="2">
                   <template v-slot:badge>{{item.score}}</template>
                   <v-card-title class="subtitle-1 text-truncate">{{item.name}}</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
-                <v-card-text class="description">description</v-card-text>
+                <v-card-text class="description">{{item.description}}</v-card-text>
                 <v-overlay absolute :value="item.done" color="green" z-index="0">
                   <v-icon>done</v-icon>
                 </v-overlay>
@@ -72,7 +72,9 @@
           @focus="submitError = ''"
           @blur="check"
         ></v-text-field>
-        <div class="dialog-discription pa-6"><pre>{{formatedHint + currentChallenge.description}}</pre></div>
+        <div class="dialog-discription pa-6">
+          <pre>{{formatedHint + currentChallenge.description}}</pre>
+        </div>
         <div class="url-list">
           <v-chip
             color="primary"
@@ -193,8 +195,12 @@ export default class Challenge extends Vue {
   async submit() {
     this.check();
     if (!!this.submitError) return;
+    let coreFlag = this.sumbitFlag.trim();
     this.loading = true;
     try {
+      if (coreFlag.substr(0, 5) != "flag{") throw "error format";
+      if (coreFlag[coreFlag.length - 1] != "}") throw "error format";
+      coreFlag = coreFlag.substring(5, coreFlag.length - 1);
       let res = await this.$apollo.mutate<SubmitResult, SubmitInput>({
         mutation: gql`
           mutation($input: SubmitInput!) {
@@ -206,13 +212,17 @@ export default class Challenge extends Vue {
         variables: {
           input: {
             challengeId: this.currentChallenge!.challengeId,
-            flag: this.sumbitFlag
+            flag: coreFlag
           }
         }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.submit.message) throw res.data!.submit.message;
-      throw "提交成功";
+      // throw "提交成功";
+      this.$router.replace({
+        path: "/challenge",
+        query: { time: Date.now().toLocaleString() }
+      });
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();
@@ -223,6 +233,12 @@ export default class Challenge extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.scrollable {
+  height: calc(100vh - 96px);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .type-title {
   width: 100%;
 }

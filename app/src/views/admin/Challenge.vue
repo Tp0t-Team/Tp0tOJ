@@ -190,6 +190,8 @@ export default class Challenge extends Vue {
       this.currentConfig = null;
       this.withoutInit = true;
       await this.loadAll();
+      this.infoText = "add / update success";
+      this.hasInfo = true;
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

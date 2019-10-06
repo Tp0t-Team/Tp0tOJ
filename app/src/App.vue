@@ -4,7 +4,7 @@
       <nav-list :isLogin="!!$store.state.global.userId"></nav-list>
     </v-navigation-drawer>
 
-    <v-app-bar app clipped-left>
+    <v-app-bar app clipped-left class="higher">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Tp0t OJ</v-toolbar-title>
     </v-app-bar>
@@ -13,7 +13,7 @@
       <router-view :key="$route.query.time" />
     </v-content>
 
-    <v-footer app padless>
+    <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
         <span>
           <strong>Tp0t</strong> &copy; 2019
@@ -50,5 +50,9 @@ export default class App extends Vue {
 <style lang="scss">
 html {
   overflow: hidden;
+}
+
+.higher {
+  z-index: 3;
 }
 </style>

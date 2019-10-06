@@ -72,7 +72,7 @@ public class AdminMutation implements GraphQLMutationResolver {
         // login & admin check
         if (session.getAttribute("isLogin") == null ||
                 !((boolean) session.getAttribute("isLogin")) ||
-                !(boolean) session.getAttribute("isAdmin")) {
+                !((boolean) session.getAttribute("isAdmin") || (boolean) session.getAttribute("isTeam"))) {
             return new ChallengeMutateResult("forbidden");
         }
 

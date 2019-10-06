@@ -210,6 +210,8 @@ export default class User extends Vue {
         throw res.data!.userInfoUpdate.message;
       this.loading = false;
       await this.loadAll();
+      this.infoText = "change user info success";
+      this.hasInfo = true;
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

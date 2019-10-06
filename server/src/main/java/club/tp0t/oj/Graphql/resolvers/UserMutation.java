@@ -265,7 +265,7 @@ public class UserMutation implements GraphQLMutationResolver {
             // save into submit table
             submitService.submit(user, challenge, submitFlag, true, mark);
 
-            return new SubmitResult("correct");
+            return new SubmitResult("");
         }
         // incorrect flag
         else {
