@@ -99,27 +99,28 @@ export default class Bulletin extends Vue {
               }
             }
           }
-        `
+        `,
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.allBulletin.message) throw res.data!.allBulletin.message;
       this.bulletins = res.data!.allBulletin.bulletins;
-      const observer = this.$apollo.subscribe<BulletinSubResult, {}>({
-        query: gql`
-          subscription {
-            bulletin {
-              title
-              description
-              time
-            }
-          }
-        `
-      });
-      observer.subscribe({
-        next: data => {
-          this.bulletins = [data.data!.bulletin, ...this.bulletins];
-        }
-      });
+      // const observer = this.$apollo.subscribe<BulletinSubResult, {}>({
+      //   query: gql`
+      //     subscription {
+      //       bulletin {
+      //         title
+      //         description
+      //         time
+      //       }
+      //     }
+      //   `
+      // });
+      // observer.subscribe({
+      //   next: data => {
+      //     this.bulletins = [data.data!.bulletin, ...this.bulletins];
+      //   }
+      // });
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

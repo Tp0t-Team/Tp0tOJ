@@ -1,64 +1,66 @@
 <template>
-  <v-container fill-width>
-    <v-row>
-      <v-col v-for="(r,index) in topRank" :key="r.userId" cols="4">
-        <v-hover v-slot:default="{ hover }">
-          <v-card
-            :elevation="hover ? 12 : 2"
-            max-width="300"
-            class="mx-auto d-flex flex-row mb-6 px-4"
-            @click="if(!!$store.state.global.userId)$router.push(`/profile/${r.userId}`)"
+  <div class="content-col">
+    <v-container fill-width>
+      <v-row>
+        <v-col v-for="(r,index) in topRank" :key="r.userId" cols="4">
+          <v-hover v-slot:default="{ hover }">
+            <v-card
+              :elevation="hover ? 12 : 2"
+              max-width="300"
+              class="mx-auto d-flex flex-row mb-6 px-4"
+              @click="if(!!$store.state.global.userId)$router.push(`/profile/${r.userId}`)"
+            >
+              <div class="pa-2 align-self-center">
+                <v-avatar size="64" color="blue">
+                  <span class="headline">{{ r.name[0] }}</span>
+                </v-avatar>
+              </div>
+              <div class="pa-2">
+                <v-card-title>
+                  <v-chip>
+                    <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
+                    {{ r.name }}
+                  </v-chip>
+                </v-card-title>
+                <v-card-text>{{ r.score }}pt</v-card-text>
+              </div>
+            </v-card>
+          </v-hover>
+        </v-col>
+      </v-row>
+      <v-simple-table class="ma-4">
+        <thead>
+          <tr>
+            <th class="text-left">Rank</th>
+            <th class="text-left">Name</th>
+            <th class="text-left">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            class="table-item"
+            v-for="(r,index) in pageRank"
+            :key="r.rank"
+            @click="$router.push(`/profile/${r.userId}`)"
           >
-            <div class="pa-2 align-self-center">
-              <v-avatar size="64" color="blue">
-                <span class="headline">{{ r.name[0] }}</span>
-              </v-avatar>
-            </div>
-            <div class="pa-2">
-              <v-card-title>
-                <v-chip>
-                  <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
-                  {{ r.name }}
-                </v-chip>
-              </v-card-title>
-              <v-card-text>{{ r.score }}pt</v-card-text>
-            </div>
-          </v-card>
-        </v-hover>
-      </v-col>
-    </v-row>
-    <v-simple-table class="ma-4">
-      <thead>
-        <tr>
-          <th class="text-left">Rank</th>
-          <th class="text-left">Name</th>
-          <th class="text-left">Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          class="table-item"
-          v-for="(r,index) in pageRank"
-          :key="r.rank"
-          @click="$router.push(`/profile/${r.userId}`)"
-        >
-          <td>{{ pageBase + index + 1 }}</td>
-          <td>{{ r.name }}</td>
-          <td>{{ r.score }}</td>
-        </tr>
-      </tbody>
-    </v-simple-table>
-    <v-row>
-      <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
-    </v-row>
-    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
-      {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
-    </v-snackbar>
-  </v-container>
+            <td>{{ pageBase + index + 1 }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.score }}</td>
+          </tr>
+        </tbody>
+      </v-simple-table>
+      <v-row>
+        <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
+      </v-row>
+      <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+        {{ infoText }}
+        <v-spacer></v-spacer>
+        <v-btn icon>
+          <v-icon @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </v-snackbar>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -104,7 +106,8 @@ export default class Rank extends Vue {
               }
             }
           }
-        `
+        `,
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
@@ -123,6 +126,11 @@ export default class Rank extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.content-col {
+  height: calc(100vh - 96px);
+  overflow-y: auto;
+}
+
 .table-item {
   cursor: pointer;
 }

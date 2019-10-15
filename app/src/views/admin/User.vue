@@ -128,7 +128,8 @@ export default class User extends Vue {
               }
             }
           }
-        `
+        `,
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.allUserInfos.message) throw res.data!.allUserInfos.message;
@@ -165,7 +166,8 @@ export default class User extends Vue {
         `,
         variables: {
           input: this.currentUser!.userId
-        }
+        },
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.submitHistory.message)

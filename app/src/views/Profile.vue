@@ -162,7 +162,8 @@ export default class Profile extends Vue {
         `,
         variables: {
           userId: this.$route.params.user_id
-        }
+        },
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.userInfo.message) throw res.data!.userInfo.message;

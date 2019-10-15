@@ -158,7 +158,8 @@ export default class Challenge extends Vue {
               }
             }
           }
-        `
+        `,
+        fetchPolicy: "no-cache"
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challengeInfos.message)
