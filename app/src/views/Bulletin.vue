@@ -3,7 +3,7 @@
     <v-card v-for="item in bulletins" :key="item.time">
       <span
         class="bulletin-time ma-4"
-      >{{new Date(item.publishTime.toString() + " UTC").toLocaleString()}}</span>
+      >{{new Date(item.publishTime.toString().replace(/\//g, "-") + "+00:00").toLocaleString()}}</span>
       <v-card-title>{{item.title}}</v-card-title>
       <v-card-text>{{item.content}}</v-card-text>
     </v-card>

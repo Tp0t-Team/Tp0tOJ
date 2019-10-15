@@ -130,7 +130,7 @@ export default class Profile extends Vue {
 
   private get showJoinTime() {
     return new Date(
-      this.userInfo.joinTime.toString() + " UTC"
+      this.userInfo.joinTime.toString().replace(/\//g, "-") + "+00:00"
     ).toLocaleString();
   }
 
