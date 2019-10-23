@@ -49,7 +49,7 @@ public class AdminQuery implements GraphQLQueryResolver {
         AllUserInfoResult res = new AllUserInfoResult("");
 
         List<User> users = userService.getAllUser();
-        if(users == null) users = new ArrayList<>();
+        if (users == null) users = new ArrayList<>();
         res.addAllUserInfo(users);
 
         return res;
@@ -73,7 +73,7 @@ public class AdminQuery implements GraphQLQueryResolver {
         List<Challenge> challenges = challengeService.getAllChallenges();
 
         for (Challenge challenge : challenges) {
-            ChallengeConfiguration challengeconfiguration = challengeService.getConfiguration(challenge);
+            ChallengeConfiguration challengeconfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
             ChallengeConfig challengeConfig = new ChallengeConfig();
 
             challengeConfig.setChallengeId(Long.toString(challenge.getChallengeId()));

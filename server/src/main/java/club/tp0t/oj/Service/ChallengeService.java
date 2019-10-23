@@ -10,6 +10,7 @@ import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.alibaba.fastjson.JSON;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
@@ -17,13 +18,17 @@ import java.util.List;
 
 @Service
 public class ChallengeService {
-    @Autowired
-    private ChallengeRepository challengeRepository;
-    @Autowired
-    private ReplicaService replicaService;
+    private final ChallengeRepository challengeRepository;
+    private final ReplicaService replicaService;
+    private final ReplicaAllocService replicaAllocService;
+
+    public ChallengeService(ChallengeRepository challengeRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
+        this.challengeRepository = challengeRepository;
+        this.replicaService = replicaService;
+        this.replicaAllocService = replicaAllocService;
+    }
 
     public List<Challenge> getEnabledChallenges() {
-        // return challengeRepository.getEnabledChallenges();
         return challengeRepository.findByState("enabled");
     }
 
@@ -35,95 +40,76 @@ public class ChallengeService {
         return challengeRepository.findByChallengeId(challengeId);
     }
 
-    public ChallengeConfiguration getConfiguration(Challenge challenge) {
-        String configuration = challenge.getConfiguration();
-        ChallengeConfiguration challengeConfiguration = JSON.parseObject(configuration, ChallengeConfiguration.class);
-        return challengeConfiguration;
-    }
-
-    public Boolean checkIdExistence(long id) {
-        Challenge challenge = challengeRepository.findByChallengeId(id);
-        return challenge != null;
-    }
-
-    @Transactional
-    public Boolean updateChallenge(ChallengeMutateInput challengeMutate) {
+    @Transactional(isolation = Isolation.REPEATABLE_READ) // ensure update after read is ok
+    public String updateChallenge(ChallengeMutateInput challengeMutate) {
         Challenge challenge = challengeRepository.findByChallengeId(Long.parseLong(challengeMutate.getChallengeId()));
 
+        // ensure challenge exist
+        if (challenge == null) return "No such challenge.";
+
+        // unpack JSON data
         String configuration = challenge.getConfiguration();
         ChallengeConfiguration challengeConfiguration = JSON.parseObject(configuration, ChallengeConfiguration.class);
 
-        if (!challengeConfiguration.getType().equals(challengeMutate.getType())) return false;
+        // ensure type consistency
+        if (!challengeConfiguration.getType().equals(challengeMutate.getType())) return "Update Error";
 
+        // update data
         challengeConfiguration.setName(challengeMutate.getName());
-//        if(challengeMutate.getType() != null) challengeConfiguration.setType(challengeMutate.getType());
         challengeConfiguration.setScoreEx(challengeMutate.getScore());
         challengeConfiguration.setFlagEx(challengeMutate.getFlag());
         challengeConfiguration.setDescription(challengeMutate.getDescription());
         challengeConfiguration.setExternalLink(challengeMutate.getExternal_link());
         challengeConfiguration.setHint(challengeMutate.getHint());
 
+        // pack JSON data
         String configurationUpdated = JSON.toJSONString(challengeConfiguration);
+
+        // update challenge to DB
         challenge.setConfiguration(configurationUpdated);
         if (challengeMutate.getState() != null) challenge.setState(challengeMutate.getState());
-
         challengeRepository.save(challenge);
 
+        // update flag for replicas
         List<Replica> replicas = replicaService.getReplicaByChallenge(challenge);
         if (replicas != null) {
             for (Replica replica : replicas) {
+                // TODO: use saveAll to speed up
                 replicaService.updateReplicaFlag(replica, challengeConfiguration.getFlag().getValue());
             }
         }
 
-        return true;
+        return "";
     }
 
     public void updateChallengeBlood(Challenge challenge) {
         challengeRepository.save(challenge);
     }
 
-//    public Boolean checkFormat(ChallengeMutateInput challengemutate){
-//
-//        String name = challengemutate.getName();
-//        String type = challengemutate.getType();
-//        ScoreTypeInput score = challengemutate.getScore();
-//        FlagTypeInput flag = challengemutate.getFlag();
-//        String description = challengemutate.getDescription();
-////        List<String> links = challengemutate.getExternal_link();
-////        List<String> hints = challengemutate.getHint();
-//        if(name==null || type==null || score==null || flag==null || description==null) {
-//            return false;
-//        }
-//
-//        name = name.replaceAll("\\s", "");
-//        type = type.replaceAll("\\s", "");
-//        description = description.replaceAll("\\s", "");
-//
-//        return true;
-//    }
-
-    public Challenge addChallenge(ChallengeMutateInput challengemutate) {
-
+    @Transactional
+    public String addChallenge(ChallengeMutateInput challengeMutate) {
+        // pack JSON data
         ChallengeConfiguration challengeConfiguration = new ChallengeConfiguration();
-        challengeConfiguration.setName(challengemutate.getName());
-        challengeConfiguration.setType(challengemutate.getType());
-        challengeConfiguration.setDescription(challengemutate.getDescription());
-        challengeConfiguration.setFlagEx(challengemutate.getFlag());
-        challengeConfiguration.setScoreEx(challengemutate.getScore());
-        challengeConfiguration.setExternalLink(challengemutate.getExternal_link());
-        challengeConfiguration.setHint(challengemutate.getHint());
-
+        challengeConfiguration.setName(challengeMutate.getName());
+        challengeConfiguration.setType(challengeMutate.getType());
+        challengeConfiguration.setDescription(challengeMutate.getDescription());
+        challengeConfiguration.setFlagEx(challengeMutate.getFlag());
+        challengeConfiguration.setScoreEx(challengeMutate.getScore());
+        challengeConfiguration.setExternalLink(challengeMutate.getExternal_link());
+        challengeConfiguration.setHint(challengeMutate.getHint());
         String configuration = JSON.toJSONString(challengeConfiguration);
+
+        // add challenge to DB
         Challenge challenge = new Challenge();
         challenge.setConfiguration(configuration);
-
-        challenge.setState(challengemutate.getState());
-
-        challenge.setGmtCreated(new Timestamp(System.currentTimeMillis()));
-        challenge.setGmtModified(new Timestamp(System.currentTimeMillis()));
+        challenge.setState(challengeMutate.getState());
         challengeRepository.save(challenge);
-        return challenge;
+
+        // create replicas and allocate to all users
+        List<Replica> replicas = replicaService.createReplicas(challenge, 1);
+        replicaAllocService.allocReplicasForAll(replicas);
+
+        return "";
     }
 
 //    public Boolean removeById(String id) {

@@ -1,6 +1,7 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.ReplicaAllocRepository;
+import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
@@ -15,14 +16,14 @@ public class ReplicaAllocService {
     @Autowired
     private ReplicaAllocRepository replicaAllocRepository;
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     public List<ReplicaAlloc> getReplicaAllocByUser(User user) {
         return replicaAllocRepository.findByUser(user);
     }
 
     public void allocReplicasForAll(List<Replica> replicas) {
-        List<User> users = userService.getAllUser();
+        List<User> users = userRepository.findAll();
         if(users == null) return;
         int userPerReplica = replicas.size() / users.size();
         for (int i = 0; i < replicas.size(); i++) {

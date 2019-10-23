@@ -1,5 +1,6 @@
 package club.tp0t.oj.Service;
 
+import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
@@ -18,7 +19,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private SubmitService submitService;
+    private SubmitRepository submitRepository;
 
     @Autowired
     private ChallengeService challengeService;
@@ -188,7 +189,8 @@ public class UserService {
 
     public void updateScore(long challengeId, long currentPoints, long newPoints) {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
-        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
+//        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
+        List<Submit> submits = submitRepository.findAllByChallengeAndCorrect(challenge, true);
         for (Submit tmpSubmit : submits) {
             User tmpUser = tmpSubmit.getUser();
             long score = tmpUser.getScore();

@@ -3,6 +3,7 @@ package club.tp0t.oj.Service;
 import club.tp0t.oj.Dao.ReplicaRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
+import club.tp0t.oj.Util.ChallengeConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,6 @@ import java.util.Random;
 public class ReplicaService {
     @Autowired
     private ReplicaRepository replicaRepository;
-    @Autowired
-    private ChallengeService challengeService;
 
     public List<Replica> getReplicaByChallenge(Challenge challenge) {
         return replicaRepository.findByChallenge(challenge);
@@ -27,11 +26,9 @@ public class ReplicaService {
         for (int i = 0; i < count; i++) {
             Replica replica = new Replica();
             replica.setChallenge(challenge);
-            replica.setFlag(challengeService.getConfiguration(challenge).getFlag().getValue());
-            replica.setGmtCreated(new Timestamp(System.currentTimeMillis()));
-            replica.setGmtModified(new Timestamp(System.currentTimeMillis()));
-            res.add(replica);
-            replicaRepository.save(replica);
+            replica.setFlag(ChallengeConfiguration.parseConfiguration(challenge.getConfiguration()).getFlag().getValue());
+            res.add(replicaRepository.save(replica));
+            // TODO: use saveAll to speed up
         }
         return res;
     }

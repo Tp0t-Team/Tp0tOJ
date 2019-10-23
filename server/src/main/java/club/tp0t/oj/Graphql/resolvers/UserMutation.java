@@ -6,6 +6,7 @@ import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
+import club.tp0t.oj.Util.ChallengeConfiguration;
 import club.tp0t.oj.Util.CheckHelper;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
@@ -240,7 +241,7 @@ public class UserMutation implements GraphQLMutationResolver {
             // TODO: get current points of challenge
             long currentPoints;
             try {
-                currentPoints = Long.parseLong(challengeService.getConfiguration(challengeService.getChallengeByChallengeId(challengeId)).getScoreEx().getBase_score());
+                currentPoints = Long.parseLong(ChallengeConfiguration.parseConfiguration(challengeService.getChallengeByChallengeId(challengeId).getConfiguration()).getScoreEx().getBase_score());
             } catch (NumberFormatException e) {
                 return new SubmitResult("unknown error");
             }

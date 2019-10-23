@@ -14,7 +14,6 @@ import java.util.List;
 public class BulletinService {
     private final BulletinRepository bulletinRepository;
 
-    @Autowired
     public BulletinService(BulletinRepository bulletinRepository) {
         this.bulletinRepository = bulletinRepository;
     }

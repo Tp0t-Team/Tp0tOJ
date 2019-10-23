@@ -1,7 +1,5 @@
 package club.tp0t.oj.Graphql.resolvers;
 
-import club.tp0t.oj.Entity.Challenge;
-import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
@@ -11,29 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
 
 @Component
 public class AdminMutation implements GraphQLMutationResolver {
     private final BulletinService bulletinService;
     private final ChallengeService challengeService;
-    private final FlagService flagService;
-    private final ReplicaService replicaService;
-    private final ReplicaAllocService replicaAllocService;
-    private final SubmitService submitService;
-    private final UserService userService;
 
-    @Autowired
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, FlagService flagService, ReplicaService replicaService, ReplicaAllocService replicaAllocService, SubmitService submitService, UserService userService) {
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
-        this.flagService = flagService;
-        this.replicaService = replicaService;
-        this.replicaAllocService = replicaAllocService;
-        this.submitService = submitService;
-        this.userService = userService;
     }
-
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
 
@@ -77,19 +62,17 @@ public class AdminMutation implements GraphQLMutationResolver {
             return new ChallengeMutateResult("forbidden");
         }
 
+        // input format check
+        if (!challengeMutate.checkPass()) return new ChallengeMutateResult("Challenge format not available");
 
-        if (!challengeMutate.checkPass()) return new ChallengeMutateResult("Challenge format not avaliable");
-
+        // unpack input data
         String id = challengeMutate.getChallengeId();
-        if (!id.equals("") && challengeService.checkIdExistence(Long.parseLong(id))) {
-            if (!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
-            return new ChallengeMutateResult("");
+
+        // execute
+        if (id.equals("")) {
+            return new ChallengeMutateResult(challengeService.addChallenge(challengeMutate));
         } else {
-            Challenge challenge = challengeService.addChallenge(challengeMutate);
-            if (challenge == null) return new ChallengeMutateResult("Addition Error");
-            List<Replica> replicas = replicaService.createReplicas(challenge, 1);
-            replicaAllocService.allocReplicasForAll(replicas);
-            return new ChallengeMutateResult("");
+            return new ChallengeMutateResult(challengeService.updateChallenge(challengeMutate));
         }
     }
 
