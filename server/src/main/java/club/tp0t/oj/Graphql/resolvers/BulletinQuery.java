@@ -12,14 +12,16 @@ import java.util.List;
 
 @Component
 public class BulletinQuery implements GraphQLQueryResolver {
-    @Autowired
-    private BulletinService bulletinService;
+    private final BulletinService bulletinService;
 
-    public BulletinResult allBulletin(){
-        List<Bulletin> bulletins = bulletinService.getAllBulletin();
-        BulletinResult  bulletinresult = new BulletinResult ("");
-        if(bulletins == null) bulletins = new ArrayList<>();
-        bulletinresult.setBulletin(bulletins);
-        return bulletinresult;
+    @Autowired
+    public BulletinQuery(BulletinService bulletinService) {
+        this.bulletinService = bulletinService;
+    }
+
+    public BulletinResult allBulletin() {
+        BulletinResult bulletinResult = new BulletinResult("");
+        bulletinResult.setBulletin(bulletinService.getAllBulletin());
+        return bulletinResult;
     }
 }

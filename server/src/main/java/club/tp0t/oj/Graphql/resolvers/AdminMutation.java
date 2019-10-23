@@ -15,20 +15,24 @@ import java.util.List;
 
 @Component
 public class AdminMutation implements GraphQLMutationResolver {
+    private final BulletinService bulletinService;
+    private final ChallengeService challengeService;
+    private final FlagService flagService;
+    private final ReplicaService replicaService;
+    private final ReplicaAllocService replicaAllocService;
+    private final SubmitService submitService;
+    private final UserService userService;
+
     @Autowired
-    private BulletinService bulletinService;
-    @Autowired
-    private ChallengeService challengeService;
-    @Autowired
-    private FlagService flagService;
-    @Autowired
-    private ReplicaService replicaService;
-    @Autowired
-    private ReplicaAllocService replicaAllocService;
-    @Autowired
-    private SubmitService submitService;
-    @Autowired
-    private UserService userService;
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, FlagService flagService, ReplicaService replicaService, ReplicaAllocService replicaAllocService, SubmitService submitService, UserService userService) {
+        this.bulletinService = bulletinService;
+        this.challengeService = challengeService;
+        this.flagService = flagService;
+        this.replicaService = replicaService;
+        this.replicaAllocService = replicaAllocService;
+        this.submitService = submitService;
+        this.userService = userService;
+    }
 
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -44,23 +48,20 @@ public class AdminMutation implements GraphQLMutationResolver {
             return new BulletinPubResult("forbidden");
         }
 
+        // input format check
         if (!bulletinPubInput.checkPass()) return new BulletinPubResult("not empty error");
 
+        // unpack input data
         String title = bulletinPubInput.getTitle();
         String content = bulletinPubInput.getContent();
         boolean topping = bulletinPubInput.getTopping();
 
-//        if(title==null) return new BulletinPubResult("not empty error");
-//        title = title.trim();
-//        if(title.equals("")) return new BulletinPubResult("not empty error");
-//        if(content==null) return new BulletinPubResult("not empty error");
-//        content = content.trim();
-//        if(content.equals("")) return new BulletinPubResult("not empty error");
-
+        // execute
         if (bulletinService.addBulletin(title, content, topping)) {
             return new BulletinPubResult("");
+        } else {
+            return new BulletinPubResult("Bulletin addition failed!");
         }
-        return new BulletinPubResult("Bulletin addition failed!");
     }
 
     public ChallengeMutateResult challengeMutate(ChallengeMutateInput challengeMutate, DataFetchingEnvironment environment) {
@@ -78,7 +79,7 @@ public class AdminMutation implements GraphQLMutationResolver {
 
 
         if (!challengeMutate.checkPass()) return new ChallengeMutateResult("Challenge format not avaliable");
-        
+
         String id = challengeMutate.getChallengeId();
         if (!id.equals("") && challengeService.checkIdExistence(Long.parseLong(id))) {
             if (!challengeService.updateChallenge(challengeMutate)) return new ChallengeMutateResult("Updation Error");
