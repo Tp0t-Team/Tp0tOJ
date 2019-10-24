@@ -3,11 +3,9 @@ package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.BulletinRepository;
 import club.tp0t.oj.Entity.Bulletin;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

@@ -135,9 +135,8 @@ public class UserMutation implements GraphQLMutationResolver {
     }
 
     // submit flag
-    // need to move into service
-    @Transactional
     public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
+
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
@@ -147,75 +146,16 @@ public class UserMutation implements GraphQLMutationResolver {
             return new SubmitResult("forbidden");
         }
 
-        // not empty
-//        if (input.getChallengeId() == null || input.getFlag() == null) {
-//            return new SubmitResult("not empty error");
-//        }
+        // input format check
         if (!input.checkPass()) return new SubmitResult("not empty error");
 
-        // check flag
+        // unpack input data
         long challengeId = Long.parseLong(input.getChallengeId());
         long userId = (long) session.getAttribute("userId");
-        String flag = flagService.getFlagByUserIdAndChallengeId(userId, challengeId);
-        String submitFlag = input.getFlag();
+        String flag = input.getFlag();
+        boolean isMember = !(boolean) session.getAttribute("isAdmin") && !(boolean) session.getAttribute("isTeam");
 
-        if (flag == null) return new SubmitResult("No replica for you");
-
-        if ((boolean) session.getAttribute("isAdmin") || (boolean) session.getAttribute("isTeam")) {
-            if (submitFlag.equals(flag)) {
-                return new SubmitResult("correct");
-            } else {
-                return new SubmitResult("incorrect");
-            }
-        }
-
-        Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
-        User user = userService.getUserById(userId);
-
-        // correct flag
-        if (submitFlag.equals(flag)) {
-            // duplicate submit
-            if (submitService.checkDuplicateSubmit(user, challengeId)) {
-                return new SubmitResult("duplicate submit");
-            }
-
-            // Transactional from here (for dynamic score)
-            // add user score
-            // TODO: get current points of challenge
-            long currentPoints;
-            try {
-                currentPoints = Long.parseLong(ChallengeConfiguration.parseConfiguration(challengeService.getChallengeByChallengeId(challengeId).getConfiguration()).getScoreEx().getBase_score());
-            } catch (NumberFormatException e) {
-                return new SubmitResult("unknown error");
-            }
-            userService.addScore(userId, currentPoints);
-
-            // TODO: calculate new points
-            int solvedCount = submitService.updateSolvedCountByChallengeId(challengeId, user);
-            long newPoints = currentPoints;
-
-            // update score of user who has solved this challenge
-            if (currentPoints != newPoints) {
-                userService.updateScore(challengeId, currentPoints, newPoints);
-            }
-            // Transactional end here
-
-            // whether first three solvers
-            int mark = 0;
-            if (solvedCount <= 3) {
-                mark = solvedCount;
-            }
-
-            // save into submit table
-            submitService.submit(user, challenge, submitFlag, true, mark);
-
-            return new SubmitResult("");
-        }
-        // incorrect flag
-        else {
-            // save into submit table
-            submitService.submit(user, challenge, submitFlag, false, 0);
-            return new SubmitResult("incorrect");
-        }
+        // execute
+        return new SubmitResult(submitService.submit(userId, challengeId, flag, isMember));
     }
 }

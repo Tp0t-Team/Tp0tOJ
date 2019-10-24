@@ -4,18 +4,20 @@ import club.tp0t.oj.Dao.ReplicaRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Util.ChallengeConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+// TODO: all is utility function.
 @Service
 public class ReplicaService {
-    @Autowired
-    private ReplicaRepository replicaRepository;
+    private final ReplicaRepository replicaRepository;
+
+    public ReplicaService(ReplicaRepository replicaRepository) {
+        this.replicaRepository = replicaRepository;
+    }
 
     public List<Replica> getReplicaByChallenge(Challenge challenge) {
         return replicaRepository.findByChallenge(challenge);
@@ -35,7 +37,7 @@ public class ReplicaService {
 
     public Replica getRandomReplicaByChallenge(Challenge challenge) {
         List<Replica> replicas = replicaRepository.findAllByChallenge(challenge);
-        if (replicas == null) return null;
+        if (replicas.size() == 0) return null;
         return replicas.get(new Random().nextInt(replicas.size()));
     }
 

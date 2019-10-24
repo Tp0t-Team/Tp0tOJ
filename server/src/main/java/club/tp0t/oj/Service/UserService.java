@@ -1,13 +1,10 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.ChallengeRepository;
-import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
-import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +16,17 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private SubmitRepository submitRepository;
-    @Autowired
-    private ChallengeRepository challengeRepository;
-    @Autowired
-    private ReplicaService replicaService;
-    @Autowired
-    private ReplicaAllocService replicaAllocService;
+    private final UserRepository userRepository;
+    private final ChallengeRepository challengeRepository;
+    private final ReplicaService replicaService;
+    private final ReplicaAllocService replicaAllocService;
+
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
+        this.userRepository = userRepository;
+        this.challengeRepository = challengeRepository;
+        this.replicaService = replicaService;
+        this.replicaAllocService = replicaAllocService;
+    }
 
     /*
     public List<User> getAllUsers() {
@@ -48,19 +46,19 @@ public class UserService {
 //        return user != null;
 //    }
 
-    public boolean checkStuNumberExistence(String stuNumber) {
+    private boolean checkStuNumberExistence(String stuNumber) {
         //User user = userRepository.getUserByStuNumber(stuNumber);
         User user = userRepository.findByStuNumber(stuNumber);
         return user != null;
     }
 
-    public boolean checkQqExistence(String qq) {
+    private boolean checkQqExistence(String qq) {
         //User user = userRepository.getUserByQq(qq);
         User user = userRepository.findByQq(qq);
         return user != null;
     }
 
-    public boolean checkMailExistence(String mail) {
+    private boolean checkMailExistence(String mail) {
         //User user = userRepository.getUserByMail(mail);
         User user = userRepository.findByMail(mail);
         return user != null;
@@ -138,11 +136,11 @@ public class UserService {
 //        return user.getRole().equals("admin");
 //    }
 
-    public long getIdByName(String name) {
-        //User user = userRepository.getUserByName(name);
-        User user = userRepository.findByName(name);
-        return user.getUserId();
-    }
+//    public long getIdByName(String name) {
+//        //User user = userRepository.getUserByName(name);
+//        User user = userRepository.findByName(name);
+//        return user.getUserId();
+//    }
 
     public List<User> getUsersRank() {
         return userRepository.getUsersRank();
@@ -157,6 +155,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    // TODO: is this utility function necessary?
     public User getUserById(long userId) {
         return userRepository.findByUserId(userId);
     }
@@ -183,15 +182,16 @@ public class UserService {
 //        return user.getRole().equals("team");
 //    }
 
+    // TODO: this is an utility function.
     public boolean adminCheckByUserId(long userId) {
         User user = userRepository.getOne(userId);
         return user.getRole().equals("admin");
     }
 
-    public boolean teamCheckByUserId(long userId) {
-        User user = userRepository.getOne(userId);
-        return user.getRole().equals("team");
-    }
+//    public boolean teamCheckByUserId(long userId) {
+//        User user = userRepository.getOne(userId);
+//        return user.getRole().equals("team");
+//    }
 
     public boolean checkUserIdExistence(long userId) {
         //int count = userRepository.checkUserIdExistence(userId);
@@ -199,6 +199,7 @@ public class UserService {
         return count == 1;
     }
 
+    // TODO: this is an utility function.
     public void addScore(long userId, long currentPoints) {
         User user = userRepository.getOne(userId);
         long score = user.getScore();
@@ -206,17 +207,17 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void updateScore(long challengeId, long currentPoints, long newPoints) {
-        Challenge challenge = challengeRepository.findByChallengeId(challengeId);// challengeService.getChallengeByChallengeId(challengeId);
-//        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
-        List<Submit> submits = submitRepository.findAllByChallengeAndCorrect(challenge, true);
-        for (Submit tmpSubmit : submits) {
-            User tmpUser = tmpSubmit.getUser();
-            long score = tmpUser.getScore();
-            tmpUser.setScore(score - currentPoints + newPoints);
-            userRepository.save(tmpUser);
-        }
-    }
+//    public void updateScore(long challengeId, long currentPoints, long newPoints) {
+//        Challenge challenge = challengeRepository.findByChallengeId(challengeId);// challengeService.getChallengeByChallengeId(challengeId);
+////        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
+//        List<Submit> submits = submitRepository.findAllByChallengeAndCorrect(challenge, true);
+//        for (Submit tmpSubmit : submits) {
+//            User tmpUser = tmpSubmit.getUser();
+//            long score = tmpUser.getScore();
+//            tmpUser.setScore(score - currentPoints + newPoints);
+//            userRepository.save(tmpUser);
+//        }
+//    }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void updateUserInfo(String userId,

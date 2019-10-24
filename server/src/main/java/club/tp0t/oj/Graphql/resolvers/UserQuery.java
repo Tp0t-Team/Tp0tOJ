@@ -57,6 +57,7 @@ public class UserQuery implements GraphQLQueryResolver {
     }
 
     // get user profile
+    // TODO: is necessary moving into service?
     public UserInfoResult userInfo(String userId, DataFetchingEnvironment environment) {
 
         // get session from context

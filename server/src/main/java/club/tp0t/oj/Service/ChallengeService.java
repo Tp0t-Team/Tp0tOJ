@@ -8,16 +8,12 @@ import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
-import club.tp0t.oj.Graphql.types.FlagTypeInput;
-import club.tp0t.oj.Graphql.types.ScoreTypeInput;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.alibaba.fastjson.JSON;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,10 +32,6 @@ public class ChallengeService {
         this.replicaService = replicaService;
         this.replicaAllocService = replicaAllocService;
     }
-
-//    public List<Challenge> getEnabledChallenges() {
-//        return challengeRepository.findByState("enabled");
-//    }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
     public List<ChallengeInfo> getChallengeInfoForUser(long userId) {
@@ -82,6 +74,7 @@ public class ChallengeService {
         return challengeRepository.findAll();
     }
 
+    // TODO: this is an utility function.
     public Challenge getChallengeByChallengeId(long challengeId) {
         // TODO: unnecessary
         return challengeRepository.findByChallengeId(challengeId);
@@ -129,6 +122,7 @@ public class ChallengeService {
         return "";
     }
 
+    // TODO: this is an utility function.
     public void updateChallengeBlood(Challenge challenge) {
         // TODO: unnecessary
         challengeRepository.save(challenge);

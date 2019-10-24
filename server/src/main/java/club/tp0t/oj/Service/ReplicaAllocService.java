@@ -5,18 +5,21 @@ import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
 
+// TODO: all is utility function.
 @Service
 public class ReplicaAllocService {
-    @Autowired
-    private ReplicaAllocRepository replicaAllocRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final ReplicaAllocRepository replicaAllocRepository;
+    private final UserRepository userRepository;
+
+    public ReplicaAllocService(ReplicaAllocRepository replicaAllocRepository, UserRepository userRepository) {
+        this.replicaAllocRepository = replicaAllocRepository;
+        this.userRepository = userRepository;
+    }
 
     public List<ReplicaAlloc> getReplicaAllocByUser(User user) {
         return replicaAllocRepository.findByUser(user);
@@ -24,7 +27,7 @@ public class ReplicaAllocService {
 
     public void allocReplicasForAll(List<Replica> replicas) {
         List<User> users = userRepository.findAll();
-        if(users == null) return;
+        if (users == null) return;
         int userPerReplica = replicas.size() / users.size();
         for (int i = 0; i < replicas.size(); i++) {
             for (int j = 0; j < userPerReplica; j++) {
