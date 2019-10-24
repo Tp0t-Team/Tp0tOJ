@@ -1,11 +1,9 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Graphql.types.AllUserInfoResult;
-import club.tp0t.oj.Graphql.types.ChallengeConfig;
-import club.tp0t.oj.Graphql.types.ChallengeConfigsResult;
-import club.tp0t.oj.Graphql.types.UserInfoResult;
+import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
@@ -20,22 +18,19 @@ import java.util.List;
 
 @Component
 public class AdminQuery implements GraphQLQueryResolver {
-    @Autowired
-    private BulletinService bulletinService;
-    @Autowired
-    private ChallengeService challengeService;
-    @Autowired
-    private FlagService flagService;
-    @Autowired
-    private ReplicaService replicaService;
-    @Autowired
-    private ReplicaAllocService replicaAllocService;
-    @Autowired
-    private SubmitService submitService;
-    @Autowired
-    private UserService userService;
+    private final ChallengeService challengeService;
+    private final SubmitService submitService;
+    private final UserService userService;
+
+    public AdminQuery(ChallengeService challengeService, SubmitService submitService, UserService userService) {
+        this.challengeService = challengeService;
+        this.submitService = submitService;
+        this.userService = userService;
+    }
 
     public AllUserInfoResult allUserInfos(DataFetchingEnvironment environment) {
+
+        // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
@@ -46,11 +41,9 @@ public class AdminQuery implements GraphQLQueryResolver {
             return new AllUserInfoResult("forbidden");
         }
 
+        // execute
         AllUserInfoResult res = new AllUserInfoResult("");
-
-        List<User> users = userService.getAllUser();
-        if (users == null) users = new ArrayList<>();
-        res.addAllUserInfo(users);
+        res.addAllUserInfo(userService.getAllUser());
 
         return res;
     }
@@ -68,10 +61,11 @@ public class AdminQuery implements GraphQLQueryResolver {
             return new ChallengeConfigsResult("forbidden");
         }
 
-        List<ChallengeConfig> challengeConfigs = new ArrayList<>();
-        ChallengeConfigsResult res = new ChallengeConfigsResult("");
+        // execute
         List<Challenge> challenges = challengeService.getAllChallenges();
 
+        // pack result
+        List<ChallengeConfig> challengeConfigs = new ArrayList<>();
         for (Challenge challenge : challenges) {
             ChallengeConfiguration challengeconfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
             ChallengeConfig challengeConfig = new ChallengeConfig();
@@ -88,8 +82,35 @@ public class AdminQuery implements GraphQLQueryResolver {
 
             challengeConfigs.add(challengeConfig);
         }
+        ChallengeConfigsResult res = new ChallengeConfigsResult("");
         res.setChallengeConfigs(challengeConfigs);
 
         return res;
+    }
+
+    public SubmitHistoryResult submitHistory(String userId, DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if (session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new SubmitHistoryResult("forbidden");
+        }
+
+        // unpack input data
+        long parsedUserId = Long.parseLong(userId);
+
+        // execute
+        List<Submit> submits = submitService.getCorrectSubmitsByUserId(parsedUserId);
+
+        // pack result
+        if (submits == null) return new SubmitHistoryResult("No such user.");
+        SubmitHistoryResult submitHistoryResult = new SubmitHistoryResult("");
+        submitHistoryResult.addSubmitInfos(submits);
+        return submitHistoryResult;
     }
 }

@@ -1,9 +1,7 @@
 package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
-import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Graphql.types.SubmitHistoryResult;
 import club.tp0t.oj.Graphql.types.ChallengeInfosResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
@@ -32,9 +30,9 @@ public class UserQuery implements GraphQLQueryResolver {
     @Autowired
     private ReplicaAllocService replicaAllocService;
     @Autowired
-    private  SubmitService submitService;
+    private SubmitService submitService;
     @Autowired
-    private  UserService userService;
+    private UserService userService;
 
     // test
     public String test(DataFetchingEnvironment environment) {
@@ -80,7 +78,7 @@ public class UserQuery implements GraphQLQueryResolver {
         List<User> users = userService.getUsersRank();
 
         // no users
-        if(users == null) return rankResult;
+        if (users == null) return rankResult;
 
         rankResult.addRankResultDescs(users);
         return rankResult;
@@ -93,14 +91,14 @@ public class UserQuery implements GraphQLQueryResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // if not login
-        if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
+        if (session.getAttribute("isLogin") == null || !(boolean) session.getAttribute("isLogin")) {
             return new UserInfoResult("forbidden");
         }
 
         // whether requested by user himself
         long currentUserId = (Long) session.getAttribute("userId");
         // by himself or by admin
-        if(currentUserId == Long.parseLong(userId) ||
+        if (currentUserId == Long.parseLong(userId) ||
                 userService.adminCheckByUserId(currentUserId)) {
             User user = userService.getUserById(Long.parseLong(userId));
             UserInfoResult userInfoResult = new UserInfoResult("");
@@ -111,7 +109,7 @@ public class UserQuery implements GraphQLQueryResolver {
         // if requested by other users
         else {
             // user not exists
-            if(!userService.checkUserIdExistence(Long.parseLong(userId))) {
+            if (!userService.checkUserIdExistence(Long.parseLong(userId))) {
                 return new UserInfoResult("not found");
             }
             // exists
@@ -133,7 +131,7 @@ public class UserQuery implements GraphQLQueryResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         // if not login
-        if(session.getAttribute("isLogin")==null || !(boolean)session.getAttribute("isLogin")) {
+        if (session.getAttribute("isLogin") == null || !(boolean) session.getAttribute("isLogin")) {
             return new ChallengeInfosResult("forbidden");
         }
 
@@ -150,39 +148,12 @@ public class UserQuery implements GraphQLQueryResolver {
 //        }
 
         // no challenge
-        if(challenges == null) return new ChallengeInfosResult("no challenge available");
+        if (challenges == null) return new ChallengeInfosResult("no challenge available");
 
         ChallengeInfosResult challengeInfosResult = new ChallengeInfosResult("");
-        challengeInfosResult.updateChallengeInfos(challenges, (long)session.getAttribute("userId"), submitService);
+        challengeInfosResult.updateChallengeInfos(challenges, (long) session.getAttribute("userId"), submitService);
 
         return challengeInfosResult;
-    }
-
-    // admin get user's submit history
-    public SubmitHistoryResult submitHistory(String userId, DataFetchingEnvironment environment) {
-
-        // get session from context
-        DefaultGraphQLServletContext context = environment.getContext();
-        HttpSession session = context.getHttpServletRequest().getSession();
-
-        // login & admin check
-        if(session.getAttribute("isLogin") == null ||
-                !((boolean) session.getAttribute("isLogin")) ||
-                !(boolean) session.getAttribute("isAdmin")) {
-            return new SubmitHistoryResult("forbidden");
-        }
-
-        User user = userService.getUserById(Long.parseLong(userId));
-        if(user == null) return new SubmitHistoryResult("no such user");
-        List<Submit> submits = submitService.getCorrectSubmitsByUser(user);
-        if(submits == null) submits = new ArrayList<>();
-//        submits = new ArrayList<>();
-
-        SubmitHistoryResult submitHistoryResult = new SubmitHistoryResult("");
-
-        submitHistoryResult.addSubmitInfos(submits);
-
-        return submitHistoryResult;
     }
 
 }

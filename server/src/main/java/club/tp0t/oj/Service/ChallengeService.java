@@ -37,6 +37,7 @@ public class ChallengeService {
     }
 
     public Challenge getChallengeByChallengeId(long challengeId) {
+        // TODO: unnecessary
         return challengeRepository.findByChallengeId(challengeId);
     }
 
@@ -68,7 +69,7 @@ public class ChallengeService {
         // update challenge to DB
         challenge.setConfiguration(configurationUpdated);
         if (challengeMutate.getState() != null) challenge.setState(challengeMutate.getState());
-        challengeRepository.save(challenge);
+        challenge = challengeRepository.save(challenge);
 
         // update flag for replicas
         List<Replica> replicas = replicaService.getReplicaByChallenge(challenge);
@@ -83,10 +84,11 @@ public class ChallengeService {
     }
 
     public void updateChallengeBlood(Challenge challenge) {
+        // TODO: unnecessary
         challengeRepository.save(challenge);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ) // constraint for alloc replica
     public String addChallenge(ChallengeMutateInput challengeMutate) {
         // pack JSON data
         ChallengeConfiguration challengeConfiguration = new ChallengeConfiguration();
@@ -103,7 +105,7 @@ public class ChallengeService {
         Challenge challenge = new Challenge();
         challenge.setConfiguration(configuration);
         challenge.setState(challengeMutate.getState());
-        challengeRepository.save(challenge);
+        challenge = challengeRepository.save(challenge);
 
         // create replicas and allocate to all users
         List<Replica> replicas = replicaService.createReplicas(challenge, 1);

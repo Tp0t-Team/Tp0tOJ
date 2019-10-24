@@ -82,8 +82,9 @@ public class SubmitService {
         return submits.size() + 1;
     }
 
-    public List<Submit> getCorrectSubmitsByUser(User user) {
-        //return submitRepository.getCorrectSubmitsByUser(user);
+    public List<Submit> getCorrectSubmitsByUserId(long userId) {
+        User user = userService.getUserById(userId);
+        if (user == null) return null;
         return submitRepository.findAllByUserAndCorrect(user, true);
     }
 }
