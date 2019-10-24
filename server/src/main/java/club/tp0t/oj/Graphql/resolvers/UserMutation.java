@@ -29,10 +29,6 @@ public class UserMutation implements GraphQLMutationResolver {
     @Autowired
     private FlagService flagService;
     @Autowired
-    private ReplicaService replicaService;
-    @Autowired
-    private ReplicaAllocService replicaAllocService;
-    @Autowired
     private SubmitService submitService;
     @Autowired
     private UserService userService;
@@ -49,6 +45,7 @@ public class UserMutation implements GraphQLMutationResolver {
             return new RegisterResult("already login cannot register");
         }
 
+        // unpack input data
         String name = registerInput.getName();
         String stuNumber = registerInput.getStuNumber();
         String password = registerInput.getPassword();
@@ -57,60 +54,15 @@ public class UserMutation implements GraphQLMutationResolver {
         String mail = registerInput.getMail();
         String grade = registerInput.getGrade();
 
-//        // not empty
-//        if(name==null ||
-//                stuNumber==null ||
-//                password==null ||
-//                department==null ||
-//                qq==null ||
-//                mail==null ||
-//                grade==null) {
-//            return new RegisterResult("not empty error");
-//        }
-
-//        name = name.replaceAll("\\s", "");
-//        stuNumber = stuNumber.replaceAll("\\s", "");
-//        qq = qq.replaceAll("\\s", "");
-//        mail = mail.replaceAll("\\s", "");
-
+        // input format check
         if (!registerInput.checkPass()) return new RegisterResult("invalid information");
-
-        // TODO: validate you are a student
-        // validate email
-//        String EMAIL_PATTERN = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@" +
-//                "[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$";
-//        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         if (!CheckHelper.MAIL_PATTERN.matcher(registerInput.getMail()).matches()) {
             return new RegisterResult("invalid mail");
         }
+        // TODO: validate you are a student
 
-        // check duplicated user
-//        if (userService.checkStuNumberExistence(stuNumber)) {
-//            return new RegisterResult("stuNumber already in use");
-//        }
-//        if (userService.checkQqExistence(qq)) {
-//            return new RegisterResult("qq already in use");
-//        }
-//        if (userService.checkMailExistence(mail)) {
-//            return new RegisterResult("mail already in use");
-//        }
-
-        // register user
-        // if failed
-        User user = userService.register(name, stuNumber, password, department, qq, mail, grade);
-        if (user == null) {
-            return new RegisterResult("failed");
-        }
-
-        List<Replica> replicas = new ArrayList<>();
-        for (Challenge challenge : challengeService.getAllChallenges()) {
-            Replica replica = replicaService.getRandomReplicaByChallenge(challenge);
-            if (replica == null) continue;
-            replicas.add(replica);
-        }
-        replicaAllocService.allocReplicasForUser(replicas, user);
-
-        return new RegisterResult("");
+        // execute
+        return new RegisterResult(userService.register(name, stuNumber, password, department, qq, mail, grade));
     }
 
     // user password reset
@@ -140,38 +92,29 @@ public class UserMutation implements GraphQLMutationResolver {
         //    return new LoginResult("already login");
         //}
 
+        // input format check
         if (!input.checkPass()) return new LoginResult("not empty error");
-        // login check
+
+        // unpack input data
         String stuNumber = input.getStuNumber();
         String password = input.getPassword();
-        // not empty
-//        if (stuNumber == null) return new LoginResult("not empty error");
-//        stuNumber = stuNumber.replaceAll("\\s", "");
-//        if (stuNumber.equals("")) return new LoginResult("not empty error");
 
-        // user not exists
-        if (!userService.checkStuNumberExistence(stuNumber)) {
-            return new LoginResult("failed");
-        }
-
-        // user password check succeeded
-        if (userService.login(stuNumber, password)) {
+        // execute
+        User user = userService.login(stuNumber, password);
+        if (user != null) {
             session.setAttribute("isLogin", true);
-            session.setAttribute("userId", userService.getIdByStuNumber(stuNumber));
+            session.setAttribute("userId", user.getUserId());
             // admin
-            if (userService.adminCheckByStuNumber(stuNumber)) {
+            if (user.getRole().equals("admin")) {
                 session.setAttribute("isAdmin", true);
             } else session.setAttribute("isAdmin", false);
             // team
-            if (userService.teamCheckByStuNumber(stuNumber)) {
+            if (user.getRole().equals("team")) {
                 session.setAttribute("isTeam", true);
             } else session.setAttribute("isTeam", false);
 
-            return new LoginResult("", Long.toString(userService.getIdByStuNumber(stuNumber)),
-                    userService.getRoleByStuNumber(stuNumber));
-        }
-        // user password check failed
-        else {
+            return new LoginResult("", Long.toString(user.getUserId()), user.getRole());
+        } else {
             return new LoginResult("failed");
         }
     }
@@ -274,43 +217,5 @@ public class UserMutation implements GraphQLMutationResolver {
             submitService.submit(user, challenge, submitFlag, false, 0);
             return new SubmitResult("incorrect");
         }
-
     }
-
-    // admin update user info
-    public UserInfoUpdateResult userInfoUpdate(UserInfoUpdateInput input, DataFetchingEnvironment environment) {
-        // get session from context
-        DefaultGraphQLServletContext context = environment.getContext();
-        HttpSession session = context.getHttpServletRequest().getSession();
-
-        // login & admin check
-        if (session.getAttribute("isLogin") == null ||
-                !((boolean) session.getAttribute("isLogin")) ||
-                !(boolean) session.getAttribute("isAdmin")) {
-            return new UserInfoUpdateResult("forbidden");
-        }
-
-        if (!input.checkPass()) return new UserInfoUpdateResult("");
-
-        // cannot change one's own role
-        long userId = (long) session.getAttribute("userId");
-        if (userService.adminCheckByUserId(userId) &&
-                Long.parseLong(input.getUserId()) == userId && !input.getRole().equals("admin")) {
-            return new UserInfoUpdateResult("downgrade not permitted");
-        }
-
-        userService.updateUserInfo(input.getUserId(),
-                input.getName(),
-                input.getRole(),
-                input.getDepartment(),
-                input.getGrade(),
-                input.getProtectedTime(),
-                input.getQq(),
-                input.getMail(),
-                input.getState());
-
-        return new UserInfoUpdateResult("");
-
-    }
-
 }

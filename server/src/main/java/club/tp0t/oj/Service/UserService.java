@@ -1,15 +1,19 @@
 package club.tp0t.oj.Service;
 
+import club.tp0t.oj.Dao.ChallengeRepository;
 import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -17,12 +21,14 @@ import java.util.concurrent.TimeUnit;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private SubmitRepository submitRepository;
-
     @Autowired
-    private ChallengeService challengeService;
+    private ChallengeRepository challengeRepository;
+    @Autowired
+    private ReplicaService replicaService;
+    @Autowired
+    private ReplicaAllocService replicaAllocService;
 
     /*
     public List<User> getAllUsers() {
@@ -36,11 +42,11 @@ public class UserService {
     }
     */
 
-    public boolean checkNameExistence(String name) {
-        //User user = userRepository.getUserByName(name);
-        User user = userRepository.findByName(name);
-        return user != null;
-    }
+//    public boolean checkNameExistence(String name) {
+//        //User user = userRepository.getUserByName(name);
+//        User user = userRepository.findByName(name);
+//        return user != null;
+//    }
 
     public boolean checkStuNumberExistence(String stuNumber) {
         //User user = userRepository.getUserByStuNumber(stuNumber);
@@ -60,32 +66,31 @@ public class UserService {
         return user != null;
     }
 
-    @Transactional
-    public User register(String name,
-                         String stuNumber,
-                         String password,
-                         String department,
-                         String qq,
-                         String mail,
-                         String grade) {
+    @Transactional(isolation = Isolation.SERIALIZABLE) // for unique test, must use this level.
+    public String register(String name,
+                           String stuNumber,
+                           String password,
+                           String department,
+                           String qq,
+                           String mail,
+                           String grade) {
         if (checkStuNumberExistence(stuNumber)) {
-            return null;
+            return "Student number has been used.";
         }
         if (checkQqExistence(qq)) {
-            return null;
+            return "QQ has been used.";
         }
         if (checkMailExistence(mail)) {
-            return null;
+            return "Mail has been used.";
         }
         User user = new User();
         user.setName(name);
         user.setStuNumber(stuNumber);
         user.setDepartment(department);
-        user.setGmtCreated(new Timestamp(System.currentTimeMillis()));
-        user.setGmtModified(new Timestamp(System.currentTimeMillis()));
         user.setJoinTime(new Timestamp(System.currentTimeMillis()));
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         // set protected time 100 days
+        // TODO: set to correct protected time!!!
         timestamp.setTime(timestamp.getTime() + TimeUnit.MINUTES.toMillis(100 * 24 * 60));
         user.setProtectedTime(timestamp);
         user.setMail(mail);
@@ -97,27 +102,41 @@ public class UserService {
         user.setTopRank(0);
         user.setGrade(grade);
 
-        userRepository.save(user);
-        return user;
+        user = userRepository.save(user);
+
+        List<Replica> replicas = new ArrayList<>();
+        for (Challenge challenge : challengeRepository.findAll()) {
+            Replica replica = replicaService.getRandomReplicaByChallenge(challenge);
+            if (replica == null) continue;
+            replicas.add(replica);
+        }
+        replicaAllocService.allocReplicasForUser(replicas, user);
+
+        return "";
     }
 
-    public boolean login(String stuNumber, String password) {
-        //User user = userRepository.getUserByStuNumber(stuNumber);
+    @Transactional
+    public User login(String stuNumber, String password) {
         User user = userRepository.findByStuNumber(stuNumber);
-
+        // not exist
+        if (user == null) return null;
         // user disabled
         if (user.getState().equals("disabled")) {
-            return false;
+            return null;
         }
         // password matches
-        return password.equals(user.getPassword());
+        if (password.equals(user.getPassword())) {
+            return user;
+        } else {
+            return null;
+        }
     }
 
-    public boolean adminCheckByStuNumber(String stuNumber) {
-        //User user = userRepository.getUserByStuNumber(stuNumber);
-        User user = userRepository.findByStuNumber(stuNumber);
-        return user.getRole().equals("admin");
-    }
+//    public boolean adminCheckByStuNumber(String stuNumber) {
+//        //User user = userRepository.getUserByStuNumber(stuNumber);
+//        User user = userRepository.findByStuNumber(stuNumber);
+//        return user.getRole().equals("admin");
+//    }
 
     public long getIdByName(String name) {
         //User user = userRepository.getUserByName(name);
@@ -129,10 +148,10 @@ public class UserService {
         return userRepository.getUsersRank();
     }
 
-    public long getIdByStuNumber(String stuNumber) {
-        User user = userRepository.findByStuNumber(stuNumber);
-        return user.getUserId();
-    }
+//    public long getIdByStuNumber(String stuNumber) {
+//        User user = userRepository.findByStuNumber(stuNumber);
+//        return user.getUserId();
+//    }
 
     public List<User> getAllUser() {
         return userRepository.findAll();
@@ -142,11 +161,11 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-    public String getRoleByStuNumber(String stuNumber) {
-        //User user = userRepository.getUserByStuNumber(stuNumber);
-        User user = userRepository.findByStuNumber(stuNumber);
-        return user.getRole();
-    }
+//    public String getRoleByStuNumber(String stuNumber) {
+//        //User user = userRepository.getUserByStuNumber(stuNumber);
+//        User user = userRepository.findByStuNumber(stuNumber);
+//        return user.getRole();
+//    }
 
     public int getRankByUserId(long userId) {
         List<User> usersRank = userRepository.getUsersRank();
@@ -158,11 +177,11 @@ public class UserService {
         return 0;
     }
 
-    public boolean teamCheckByStuNumber(String stuNumber) {
-        //User user = userRepository.getUserByStuNumber(stuNumber);
-        User user = userRepository.findByStuNumber(stuNumber);
-        return user.getRole().equals("team");
-    }
+//    public boolean teamCheckByStuNumber(String stuNumber) {
+//        //User user = userRepository.getUserByStuNumber(stuNumber);
+//        User user = userRepository.findByStuNumber(stuNumber);
+//        return user.getRole().equals("team");
+//    }
 
     public boolean adminCheckByUserId(long userId) {
         User user = userRepository.getOne(userId);
@@ -188,7 +207,7 @@ public class UserService {
     }
 
     public void updateScore(long challengeId, long currentPoints, long newPoints) {
-        Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
+        Challenge challenge = challengeRepository.findByChallengeId(challengeId);// challengeService.getChallengeByChallengeId(challengeId);
 //        List<Submit> submits = submitService.getCorrectSubmitsByChallenge(challenge);
         List<Submit> submits = submitRepository.findAllByChallengeAndCorrect(challenge, true);
         for (Submit tmpSubmit : submits) {
@@ -199,6 +218,7 @@ public class UserService {
         }
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void updateUserInfo(String userId,
                                String name,
                                String role,

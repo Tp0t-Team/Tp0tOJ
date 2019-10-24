@@ -5,7 +5,6 @@ import club.tp0t.oj.Service.*;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
@@ -14,10 +13,12 @@ import javax.servlet.http.HttpSession;
 public class AdminMutation implements GraphQLMutationResolver {
     private final BulletinService bulletinService;
     private final ChallengeService challengeService;
+    private final UserService userService;
 
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService) {
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
+        this.userService = userService;
     }
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -81,6 +82,43 @@ public class AdminMutation implements GraphQLMutationResolver {
         // TODO:
 //        if(!challengeService.removeById(id)) return new ChallengeRemoveResult("Remove failed");
 //        return new ChallengeRemoveResult("");
+    }
+
+    public UserInfoUpdateResult userInfoUpdate(UserInfoUpdateInput input, DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if (session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new UserInfoUpdateResult("forbidden");
+        }
+
+        // input format check
+        if (!input.checkPass()) return new UserInfoUpdateResult("");
+
+        // cannot change one's own role
+        long userId = (long) session.getAttribute("userId");
+        if (userService.adminCheckByUserId(userId) &&
+                Long.parseLong(input.getUserId()) == userId && !input.getRole().equals("admin")) {
+            return new UserInfoUpdateResult("downgrade not permitted");
+        }
+
+        // execute
+        userService.updateUserInfo(input.getUserId(),
+                input.getName(),
+                input.getRole(),
+                input.getDepartment(),
+                input.getGrade(),
+                input.getProtectedTime(),
+                input.getQq(),
+                input.getMail(),
+                input.getState());
+
+        return new UserInfoUpdateResult("");
     }
 }
 
