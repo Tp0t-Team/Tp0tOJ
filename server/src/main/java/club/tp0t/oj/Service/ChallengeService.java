@@ -1,8 +1,12 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Dao.ChallengeRepository;
+import club.tp0t.oj.Dao.SubmitRepository;
+import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
+import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
 import club.tp0t.oj.Graphql.types.FlagTypeInput;
 import club.tp0t.oj.Graphql.types.ScoreTypeInput;
@@ -14,22 +18,64 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ChallengeService {
     private final ChallengeRepository challengeRepository;
+    private final UserRepository userRepository;
+    private final SubmitRepository submitRepository;
     private final ReplicaService replicaService;
     private final ReplicaAllocService replicaAllocService;
 
-    public ChallengeService(ChallengeRepository challengeRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
         this.challengeRepository = challengeRepository;
+        this.userRepository = userRepository;
+        this.submitRepository = submitRepository;
         this.replicaService = replicaService;
         this.replicaAllocService = replicaAllocService;
     }
 
-    public List<Challenge> getEnabledChallenges() {
-        return challengeRepository.findByState("enabled");
+//    public List<Challenge> getEnabledChallenges() {
+//        return challengeRepository.findByState("enabled");
+//    }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
+    public List<ChallengeInfo> getChallengeInfoForUser(long userId) {
+        User user = userRepository.findByUserId(userId);
+
+        List<Challenge> challengeList = challengeRepository.findByState("enabled");
+        ArrayList<ChallengeInfo> result = new ArrayList<>();
+        for (Challenge challenge : challengeList) {
+            ChallengeInfo challengeInfo = new ChallengeInfo();
+            challengeInfo.setChallengeId(Long.toString(challenge.getChallengeId()));
+
+            // set blood
+            List<String> blood = new ArrayList<>();
+            if (challenge.getFirstBlood() != null)
+                blood.add(Long.toString(challenge.getFirstBlood().getUserId()));
+            if (challenge.getSecondBlood() != null)
+                blood.add(Long.toString(challenge.getSecondBlood().getUserId()));
+            if (challenge.getThirdBlood() != null)
+                blood.add(Long.toString(challenge.getThirdBlood().getUserId()));
+            challengeInfo.setBlood(blood);
+
+            // whether solved by user
+            challengeInfo.setDone(submitRepository.findByUserAndChallengeAndCorrect(user, challenge, true) != null);
+
+            // parse from description
+            ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
+            challengeInfo.setDescription(challengeConfiguration.getDescription());
+            challengeInfo.setExternalLink(challengeConfiguration.getExternalLink());
+            challengeInfo.setHint(challengeConfiguration.getHint());
+            challengeInfo.setType(challengeConfiguration.getType());
+            challengeInfo.setName(challengeConfiguration.getName());
+            challengeInfo.setScore(Integer.parseInt(challengeConfiguration.getScoreEx().getBase_score()));
+
+            result.add(challengeInfo);
+        }
+        return result;
     }
 
     public List<Challenge> getAllChallenges() {

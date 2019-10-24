@@ -19,20 +19,13 @@ import java.util.List;
 
 @Component
 public class UserQuery implements GraphQLQueryResolver {
-    @Autowired
-    private BulletinService bulletinService;
-    @Autowired
-    private ChallengeService challengeService;
-    @Autowired
-    private FlagService flagService;
-    @Autowired
-    private ReplicaService replicaService;
-    @Autowired
-    private ReplicaAllocService replicaAllocService;
-    @Autowired
-    private SubmitService submitService;
-    @Autowired
-    private UserService userService;
+    private final ChallengeService challengeService;
+    private final UserService userService;
+
+    public UserQuery(ChallengeService challengeService, UserService userService) {
+        this.challengeService = challengeService;
+        this.userService = userService;
+    }
 
     // test
     public String test(DataFetchingEnvironment environment) {
@@ -56,36 +49,16 @@ public class UserQuery implements GraphQLQueryResolver {
         //    return new RankResult("forbidden");
         //}
 
-        /*
-        // normal user
-        // can only get normal users
-        if(false) {
-            Profile profile = new Profile("normal");
-            List<User> users = userService.getNormalUsers();
-            profile.addNormalUserInfo(users);
-            return profile;
-        }
-
-        // admin
-        // get admin users, disabled users
-        Profile profile = new Profile("admin");
-        List<User> users = userService.getAllUsers();
-        profile.addAllUserInfo(users);
-        return profile;
-        */
-
+        //execute
         RankResult rankResult = new RankResult("");
-        List<User> users = userService.getUsersRank();
+        rankResult.addRankResultDescs(userService.getUsersRank());
 
-        // no users
-        if (users == null) return rankResult;
-
-        rankResult.addRankResultDescs(users);
         return rankResult;
     }
 
     // get user profile
     public UserInfoResult userInfo(String userId, DataFetchingEnvironment environment) {
+
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
@@ -95,24 +68,26 @@ public class UserQuery implements GraphQLQueryResolver {
             return new UserInfoResult("forbidden");
         }
 
-        // whether requested by user himself
+        // unpack input data
+        Long parsedUserId = Long.parseLong(userId);
         long currentUserId = (Long) session.getAttribute("userId");
-        // by himself or by admin
-        if (currentUserId == Long.parseLong(userId) ||
+
+        // if requested by himself or by admin
+        if (currentUserId == parsedUserId ||
                 userService.adminCheckByUserId(currentUserId)) {
-            User user = userService.getUserById(Long.parseLong(userId));
+            User user = userService.getUserById(parsedUserId);
             UserInfoResult userInfoResult = new UserInfoResult("");
             userInfoResult.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
-            return userInfoResult;
 
+            return userInfoResult;
         }
         // if requested by other users
         else {
-            // user not exists
+            // if user not exists
             if (!userService.checkUserIdExistence(Long.parseLong(userId))) {
                 return new UserInfoResult("not found");
             }
-            // exists
+            // if user exists
             else {
                 User user = userService.getUserById(Long.parseLong(userId));
                 UserInfoResult userInfoResult = new UserInfoResult("");
@@ -120,7 +95,6 @@ public class UserQuery implements GraphQLQueryResolver {
                 return userInfoResult;
             }
         }
-
     }
 
     // get challenges
@@ -135,23 +109,9 @@ public class UserQuery implements GraphQLQueryResolver {
             return new ChallengeInfosResult("forbidden");
         }
 
-        List<Challenge> challenges;
-
-        // admin or team
-//        long userId = (long) session.getAttribute("userId");
-//        if(userService.adminCheckByUserId(userId) || userService.teamCheckByUserId(userId)) {
-//            challenges = challengeService.getAllChallenges();
-//        }
-        // member
-//        else {
-        challenges = challengeService.getEnabledChallenges();
-//        }
-
-        // no challenge
-        if (challenges == null) return new ChallengeInfosResult("no challenge available");
-
+        // execute
         ChallengeInfosResult challengeInfosResult = new ChallengeInfosResult("");
-        challengeInfosResult.updateChallengeInfos(challenges, (long) session.getAttribute("userId"), submitService);
+        challengeInfosResult.setChallengeInfos(challengeService.getChallengeInfoForUser((long) session.getAttribute("userId")));
 
         return challengeInfosResult;
     }
