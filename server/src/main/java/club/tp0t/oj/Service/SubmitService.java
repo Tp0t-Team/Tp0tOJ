@@ -1,5 +1,6 @@
 package club.tp0t.oj.Service;
 
+import club.tp0t.oj.Component.FlagHelper;
 import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
@@ -17,13 +18,13 @@ public class SubmitService {
     private final SubmitRepository submitRepository;
     private final ChallengeService challengeService;
     private final UserService userService;
-    private final FlagService flagService;
+    private final FlagHelper flagHelper;
 
-    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagService flagService) {
+    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper) {
         this.submitRepository = submitRepository;
         this.challengeService = challengeService;
         this.userService = userService;
-        this.flagService = flagService;
+        this.flagHelper = flagHelper;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -34,7 +35,7 @@ public class SubmitService {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
 
         // get your flag and check
-        String correctFlag = flagService.getFlagByUserIdAndChallengeId(user, challenge);
+        String correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
         if (correctFlag == null) return "No replica for you.";
         boolean correct = correctFlag.equals(flag);
 

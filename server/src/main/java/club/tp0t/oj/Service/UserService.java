@@ -1,5 +1,7 @@
 package club.tp0t.oj.Service;
 
+import club.tp0t.oj.Component.ReplicaAllocHelper;
+import club.tp0t.oj.Component.ReplicaHelper;
 import club.tp0t.oj.Dao.ChallengeRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
@@ -18,33 +20,15 @@ import java.util.concurrent.TimeUnit;
 public class UserService {
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
-    private final ReplicaService replicaService;
-    private final ReplicaAllocService replicaAllocService;
+    private final ReplicaHelper replicaHelper;
+    private final ReplicaAllocHelper replicaAllocHelper;
 
-    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
-        this.replicaService = replicaService;
-        this.replicaAllocService = replicaAllocService;
+        this.replicaHelper = replicaHelper;
+        this.replicaAllocHelper = replicaAllocHelper;
     }
-
-    /*
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-    */
-
-    /*
-    public List<User> getNormalUsers() {
-        return userRepository.getNormalUsers();
-    }
-    */
-
-//    public boolean checkNameExistence(String name) {
-//        //User user = userRepository.getUserByName(name);
-//        User user = userRepository.findByName(name);
-//        return user != null;
-//    }
 
     private boolean checkStuNumberExistence(String stuNumber) {
         //User user = userRepository.getUserByStuNumber(stuNumber);
@@ -104,11 +88,11 @@ public class UserService {
 
         List<Replica> replicas = new ArrayList<>();
         for (Challenge challenge : challengeRepository.findAll()) {
-            Replica replica = replicaService.getRandomReplicaByChallenge(challenge);
+            Replica replica = replicaHelper.getRandomReplicaByChallenge(challenge);
             if (replica == null) continue;
             replicas.add(replica);
         }
-        replicaAllocService.allocReplicasForUser(replicas, user);
+        replicaAllocHelper.allocReplicasForUser(replicas, user);
 
         return "";
     }
@@ -130,26 +114,9 @@ public class UserService {
         }
     }
 
-//    public boolean adminCheckByStuNumber(String stuNumber) {
-//        //User user = userRepository.getUserByStuNumber(stuNumber);
-//        User user = userRepository.findByStuNumber(stuNumber);
-//        return user.getRole().equals("admin");
-//    }
-
-//    public long getIdByName(String name) {
-//        //User user = userRepository.getUserByName(name);
-//        User user = userRepository.findByName(name);
-//        return user.getUserId();
-//    }
-
     public List<User> getUsersRank() {
         return userRepository.getUsersRank();
     }
-
-//    public long getIdByStuNumber(String stuNumber) {
-//        User user = userRepository.findByStuNumber(stuNumber);
-//        return user.getUserId();
-//    }
 
     public List<User> getAllUser() {
         return userRepository.findAll();
@@ -160,12 +127,6 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-//    public String getRoleByStuNumber(String stuNumber) {
-//        //User user = userRepository.getUserByStuNumber(stuNumber);
-//        User user = userRepository.findByStuNumber(stuNumber);
-//        return user.getRole();
-//    }
-
     public int getRankByUserId(long userId) {
         List<User> usersRank = userRepository.getUsersRank();
         for (int i = 0; i < usersRank.size(); i++) {
@@ -175,12 +136,6 @@ public class UserService {
         // user not exists
         return 0;
     }
-
-//    public boolean teamCheckByStuNumber(String stuNumber) {
-//        //User user = userRepository.getUserByStuNumber(stuNumber);
-//        User user = userRepository.findByStuNumber(stuNumber);
-//        return user.getRole().equals("team");
-//    }
 
     // TODO: this is an utility function.
     public boolean adminCheckByUserId(long userId) {

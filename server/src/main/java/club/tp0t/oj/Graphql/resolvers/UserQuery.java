@@ -1,21 +1,17 @@
 package club.tp0t.oj.Graphql.resolvers;
 
-import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.ChallengeInfosResult;
-import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Graphql.types.RankResult;
-import club.tp0t.oj.Service.*;
-import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Graphql.types.UserInfoResult;
+import club.tp0t.oj.Service.ChallengeService;
+import club.tp0t.oj.Service.UserService;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class UserQuery implements GraphQLQueryResolver {
@@ -70,7 +66,7 @@ public class UserQuery implements GraphQLQueryResolver {
         }
 
         // unpack input data
-        Long parsedUserId = Long.parseLong(userId);
+        long parsedUserId = Long.parseLong(userId);
         long currentUserId = (Long) session.getAttribute("userId");
 
         // if requested by himself or by admin

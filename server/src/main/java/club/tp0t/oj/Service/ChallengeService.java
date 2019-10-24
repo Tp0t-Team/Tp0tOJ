@@ -1,5 +1,7 @@
 package club.tp0t.oj.Service;
 
+import club.tp0t.oj.Component.ReplicaAllocHelper;
+import club.tp0t.oj.Component.ReplicaHelper;
 import club.tp0t.oj.Dao.ChallengeRepository;
 import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Dao.UserRepository;
@@ -22,15 +24,15 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
     private final SubmitRepository submitRepository;
-    private final ReplicaService replicaService;
-    private final ReplicaAllocService replicaAllocService;
+    private final ReplicaHelper replicaHelper;
+    private final ReplicaAllocHelper replicaAllocHelper;
 
-    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaService replicaService, ReplicaAllocService replicaAllocService) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
-        this.replicaService = replicaService;
-        this.replicaAllocService = replicaAllocService;
+        this.replicaHelper = replicaHelper;
+        this.replicaAllocHelper = replicaAllocHelper;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
@@ -111,11 +113,11 @@ public class ChallengeService {
         challenge = challengeRepository.save(challenge);
 
         // update flag for replicas
-        List<Replica> replicas = replicaService.getReplicaByChallenge(challenge);
+        List<Replica> replicas = replicaHelper.getReplicaByChallenge(challenge);
         if (replicas != null) {
             for (Replica replica : replicas) {
                 // TODO: use saveAll to speed up
-                replicaService.updateReplicaFlag(replica, challengeConfiguration.getFlag().getValue());
+                replicaHelper.updateReplicaFlag(replica, challengeConfiguration.getFlag().getValue());
             }
         }
 
@@ -148,8 +150,8 @@ public class ChallengeService {
         challenge = challengeRepository.save(challenge);
 
         // create replicas and allocate to all users
-        List<Replica> replicas = replicaService.createReplicas(challenge, 1);
-        replicaAllocService.allocReplicasForAll(replicas);
+        List<Replica> replicas = replicaHelper.createReplicas(challenge, 1);
+        replicaAllocHelper.allocReplicasForAll(replicas);
 
         return "";
     }

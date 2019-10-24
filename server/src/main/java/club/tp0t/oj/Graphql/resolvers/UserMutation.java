@@ -1,37 +1,28 @@
 package club.tp0t.oj.Graphql.resolvers;
 
-import club.tp0t.oj.Entity.Challenge;
-import club.tp0t.oj.Entity.Replica;
-import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.*;
-import club.tp0t.oj.Service.*;
-import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Service.SubmitService;
+import club.tp0t.oj.Service.UserService;
 import club.tp0t.oj.Util.CheckHelper;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @Component
 public class UserMutation implements GraphQLMutationResolver {
+    private final SubmitService submitService;
+    private final UserService userService;
+
     @Autowired
-    private BulletinService bulletinService;
-    @Autowired
-    private ChallengeService challengeService;
-    @Autowired
-    private FlagService flagService;
-    @Autowired
-    private SubmitService submitService;
-    @Autowired
-    private UserService userService;
+    public UserMutation(SubmitService submitService, UserService userService) {
+        this.submitService = submitService;
+        this.userService = userService;
+    }
 
     // user register
     public RegisterResult register(RegisterInput registerInput, DataFetchingEnvironment environment) {

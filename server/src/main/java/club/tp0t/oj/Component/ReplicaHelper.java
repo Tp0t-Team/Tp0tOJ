@@ -1,21 +1,20 @@
-package club.tp0t.oj.Service;
+package club.tp0t.oj.Component;
 
 import club.tp0t.oj.Dao.ReplicaRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Util.ChallengeConfiguration;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-// TODO: all is utility function.
-@Service
-public class ReplicaService {
+@Component
+public class ReplicaHelper {
     private final ReplicaRepository replicaRepository;
 
-    public ReplicaService(ReplicaRepository replicaRepository) {
+    public ReplicaHelper(ReplicaRepository replicaRepository) {
         this.replicaRepository = replicaRepository;
     }
 

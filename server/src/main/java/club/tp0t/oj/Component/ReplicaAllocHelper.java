@@ -1,22 +1,21 @@
-package club.tp0t.oj.Service;
+package club.tp0t.oj.Component;
 
 import club.tp0t.oj.Dao.ReplicaAllocRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ReplicaAlloc;
 import club.tp0t.oj.Entity.User;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-// TODO: all is utility function.
-@Service
-public class ReplicaAllocService {
+@Component
+public class ReplicaAllocHelper {
     private final ReplicaAllocRepository replicaAllocRepository;
     private final UserRepository userRepository;
 
-    public ReplicaAllocService(ReplicaAllocRepository replicaAllocRepository, UserRepository userRepository) {
+    public ReplicaAllocHelper(ReplicaAllocRepository replicaAllocRepository, UserRepository userRepository) {
         this.replicaAllocRepository = replicaAllocRepository;
         this.userRepository = userRepository;
     }
