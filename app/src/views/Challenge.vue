@@ -27,11 +27,11 @@
                 </v-overlay>
                 <v-card-actions>
                   <v-row>
-                    <v-col cols="4" v-for="blood in item.blood" :key="item.challengeId+blood.blood">
+                    <v-col cols="4" v-for="blood in item.blood" :key="item.challengeId+blood.userId">
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn fab @click.stop="seeBlood(blood)">
-                          <v-icon>whatshot</v-icon>
+                        <v-btn color="blue" fab @click.stop="seeBlood(blood.userId)">
+                          <v-avatar size="56">{{blood.name[0]}}</v-avatar>
                         </v-btn>
                         <v-spacer></v-spacer>
                       </v-layout>
@@ -153,7 +153,10 @@ export default class Challenge extends Vue {
                 externalLink
                 hint
                 score
-                blood
+                blood {
+                  userId
+                  name
+                }
                 done
               }
             }

@@ -27,7 +27,10 @@ export interface ChallengeDesc {
     description: string
     external_link: string[]
     hint: string[]
-    blood: string[]
+    blood: {
+        userId: string
+        name: string
+    }[]
     done: boolean
 }
 

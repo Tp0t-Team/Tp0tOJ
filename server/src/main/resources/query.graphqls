@@ -59,8 +59,13 @@ type ChallengeInfo {
     description: String
     externalLink: [String]
     hint: [String]
-    blood: [String]
+    blood: [BloodInfo]
     done: Boolean
+}
+
+type BloodInfo {
+    userId: String
+    name: String
 }
 
 type ChallengeConfigsResult {

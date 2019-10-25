@@ -155,8 +155,7 @@ public class UserService {
     }
 
     // TODO: this is an utility function.
-    public void addScore(long userId, long currentPoints) {
-        User user = userRepository.getOne(userId);
+    public void addScore(User user, long currentPoints) {
         long score = user.getScore();
         user.setScore(score + currentPoints);
         userRepository.save(user);

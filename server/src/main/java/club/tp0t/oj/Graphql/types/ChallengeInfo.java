@@ -10,7 +10,7 @@ public class ChallengeInfo {
     private String description;
     private List<String> externalLink = new ArrayList<>();
     private List<String> hint = new ArrayList<>();
-    private List<String> blood = new ArrayList<>();
+    private List<BloodInfo> blood = new ArrayList<>();
     private boolean done;
     private String challengeId;
 
@@ -34,7 +34,7 @@ public class ChallengeInfo {
         this.hint = hint;
     }
 
-    public void setBlood(List<String> blood) {
+    public void setBlood(List<BloodInfo> blood) {
         this.blood = blood;
     }
 
@@ -66,7 +66,7 @@ public class ChallengeInfo {
         return hint;
     }
 
-    public List<String> getBlood() {
+    public List<BloodInfo> getBlood() {
         return blood;
     }
 

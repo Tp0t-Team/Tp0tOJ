@@ -8,6 +8,7 @@ import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Graphql.types.BloodInfo;
 import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
 import club.tp0t.oj.Util.ChallengeConfiguration;
@@ -46,13 +47,13 @@ public class ChallengeService {
             challengeInfo.setChallengeId(Long.toString(challenge.getChallengeId()));
 
             // set blood
-            List<String> blood = new ArrayList<>();
+            List<BloodInfo> blood = new ArrayList<>();
             if (challenge.getFirstBlood() != null)
-                blood.add(Long.toString(challenge.getFirstBlood().getUserId()));
+                blood.add(BloodInfo.fromUser(challenge.getFirstBlood()));
             if (challenge.getSecondBlood() != null)
-                blood.add(Long.toString(challenge.getSecondBlood().getUserId()));
+                blood.add(BloodInfo.fromUser(challenge.getSecondBlood()));
             if (challenge.getThirdBlood() != null)
-                blood.add(Long.toString(challenge.getThirdBlood().getUserId()));
+                blood.add(BloodInfo.fromUser(challenge.getThirdBlood()));
             challengeInfo.setBlood(blood);
 
             // whether solved by user
