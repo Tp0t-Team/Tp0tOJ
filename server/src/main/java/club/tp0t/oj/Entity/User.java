@@ -7,6 +7,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 
 @Entity
@@ -211,6 +214,18 @@ public class User {
 
     public void setGrade(String grade) {
         this.grade = grade;
+    }
+
+    public String makeAvatarUrl() {
+        String hash = "";
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+            messageDigest.update(this.mail.trim().toLowerCase().getBytes());
+            hash = new BigInteger(1, messageDigest.digest()).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            // do nothing
+        }
+        return "https://www.gravatar.com/avatar/" + hash + "?d=404";
     }
 
 }

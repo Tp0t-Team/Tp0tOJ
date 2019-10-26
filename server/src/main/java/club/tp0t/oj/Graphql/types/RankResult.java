@@ -36,6 +36,7 @@ public class RankResult {
             // hide some attributes
             RankResultDesc rankResultDesc = new RankResultDesc();
             rankResultDesc.setName(user.getName());
+            rankResultDesc.setAvatar(user.makeAvatarUrl());
             rankResultDesc.setScore(Long.toString(user.getScore()));
             rankResultDesc.setUserId(Long.toString(user.getUserId()));
 

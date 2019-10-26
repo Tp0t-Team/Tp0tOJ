@@ -27,11 +27,18 @@
                 </v-overlay>
                 <v-card-actions>
                   <v-row>
-                    <v-col cols="4" v-for="blood in item.blood" :key="item.challengeId+blood.userId">
+                    <v-col
+                      cols="4"
+                      v-for="blood in item.blood"
+                      :key="item.challengeId+blood.userId"
+                    >
                       <v-layout row>
                         <v-spacer></v-spacer>
                         <v-btn color="blue" fab @click.stop="seeBlood(blood.userId)">
-                          <v-avatar size="56">{{blood.name[0]}}</v-avatar>
+                          <!-- <v-avatar size="56">{{blood.name[0]}}</v-avatar> -->
+                          <v-avatar size="56">
+                            <user-avatar class="white--text" :url="blood.avatar" :size="56" :name="blood.name"></user-avatar>
+                          </v-avatar>
                         </v-btn>
                         <v-spacer></v-spacer>
                       </v-layout>
@@ -105,6 +112,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
 import gql from "graphql-tag";
+import UserAvatar from "@/components/UserAvatar.vue";
 import {
   ChallengeDesc,
   ChallengeResult,
@@ -113,7 +121,11 @@ import {
 } from "@/struct";
 import constValue from "@/constValue";
 
-@Component
+@Component({
+  components: {
+    UserAvatar
+  }
+})
 export default class Challenge extends Vue {
   private challengeType = constValue.challengeType;
 
@@ -156,6 +168,7 @@ export default class Challenge extends Vue {
                 blood {
                   userId
                   name
+                  avatar
                 }
                 done
               }

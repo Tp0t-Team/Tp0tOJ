@@ -5,6 +5,7 @@ export interface Result {
 export interface UserInfo {
     userId: string
     name: string
+    avatar: string
     role: string
     stuNumber: string
     department: string
@@ -30,6 +31,7 @@ export interface ChallengeDesc {
     blood: {
         userId: string
         name: string
+        avatar: string
     }[]
     done: boolean
 }
@@ -37,6 +39,7 @@ export interface ChallengeDesc {
 export interface RankDesc {
     userId: string
     name: string
+    avatar: string
     score: string
 }
 

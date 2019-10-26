@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class UserInfo {
     private String name;
+    private String avatar;
     private String stuNumber;
     private String department;
     private String qq;
@@ -20,6 +21,7 @@ public class UserInfo {
     private String grade;
 
     public UserInfo(String name,
+                    String avatar,
                     String stuNumber,
                     String department,
                     String qq,
@@ -34,6 +36,7 @@ public class UserInfo {
                     int rank,
                     String grade) {
         this.name = name;
+        this.avatar = avatar;
         this.stuNumber = stuNumber;
         this.department = department;
         this.qq = qq;
@@ -48,10 +51,13 @@ public class UserInfo {
         this.rank = rank;
         this.grade = grade;
     }
-    public UserInfo(){};
 
     public String getName() {
         return name;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 
     public String getStuNumber() {
@@ -92,6 +98,10 @@ public class UserInfo {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public void setStuNumber(String stuNumber) {

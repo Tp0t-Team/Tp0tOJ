@@ -16,6 +16,7 @@ type UserInfoResult {
 type UserInfo {
     userId: String # long to String
     name: String
+    avatar: String
     stuNumber: String
     department: String
     qq: String
@@ -48,6 +49,7 @@ type ChallengeInfosResult {
 type RankResultDesc {
     userId: String
     name: String
+    avatar: String
     score: Int
 }
 
@@ -66,6 +68,7 @@ type ChallengeInfo {
 type BloodInfo {
     userId: String
     name: String
+    avatar: String
 }
 
 type ChallengeConfigsResult {

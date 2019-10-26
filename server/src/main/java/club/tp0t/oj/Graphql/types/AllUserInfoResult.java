@@ -21,6 +21,7 @@ public class AllUserInfoResult {
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
             this.allUserInfos.add(new UserInfo(user.getName(),
+                    user.makeAvatarUrl(),
                     user.getStuNumber(),
                     user.getDepartment(),
                     user.getQq(),

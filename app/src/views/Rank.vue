@@ -12,7 +12,8 @@
             >
               <div class="pa-2 align-self-center">
                 <v-avatar size="64" color="blue">
-                  <span class="headline">{{ r.name[0] }}</span>
+                  <!-- <span class="headline">{{ r.name[0] }}</span> -->
+                  <user-avatar class="headline white--text" :url="r.avatar" :size="64" :name="r.name"></user-avatar>
                 </v-avatar>
               </div>
               <div class="pa-2">
@@ -66,11 +67,16 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
+import UserAvatar from "@/components/UserAvatar.vue";
 import { RankDesc, RankResult } from "@/struct";
 
 const UserPerPage = 10;
 
-@Component
+@Component({
+  components: {
+    UserAvatar
+  }
+})
 export default class Rank extends Vue {
   private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
@@ -102,6 +108,7 @@ export default class Rank extends Vue {
               rankResultDescs {
                 userId
                 name
+                avatar
                 score
               }
             }

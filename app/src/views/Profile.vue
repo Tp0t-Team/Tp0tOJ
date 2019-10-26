@@ -3,9 +3,27 @@
     <!-- {{$route.params.user_id}} -->
     <v-row class="avatar">
       <v-spacer></v-spacer>
-      <v-avatar :color="loading?'grey':'blue'" size="64">
-        <span class="white--text">{{userInfo.name[0]}}</span>
-      </v-avatar>
+      <v-tooltip right>
+        <template v-slot:activator="{ on }">
+          <v-avatar
+            class="hoverable"
+            :color="loading?'grey':'blue'"
+            size="64"
+            @click="editAvatar"
+            v-on="on"
+          >
+            <!-- <span class="white--text">{{userInfo.name[0]}}</span> -->
+            <user-avatar
+              class="white--text"
+              :url="userInfo.avatar"
+              :size="64"
+              :name="userInfo.name"
+              :key="userInfo.avatar"
+            ></user-avatar>
+          </v-avatar>
+        </template>
+        <span>avatar service based on Gravatar</span>
+      </v-tooltip>
       <v-spacer></v-spacer>
     </v-row>
     <v-row class="mt-5">
@@ -101,16 +119,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
+import { Route } from "vue-router";
+import UserAvatar from "@/components/UserAvatar.vue";
 import { UserInfo, UserInfoResult } from "@/struct";
 import gql from "graphql-tag";
 
-@Component
+@Component({
+  components: {
+    UserAvatar
+  }
+})
 export default class Profile extends Vue {
   private loading: boolean = false;
   private userInfo: UserInfo = {
     userId: "",
     name: "",
+    avatar: "",
     role: "",
     stuNumber: "",
     department: "",
@@ -135,6 +160,19 @@ export default class Profile extends Vue {
   }
 
   async mounted() {
+    await this.load(this.$route.params.user_id);
+  }
+
+  @Watch("$route")
+  async beforeRouteUpdate(to: Route) {
+    await this.load(to.params.user_id);
+  }
+
+  editAvatar() {
+    window.open("https://www.gravatar.com/");
+  }
+
+  async load(userId: string) {
     try {
       let res = await this.$apollo.query<UserInfoResult, { userId: string }>({
         query: gql`
@@ -144,6 +182,7 @@ export default class Profile extends Vue {
               userInfo {
                 userId
                 name
+                avatar
                 role
                 stuNumber
                 department
@@ -161,7 +200,7 @@ export default class Profile extends Vue {
           }
         `,
         variables: {
-          userId: this.$route.params.user_id
+          userId: userId
         },
         fetchPolicy: "no-cache"
       });
@@ -184,6 +223,10 @@ export default class Profile extends Vue {
   left: 12px;
   width: 100%;
   z-index: 1;
+}
+
+.hoverable:hover {
+  cursor: pointer;
 }
 
 .outer {

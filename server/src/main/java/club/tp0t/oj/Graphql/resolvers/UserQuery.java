@@ -81,12 +81,12 @@ public class UserQuery implements GraphQLQueryResolver {
         // if requested by other users
         else {
             // if user not exists
-            if (!userService.checkUserIdExistence(Long.parseLong(userId))) {
+            if (!userService.checkUserIdExistence(parsedUserId)) {
                 return new UserInfoResult("not found");
             }
             // if user exists
             else {
-                User user = userService.getUserById(Long.parseLong(userId));
+                User user = userService.getUserById(parsedUserId);
                 UserInfoResult userInfoResult = new UserInfoResult("");
                 userInfoResult.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
                 return userInfoResult;

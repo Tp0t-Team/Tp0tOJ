@@ -22,6 +22,7 @@ public class UserInfoResult {
     // hide some attributes
     public void addOthersUserInfo(User user, int rank) {
         this.userInfo = new UserInfo(user.getName(),
+                user.makeAvatarUrl(),
                 "",  // stuNumber
                 "",  // department
                 "",  // qq
@@ -40,6 +41,7 @@ public class UserInfoResult {
     // add all information
     public void addOwnUserInfo(User user, int rank) {
         this.userInfo = new UserInfo(user.getName(),
+                user.makeAvatarUrl(),
                 user.getStuNumber(),
                 user.getDepartment(),
                 user.getQq(),
