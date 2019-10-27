@@ -21,6 +21,18 @@ export default new Router({
                 import(/* webpackChunkName: "login" */ '@/views/Login.vue')
         },
         {
+            path: '/forget',
+            name: 'forget',
+            component: () =>
+                import(/* webpackChunkName: "forget" */ '@/views/Forget.vue')
+        },
+        {
+            path: '/reset',
+            name: 'reset',
+            component: () =>
+                import(/* webpackChunkName: "reset" */ '@/views/Reset.vue')
+        },
+        {
             path: '/bulletin',
             name: 'bulletin',
             component: () =>

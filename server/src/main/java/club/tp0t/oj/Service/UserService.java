@@ -3,9 +3,11 @@ package club.tp0t.oj.Service;
 import club.tp0t.oj.Component.ReplicaAllocHelper;
 import club.tp0t.oj.Component.ReplicaHelper;
 import club.tp0t.oj.Dao.ChallengeRepository;
+import club.tp0t.oj.Dao.ResetTokenRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
+import club.tp0t.oj.Entity.ResetToken;
 import club.tp0t.oj.Entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -14,18 +16,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
+    private final ResetTokenRepository resetTokenRepository;
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
 
-    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
+        this.resetTokenRepository = resetTokenRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
     }
@@ -112,6 +118,77 @@ public class UserService {
         } else {
             return null;
         }
+    }
+
+    public class Forget {
+        private String message;
+        private String token;
+        private String mail;
+        private String name;
+
+        Forget(String message, String token, String mail, String name) {
+            this.message = message;
+            this.token = token;
+            this.mail = mail;
+            this.name = name;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getMail() {
+            return mail;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    private static String makeToken() {
+        return UUID.randomUUID().toString() + "-" + Long.toString(System.currentTimeMillis(), 16);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE) // for first forget
+    public Forget forget(String stuNumber) {
+        User user = userRepository.findByStuNumber(stuNumber);
+        if (user == null) return new Forget("unregister", "", "", "");
+        ResetToken resetToken = resetTokenRepository.findByUser(user);
+        if (resetToken != null) {
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            if (now.getTime() - resetToken.getGmtModified().getTime() < TimeUnit.MINUTES.toMillis(5)) {
+                // too short delta time
+                return new Forget("too short interval", "", "", "");
+            } else {
+                // renew token
+                resetToken.setToken(makeToken());
+                resetToken = resetTokenRepository.save(resetToken);
+                return new Forget("", resetToken.getToken(), user.getMail(), user.getName());
+            }
+        } else {
+            // create token
+            resetToken = new ResetToken();
+            resetToken.setUser(user);
+            resetToken.setToken(makeToken());
+            resetToken = resetTokenRepository.save(resetToken);
+            return new Forget("", resetToken.getToken(), user.getMail(), user.getName());
+        }
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE) // for delete and so on
+    public String reset(String token, String password) {
+        ResetToken resetToken = resetTokenRepository.findByToken(token);
+        if (resetToken == null) return "invalid";
+        User user = resetToken.getUser();
+        user.setPassword(password);
+        userRepository.save(user);
+        resetTokenRepository.delete(resetToken);
+        return "";
     }
 
     public List<User> getUsersRank() {

@@ -139,6 +139,18 @@ export type RegisterResult = { register: Result }
 // mutation logout
 export type LogoutResult = { logout: Result }
 
+// mutation forget
+export type ForgetResult = { forget: Result }
+
+// mutation reset
+export interface ResetInput {
+    input: {
+        password: string
+        token: string
+    }
+}
+export type ResetResult = { reset: Result }
+
 // mutation sumbit
 export interface SubmitInput {
     input: {

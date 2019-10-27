@@ -8,6 +8,7 @@ import club.tp0t.oj.Graphql.resolvers.BulletinQuery;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableConfigurationProperties
 public class OjApplication {
 
 	public static void main(String[] args) {

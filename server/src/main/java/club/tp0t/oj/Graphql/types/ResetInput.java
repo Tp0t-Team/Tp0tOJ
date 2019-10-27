@@ -1,31 +1,26 @@
 package club.tp0t.oj.Graphql.types;
 
 public class ResetInput {
-    private String name;
-    private String stuNumber;
-    private String mail;
+    private String password;
+    private String token;
 
-    public String getName() {
-        return name;
+    public String getPassword() {
+        return password;
     }
 
-    public String getStuNumber() {
-        return stuNumber;
+    public String getToken() {
+        return token;
     }
 
-    public String getMail() {
-        return mail;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setToken(String token) {
+        this.token = token;
     }
 
-    public void setStuNumber(String stuNumber) {
-        this.stuNumber = stuNumber;
-    }
-
-    public void setMail(String mail) {
-        this.mail = mail;
+    public boolean checkPass() {
+        return !password.equals("") && !token.equals("");
     }
 }

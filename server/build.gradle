@@ -23,6 +23,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
     compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.10.0'
     compile 'com.graphql-java-kickstart:graphql-java-tools:5.6.1'
 

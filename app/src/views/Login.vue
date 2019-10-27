@@ -23,6 +23,14 @@
             ></v-text-field>
             <v-spacer class="ma-6"></v-spacer>
             <v-btn
+              absolute
+              bottom
+              right
+              text
+              @click="$router.push('/forget')"
+              class="forget"
+            >forget</v-btn>
+            <v-btn
               color="primary"
               absolute
               bottom
@@ -288,4 +296,7 @@ export default class Login extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.forget {
+  margin-right: 100px;
+}
 </style>

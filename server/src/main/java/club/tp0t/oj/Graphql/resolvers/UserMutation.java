@@ -5,23 +5,39 @@ import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.SubmitService;
 import club.tp0t.oj.Service.UserService;
 import club.tp0t.oj.Util.CheckHelper;
+import club.tp0t.oj.Util.OjConfig;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMailMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import javax.servlet.http.HttpSession;
 
 @Component
 public class UserMutation implements GraphQLMutationResolver {
     private final SubmitService submitService;
     private final UserService userService;
+    private final JavaMailSender mailSender;
+    private final OjConfig config;
+
+    @Value("${spring.mail.username}")
+    private String from;
 
     @Autowired
-    public UserMutation(SubmitService submitService, UserService userService) {
+    public UserMutation(SubmitService submitService, UserService userService, JavaMailSender mailSender, OjConfig config) {
         this.submitService = submitService;
         this.userService = userService;
+        this.mailSender = mailSender;
+        this.config = config;
     }
 
     // user register
@@ -39,7 +55,7 @@ public class UserMutation implements GraphQLMutationResolver {
         // unpack input data
         String name = registerInput.getName();
         String stuNumber = registerInput.getStuNumber();
-        String password = registerInput.getPassword();
+        String password = DigestUtils.md5DigestAsHex((config.getSalt() + registerInput.getPassword()).getBytes()); // registerInput.getPassword();
         String department = registerInput.getDepartment();
         String qq = registerInput.getQq();
         String mail = registerInput.getMail();
@@ -88,7 +104,7 @@ public class UserMutation implements GraphQLMutationResolver {
 
         // unpack input data
         String stuNumber = input.getStuNumber();
-        String password = input.getPassword();
+        String password = DigestUtils.md5DigestAsHex((config.getSalt() + input.getPassword()).getBytes()); // input.getPassword();
 
         // execute
         User user = userService.login(stuNumber, password);
@@ -123,6 +139,47 @@ public class UserMutation implements GraphQLMutationResolver {
 
         session.setAttribute("isLogin", false);
         return new LogoutResult("");
+    }
+
+    public ForgetResult forget(String input) {
+
+        // input format check
+        if (input.equals("")) return new ForgetResult("not empty error");
+
+        //execute
+        UserService.Forget forget = userService.forget(input);
+        if (!forget.getMessage().equals("")) {
+            return new ForgetResult(forget.getMessage());
+        } else {
+            // TODO: send mail
+//            System.out.println(forget.getToken()); // for debug
+            try {
+                MimeMessageHelper mailMessage = new MimeMessageHelper(mailSender.createMimeMessage());
+                String toName = MimeUtility.encodeText(forget.getName());
+                String fromName = MimeUtility.encodeText(config.getName());
+                mailMessage.setTo(String.format("%s <%s>", toName, forget.getMail()));
+                mailMessage.setFrom(String.format("%s <%s>", fromName, from));
+                mailMessage.setSubject("password reset");
+                mailMessage.setText(String.format("Please use the follow link to reset your password.\n%s/reset?token=%s", config.getHost(), forget.getToken()));
+                mailSender.send(mailMessage.getMimeMessage());
+                return new ForgetResult("");
+            } catch (Exception e) {
+                return new ForgetResult("Send mail failed, please wait.");
+            }
+        }
+    }
+
+    public ResetResult reset(ResetInput input) {
+
+        // input format check
+        if (!input.checkPass()) return new ResetResult("not empty error");
+
+        // unpack input data
+        String token = input.getToken();
+        String password = DigestUtils.md5DigestAsHex((config.getSalt() + input.getPassword()).getBytes()); // input.getPassword();
+
+        // execute
+        return new ResetResult(userService.reset(token, password));
     }
 
     // submit flag
