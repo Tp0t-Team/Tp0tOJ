@@ -9,7 +9,15 @@
         <v-row>
           <v-spacer></v-spacer>
           <v-avatar color="blue" size="64">
-            <span>{{currentUser && currentUser.name[0] || "?"}}</span>
+            <!-- <span>{{currentUser && currentUser.name[0] || "?"}}</span> -->
+            <user-avatar
+              class="white--text"
+              v-if="!!currentUser"
+              :url="currentUser.avatar"
+              :size="64"
+              :name="currentUser.name"
+              :key="currentUser.avatar"
+            ></user-avatar>
           </v-avatar>
           <v-spacer></v-spacer>
         </v-row>
@@ -63,6 +71,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserEditor from "@/components/UserEditor.vue";
+import UserAvatar from "@/components/UserAvatar.vue";
 import {
   UserInfo,
   AllUserInfoResult,
@@ -74,7 +83,8 @@ import {
 
 @Component({
   components: {
-    UserEditor
+    UserEditor,
+    UserAvatar
   }
 })
 export default class User extends Vue {
@@ -113,6 +123,7 @@ export default class User extends Vue {
               allUserInfos {
                 userId
                 name
+                avatar
                 role
                 stuNumber
                 department
