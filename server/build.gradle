@@ -10,14 +10,16 @@ sourceCompatibility = '1.8'
 
 repositories {
     maven { url 'http://maven.aliyun.com/groups/public/' }
-    maven { url 'http://maven.aliyun.com/repositories/jcenter' }
+    maven { url 'https://maven.aliyun.com/repository/jcenter' }
+    maven { url 'https://maven.aliyun.com/repository/spring' }
     // maven{ url 'http://maven.aliyun.com/repositories/gradle-plugin'}
-    mavenCentral()
-    jcenter()
+//    mavenCentral()
+//    jcenter()
 }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
