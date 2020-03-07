@@ -1,5 +1,13 @@
 package club.tp0t.oj.Util;
 
+import club.tp0t.oj.Dao.ChallengeRepository;
+import club.tp0t.oj.Dao.SubmitRepository;
+import club.tp0t.oj.Dao.UserRepository;
+import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.Submit;
+import club.tp0t.oj.Entity.User;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -8,9 +16,16 @@ import java.util.List;
 
 @Component
 public class RankHelper {
+    private final ChallengeRepository challengeRepository;
+    private final UserRepository userRepository;
+    private final SubmitRepository submitRepository;
+
     private StringRedisTemplate redisTemplate;
 
-    public RankHelper(StringRedisTemplate redisTemplate) {
+    public RankHelper(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, StringRedisTemplate redisTemplate) {
+        this.challengeRepository = challengeRepository;
+        this.userRepository = userRepository;
+        this.submitRepository = submitRepository;
         this.redisTemplate = redisTemplate;
     }
 
@@ -128,5 +143,28 @@ public class RankHelper {
             return false;
         }
         return true;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void warmUp() {
+        List<Challenge> challengeList = challengeRepository.findByState("enabled");
+        for (int i = 0; i < challengeList.size(); i++) {
+            Challenge tmpChallenge = challengeList.get(i);
+            String challengeConfigString = tmpChallenge.getConfiguration();
+            ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challengeConfigString);
+            addChallenge(tmpChallenge.getChallengeId(), challengeConfiguration.getScore().getBaseScore());
+        }
+
+        List<User> userList = userRepository.findAll();
+        for (int i = 0; i < userList.size(); i++) {
+            User tmpUser = userList.get(i);
+            addUser(tmpUser.getUserId(), tmpUser.getScore());
+        }
+
+        List<Submit> submitList = submitRepository.findAllByCorrect(true);
+        for (int i = 0; i < submitList.size(); i++) {
+            Submit tmpSubmit = submitList.get(i);
+            submit(tmpSubmit.getUser().getUserId(), tmpSubmit.getChallenge().getChallengeId(), tmpSubmit.getSubmitTime().getTime(),null);  // TODO: calculator
+        }
     }
 }
