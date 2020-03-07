@@ -14,6 +14,7 @@ public class OjConfig {
     private double firstBloodPercentage;
     private double secondBloodPercentage;
     private double thirdBloodPercentage;
+    private int halfLife;
 
     public String getHost() {
         return host;
@@ -39,6 +40,10 @@ public class OjConfig {
         return thirdBloodPercentage;
     }
 
+    public int getHalfLife() {
+        return halfLife;
+    }
+
     public void setHost(String host) {
         this.host = host;
     }
@@ -61,5 +66,9 @@ public class OjConfig {
 
     public void setThirdBloodPercentage(double thirdBloodPercentage) {
         this.thirdBloodPercentage = thirdBloodPercentage;
+    }
+
+    public void setHalfLife(int halfLife) {
+        this.halfLife = halfLife;
     }
 }

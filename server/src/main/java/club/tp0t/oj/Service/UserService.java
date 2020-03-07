@@ -9,6 +9,7 @@ import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ResetToken;
 import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Util.RankHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +28,15 @@ public class UserService {
     private final ResetTokenRepository resetTokenRepository;
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
+    private final RankHelper rankHelper;
 
-    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.resetTokenRepository = resetTokenRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
+        this.rankHelper = rankHelper;
     }
 
     private boolean checkStuNumberExistence(String stuNumber) {
@@ -192,7 +195,13 @@ public class UserService {
     }
 
     public List<User> getUsersRank() {
-        return userRepository.getUsersRank();
+        List<Long> rank = rankHelper.getRank();
+        List<User> result = new ArrayList<>();
+        for(long userId : rank) {
+            result.add(userRepository.findByUserId(userId));
+        }
+        return result;
+        // return userRepository.getUsersRank();
     }
 
     public List<User> getAllUser() {
@@ -231,12 +240,12 @@ public class UserService {
         return count == 1;
     }
 
-    // TODO: this is an utility function.
+    /*// TODO: this is an utility function.
     public void addScore(User user, long currentPoints) {
         long score = user.getScore();
         user.setScore(score + currentPoints);
         userRepository.save(user);
-    }
+    }*/
 
 //    public void updateScore(long challengeId, long currentPoints, long newPoints) {
 //        Challenge challenge = challengeRepository.findByChallengeId(challengeId);// challengeService.getChallengeByChallengeId(challengeId);

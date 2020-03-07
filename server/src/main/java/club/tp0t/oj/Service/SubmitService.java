@@ -5,7 +5,9 @@ import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Util.BasicScoreCalculator;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Util.RankHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +21,14 @@ public class SubmitService {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final FlagHelper flagHelper;
+    private final RankHelper rankHelper;
 
-    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper) {
+    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper, RankHelper rankHelper) {
         this.submitRepository = submitRepository;
         this.challengeService = challengeService;
         this.userService = userService;
         this.flagHelper = flagHelper;
+        this.rankHelper = rankHelper;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -92,7 +96,8 @@ public class SubmitService {
                     return "unknown error";
                 }
                 // TODO: change score update method.
-                userService.addScore(user, currentPoints);
+                // userService.addScore(user, currentPoints);
+                rankHelper.submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime());
                 return "";
             } else {
                 return "incorrect";

@@ -19,7 +19,7 @@ public class RankHelper {
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
     private final SubmitRepository submitRepository;
-    private final BasicScoreCalculator basicScoreCalculator;
+    private final BasicScoreCalculator calculator;
 
     private StringRedisTemplate redisTemplate;
 
@@ -27,7 +27,7 @@ public class RankHelper {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
-        this.basicScoreCalculator = basicScoreCalculator;
+        this.calculator = basicScoreCalculator;
         this.redisTemplate = redisTemplate;
     }
 
@@ -92,7 +92,7 @@ public class RankHelper {
         return true;
     }
 
-    public boolean submit(long userId, long challengeId, long timestamp, ScoreCalculator calculator) {
+    public boolean submit(long userId, long challengeId, long timestamp) {
         redisTemplate.setEnableTransactionSupport(true);
         try {
             redisTemplate.multi();
@@ -163,7 +163,7 @@ public class RankHelper {
 
         List<Submit> submitList = submitRepository.findAllByCorrectOrderBySubmitTimeAsc(true);
         for (Submit submit : submitList) {
-            submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime(), basicScoreCalculator);
+            submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime());
         }
     }
 }

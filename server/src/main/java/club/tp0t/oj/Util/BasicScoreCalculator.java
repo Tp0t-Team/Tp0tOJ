@@ -1,24 +1,40 @@
 package club.tp0t.oj.Util;
 
+import club.tp0t.oj.Dao.ChallengeRepository;
+import club.tp0t.oj.Entity.Challenge;
 import org.springframework.stereotype.Component;
 
 @Component
 public class BasicScoreCalculator implements RankHelper.ScoreCalculator {
     private final OjConfig ojConfig;
+    private final ChallengeRepository challengeRepository;
 
-    public BasicScoreCalculator(OjConfig ojConfig) {
+    public BasicScoreCalculator(OjConfig ojConfig, ChallengeRepository challengeRepository) {
         this.ojConfig = ojConfig;
+        this.challengeRepository = challengeRepository;
     }
 
-    private long curve() {
-        return 0;
+    private long curve(int baseScore, int count) {
+        if(count == 0) {
+            return baseScore;
+        }
+        double coefficient = 1.8414 / new Integer(ojConfig.getHalfLife()).doubleValue() * count;
+        double result = Math.floor(new Integer(baseScore).doubleValue() / coefficient + Math.exp(-coefficient));
+        return new Double(result).longValue();
     }
 
     @Override
     public long getScore(long challengeId, long count) {
         // step 1: from challengeId, get curve parameters
+        Challenge challenge = challengeRepository.findByChallengeId(challengeId);
+        ChallengeConfiguration configuration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
         // step 2: use curve(), parameters & count, calc the score
-        return 0;
+        if(configuration.getScore().isDynamic()) {
+            return curve(configuration.getScore().getBaseScore(), new Long(count).intValue());
+        }
+        else {
+            return configuration.getScore().getBaseScore();
+        }
     }
 
     @Override
