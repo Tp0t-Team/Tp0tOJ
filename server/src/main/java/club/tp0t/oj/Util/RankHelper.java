@@ -17,7 +17,9 @@ public class RankHelper {
     public interface ScoreCalculator {
         long getScore(long challengeId, long count);
 
-        long getIncrementScore(long score, int index); // index: 0, 1, 2, ...
+        // used when this user first submit this flag
+        long getIncrementScore(long score, long index); // index: 0, 1, 2, ...
+        
         // used for blood
         long getDeltaScoreForUser(long oldScore, long newScore, int index); // index: 0, 1, 2, ...
     }
@@ -89,7 +91,7 @@ public class RankHelper {
                 throw new Exception();
             }
             long oldScore = Long.parseLong(scoreString);
-            redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getScore(oldScore, count - 1));
+            redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getIncrementScore(oldScore, count - 1));
             long newScore = calculator.getScore(challengeId, count);
             redisTemplate.opsForValue().set("ChallengeScore:" + challengeId, String.valueOf(newScore));
             List<String> users = redisTemplate.opsForList().range("Challenge:", 0, count);
