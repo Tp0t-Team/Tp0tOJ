@@ -197,8 +197,11 @@ public class UserService {
     public List<User> getUsersRank() {
         List<Long> rank = rankHelper.getRank();
         List<User> result = new ArrayList<>();
-        for(long userId : rank) {
-            result.add(userRepository.findByUserId(userId));
+        for (long userId : rank) {
+            User user = userRepository.findByUserId(userId);
+            if (user != null) {
+                result.add(user);
+            }
         }
         return result;
         // return userRepository.getUsersRank();

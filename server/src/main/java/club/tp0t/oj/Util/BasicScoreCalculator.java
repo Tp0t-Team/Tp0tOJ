@@ -27,6 +27,9 @@ public class BasicScoreCalculator implements RankHelper.ScoreCalculator {
     public long getScore(long challengeId, long count) {
         // step 1: from challengeId, get curve parameters
         Challenge challenge = challengeRepository.findByChallengeId(challengeId);
+        if(challenge == null) {
+            return 0;
+        }
         ChallengeConfiguration configuration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
         // step 2: use curve(), parameters & count, calc the score
         if(configuration.getScore().isDynamic()) {
