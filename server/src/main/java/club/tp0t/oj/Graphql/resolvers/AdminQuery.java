@@ -2,14 +2,12 @@ package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Submit;
-import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
