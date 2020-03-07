@@ -31,6 +31,6 @@ public interface SubmitRepository extends JpaRepository<Submit, Long> {
 
     List<Submit> findAllByUserAndCorrect(User user, boolean correct);
 
-    List<Submit> findAllByCorrect(boolean correct);
+    List<Submit> findAllByCorrectOrderBySubmitTimeAsc(boolean b);
 }
 

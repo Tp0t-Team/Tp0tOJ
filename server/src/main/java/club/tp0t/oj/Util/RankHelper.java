@@ -161,7 +161,7 @@ public class RankHelper {
             addUser(user.getUserId(), user.getScore());
         }
 
-        List<Submit> submitList = submitRepository.findAllByCorrect(true);
+        List<Submit> submitList = submitRepository.findAllByCorrectOrderBySubmitTimeAsc(true);
         for (Submit submit : submitList) {
             submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime(), basicScoreCalculator);
         }
