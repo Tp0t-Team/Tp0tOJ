@@ -20,7 +20,7 @@ public class OjConfig {
     private double secondBloodPercentage;
     private double thirdBloodPercentage;
     private int halfLife;
-    private boolean competitionMode;
+    private boolean competition;
     private boolean allowRegister;
     private Date beginTime;
     private Date endTime;
@@ -50,9 +50,13 @@ public class OjConfig {
         return halfLife;
     }
 
-    public boolean isCompetition(){ return competitionMode;}
+    public boolean isCompetition() {
+        return competition;
+    }
 
-    public boolean isAllowRegister(){ return  allowRegister;}
+    public boolean isAllowRegister() {
+        return allowRegister;
+    }
 
     public Date getBeginTime() {
         return beginTime;
@@ -90,8 +94,8 @@ public class OjConfig {
         this.halfLife = halfLife;
     }
 
-    public void setCompetitionMode(boolean competitionMode){
-        this.competitionMode = allowRegister;
+    public void setCompetition(boolean competition){
+        this.competition = competition;
     }
 
     public void setAllowRegister(boolean allowRegister) {

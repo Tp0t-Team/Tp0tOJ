@@ -11,18 +11,20 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.stereotype.Component;
-import club.tp0t.oj.Service.ComputationService;
+import club.tp0t.oj.Service.CompetitionService;
+
 import javax.servlet.http.HttpSession;
 
 @Component
 public class UserQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
-    private final ComputationService computationService;
-    public UserQuery(ChallengeService challengeService, UserService userService,ComputationService computationService) {
+    private final CompetitionService competitionService;
+
+    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionService competitionService) {
         this.challengeService = challengeService;
         this.userService = userService;
-        this.computationService = computationService;
+        this.competitionService = competitionService;
     }
 
     // test
@@ -116,17 +118,15 @@ public class UserQuery implements GraphQLQueryResolver {
     }
 
     public CompetitionResult competition(DataFetchingEnvironment environment) {
-        //TODO:
 
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
         CompetitionResult competitionResult = new CompetitionResult("");
-        competitionResult.setCompetitionMode(computationService.getCompetitionMode());
-        competitionResult.setRegisterAllow(computationService.getRegisterAllow());
-        competitionResult.setBeginTime(computationService.getBeginTime());
-        competitionResult.setBeginTime(computationService.getEndTime());
-
+        competitionResult.setCompetition(competitionService.getCompetition());
+        competitionResult.setRegisterAllow(competitionService.getRegisterAllow());
+        competitionResult.setBeginTime(competitionService.getBeginTime());
+        competitionResult.setEndTime(competitionService.getEndTime());
         return competitionResult;
     }
 

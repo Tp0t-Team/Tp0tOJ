@@ -4,21 +4,21 @@ import club.tp0t.oj.Util.OjConfig;
 
 public class CompetitionResult {
     private String message;
-    private Boolean competitionMode;
+    private Boolean competition;
     private Boolean registerAllow;
     private String beginTime;
     private String endTime;
+
     public CompetitionResult(String message){
         this.message = message;
-
     }
 
     public String getMessage() {
         return message;
     }
 
-    public Boolean getCompetitionMode() {
-        return competitionMode;
+    public Boolean getCompetition() {
+        return competition;
     }
 
     public Boolean getRegisterAllow() {
@@ -37,8 +37,8 @@ public class CompetitionResult {
         this.message = message;
     }
 
-    public void setCompetitionMode(Boolean competition) {
-        this.competitionMode = competition;
+    public void setCompetition(Boolean competition) {
+        this.competition = competition;
     }
 
     public void setRegisterAllow(Boolean registerAllow) {
