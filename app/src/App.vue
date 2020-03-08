@@ -29,6 +29,7 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
+import { CompetitionResult } from "./struct";
 
 @Component({
   components: {
@@ -38,7 +39,7 @@ import NavList from "@/components/NavList.vue";
 export default class App extends Vue {
   private drawer: boolean | null = null;
 
-  mounted() {
+  async mounted() {
     let userId = sessionStorage.getItem("user_id") || null;
     let role = sessionStorage.getItem("role") || null;
     if (!userId || !role) {
@@ -46,6 +47,29 @@ export default class App extends Vue {
       role = null;
     }
     this.$store.commit("global/setUserIdAndRole", { userId, role });
+    try {
+      let res = await this.$apollo.query<CompetitionResult>({
+        query: gql`
+          query {
+            competition {
+              message
+              competition
+              registerAllow
+              beginTime
+              endTime
+            }
+          }
+        `
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.competition.message) throw res.data!.competition.message;
+      this.$store.commit(
+        "competition/setCompetitionInfo",
+        res.data!.competition
+      );
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async WarmUp() {

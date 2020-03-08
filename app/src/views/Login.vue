@@ -3,7 +3,12 @@
     <v-card width="500">
       <v-tabs v-model="tab" centered grow color="primary">
         <v-tab href="#tab-login" :disabled="loading">login</v-tab>
-        <v-tab href="#tab-register" :disabled="loading">register</v-tab>
+        <v-tab
+          href="#tab-register"
+          :disabled="loading"
+          v-if="$store.state.competition.registerAllow"
+          >register</v-tab
+        >
         <v-tab-item value="tab-login">
           <v-form v-model="loginValid" class="pa-6" ref="loginForm">
             <v-text-field
@@ -43,7 +48,10 @@
             >
           </v-form>
         </v-tab-item>
-        <v-tab-item value="tab-register">
+        <v-tab-item
+          value="tab-register"
+          v-if="$store.state.competition.registerAllow"
+        >
           <v-form v-model="regValid" class="pa-6" ref="registerForm">
             <v-layout row>
               <v-flex sm6 pl-3 pr-3>

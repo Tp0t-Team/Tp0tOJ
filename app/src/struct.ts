@@ -76,7 +76,7 @@ export interface SubmitInfo {
   mark: number;
 }
 
-interface CompetitionInfo {
+export interface CompetitionInfo {
   competition: boolean;
   registerAllow: boolean;
   beginTime: string;

@@ -69,13 +69,13 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
+import gql from "graphql-tag";
 import DateTimePicker from "@/components/DateTimePicker.vue";
 import {
   CompetitionResult,
   CompetitionMutationResult,
   CompetitionMutationInput
 } from "../../struct";
-import gql from "graphql-tag";
 
 @Component({
   components: {
