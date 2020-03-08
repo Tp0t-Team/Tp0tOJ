@@ -11,17 +11,18 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.stereotype.Component;
-
+import club.tp0t.oj.Service.ComputationService;
 import javax.servlet.http.HttpSession;
 
 @Component
 public class UserQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
-
-    public UserQuery(ChallengeService challengeService, UserService userService) {
+    private final ComputationService computationService;
+    public UserQuery(ChallengeService challengeService, UserService userService,ComputationService computationService) {
         this.challengeService = challengeService;
         this.userService = userService;
+        this.computationService = computationService;
     }
 
     // test
@@ -116,6 +117,17 @@ public class UserQuery implements GraphQLQueryResolver {
 
     public CompetitionResult competition(DataFetchingEnvironment environment) {
         //TODO:
+
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        CompetitionResult competitionResult = new CompetitionResult("");
+        competitionResult.setCompetitionMode(computationService.getCompetitionMode());
+        competitionResult.setRegisterAllow(computationService.getRegisterAllow());
+        competitionResult.setBeginTime(computationService.getBeginTime());
+        competitionResult.setBeginTime(computationService.getEndTime());
+
+        return competitionResult;
     }
 
 }

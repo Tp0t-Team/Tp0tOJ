@@ -7,6 +7,7 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 
@@ -16,12 +17,13 @@ public class AdminMutation implements GraphQLMutationResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final RankHelper rankHelper;
-
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper) {
+    private final ComputationService computationService;
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper,ComputationService computationService) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
         this.userService = userService;
         this.rankHelper = rankHelper;
+        this.computationService = computationService;
     }
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -142,6 +144,27 @@ public class AdminMutation implements GraphQLMutationResolver {
 
     public CompetitionMutationResult competition(CompetitionMutationInput input, DataFetchingEnvironment environment) {
         //TODO:
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if (session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return new CompetitionMutationResult("forbidden");
+        }
+
+        CompetitionMutationInput competitionMutationInput = new CompetitionMutationInput();
+        CompetitionMutationResult competitionMutationResult = new CompetitionMutationResult("");
+        computationService.setCompetitionMode(competitionMutationInput.getCompetition());
+        computationService.setRegisterAllow(competitionMutationInput.getRegisterAllow());
+        computationService.setEndTime(competitionMutationInput.getEndTime());
+        computationService.setBeginTime(competitionMutationInput.getBeginTime());
+        return competitionMutationResult;
+
+
     }
 }
 
