@@ -7,7 +7,6 @@ import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 
@@ -17,13 +16,14 @@ public class AdminMutation implements GraphQLMutationResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final RankHelper rankHelper;
-    private final ComputationService computationService;
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper,ComputationService computationService) {
+    private final CompetitionService competitionService;
+
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper, CompetitionService competitionService) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
         this.userService = userService;
         this.rankHelper = rankHelper;
-        this.computationService = computationService;
+        this.competitionService = competitionService;
     }
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -143,7 +143,6 @@ public class AdminMutation implements GraphQLMutationResolver {
     }
 
     public CompetitionMutationResult competition(CompetitionMutationInput input, DataFetchingEnvironment environment) {
-        //TODO:
 
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
@@ -158,13 +157,11 @@ public class AdminMutation implements GraphQLMutationResolver {
 
         CompetitionMutationInput competitionMutationInput = new CompetitionMutationInput();
         CompetitionMutationResult competitionMutationResult = new CompetitionMutationResult("");
-        computationService.setCompetitionMode(competitionMutationInput.getCompetition());
-        computationService.setRegisterAllow(competitionMutationInput.getRegisterAllow());
-        computationService.setEndTime(competitionMutationInput.getEndTime());
-        computationService.setBeginTime(competitionMutationInput.getBeginTime());
+        competitionService.setCompetition(competitionMutationInput.getCompetition());
+        competitionService.setRegisterAllow(competitionMutationInput.getRegisterAllow());
+        competitionService.setBeginTime(competitionMutationInput.getBeginTime());
+        competitionService.setEndTime(competitionMutationInput.getEndTime());
         return competitionMutationResult;
-
-
     }
 }
 

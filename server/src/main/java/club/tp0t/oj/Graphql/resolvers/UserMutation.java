@@ -21,6 +21,7 @@ import org.springframework.util.DigestUtils;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.servlet.http.HttpSession;
+import java.util.Date;
 
 @Component
 public class UserMutation implements GraphQLMutationResolver {
@@ -42,6 +43,10 @@ public class UserMutation implements GraphQLMutationResolver {
 
     // user register
     public RegisterResult register(RegisterInput registerInput, DataFetchingEnvironment environment) {
+
+        if(!config.isAllowRegister()) {
+            return new RegisterResult("disabled");
+        }
 
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();
@@ -143,6 +148,10 @@ public class UserMutation implements GraphQLMutationResolver {
 
     public ForgetResult forget(String input) {
 
+        if(!config.isAllowRegister()) {
+            return new ForgetResult("disabled");
+        }
+
         // input format check
         if (input.equals("")) return new ForgetResult("not empty error");
 
@@ -184,6 +193,13 @@ public class UserMutation implements GraphQLMutationResolver {
 
     // submit flag
     public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
+
+        Date now = new Date();
+        if(now.compareTo(config.getBeginTime()) < 0) {
+            return new SubmitResult("disabled");
+        }else if(now.compareTo(config.getEndTime()) > 0) {
+            return new SubmitResult("competition finished");
+        }
 
         // get session from context
         DefaultGraphQLServletContext context = environment.getContext();

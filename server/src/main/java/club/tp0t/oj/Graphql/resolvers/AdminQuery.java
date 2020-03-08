@@ -5,6 +5,7 @@ import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Util.OjConfig;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -19,11 +20,13 @@ public class AdminQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final SubmitService submitService;
     private final UserService userService;
+    private final OjConfig config;
 
-    public AdminQuery(ChallengeService challengeService, SubmitService submitService, UserService userService) {
+    public AdminQuery(ChallengeService challengeService, SubmitService submitService, UserService userService, OjConfig config) {
         this.challengeService = challengeService;
         this.submitService = submitService;
         this.userService = userService;
+        this.config = config;
     }
 
     public AllUserInfoResult allUserInfos(DataFetchingEnvironment environment) {
@@ -92,11 +95,17 @@ public class AdminQuery implements GraphQLQueryResolver {
         DefaultGraphQLServletContext context = environment.getContext();
         HttpSession session = context.getHttpServletRequest().getSession();
 
-        // login & admin check
-        if (session.getAttribute("isLogin") == null ||
-                !((boolean) session.getAttribute("isLogin")) ||
-                !(boolean) session.getAttribute("isAdmin")) {
-            return new SubmitHistoryResult("forbidden");
+        if (!config.isCompetition()) {
+            // login & admin check
+            if (session.getAttribute("isLogin") == null ||
+                    !((boolean) session.getAttribute("isLogin")) ||
+                    !(boolean) session.getAttribute("isAdmin")) {
+                return new SubmitHistoryResult("forbidden");
+            }
+        } else {
+            if (session.getAttribute("isLogin") == null) {
+                return new SubmitHistoryResult("forbidden");
+            }
         }
 
         // unpack input data
