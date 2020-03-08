@@ -53,6 +53,11 @@ public class FlagProxyService {
         List<Challenge> tmpChallengeList = challengeRepository.findByState("disabled");
         challengeList.addAll(tmpChallengeList);
         List<User> userList = userRepository.findAllByRole("member");
+        List<User> tmpUserList = userRepository.findAllByRole("team");
+        userList.addAll(tmpUserList);
+        tmpUserList = userRepository.findAllByRole("admin");
+        userList.addAll(tmpUserList);
+
         for (Challenge tmpChallenge : challengeList) {
             ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(tmpChallenge.getConfiguration());
             if (challengeConfiguration.getFlag().isDynamic()) {
@@ -71,14 +76,43 @@ public class FlagProxyService {
         }
     }
 
-    // TODO: add proxied flag for new challenge
-    public void addChallenge() {
+    // add proxied flag for new challenge
+    public void updateChallenge(Challenge challenge) {
+        ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
+        if (challengeConfiguration.getFlag().isDynamic()) {
+            List<User> userList = userRepository.findAllByRole("member");
+            List<User> tmpUserList = userRepository.findAllByRole("team");
+            userList.addAll(tmpUserList);
+            tmpUserList = userRepository.findAllByRole("admin");
+            userList.addAll(tmpUserList);
 
+            for (User tmpUser: userList) {
+                FlagProxy flagProxy = new FlagProxy();
+                flagProxy.setChallenge(challenge);
+                flagProxy.setUser(tmpUser);
+                flagProxy.setFlag(randomFlag());
+                flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                flagProxyRepository.save(flagProxy);
+            }
+        }
     }
 
-    // TODO: add proxied flag for new user
-    public void addUser() {
+    // add proxied flag for new user
+    public void addUser(User user) {
+        List<Challenge> challengeList = challengeRepository.findByState("enabled");
+        List<Challenge> tmpChallengeList = challengeRepository.findByState("disabled");
+        challengeList.addAll(tmpChallengeList);
 
+        for (Challenge tmpChallenge : challengeList) {
+            ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(tmpChallenge.getConfiguration());
+            if (challengeConfiguration.getFlag().isDynamic()) {
+                FlagProxy flagProxy = new FlagProxy();
+                flagProxy.setChallenge(tmpChallenge);
+                flagProxy.setUser(user);
+                flagProxy.setFlag(randomFlag());
+                flagProxy.setPort(randomPort(50000, 65535));
+            }
+        }
     }
 
     // currently generate uuid as random flag

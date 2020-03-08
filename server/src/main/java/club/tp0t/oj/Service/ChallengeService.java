@@ -32,8 +32,9 @@ public class ChallengeService {
     private final ReplicaAllocHelper replicaAllocHelper;
     private final RankHelper rankHelper;
     private final FlagProxyRepository flagProxyRepository;
+    private final FlagProxyService flagProxyService;
 
-    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyRepository flagProxyRepository) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyRepository flagProxyRepository, FlagProxyService flagProxyService) {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
@@ -41,6 +42,7 @@ public class ChallengeService {
         this.replicaAllocHelper = replicaAllocHelper;
         this.rankHelper = rankHelper;
         this.flagProxyRepository = flagProxyRepository;
+        this.flagProxyService = flagProxyService;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
@@ -151,6 +153,7 @@ public class ChallengeService {
             }
         }
 
+        flagProxyService.updateChallenge(challenge);
         return "";
     }
 
@@ -185,6 +188,7 @@ public class ChallengeService {
         List<Replica> replicas = replicaHelper.createReplicas(challenge, 1);
         replicaAllocHelper.allocReplicasForAll(replicas);
 
+        flagProxyService.updateChallenge(challenge);
         return "";
     }
 

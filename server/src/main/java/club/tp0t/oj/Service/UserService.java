@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -29,14 +28,16 @@ public class UserService {
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
     private final RankHelper rankHelper;
+    private final FlagProxyService flagProxyService;
 
-    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper) {
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyService flagProxyService) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.resetTokenRepository = resetTokenRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
         this.rankHelper = rankHelper;
+        this.flagProxyService = flagProxyService;
     }
 
     private boolean checkStuNumberExistence(String stuNumber) {
@@ -105,6 +106,7 @@ public class UserService {
         }
         replicaAllocHelper.allocReplicasForUser(replicas, user);
 
+        flagProxyService.addUser(user);
         return "";
     }
 
