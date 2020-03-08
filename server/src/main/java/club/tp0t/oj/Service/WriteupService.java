@@ -43,7 +43,7 @@ public class WriteupService {
         String upload_filename = file.getOriginalFilename();
         //destPath is a file name
         String destPath = basePath +"/"+ upload_filename;
-        File dest = new File(basePath);
+        File dest = new File(destPath);
         try {
             file.transferTo(dest);
             return new ResponseEntity(HttpStatus.OK);
