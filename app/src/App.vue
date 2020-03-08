@@ -4,9 +4,17 @@
       <nav-list :isLogin="!!$store.state.global.userId"></nav-list>
     </v-navigation-drawer>
 
-    <v-app-bar app clipped-left class="higher">
+    <v-app-bar app clipped-left class="higher pr-2">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Tp0t OJ</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn
+        icon
+        @click="WarmUp"
+        v-if="$store.state.global.role==='admin'"
+      >
+        <v-icon color="primary">whatshot</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-content>
@@ -25,6 +33,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import gql from 'graphql-tag';
 import NavList from "@/components/NavList.vue";
 
 @Component({
@@ -43,6 +52,21 @@ export default class App extends Vue {
       role = null;
     }
     this.$store.commit("global/setUserIdAndRole", { userId, role });
+  }
+
+  async WarmUp() {
+    try{
+      let res = await this.$apollo.mutate<Boolean>({
+        mutation: gql`
+          mutation{
+            warmUp
+          }`
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (!res.data!) throw "error";
+    }catch(e) {
+      console.log(e);
+    }
   }
 }
 </script>
