@@ -50,7 +50,7 @@ public class OjConfig {
         return halfLife;
     }
 
-    public boolean isCompetitionMode(){ return competitionMode;}
+    public boolean isCompetition(){ return competitionMode;}
 
     public boolean isAllowRegister(){ return  allowRegister;}
 
