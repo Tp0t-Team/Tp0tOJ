@@ -3,9 +3,11 @@ package club.tp0t.oj.Service;
 import club.tp0t.oj.Component.ReplicaAllocHelper;
 import club.tp0t.oj.Component.ReplicaHelper;
 import club.tp0t.oj.Dao.ChallengeRepository;
+import club.tp0t.oj.Dao.FlagProxyRepository;
 import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Dao.UserRepository;
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.FlagProxy;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.BloodInfo;
@@ -29,14 +31,16 @@ public class ChallengeService {
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
     private final RankHelper rankHelper;
+    private final FlagProxyRepository flagProxyRepository;
 
-    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyRepository flagProxyRepository) {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
         this.rankHelper = rankHelper;
+        this.flagProxyRepository = flagProxyRepository;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
@@ -64,8 +68,30 @@ public class ChallengeService {
 
             // parse from description
             ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
+
+            // replace flag proxied port
+            List<String> externalLinkList = challengeConfiguration.getExternalLink();
+            User tmpUser = userRepository.findByUserId(userId);
+            if (challengeConfiguration.getFlag().isDynamic() && // only change proxied flag port
+                    tmpUser.getRole().equals("member")) {  // do not change for team & admin
+                FlagProxy tmpFlagProxy = flagProxyRepository.findByChallengeIdAndUserId(challenge.getChallengeId(), tmpUser.getUserId());
+                List<String> replacedExternalLinkList = new ArrayList<>();
+                if (tmpFlagProxy != null) {
+                    long port = tmpFlagProxy.getPort();
+                    for (String tmpExternalLink : externalLinkList) {
+                        replacedExternalLinkList.add(tmpExternalLink.replaceAll("端口", Long.toString(port)));
+                    }
+                } else {  // no record found for this user & challenge
+                    for (String tmpExternalLink : externalLinkList) {
+                        replacedExternalLinkList.add(tmpExternalLink.replaceAll("端口", "error!"));
+                    }
+                }
+                challengeInfo.setExternalLink(replacedExternalLinkList);
+            } else {  // not dynamic or team/admin user
+                challengeInfo.setExternalLink(externalLinkList);
+            }
+
             challengeInfo.setDescription(challengeConfiguration.getDescription());
-            challengeInfo.setExternalLink(challengeConfiguration.getExternalLink());
             challengeInfo.setHint(challengeConfiguration.getHint());
             challengeInfo.setType(challengeConfiguration.getType());
             challengeInfo.setName(challengeConfiguration.getName());
