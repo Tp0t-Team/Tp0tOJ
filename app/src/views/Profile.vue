@@ -36,6 +36,8 @@
                 <div>
                   <v-subheader>
                     <span class="text-center">
+                      <strong v-if="$store.state.competition.competition">{{ userInfo.name }}</strong>
+                      <br v-if="$store.state.competition.competition" />
                       <strong>
                         Rank:
                         <span v-if="userInfo.rank != 0">{{
@@ -49,7 +51,7 @@
                   </v-subheader>
                 </div>
               </v-row>
-              <v-row>
+              <v-row v-if="!$store.state.competition.competition">
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -67,7 +69,12 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId == $route.params.user_id">
+              <v-row
+                v-if="
+                  $store.state.global.userId == $route.params.user_id &&
+                    !$store.state.competition.competition
+                "
+              >
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -85,7 +92,7 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row>
+              <v-row v-if="!$store.state.competition.competition">
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -103,7 +110,7 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row>
+              <v-row v-if="!$store.state.competition.competition">
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -121,7 +128,12 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId == $route.params.user_id">
+              <v-row
+                v-if="
+                  $store.state.global.userId == $route.params.user_id &&
+                    !$store.state.competition.competition
+                "
+              >
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -140,6 +152,32 @@
                 </v-col>
               </v-row>
             </v-form>
+            <v-row v-if="$store.state.competition.competition">
+              <v-simple-table dense>
+                <thead>
+                  <tr>
+                    <th>submit time</th>
+                    <th>challenge name</th>
+                    <th>mark</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="item in resolves" :key="item.submitTime">
+                    <td>{{ item.submitTime }}</td>
+                    <td>{{ item.challengeName }}</td>
+                    <td>
+                      <v-badge
+                        v-if="!!item.mark"
+                        class="mark-badge"
+                        :color="rankColor[item.mark - 1]"
+                      >
+                        <template v-slot:badge>{{ item.mark }}</template>
+                      </v-badge>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-simple-table>
+            </v-row>
           </v-card>
         </v-card>
       </v-col>
@@ -159,7 +197,12 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { Route } from "vue-router";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { UserInfo, UserInfoResult } from "@/struct";
+import {
+  UserInfo,
+  UserInfoResult,
+  SubmitInfo,
+  SubmitHistoryResult
+} from "@/struct";
 import gql from "graphql-tag";
 
 @Component({
@@ -187,6 +230,8 @@ export default class Profile extends Vue {
     rank: 0
   };
 
+  private resolves: SubmitInfo[] = [];
+
   private infoText: string = "";
   private hasInfo: boolean = false;
 
@@ -198,6 +243,9 @@ export default class Profile extends Vue {
 
   async mounted() {
     await this.load(this.$route.params.user_id);
+    if (this.$store.state.competition.competition == true) {
+      await this.loadResolve(this.$route.params.user_id);
+    }
   }
 
   @Watch("$route")
@@ -247,6 +295,39 @@ export default class Profile extends Vue {
       this.loading = false;
     } catch (e) {
       this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
+
+  async loadResolve(userId: string) {
+    try {
+      let res = await this.$apollo.query<
+        SubmitHistoryResult,
+        { input: string }
+      >({
+        query: gql`
+          query($input: String!) {
+            submitHistory(userId: $input) {
+              message
+              submitInfos {
+                submitTime
+                challengeName
+                mark
+              }
+            }
+          }
+        `,
+        variables: {
+          input: userId
+        },
+        fetchPolicy: "no-cache"
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.submitHistory.message)
+        throw res.data!.submitHistory.message;
+      this.resolves = res.data!.submitHistory.submitInfos;
+    } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
