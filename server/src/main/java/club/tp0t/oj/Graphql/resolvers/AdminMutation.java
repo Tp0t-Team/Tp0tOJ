@@ -155,12 +155,12 @@ public class AdminMutation implements GraphQLMutationResolver {
             return new CompetitionMutationResult("forbidden");
         }
 
-        CompetitionMutationInput competitionMutationInput = new CompetitionMutationInput();
+
         CompetitionMutationResult competitionMutationResult = new CompetitionMutationResult("");
-        competitionService.setCompetition(competitionMutationInput.getCompetition());
-        competitionService.setRegisterAllow(competitionMutationInput.getRegisterAllow());
-        competitionService.setBeginTime(competitionMutationInput.getBeginTime());
-        competitionService.setEndTime(competitionMutationInput.getEndTime());
+        competitionService.setCompetition(input.getCompetition());
+        competitionService.setRegisterAllow(input.getRegisterAllow());
+        competitionService.setBeginTime(input.getBeginTime());
+        competitionService.setEndTime(input.getEndTime());
         return competitionMutationResult;
     }
 }
