@@ -7,6 +7,7 @@ type Query {
     rank: RankResult
     allBulletin : BulletinResult
     submitHistory(userId: String!): SubmitHistoryResult
+    competition: CompetitionResult
 }
 type UserInfoResult {
     message: String
@@ -118,4 +119,12 @@ type SubmitInfo {
     submitTime: String
     challengeName: String
     mark: Int
+}
+
+type CompetitionResult {
+    message: String
+    competition: Boolean
+    registerAllow: Boolean
+    beginTime: String
+    endTime: String
 }

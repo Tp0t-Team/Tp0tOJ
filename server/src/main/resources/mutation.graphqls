@@ -10,6 +10,7 @@ type Mutation {
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
     challengeRemove(input: String!): ChallengeRemoveResult!
     warmUp: Boolean!
+    competition(input: CompetitionMutationInput!): CompetitionMutationResult!
 }
 
 input RegisterInput {
@@ -117,5 +118,16 @@ type ChallengeMutateResult {
 }
 
 type ChallengeRemoveResult {
+    message: String
+}
+
+input CompetitionMutationInput {
+    competition: Boolean
+    registerAllow: Boolean
+    beginTime: String
+    endTime:String
+}
+
+type CompetitionMutationResult {
     message: String
 }

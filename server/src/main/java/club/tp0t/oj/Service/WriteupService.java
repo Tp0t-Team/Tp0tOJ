@@ -39,7 +39,7 @@ public class WriteupService {
         } else if (file.isEmpty() || !CheckContentType(file.getContentType())) {
             result = new ResponseEntity(HttpStatus.FORBIDDEN);
         } else {// save file
-            String upload_filename = file.getOriginalFilename();//destPath is a file name
+            String upload_filename = user.getStuNumber() + "-" + user.getName() + "-" + file.getOriginalFilename();//destPath is a file name
             String destPath = basePath + "/" + upload_filename;
             File dest = new File(destPath);
             try {
