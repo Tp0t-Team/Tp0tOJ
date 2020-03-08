@@ -1,7 +1,7 @@
 <template>
   <v-form>
     <v-row>
-      <v-col cols="6">
+      <v-col cols="4">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -13,7 +13,19 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="4">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="dynamicScore"
+            label="DynamicScore"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+      <v-col cols="4">
         <v-file-input
           v-model="configFile"
           accept=".yaml, .yml"
@@ -152,6 +164,7 @@ export default class ChallengeEditor extends Vue {
   private reader: FileReader = new FileReader();
 
   private state: boolean = false;
+  private dynamicScore: boolean = false;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
@@ -181,6 +194,7 @@ export default class ChallengeEditor extends Vue {
         this.hints = config.hint || this.hints;
         this.setValue = false;
         this.state = false;
+        this.dynamicScore = config.score.dynamic || this.dynamicScore;
       } catch (e) {
         this.EmitError(e.toString());
       }
@@ -194,6 +208,7 @@ export default class ChallengeEditor extends Vue {
     this.links = this.config.external_link;
     this.hints = this.config.hint;
     this.state = this.config.state == "enabled";
+    this.dynamicScore = this.config.score.dynamic;
   }
 
   @Emit("error")
@@ -210,7 +225,7 @@ export default class ChallengeEditor extends Vue {
       challengeId: (this.config && this.config.challengeId) || "",
       name: this.name,
       type: this.type,
-      score: { dynamic: false, base_score: this.score.toString() },
+      score: { dynamic: this.dynamicScore, base_score: this.score.toString() },
       flag: { dynamic: false, value: this.flag },
       description: this.description,
       external_link: this.links,
