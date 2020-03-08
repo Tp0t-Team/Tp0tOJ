@@ -47,7 +47,14 @@
         ></v-text-field>
       </v-col>
       <v-col cols="6">
-        <v-text-field v-model="type" outlined label="type" readonly value="web" :disabled="loading"></v-text-field>
+        <v-text-field
+          v-model="type"
+          outlined
+          label="type"
+          readonly
+          value="web"
+          :disabled="loading"
+        ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -94,8 +101,8 @@
                 :disabled="loading || disabled"
               ></v-text-field>
             </v-list-item>
-            <v-list-item v-for="(l,index) in links" :key="l" @click=";">
-              <v-list-item-content>{{l}}</v-list-item-content>
+            <v-list-item v-for="(l, index) in links" :key="l" @click="">
+              <v-list-item-content>{{ l }}</v-list-item-content>
               <v-list-item-icon>
                 <v-btn icon :disabled="loading" @click="removeLink(index)">
                   <v-icon>close</v-icon>
@@ -118,10 +125,14 @@
                 :disabled="loading || disabled"
               ></v-text-field>
             </v-list-item>
-            <v-list-item v-for="(l,index) in hints" :key="l" @click=";">
-              <v-list-item-content>{{l}}</v-list-item-content>
+            <v-list-item v-for="(l, index) in hints" :key="l" @click="">
+              <v-list-item-content>{{ l }}</v-list-item-content>
               <v-list-item-icon>
-                <v-btn icon :disabled="loading || disabled" @click="removeHint(index)">
+                <v-btn
+                  icon
+                  :disabled="loading || disabled"
+                  @click="removeHint(index)"
+                >
                   <v-icon>close</v-icon>
                 </v-btn>
               </v-list-item-icon>

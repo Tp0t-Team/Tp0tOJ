@@ -2,10 +2,20 @@
   <v-form>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="name" :disabled="loading || disabled" outlined label="name"></v-text-field>
+        <v-text-field
+          v-model="name"
+          :disabled="loading || disabled"
+          outlined
+          label="name"
+        ></v-text-field>
       </v-col>
       <v-col cols="6">
-        <v-text-field v-model="studentNumber" outlined disabled label="student number"></v-text-field>
+        <v-text-field
+          v-model="studentNumber"
+          outlined
+          disabled
+          label="student number"
+        ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
@@ -30,7 +40,12 @@
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="score" outlined disabled label="score"></v-text-field>
+        <v-text-field
+          v-model="score"
+          outlined
+          disabled
+          label="score"
+        ></v-text-field>
       </v-col>
       <v-col cols="6">
         <v-menu
@@ -50,8 +65,10 @@
           </template>
           <v-date-picker v-model="protectedTime">
             <v-spacer></v-spacer>
-            <v-btn text @click="dateMenu=false">Cancel</v-btn>
-            <v-btn text color="primary" @click="$refs.dateMenu.save(menuDate)">OK</v-btn>
+            <v-btn text @click="dateMenu = false">Cancel</v-btn>
+            <v-btn text color="primary" @click="$refs.dateMenu.save(menuDate)"
+              >OK</v-btn
+            >
           </v-date-picker>
         </v-menu>
       </v-col>
@@ -78,18 +95,38 @@
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="qq" :disabled="loading || disabled" outlined label="QQ"></v-text-field>
+        <v-text-field
+          v-model="qq"
+          :disabled="loading || disabled"
+          outlined
+          label="QQ"
+        ></v-text-field>
       </v-col>
       <v-col cols="6">
-        <v-text-field v-model="mail" :disabled="loading || disabled" outlined label="mail"></v-text-field>
+        <v-text-field
+          v-model="mail"
+          :disabled="loading || disabled"
+          outlined
+          label="mail"
+        ></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-text-field v-model="topRank" outlined disabled label="top rank"></v-text-field>
+        <v-text-field
+          v-model="topRank"
+          outlined
+          disabled
+          label="top rank"
+        ></v-text-field>
       </v-col>
       <v-col>
-        <v-text-field v-model="joinTime" outlined disabled label="join time"></v-text-field>
+        <v-text-field
+          v-model="joinTime"
+          outlined
+          disabled
+          label="join time"
+        ></v-text-field>
       </v-col>
     </v-row>
     <v-btn

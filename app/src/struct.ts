@@ -1,195 +1,212 @@
 export interface Result {
-    message: string
+  message: string;
 }
 
 export interface UserInfo {
-    userId: string
-    name: string
-    avatar: string
-    role: string
-    stuNumber: string
-    department: string
-    grade: string
-    protectedTime: string
-    qq: string
-    mail: string
-    topRank: string
-    joinTime: string
-    score: string
-    state: string
-    rank: number
+  userId: string;
+  name: string;
+  avatar: string;
+  role: string;
+  stuNumber: string;
+  department: string;
+  grade: string;
+  protectedTime: string;
+  qq: string;
+  mail: string;
+  topRank: string;
+  joinTime: string;
+  score: string;
+  state: string;
+  rank: number;
 }
 
 export interface ChallengeDesc {
-    challengeId: string
-    type: string
-    name: string
-    score: number
-    description: string
-    external_link: string[]
-    hint: string[]
-    blood: {
-        userId: string
-        name: string
-        avatar: string
-    }[]
-    done: boolean
+  challengeId: string;
+  type: string;
+  name: string;
+  score: number;
+  description: string;
+  external_link: string[];
+  hint: string[];
+  blood: {
+    userId: string;
+    name: string;
+    avatar: string;
+  }[];
+  done: boolean;
 }
 
 export interface RankDesc {
-    userId: string
-    name: string
-    avatar: string
-    score: string
+  userId: string;
+  name: string;
+  avatar: string;
+  score: string;
 }
 
 export interface BulletinItem {
-    title: string
-    content: string
-    publishTime: string
+  title: string;
+  content: string;
+  publishTime: string;
 }
 
 export interface ChallengeConfig {
-    name: string
-    type: string
-    score: {
-        dynamic: boolean
-        base_score: string | number
-    }
-    flag: {
-        dynamic: boolean
-        value: string
-    }
-    description: string
-    external_link: string[]
-    hint: string[]
+  name: string;
+  type: string;
+  score: {
+    dynamic: boolean;
+    base_score: string | number;
+  };
+  flag: {
+    dynamic: boolean;
+    value: string;
+  };
+  description: string;
+  external_link: string[];
+  hint: string[];
 }
 
 export type ChallengeConfigWithId = {
-    challengeId: string
-    state: string
-} & ChallengeConfig
+  challengeId: string;
+  state: string;
+} & ChallengeConfig;
 
 export interface SubmitInfo {
-    submitTime: String
-    challengeName: String
-    mark: number
+  submitTime: String;
+  challengeName: String;
+  mark: number;
+}
+
+interface CompetitionInfo {
+  competition: boolean;
+  registerAllow: boolean;
+  beginTime: string;
+  endTime: string;
 }
 
 // query userInfo
-export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result }
+export type UserInfoResult = { userInfo: { userInfo: UserInfo } & Result };
 
 export type AllUserInfoResult = {
-    allUserInfos: { allUserInfos: UserInfo[] } & Result
-}
+  allUserInfos: { allUserInfos: UserInfo[] } & Result;
+};
 
 // query challenges
 export type ChallengeResult = {
-    challengeInfos: { challengeInfos: ChallengeDesc[] } & Result
-}
+  challengeInfos: { challengeInfos: ChallengeDesc[] } & Result;
+};
 
 // query challengeConfig
 export type ChallengeConfigResult = {
-    challengeConfigs: {
-        challengeConfigs: ChallengeConfigWithId[]
-    } & Result
-}
+  challengeConfigs: {
+    challengeConfigs: ChallengeConfigWithId[];
+  } & Result;
+};
 
 // query rank
-export type RankResult = { rank: { rankResultDescs: RankDesc[] } & Result }
+export type RankResult = { rank: { rankResultDescs: RankDesc[] } & Result };
 
 // query allBulletin
 export type AllBulletinResult = {
-    allBulletin: { bulletins: BulletinItem[] } & Result
-}
+  allBulletin: { bulletins: BulletinItem[] } & Result;
+};
 
 // query submitHistory
 export type SubmitHistoryResult = {
-    submitHistory: { submitInfos: SubmitInfo[] } & Result
-}
+  submitHistory: { submitInfos: SubmitInfo[] } & Result;
+};
+
+// query competition
+export type CompetitionResult = {
+  competition: CompetitionInfo & Result;
+};
 
 // mutation login
 export interface LoginInput {
-    input: {
-        stuNumber: string
-        password: string
-    }
+  input: {
+    stuNumber: string;
+    password: string;
+  };
 }
 export type LoginResult = {
-    login: {
-        userId: string
-        role: string
-    } & Result
-}
+  login: {
+    userId: string;
+    role: string;
+  } & Result;
+};
 
 // mutation register
 export interface RegisterInput {
-    input: {
-        name: string
-        stuNumber: string
-        password: string
-        department: string
-        grade: string
-        qq: string
-        mail: string
-    }
+  input: {
+    name: string;
+    stuNumber: string;
+    password: string;
+    department: string;
+    grade: string;
+    qq: string;
+    mail: string;
+  };
 }
-export type RegisterResult = { register: Result }
+export type RegisterResult = { register: Result };
 
 // mutation logout
-export type LogoutResult = { logout: Result }
+export type LogoutResult = { logout: Result };
 
 // mutation forget
-export type ForgetResult = { forget: Result }
+export type ForgetResult = { forget: Result };
 
 // mutation reset
 export interface ResetInput {
-    input: {
-        password: string
-        token: string
-    }
+  input: {
+    password: string;
+    token: string;
+  };
 }
-export type ResetResult = { reset: Result }
+export type ResetResult = { reset: Result };
 
 // mutation sumbit
 export interface SubmitInput {
-    input: {
-        challengeId: string
-        flag: string
-    }
+  input: {
+    challengeId: string;
+    flag: string;
+  };
 }
 export type SubmitResult = {
-    submit: Result
-}
+  submit: Result;
+};
 
 // mutation bulletinPub
 export interface BulletinPubInput {
-    input: {
-        title: string
-        content: string
-        topping: boolean
-    }
+  input: {
+    title: string;
+    content: string;
+    topping: boolean;
+  };
 }
-export type BulletinPubResult = { bulletinPub: Result }
+export type BulletinPubResult = { bulletinPub: Result };
 
 // mutation userInfoUpdate
 export interface UserInfoUpdateInput {
-    input: {
-        userId: string
-        name: string
-        role: string
-        department: string
-        grade: string
-        protectedTime: string
-        qq: string
-        mail: string
-        state: string
-    }
+  input: {
+    userId: string;
+    name: string;
+    role: string;
+    department: string;
+    grade: string;
+    protectedTime: string;
+    qq: string;
+    mail: string;
+    state: string;
+  };
 }
-export type UserInfoUpdateResult = { userInfoUpdate: Result }
+export type UserInfoUpdateResult = { userInfoUpdate: Result };
 
 // mutation challengeMutate
-export type ChallengeMutateResult = { challengeMutate: Result }
+export type ChallengeMutateResult = { challengeMutate: Result };
+
+// mutation competition
+export type CompetitionMutationInput = { input: CompetitionInfo };
+
+export type CompetitionMutationResult = { competition: Result };
 
 // subscription bulletin
-export type BulletinSubResult = { bulletin: BulletinItem }
+export type BulletinSubResult = { bulletin: BulletinItem };

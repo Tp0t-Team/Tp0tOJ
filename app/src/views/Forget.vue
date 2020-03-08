@@ -17,7 +17,8 @@
           @click="forget"
           :disabled="loading"
           :loading="loading"
-        >submit</v-btn>
+          >submit</v-btn
+        >
       </v-form>
     </v-card>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
@@ -83,5 +84,4 @@ export default class Forget extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

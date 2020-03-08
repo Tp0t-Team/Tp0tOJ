@@ -8,7 +8,14 @@
         <v-list-item-title>Home</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item @click="$router.push({path:'/bulletin',query:{time:Date.now().toLocaleString()}})">
+    <v-list-item
+      @click="
+        $router.push({
+          path: '/bulletin',
+          query: { time: Date.now().toLocaleString() }
+        })
+      "
+    >
       <v-list-item-action>
         <v-icon>notifications</v-icon>
       </v-list-item-action>
@@ -18,7 +25,12 @@
     </v-list-item>
     <v-list-item
       v-if="isLogin"
-      @click="$router.push({path:'/challenge',query:{time:Date.now().toLocaleString()}})"
+      @click="
+        $router.push({
+          path: '/challenge',
+          query: { time: Date.now().toLocaleString() }
+        })
+      "
     >
       <v-list-item-action>
         <v-icon>list_alt</v-icon>
@@ -27,7 +39,14 @@
         <v-list-item-title>Challenges</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item @click="$router.push({path:'/rank/1',query:{time:Date.now().toLocaleString()}})">
+    <v-list-item
+      @click="
+        $router.push({
+          path: '/rank/1',
+          query: { time: Date.now().toLocaleString() }
+        })
+      "
+    >
       <v-list-item-action>
         <v-icon>assessment</v-icon>
       </v-list-item-action>
@@ -35,7 +54,10 @@
         <v-list-item-title>Rank</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <v-list-item v-if="isLogin" @click="$router.push(`/profile/${$store.state.global.userId}`)">
+    <v-list-item
+      v-if="isLogin"
+      @click="$router.push(`/profile/${$store.state.global.userId}`)"
+    >
       <v-list-item-action>
         <v-icon>person</v-icon>
       </v-list-item-action>
@@ -59,22 +81,43 @@
         <v-list-item-title>Login | Register</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
-    <div v-if="$store.state.global.role=='admin' || $store.state.global.role=='team'">
+    <div
+      v-if="
+        $store.state.global.role == 'admin' ||
+          $store.state.global.role == 'team'
+      "
+    >
       <v-divider></v-divider>
       <v-list-group prepend-icon="build" no-action>
         <template v-slot:activator>
           <v-list-item-title>Admin</v-list-item-title>
         </template>
-        <v-list-item v-if="$store.state.global.role=='admin'" @click="$router.push('/admin/user')">
+        <v-list-item
+          v-if="$store.state.global.role == 'admin'"
+          @click="$router.push('/admin/user')"
+        >
           <v-list-item-content>
             <v-list-item-title>Users</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item
-          @click="$router.push({path:'/admin/challenge',query:{time:Date.now().toLocaleString()}})"
+          @click="
+            $router.push({
+              path: '/admin/challenge',
+              query: { time: Date.now().toLocaleString() }
+            })
+          "
         >
           <v-list-item-content>
             <v-list-item-title>Challenges</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          v-if="$store.state.global.role == 'admin'"
+          @click="$router.push('/admin/competition')"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Competition</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list-group>
@@ -142,5 +185,4 @@ export default class NavList extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

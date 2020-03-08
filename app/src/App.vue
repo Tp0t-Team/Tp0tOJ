@@ -8,11 +8,7 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Tp0t OJ</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn
-        icon
-        @click="WarmUp"
-        v-if="$store.state.global.role==='admin'"
-      >
+      <v-btn icon @click="WarmUp" v-if="$store.state.global.role === 'admin'">
         <v-icon color="primary">whatshot</v-icon>
       </v-btn>
     </v-app-bar>
@@ -23,9 +19,7 @@
 
     <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
-        <span>
-          <strong>Tp0t</strong> &copy; 2019
-        </span>
+        <span> <strong>Tp0t</strong> &copy; 2019 </span>
       </v-col>
     </v-footer>
   </v-app>
@@ -33,7 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
-import gql from 'graphql-tag';
+import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
 
 @Component({
@@ -55,16 +49,17 @@ export default class App extends Vue {
   }
 
   async WarmUp() {
-    try{
+    try {
       let res = await this.$apollo.mutate<Boolean>({
         mutation: gql`
-          mutation{
+          mutation {
             warmUp
-          }`
+          }
+        `
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (!res.data!) throw "error";
-    }catch(e) {
+    } catch (e) {
       console.log(e);
     }
   }

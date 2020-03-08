@@ -7,7 +7,7 @@
         <template v-slot:activator="{ on }">
           <v-avatar
             class="hoverable"
-            :color="loading?'grey':'blue'"
+            :color="loading ? 'grey' : 'blue'"
             size="64"
             @click="editAvatar"
             v-on="on"
@@ -38,24 +38,36 @@
                     <span class="text-center">
                       <strong>
                         Rank:
-                        <span v-if="userInfo.rank!=0">{{userInfo.rank}}</span>
+                        <span v-if="userInfo.rank != 0">{{
+                          userInfo.rank
+                        }}</span>
                         <span v-else>∞</span>
                       </strong>
                       <br />
-                      {{userInfo.score}}pt
+                      {{ userInfo.score }}pt
                     </span>
                   </v-subheader>
                 </div>
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="name" :value="userInfo.name"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="name"
+                    :value="userInfo.name"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="role" :value="userInfo.role"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="role"
+                    :value="userInfo.role"
+                  ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
+              <v-row v-if="$store.state.global.userId == $route.params.user_id">
                 <v-col cols="6">
                   <v-text-field
                     :loading="loading"
@@ -75,7 +87,12 @@
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="state" :value="userInfo.state"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="state"
+                    :value="userInfo.state"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
@@ -88,18 +105,38 @@
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="grade"
+                    :value="userInfo.grade"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="join time"
+                    :value="showJoinTime"
+                  ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
+              <v-row v-if="$store.state.global.userId == $route.params.user_id">
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="QQ" :value="userInfo.qq"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="QQ"
+                    :value="userInfo.qq"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="mail"
+                    :value="userInfo.mail"
+                  ></v-text-field>
                 </v-col>
               </v-row>
             </v-form>

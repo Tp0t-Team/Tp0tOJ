@@ -1,12 +1,16 @@
 <template>
   <v-container fluid class="scrollable">
     <div v-for="type in challengeType" :key="type">
-      <div v-if="challenges.filter((v)=>v.type==type).length!=0">
-        <div class="type-title display-1 ml-4">{{type}}</div>
+      <div v-if="challenges.filter(v => v.type == type).length != 0">
+        <div class="type-title display-1 ml-4">{{ type }}</div>
         <v-divider color="primary"></v-divider>
       </div>
       <v-row>
-        <v-col sm="3" v-for="item in challenges.filter((v)=>v.type==type)" :key="item.challengeId">
+        <v-col
+          sm="3"
+          v-for="item in challenges.filter(v => v.type == type)"
+          :key="item.challengeId"
+        >
           <v-layout justify-center>
             <v-hover :disabled="item.done" v-slot:default="{ hover }">
               <v-card
@@ -17,12 +21,21 @@
                 @click="openDetial(item.challengeId)"
               >
                 <v-badge left overlap class="score" z-index="2">
-                  <template v-slot:badge>{{item.score}}</template>
-                  <v-card-title class="subtitle-1 text-truncate">{{item.name}}</v-card-title>
+                  <template v-slot:badge>{{ item.score }}</template>
+                  <v-card-title class="subtitle-1 text-truncate">{{
+                    item.name
+                  }}</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
-                <v-card-text class="description">{{item.description}}</v-card-text>
-                <v-overlay absolute :value="item.done" color="green" z-index="0">
+                <v-card-text class="description">{{
+                  item.description
+                }}</v-card-text>
+                <v-overlay
+                  absolute
+                  :value="item.done"
+                  color="green"
+                  z-index="0"
+                >
                   <v-icon>done</v-icon>
                 </v-overlay>
                 <v-card-actions>
@@ -30,14 +43,23 @@
                     <v-col
                       cols="4"
                       v-for="blood in item.blood"
-                      :key="item.challengeId+blood.userId"
+                      :key="item.challengeId + blood.userId"
                     >
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn color="blue" fab @click.stop="seeBlood(blood.userId)">
+                        <v-btn
+                          color="blue"
+                          fab
+                          @click.stop="seeBlood(blood.userId)"
+                        >
                           <!-- <v-avatar size="56">{{blood.name[0]}}</v-avatar> -->
                           <v-avatar size="56">
-                            <user-avatar class="white--text" :url="blood.avatar" :size="56" :name="blood.name"></user-avatar>
+                            <user-avatar
+                              class="white--text"
+                              :url="blood.avatar"
+                              :size="56"
+                              :name="blood.name"
+                            ></user-avatar>
                           </v-avatar>
                         </v-btn>
                         <v-spacer></v-spacer>
@@ -55,14 +77,14 @@
       v-model="showDialog"
       :persistent="loading"
       width="800px"
-      v-if="currentChallenge!=null"
+      v-if="currentChallenge != null"
     >
       <v-card width="800px" height="600px">
         <v-toolbar dense>
           <v-spacer></v-spacer>
           <v-toolbar-title>
-            {{currentChallenge.name}}
-            <v-chip class="ml-2">{{currentChallenge.score}}pt</v-chip>
+            {{ currentChallenge.name }}
+            <v-chip class="ml-2">{{ currentChallenge.score }}pt</v-chip>
           </v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
@@ -80,7 +102,7 @@
           @blur="check"
         ></v-text-field>
         <div class="dialog-discription pa-6">
-          <pre>{{formatedHint + currentChallenge.description}}</pre>
+          <pre>{{ formatedHint + currentChallenge.description }}</pre>
         </div>
         <div class="url-list">
           <v-chip
@@ -91,7 +113,7 @@
             v-for="link in currentChallenge.externalLink"
             :key="link"
           >
-            {{link}}
+            {{ link }}
             <v-btn class="ml-4" icon color="primary" @click="openUrl(link)">
               <v-icon>navigate_next</v-icon>
             </v-btn>
@@ -211,7 +233,7 @@ export default class Challenge extends Vue {
 
   async submit() {
     this.check();
-    if (!!this.submitError) return;
+    if (this.submitError) return;
     let coreFlag = this.sumbitFlag.trim();
     this.loading = true;
     try {

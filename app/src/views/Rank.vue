@@ -2,24 +2,37 @@
   <div class="content-col">
     <v-container fill-width>
       <v-row>
-        <v-col v-for="(r,index) in topRank" :key="r.userId" cols="4">
+        <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
           <v-hover v-slot:default="{ hover }">
             <v-card
               :elevation="hover ? 12 : 2"
               max-width="300"
               class="mx-auto d-flex flex-row mb-6 px-4"
-              @click="if(!!$store.state.global.userId)$router.push(`/profile/${r.userId}`)"
+              @click="
+                if (!!$store.state.global.userId)
+                  $router.push(`/profile/${r.userId}`);
+              "
             >
               <div class="pa-2 align-self-center">
                 <v-avatar size="64" color="blue">
                   <!-- <span class="headline">{{ r.name[0] }}</span> -->
-                  <user-avatar class="headline white--text" :url="r.avatar" :size="64" :name="r.name"></user-avatar>
+                  <user-avatar
+                    class="headline white--text"
+                    :url="r.avatar"
+                    :size="64"
+                    :name="r.name"
+                  ></user-avatar>
                 </v-avatar>
               </div>
               <div class="pa-2">
                 <v-card-title>
                   <v-chip>
-                    <v-avatar large left :class="rankColor[index]+' white--text'">{{ index + 1 }}</v-avatar>
+                    <v-avatar
+                      large
+                      left
+                      :class="rankColor[index] + ' white--text'"
+                      >{{ index + 1 }}</v-avatar
+                    >
                     {{ r.name }}
                   </v-chip>
                 </v-card-title>
@@ -40,7 +53,7 @@
         <tbody>
           <tr
             class="table-item"
-            v-for="(r,index) in pageRank"
+            v-for="(r, index) in pageRank"
             :key="r.rank"
             @click="$router.push(`/profile/${r.userId}`)"
           >
@@ -51,7 +64,11 @@
         </tbody>
       </v-simple-table>
       <v-row>
-        <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
+        <v-pagination
+          v-model="page"
+          :page="page"
+          :length="pageCount"
+        ></v-pagination>
       </v-row>
       <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
         {{ infoText }}

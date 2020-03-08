@@ -1,24 +1,24 @@
-import Vue from 'vue'
-import VueApollo from 'vue-apollo'
-import { ApolloClient, InMemoryCache } from 'apollo-boost'
-import { createHttpLink } from 'apollo-link-http'
+import Vue from "vue";
+import VueApollo from "vue-apollo";
+import { ApolloClient, InMemoryCache } from "apollo-boost";
+import { createHttpLink } from "apollo-link-http";
 
-Vue.use(VueApollo)
+Vue.use(VueApollo);
 
 const options = {
-    link: createHttpLink({
-        uri: '/graphql'
-    }),
-    cache: new InMemoryCache()
-}
+  link: createHttpLink({
+    uri: "/graphql"
+  }),
+  cache: new InMemoryCache()
+};
 
-const apolloClient = new ApolloClient(options)
+const apolloClient = new ApolloClient(options);
 
 export function createApolloProvider() {
-    const apolloProvider = new VueApollo({
-        defaultClient: apolloClient
-    })
-    return apolloProvider
+  const apolloProvider = new VueApollo({
+    defaultClient: apolloClient
+  });
+  return apolloProvider;
 }
 
 // Name of the localStorage item

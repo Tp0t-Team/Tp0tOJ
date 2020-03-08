@@ -1,14 +1,19 @@
 <template>
   <v-container class="bulletin-list">
     <v-card v-for="item in bulletins" :key="item.time">
-      <span
-        class="bulletin-time ma-4"
-      >{{new Date(item.publishTime.toString().replace(/\//g, "-") + "+00:00").toLocaleString()}}</span>
-      <v-card-title>{{item.title}}</v-card-title>
-      <v-card-text>{{item.content}}</v-card-text>
+      <span class="bulletin-time ma-4">{{
+        new Date(
+          item.publishTime.toString().replace(/\//g, "-") + "+00:00"
+        ).toLocaleString()
+      }}</span>
+      <v-card-title>{{ item.title }}</v-card-title>
+      <v-card-text>{{ item.content }}</v-card-text>
     </v-card>
     <v-btn
-      v-if="$store.state.global.role=='admin'||$store.state.global.role=='team'"
+      v-if="
+        $store.state.global.role == 'admin' ||
+          $store.state.global.role == 'team'
+      "
       fab
       absolute
       right
@@ -21,7 +26,12 @@
     <v-dialog :persistent="loading" v-model="edit" width="400px">
       <v-card width="400px" class="pa-4">
         <v-form v-model="valid" ref="edit">
-          <v-text-field :disabled="loading" v-model="title" label="Title" :rules="[rules.required]"></v-text-field>
+          <v-text-field
+            :disabled="loading"
+            v-model="title"
+            label="Title"
+            :rules="[rules.required]"
+          ></v-text-field>
           <v-textarea
             :disabled="loading"
             v-model="description"
@@ -37,7 +47,8 @@
               color="primary"
               text
               @click="publish"
-            >publish</v-btn>
+              >publish</v-btn
+            >
           </v-row>
         </v-form>
       </v-card>

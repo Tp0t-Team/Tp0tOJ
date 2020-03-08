@@ -2,8 +2,12 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.type">
-          <v-toolbar dense>{{item.type}}</v-toolbar>
+        <v-card
+          class="ma-4"
+          v-for="item in challengeConfigFiltered"
+          :key="item.type"
+        >
+          <v-toolbar dense>{{ item.type }}</v-toolbar>
           <v-list dense>
             <v-list-item
               v-for="conf in item.items"
@@ -11,9 +15,13 @@
               @click="editChallenge(conf.challengeId)"
               :disabled="loading"
             >
-              <v-list-item-content>{{conf.name}}</v-list-item-content>
+              <v-list-item-content>{{ conf.name }}</v-list-item-content>
               <v-list-item-icon>
-                <v-btn icon :disabled="loading" @click.stop="tryDelete(conf.challengeId)">
+                <v-btn
+                  icon
+                  :disabled="loading"
+                  @click.stop="tryDelete(conf.challengeId)"
+                >
                   <v-icon>close</v-icon>
                 </v-btn>
               </v-list-item-icon>
@@ -33,7 +41,7 @@
           <v-card-title>Are you sure to discard changes?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text @click="showDiscardDialog=false">cancel</v-btn>
+            <v-btn text @click="showDiscardDialog = false">cancel</v-btn>
             <v-btn text color="primary" @click="continueChange">sure</v-btn>
           </v-card-actions>
         </v-card>
@@ -43,7 +51,7 @@
           <v-card-title>Are you sure to delete this challenge?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text @click="showDeleteDialog=false">cancel</v-btn>
+            <v-btn text @click="showDeleteDialog = false">cancel</v-btn>
             <v-btn text color="primary" @click="deleteConfig">accept</v-btn>
           </v-card-actions>
         </v-card>
@@ -57,7 +65,7 @@
           @error="error"
           @change="Changed"
           @submit="submit"
-          :key="currentConfig && currentConfig.challengeId || ''"
+          :key="(currentConfig && currentConfig.challengeId) || ''"
         ></challenge-editor>
       </v-col>
     </v-row>

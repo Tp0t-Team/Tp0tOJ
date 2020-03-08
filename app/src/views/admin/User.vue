@@ -2,7 +2,11 @@
   <v-container fluid>
     <v-row>
       <v-col cols="6" class="content-col">
-        <v-data-table :headers="headers" :items="users" @click:row="select"></v-data-table>
+        <v-data-table
+          :headers="headers"
+          :items="users"
+          @click:row="select"
+        ></v-data-table>
       </v-col>
       <v-col cols="6" class="content-col">
         <v-divider class="avatar-divider" color="primary"></v-divider>
@@ -24,7 +28,7 @@
         <user-editor
           :disabled="withoutInit"
           :loading="loading"
-          :key="currentUser && currentUser.stuNumber || ''"
+          :key="(currentUser && currentUser.stuNumber) || ''"
           :user="currentUser"
           @submit="submit"
         ></user-editor>
@@ -45,11 +49,15 @@
           </thead>
           <tbody>
             <tr v-for="item in resolves" :key="item.submitTime">
-              <td>{{item.submitTime}}</td>
-              <td>{{item.challengeName}}</td>
+              <td>{{ item.submitTime }}</td>
+              <td>{{ item.challengeName }}</td>
               <td>
-                <v-badge v-if="!!item.mark" class="mark-badge" :color="rankColor[item.mark - 1]">
-                  <template v-slot:badge>{{item.mark}}</template>
+                <v-badge
+                  v-if="!!item.mark"
+                  class="mark-badge"
+                  :color="rankColor[item.mark - 1]"
+                >
+                  <template v-slot:badge>{{ item.mark }}</template>
                 </v-badge>
               </td>
             </tr>

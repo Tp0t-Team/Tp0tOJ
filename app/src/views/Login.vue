@@ -29,7 +29,8 @@
               text
               @click="$router.push('/forget')"
               class="forget"
-            >forget</v-btn>
+              >forget</v-btn
+            >
             <v-btn
               color="primary"
               absolute
@@ -38,7 +39,8 @@
               @click="login"
               :disabled="loading"
               :loading="loading"
-            >login</v-btn>
+              >login</v-btn
+            >
           </v-form>
         </v-tab-item>
         <v-tab-item value="tab-register">
@@ -83,13 +85,18 @@
             </v-layout>
             <v-layout row>
               <v-flex sm6 pl-3 pr-3>
-                <v-text-field v-model="qq" label="QQ" :rules="[rules.required]" :disabled="loading"></v-text-field>
+                <v-text-field
+                  v-model="qq"
+                  label="QQ"
+                  :rules="[rules.required]"
+                  :disabled="loading"
+                ></v-text-field>
               </v-flex>
               <v-flex sm6 pl-3 pr-3>
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required,rules.email]"
+                  :rules="[rules.required, rules.email]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -102,7 +109,7 @@
                   :append-icon="showPassword ? 'visibility' : 'visibility_off'"
                   :type="showPassword ? 'text' : 'password'"
                   @click:append="showPassword = !showPassword"
-                  :rules="[rules.required,rules.passLen(8),rules.password]"
+                  :rules="[rules.required, rules.passLen(8), rules.password]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -131,7 +138,8 @@
                 @click="register"
                 :disabled="loading"
                 :loading="loading"
-              >register</v-btn>
+                >register</v-btn
+              >
             </v-layout>
           </v-form>
         </v-tab-item>

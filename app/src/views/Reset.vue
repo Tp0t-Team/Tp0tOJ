@@ -32,7 +32,8 @@
           @click="reset"
           :disabled="loading"
           :loading="loading"
-        >reset</v-btn>
+          >reset</v-btn
+        >
       </v-form>
     </v-card>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
@@ -114,5 +115,4 @@ export default class Reset extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
