@@ -19,14 +19,31 @@ public class WriteupService {
     public WriteupService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
+    private boolean CheckContentType(String contentType){
+        boolean flag = false;
+        //allowed contentType list
+        String[] allowTypeList={"application/pdf","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/markdown","text/plain"};
+        for (String allow:allowTypeList) {
+            if (allow.compareTo(contentType) == 0) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
     public ResponseEntity upload(MultipartFile file, long userId) {
         User user = userRepository.findByUserId(userId);
         if(user == null) {
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        //check file
+        if(file.isEmpty() || !CheckContentType(file.getContentType())){
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
         // save file
-        File dest = new File(basePath + user.getStuNumber());
+        String upload_filename = file.getOriginalFilename();
+        //destPath is a file name
+        String destPath = basePath +"/"+ upload_filename;
+        File dest = new File(basePath);
         try {
             file.transferTo(dest);
             return new ResponseEntity(HttpStatus.OK);
