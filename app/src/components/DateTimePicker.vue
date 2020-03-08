@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit, Watch } from "vue-property-decorator";
 
 @Component
 export default class Competition extends Vue {
@@ -52,25 +52,37 @@ export default class Competition extends Vue {
   private menuTime: String = "";
 
   mounted() {
+    this.refresh();
+  }
+
+  @Watch("value")
+  refresh() {
     if (this.value != null) {
-      this.date = `${this.value.getFullYear()}-${this.value.getMonth()}-${this.value.getDate()}`;
+      this.date = `${this.value.getFullYear()}-${this.value.getMonth() +
+        1}-${this.value.getDate()}`;
       this.time = `${this.value.getHours()}:${this.value.getMinutes()}`;
+    } else {
+      this.date = "";
+      this.time = "";
     }
   }
 
   @Emit("input")
   SetDate() {
+    if (this.date == "" || this.time == "") {
+      return new Date();
+    }
     let datetime = new Date(this.date + " " + this.time);
     return datetime;
   }
 
   DateClick() {
-    this.menuDate = this.date;
+    this.menuDate = this.date || null;
     this.dateOrTime = false;
   }
 
   TimeClick() {
-    this.menuTime = this.time;
+    this.menuTime = this.time || null;
     this.dateOrTime = true;
   }
 

@@ -36,7 +36,9 @@
                 <div>
                   <v-subheader>
                     <span class="text-center">
-                      <strong v-if="$store.state.competition.competition">{{ userInfo.name }}</strong>
+                      <strong v-if="$store.state.competition.competition">{{
+                        userInfo.name
+                      }}</strong>
                       <br v-if="$store.state.competition.competition" />
                       <strong>
                         Rank:
@@ -153,7 +155,12 @@
               </v-row>
             </v-form>
             <v-row v-if="$store.state.competition.competition">
-              <v-simple-table dense>
+              <v-simple-table
+                dense
+                class="table mt-2"
+                height="400"
+                fixed-header
+              >
                 <thead>
                   <tr>
                     <th>submit time</th>
@@ -231,6 +238,8 @@ export default class Profile extends Vue {
   };
 
   private resolves: SubmitInfo[] = [];
+
+  private rankColor = ["amber", "light-blue", "green"];
 
   private infoText: string = "";
   private hasInfo: boolean = false;
@@ -355,5 +364,9 @@ export default class Profile extends Vue {
 .inner {
   background: transparent;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.4) inset;
+}
+
+.table {
+  width: 100%;
 }
 </style>

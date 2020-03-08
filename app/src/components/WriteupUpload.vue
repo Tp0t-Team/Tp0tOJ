@@ -22,10 +22,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 
 @Component
-export default class UserEditor extends Vue {
+export default class WriteupUpload extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
@@ -33,15 +33,18 @@ export default class UserEditor extends Vue {
   private allow: boolean = false;
 
   mounted() {
-    let allowTime: Date = new Date();
-    allowTime.setHours(1);
+    this.refreshVisible();
+  }
+
+  @Watch("$store.state.competition", { deep: true })
+  refreshVisible() {
     if (
-      this.$store.state.competition.endtime != null &&
+      this.$store.state.competition.endTime != null &&
       this.$store.state.competition.competition === true
     ) {
       let deltaTime =
-        Date.now() - this.$store.state.competition.endtime.getTime();
-      if (deltaTime > 0 && deltaTime <= allowTime.getTime()) {
+        Date.now() - this.$store.state.competition.endTime;
+      if (deltaTime > 0 && deltaTime <= 3600 * 1000) {
         this.allow = true;
       }
     }
@@ -52,12 +55,9 @@ export default class UserEditor extends Vue {
       this.loading = true;
       try {
         let formData = new FormData();
-        formData.append("wrtieup", event);
+        formData.append("writeup", event);
         let res = await fetch("/writeup", {
           method: "POST",
-          headers: {
-            "content-type": "multipart/form-data"
-          },
           body: formData,
           cache: "no-cache"
         });

@@ -113,8 +113,14 @@ export default class Competition extends Vue {
       if (res.data!.competition.message) throw res.data!.competition.message;
       this.competition = res.data!.competition.competition;
       this.registerAllow = res.data!.competition.registerAllow;
-      this.beginTime = new Date(res.data!.competition.beginTime);
-      this.endTime = new Date(res.data!.competition.endTime);
+      this.beginTime =
+        res.data!.competition.beginTime != null
+          ? new Date(res.data!.competition.beginTime)
+          : null;
+      this.endTime =
+        res.data!.competition.endTime != null
+          ? new Date(res.data!.competition.endTime)
+          : null;
       this.loading = false;
     } catch (e) {
       this.loading = false;
@@ -131,7 +137,7 @@ export default class Competition extends Vue {
         CompetitionMutationInput
       >({
         mutation: gql`
-          mutation($input: CompetitionMutationIEnput!) {
+          mutation($input: CompetitionMutationInput!) {
             competition(input: $input) {
               message
             }
@@ -141,8 +147,8 @@ export default class Competition extends Vue {
           input: {
             competition: this.competition,
             registerAllow: this.registerAllow,
-            beginTime: this.beginTime!.toUTCString(),
-            endTime: this.endTime!.toUTCString()
+            beginTime: this.beginTime!.toJSON(),
+            endTime: this.endTime!.toJSON()
           }
         }
       });
