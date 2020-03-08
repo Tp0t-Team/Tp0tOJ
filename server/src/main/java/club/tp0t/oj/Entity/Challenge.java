@@ -37,7 +37,7 @@ public class Challenge {
 
     @NotEmpty
     @Column(name = "state")
-    private String state;
+    private String state;  // enabled/disabled
 
     @NotNull
     @Column(name = "gmt_created")

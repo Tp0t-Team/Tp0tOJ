@@ -74,7 +74,7 @@ public class ChallengeService {
             User tmpUser = userRepository.findByUserId(userId);
             if (challengeConfiguration.getFlag().isDynamic() && // only change proxied flag port
                     tmpUser.getRole().equals("member")) {  // do not change for team & admin
-                FlagProxy tmpFlagProxy = flagProxyRepository.findByChallengeIdAndUserId(challenge.getChallengeId(), tmpUser.getUserId());
+                FlagProxy tmpFlagProxy = flagProxyRepository.findByChallengeAndUser(challenge, tmpUser);
                 List<String> replacedExternalLinkList = new ArrayList<>();
                 if (tmpFlagProxy != null) {
                     long port = tmpFlagProxy.getPort();
