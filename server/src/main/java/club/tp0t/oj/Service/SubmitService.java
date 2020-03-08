@@ -93,16 +93,6 @@ public class SubmitService {
             submit.setChallenge(challenge);
             submitRepository.save(submit);
             if (correct) {
-                /*// add user score
-                // TODO: get current points of challenge
-                long currentPoints = 0;
-                try {
-                    currentPoints = Long.parseLong(ChallengeConfiguration.parseConfiguration(challenge.getConfiguration()).getScoreEx().getBase_score());
-                } catch (NumberFormatException e) {
-                    return "unknown error";
-                }
-                // TODO: change score update method.
-                userService.addScore(user, currentPoints);*/
                 return "";
             } else {
                 return "incorrect";

@@ -77,17 +77,13 @@ public class RankHelper {
         if (!redisLock("UserLock", "0", 100)) {
             return false;
         }
-        // redisTemplate.setEnableTransactionSupport(true);
         try {
-            // redisTemplate.multi();
             redisTemplate.opsForValue().set("UserScore:" + userId, String.valueOf(baseScore));
             redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(0));
             redisTemplate.delete("User:" + userId);
-            // redisTemplate.exec();
             redisUnlock("UserLock");
         } catch (Exception e) {
             e.printStackTrace();
-            // redisTemplate.discard();
             redisUnlock("UserLock");
             return false;
         }
@@ -98,16 +94,12 @@ public class RankHelper {
         if (!redisLock("ChallengeLock", "0", 100)) {
             return false;
         }
-        // redisTemplate.setEnableTransactionSupport(true);
         try {
-            // redisTemplate.multi();
             redisTemplate.opsForValue().set("ChallengeScore:" + challenge, String.valueOf(originScore));
             redisTemplate.delete("Challenge:" + challenge);
             redisUnlock("ChallengeLock");
-            // redisTemplate.exec();
         } catch (Exception e) {
             e.printStackTrace();
-            // redisTemplate.discard();
             redisUnlock("ChallengeLock");
             return false;
         }
@@ -122,18 +114,7 @@ public class RankHelper {
         if (!redisLock("SubmitLock", "0", 1000)) {
             return false;
         }
-        // redisTemplate.setEnableTransactionSupport(true);
         try {
-            /*while (redisTemplate.opsForValue().setIfAbsent("lock", String.valueOf(1)) == Boolean.TRUE) {
-                try {
-                    wait(10);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            redisTemplate.expire("lock", 2, TimeUnit.SECONDS);*/
-            // redisTemplate.watch("ChallengeScore:" + challengeId);
-            // redisTemplate.watch("Challenge:" + challengeId);
             String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
             if (scoreString == null) {
                 throw new Exception();
@@ -151,32 +132,18 @@ public class RankHelper {
             }
             users.add(String.valueOf(userId));
             //
-            try {
-                // redisTemplate.multi();
-                //
-                redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
-                redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
-                redisTemplate.opsForList().rightPush("User:" + userId, String.valueOf(challengeId));
-                redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getIncrementScore(oldScore, count - 1));
-                redisTemplate.opsForValue().set("ChallengeScore:" + challengeId, String.valueOf(newScore));
-                for (int i = 0; i < users.size(); i++) {
-                    long user = Long.parseLong(users.get(i));
-                    redisTemplate.opsForValue().decrement("UserScore:" + user, calculator.getDeltaScoreForUser(oldScore, newScore, i));
-                }
-                // redisTemplate.exec();
-                redisUnlock("SubmitLock");
-            } catch (Exception e) {
-                e.printStackTrace();
-                // redisTemplate.discard();
-                redisUnlock("SubmitLock");
-                return false;
+            redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
+            redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
+            redisTemplate.opsForList().rightPush("User:" + userId, String.valueOf(challengeId));
+            redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getIncrementScore(oldScore, count - 1));
+            redisTemplate.opsForValue().set("ChallengeScore:" + challengeId, String.valueOf(newScore));
+            for (int i = 0; i < users.size(); i++) {
+                long user = Long.parseLong(users.get(i));
+                redisTemplate.opsForValue().decrement("UserScore:" + user, calculator.getDeltaScoreForUser(oldScore, newScore, i));
             }
-            // redisTemplate.unwatch();
-            //redisTemplate.delete("lock");
+            redisUnlock("SubmitLock");
         } catch (Exception e) {
-            //redisTemplate.delete("lock");
             e.printStackTrace();
-            // redisTemplate.unwatch();
             redisUnlock("SubmitLock");
             return false;
         }
@@ -184,76 +151,20 @@ public class RankHelper {
             return true;
         }
         return refreshRank();
-        /*try {
-            redisTemplate.multi();
-            redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
-            redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
-            redisTemplate.opsForList().rightPush("User:" + userId, String.valueOf(challengeId));
-            String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
-            if (scoreString == null) {
-                System.out.println(challengeId);
-                throw new Exception();
-            }
-            Long count = redisTemplate.opsForList().size("Challenge:" + challengeId);
-            if (count == null) {
-                throw new Exception();
-            }
-            long oldScore = Long.parseLong(scoreString);
-            redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getIncrementScore(oldScore, count - 1));
-            long newScore = calculator.getScore(challengeId, count);
-            redisTemplate.opsForValue().set("ChallengeScore:" + challengeId, String.valueOf(newScore));
-            List<String> users = redisTemplate.opsForList().range("Challenge:", 0, count);
-            if (users == null) {
-                throw new Exception();
-            }
-            List<Long[]> scoreList = new ArrayList<>();
-            for (int i = 0; i < users.size(); i++) {
-                long user = Long.parseLong(users.get(i));
-                redisTemplate.opsForValue().decrement("UserScore:" + user, calculator.getDeltaScoreForUser(oldScore, newScore, i));
-                String score = redisTemplate.opsForValue().get("UserScore:" + user);
-                if (score == null) {
-                    throw new Exception();
-                }
-                String time = redisTemplate.opsForValue().get("UserTime:" + user);
-                if (time == null) {
-                    throw new Exception();
-                }
-                scoreList.add(new Long[]{user, Long.parseLong(score), Long.parseLong(time)});
-            }
-            scoreList.sort((Long[] a, Long[] b) -> {
-                int result = b[1].compareTo(a[1]);
-                if (result == 0) {
-                    result = a[1].compareTo(b[1]);
-                }
-                return result;
-            });
-            for (int i = 0; i < scoreList.size(); i++) {
-                redisTemplate.opsForList().set("Rank", i, scoreList.get(i)[0].toString());
-            }
-            redisTemplate.exec();
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            e.printStackTrace();
-            redisTemplate.discard();
-            return false;
-        }*/
     }
 
     private boolean refreshRank() {
         if (!redisLock("RankLock", "0", 1000)) {
             return false;
         }
-        // redisTemplate.setEnableTransactionSupport(true);
         try {
             List<User> userList = userRepository.findAllByRole("member");
             List<Long[]> scoreList = new ArrayList<>();
             for (User user : userList) {
-                // redisTemplate.watch("UserScore:" + user.getUserId());
                 String score = redisTemplate.opsForValue().get("UserScore:" + user.getUserId());
                 if (score == null) {
                     throw new Exception();
                 }
-                // redisTemplate.watch("UserTime:" + user.getUserId());
                 String time = redisTemplate.opsForValue().get("UserTime:" + user.getUserId());
                 if (time == null) {
                     throw new Exception();
@@ -267,25 +178,14 @@ public class RankHelper {
                 }
                 return result;
             });
-            try {
-                // redisTemplate.multi();
-                redisTemplate.delete("Rank");
-                for (Long[] item : scoreList) {
-                    redisTemplate.opsForList().rightPush("Rank", item[0].toString());
-                    redisTemplate.opsForList().rightPush("Rank", item[1].toString());
-                }
-                redisUnlock("RankLock");
-                // redisTemplate.exec();
-            } catch (Exception e) {
-                e.printStackTrace();
-                // redisTemplate.discard();
-                redisUnlock("RankLock");
-                return false;
+            redisTemplate.delete("Rank");
+            for (Long[] item : scoreList) {
+                redisTemplate.opsForList().rightPush("Rank", item[0].toString());
+                redisTemplate.opsForList().rightPush("Rank", item[1].toString());
             }
-            // redisTemplate.unwatch();
+            redisUnlock("RankLock");
         } catch (Exception e) {
             e.printStackTrace();
-            // redisTemplate.unwatch();
             redisUnlock("RankLock");
             return false;
         }
