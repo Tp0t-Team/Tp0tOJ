@@ -74,33 +74,41 @@ public class RankHelper {
     }
 
     public boolean addUser(long userId, long baseScore) {
-        redisTemplate.setEnableTransactionSupport(true);
+        if (!redisLock("UserLock", "0", 100)) {
+            return false;
+        }
+        // redisTemplate.setEnableTransactionSupport(true);
         try {
-            redisTemplate.multi();
-            //if (redisTemplate.hasKey("UserScore:" + userId) == Boolean.TRUE) {
+            // redisTemplate.multi();
             redisTemplate.opsForValue().set("UserScore:" + userId, String.valueOf(baseScore));
-            //}
-            //if (redisTemplate.hasKey("UserTime:" + userId) == Boolean.TRUE) {
             redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(0));
-            //}
             redisTemplate.delete("User:" + userId);
-            redisTemplate.exec();
+            // redisTemplate.exec();
+            redisUnlock("UserLock");
         } catch (Exception e) {
-            redisTemplate.discard();
+            e.printStackTrace();
+            // redisTemplate.discard();
+            redisUnlock("UserLock");
             return false;
         }
         return true;
     }
 
     public boolean addChallenge(long challenge, long originScore) {
-        redisTemplate.setEnableTransactionSupport(true);
+        if (!redisLock("ChallengeLock", "0", 100)) {
+            return false;
+        }
+        // redisTemplate.setEnableTransactionSupport(true);
         try {
-            redisTemplate.multi();
+            // redisTemplate.multi();
             redisTemplate.opsForValue().set("ChallengeScore:" + challenge, String.valueOf(originScore));
             redisTemplate.delete("Challenge:" + challenge);
-            redisTemplate.exec();
+            redisUnlock("ChallengeLock");
+            // redisTemplate.exec();
         } catch (Exception e) {
-            redisTemplate.discard();
+            e.printStackTrace();
+            // redisTemplate.discard();
+            redisUnlock("ChallengeLock");
             return false;
         }
         return true;
@@ -111,7 +119,10 @@ public class RankHelper {
     }
 
     private boolean submit(long userId, long challengeId, long timestamp, boolean warmUp) {
-        redisTemplate.setEnableTransactionSupport(true);
+        if (!redisLock("SubmitLock", "0", 1000)) {
+            return false;
+        }
+        // redisTemplate.setEnableTransactionSupport(true);
         try {
             /*while (redisTemplate.opsForValue().setIfAbsent("lock", String.valueOf(1)) == Boolean.TRUE) {
                 try {
@@ -121,8 +132,8 @@ public class RankHelper {
                 }
             }
             redisTemplate.expire("lock", 2, TimeUnit.SECONDS);*/
-            redisTemplate.watch("ChallengeScore:" + challengeId);
-            redisTemplate.watch("Challenge:" + challengeId);
+            // redisTemplate.watch("ChallengeScore:" + challengeId);
+            // redisTemplate.watch("Challenge:" + challengeId);
             String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
             if (scoreString == null) {
                 throw new Exception();
@@ -141,7 +152,7 @@ public class RankHelper {
             users.add(String.valueOf(userId));
             //
             try {
-                redisTemplate.multi();
+                // redisTemplate.multi();
                 //
                 redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
                 redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
@@ -152,18 +163,21 @@ public class RankHelper {
                     long user = Long.parseLong(users.get(i));
                     redisTemplate.opsForValue().decrement("UserScore:" + user, calculator.getDeltaScoreForUser(oldScore, newScore, i));
                 }
-                redisTemplate.exec();
+                // redisTemplate.exec();
+                redisUnlock("SubmitLock");
             } catch (Exception e) {
                 e.printStackTrace();
-                redisTemplate.discard();
+                // redisTemplate.discard();
+                redisUnlock("SubmitLock");
                 return false;
             }
-            redisTemplate.unwatch();
+            // redisTemplate.unwatch();
             //redisTemplate.delete("lock");
         } catch (Exception e) {
             //redisTemplate.delete("lock");
             e.printStackTrace();
-            redisTemplate.unwatch();
+            // redisTemplate.unwatch();
+            redisUnlock("SubmitLock");
             return false;
         }
         if (warmUp) {
@@ -226,17 +240,20 @@ public class RankHelper {
     }
 
     private boolean refreshRank() {
-        redisTemplate.setEnableTransactionSupport(true);
+        if (!redisLock("RankLock", "0", 1000)) {
+            return false;
+        }
+        // redisTemplate.setEnableTransactionSupport(true);
         try {
             List<User> userList = userRepository.findAllByRole("member");
             List<Long[]> scoreList = new ArrayList<>();
             for (User user : userList) {
-                redisTemplate.watch("UserScore:" + user.getUserId());
+                // redisTemplate.watch("UserScore:" + user.getUserId());
                 String score = redisTemplate.opsForValue().get("UserScore:" + user.getUserId());
                 if (score == null) {
                     throw new Exception();
                 }
-                redisTemplate.watch("UserTime:" + user.getUserId());
+                // redisTemplate.watch("UserTime:" + user.getUserId());
                 String time = redisTemplate.opsForValue().get("UserTime:" + user.getUserId());
                 if (time == null) {
                     throw new Exception();
@@ -251,22 +268,25 @@ public class RankHelper {
                 return result;
             });
             try {
-                redisTemplate.multi();
+                // redisTemplate.multi();
                 redisTemplate.delete("Rank");
                 for (Long[] item : scoreList) {
                     redisTemplate.opsForList().rightPush("Rank", item[0].toString());
                     redisTemplate.opsForList().rightPush("Rank", item[1].toString());
                 }
-                redisTemplate.exec();
+                redisUnlock("RankLock");
+                // redisTemplate.exec();
             } catch (Exception e) {
                 e.printStackTrace();
-                redisTemplate.discard();
+                // redisTemplate.discard();
+                redisUnlock("RankLock");
                 return false;
             }
-            redisTemplate.unwatch();
+            // redisTemplate.unwatch();
         } catch (Exception e) {
             e.printStackTrace();
-            redisTemplate.unwatch();
+            // redisTemplate.unwatch();
+            redisUnlock("RankLock");
             return false;
         }
         return true;
