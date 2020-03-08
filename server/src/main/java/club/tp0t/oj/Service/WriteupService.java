@@ -19,11 +19,12 @@ public class WriteupService {
     public WriteupService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    private boolean CheckContentType(String contentType){
+
+    private boolean CheckContentType(String contentType) {
         boolean flag = false;
         //allowed contentType list
-        String[] allowTypeList={"application/pdf","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/markdown","text/plain"};
-        for (String allow:allowTypeList) {
+        String[] allowTypeList = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/markdown", "text/plain"};
+        for (String allow : allowTypeList) {
             if (allow.compareTo(contentType) == 0) {
                 flag = true;
                 break;
@@ -31,6 +32,7 @@ public class WriteupService {
         }
         return flag;
     }
+
     public ResponseEntity upload(MultipartFile file, long userId) {
         ResponseEntity result;
         User user = userRepository.findByUserId(userId);

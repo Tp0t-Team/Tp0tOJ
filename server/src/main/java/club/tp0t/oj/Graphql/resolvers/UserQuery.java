@@ -7,6 +7,7 @@ import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Service.ChallengeService;
 import club.tp0t.oj.Service.UserService;
+import club.tp0t.oj.Util.OjConfig;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -14,17 +15,20 @@ import org.springframework.stereotype.Component;
 import club.tp0t.oj.Service.CompetitionService;
 
 import javax.servlet.http.HttpSession;
+import java.util.Date;
 
 @Component
 public class UserQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final CompetitionService competitionService;
+    private final OjConfig config;
 
-    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionService competitionService) {
+    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionService competitionService, OjConfig config) {
         this.challengeService = challengeService;
         this.userService = userService;
         this.competitionService = competitionService;
+        this.config = config;
     }
 
     // test
@@ -108,6 +112,13 @@ public class UserQuery implements GraphQLQueryResolver {
         // if not login
         if (session.getAttribute("isLogin") == null || !(boolean) session.getAttribute("isLogin")) {
             return new ChallengeInfosResult("forbidden");
+        }
+
+        if (config.isCompetition()) {
+            Date now = new Date();
+            if (now.compareTo(config.getBeginTime()) < 0) {
+                return new ChallengeInfosResult("");
+            }
         }
 
         // execute
