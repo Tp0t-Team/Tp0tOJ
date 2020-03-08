@@ -26,30 +26,30 @@ public class WriteupService {
         for (String allow:allowTypeList) {
             if (allow.compareTo(contentType) == 0) {
                 flag = true;
+                break;
             }
         }
         return flag;
     }
     public ResponseEntity upload(MultipartFile file, long userId) {
+        ResponseEntity result;
         User user = userRepository.findByUserId(userId);
-        if(user == null) {
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (user == null) {
+            result = new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+        } else if (file.isEmpty() || !CheckContentType(file.getContentType())) {
+            result = new ResponseEntity(HttpStatus.FORBIDDEN);
+        } else {// save file
+            String upload_filename = file.getOriginalFilename();//destPath is a file name
+            String destPath = basePath + "/" + upload_filename;
+            File dest = new File(destPath);
+            try {
+                file.transferTo(dest);
+                result = new ResponseEntity(HttpStatus.OK);
+            } catch (IllegalStateException | IOException e) {
+                e.printStackTrace();
+                result = new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-        //check file
-        if(file.isEmpty() || !CheckContentType(file.getContentType())){
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
-        }
-        // save file
-        String upload_filename = file.getOriginalFilename();
-        //destPath is a file name
-        String destPath = basePath +"/"+ upload_filename;
-        File dest = new File(destPath);
-        try {
-            file.transferTo(dest);
-            return new ResponseEntity(HttpStatus.OK);
-        } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return result;
     }
 }
