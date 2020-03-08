@@ -15,13 +15,16 @@ public class BasicScoreCalculator implements RankHelper.ScoreCalculator {
     }
 
     private long curve(int baseScore, int count) {
-        if(count == 0) {
+        if(count <= 0) {
             return baseScore;
         }
-        count -= 1;
-        double coefficient = 1.8414 / new Integer(ojConfig.getHalfLife()).doubleValue() * count;
-        double result = Math.floor(new Integer(baseScore).doubleValue() / (coefficient + Math.exp(-coefficient)));
-        return new Double(result).longValue();
+        else {
+            count -= 1;
+            double coefficient = 1.8414 / new Integer(ojConfig.getHalfLife()).doubleValue() * count;
+            double result = Math.floor(new Integer(baseScore).doubleValue() / (coefficient + Math.exp(-coefficient)));
+            return new Double(result).longValue();
+        }
+
     }
 
     @Override
