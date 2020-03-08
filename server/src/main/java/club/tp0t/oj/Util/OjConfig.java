@@ -5,7 +5,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource(value = {"classpath:/application.properties"})
+@PropertySource(value = {"classpath:/application.properties", "file:./application.properties"})
 @ConfigurationProperties(prefix = "oj")
 public class OjConfig {
     private String host;
