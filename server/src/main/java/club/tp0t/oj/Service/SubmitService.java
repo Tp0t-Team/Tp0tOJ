@@ -51,9 +51,15 @@ public class SubmitService {
             }
         } else {
             int mark = 0;
+            Timestamp submitTime = new Timestamp(System.currentTimeMillis());
             if (correct) {
                 if (submitRepository.findByUserAndChallengeAndCorrect(user, challenge, true) != null) {
                     return "duplicate submit";
+                }
+
+                // try add to redis
+                if (!rankHelper.submit(user.getUserId(), challenge.getChallengeId(), submitTime.getTime())) {
+                    return "please wait moment";
                 }
 
                 // update blood
@@ -82,12 +88,12 @@ public class SubmitService {
             submit.setCorrect(correct);
             submit.setMark(mark);
             submit.setSubmitFlag(flag);
-            submit.setSubmitTime(new Timestamp(System.currentTimeMillis()));
+            submit.setSubmitTime(submitTime);
             submit.setUser(user);
             submit.setChallenge(challenge);
             submitRepository.save(submit);
             if (correct) {
-                // add user score
+                /*// add user score
                 // TODO: get current points of challenge
                 long currentPoints = 0;
                 try {
@@ -96,8 +102,7 @@ public class SubmitService {
                     return "unknown error";
                 }
                 // TODO: change score update method.
-                // userService.addScore(user, currentPoints);
-                rankHelper.submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime());
+                userService.addScore(user, currentPoints);*/
                 return "";
             } else {
                 return "incorrect";

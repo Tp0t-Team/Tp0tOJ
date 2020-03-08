@@ -2,6 +2,7 @@ package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
+import club.tp0t.oj.Util.RankHelper;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -14,11 +15,13 @@ public class AdminMutation implements GraphQLMutationResolver {
     private final BulletinService bulletinService;
     private final ChallengeService challengeService;
     private final UserService userService;
+    private final RankHelper rankHelper;
 
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService) {
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
         this.userService = userService;
+        this.rankHelper = rankHelper;
     }
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -119,6 +122,22 @@ public class AdminMutation implements GraphQLMutationResolver {
                 input.getState());
 
         return new UserInfoUpdateResult("");
+    }
+
+    public boolean warmUp(DataFetchingEnvironment environment) {
+
+        // get session from context
+        DefaultGraphQLServletContext context = environment.getContext();
+        HttpSession session = context.getHttpServletRequest().getSession();
+
+        // login & admin check
+        if (session.getAttribute("isLogin") == null ||
+                !((boolean) session.getAttribute("isLogin")) ||
+                !(boolean) session.getAttribute("isAdmin")) {
+            return false;
+        }
+
+        return rankHelper.warmUp();
     }
 }
 

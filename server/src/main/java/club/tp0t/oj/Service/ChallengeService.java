@@ -12,6 +12,7 @@ import club.tp0t.oj.Graphql.types.BloodInfo;
 import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Util.RankHelper;
 import com.alibaba.fastjson.JSON;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -27,13 +28,15 @@ public class ChallengeService {
     private final SubmitRepository submitRepository;
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
+    private final RankHelper rankHelper;
 
-    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper) {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
+        this.rankHelper = rankHelper;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
@@ -149,6 +152,8 @@ public class ChallengeService {
         challenge.setConfiguration(configuration);
         challenge.setState(challengeMutate.getState());
         challenge = challengeRepository.save(challenge);
+
+        rankHelper.addChallenge(challenge.getChallengeId(), challengeConfiguration.getScore().getBaseScore());
 
         // create replicas and allocate to all users
         List<Replica> replicas = replicaHelper.createReplicas(challenge, 1);

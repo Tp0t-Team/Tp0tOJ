@@ -95,6 +95,8 @@ public class UserService {
 
         user = userRepository.save(user);
 
+        rankHelper.addUser(user.getUserId(), 0);
+
         List<Replica> replicas = new ArrayList<>();
         for (Challenge challenge : challengeRepository.findAll()) {
             Replica replica = replicaHelper.getRandomReplicaByChallenge(challenge);
@@ -197,9 +199,12 @@ public class UserService {
     public List<User> getUsersRank() {
         List<Long> rank = rankHelper.getRank();
         List<User> result = new ArrayList<>();
-        for (long userId : rank) {
+        for (int i = 0; i < rank.size(); i += 2) {
+            long userId = rank.get(i);
+            long score = rank.get(i + 1);
             User user = userRepository.findByUserId(userId);
             if (user != null) {
+                user.setScore(score);
                 result.add(user);
             }
         }

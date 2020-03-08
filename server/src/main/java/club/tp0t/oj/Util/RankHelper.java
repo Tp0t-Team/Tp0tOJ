@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class RankHelper {
@@ -31,37 +32,44 @@ public class RankHelper {
         this.redisTemplate = redisTemplate;
     }
 
+    private boolean redisLock(String key, String value, long timeout) {
+        if (redisTemplate.opsForValue().setIfAbsent(key, value) == Boolean.TRUE) {
+            redisTemplate.expire(key, timeout, TimeUnit.MILLISECONDS);
+            return true;
+        }
+        return false;
+    }
+
+    private void redisUnlock(String key) {
+        redisTemplate.delete(key);
+    }
+
     public interface ScoreCalculator {
         long getScore(long challengeId, long count);
 
         // used when this user first submit this flag
         long getIncrementScore(long score, long index); // index: 0, 1, 2, ...
-        
+
         // used for blood
         long getDeltaScoreForUser(long oldScore, long newScore, int index); // index: 0, 1, 2, ...
     }
 
     public List<Long> getRank() {
-        redisTemplate.setEnableTransactionSupport(true);
         try {
-            redisTemplate.multi();
-            Long size = redisTemplate.opsForList().size("Rank");
-            if (size == null) {
-                throw new Exception();
-            }
-            List<String> rankList = redisTemplate.opsForList().range("Rank", 0, size);
+            List<String> rankList = redisTemplate.opsForList().range("Rank", 0, -1);
             if (rankList == null) {
                 throw new Exception();
             }
+            System.out.println(rankList.size());
             List<Long> result = new ArrayList<>();
-            for (String user : rankList) {
-                result.add(Long.parseLong(user));
+            for (String item : rankList) {
+                result.add(Long.parseLong(item));
             }
-            redisTemplate.exec();
             return result;
         } catch (Exception e) {
-            redisTemplate.discard();
-            return null;
+            System.out.println(e.toString());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 
@@ -69,12 +77,13 @@ public class RankHelper {
         redisTemplate.setEnableTransactionSupport(true);
         try {
             redisTemplate.multi();
-            if (redisTemplate.hasKey("UserScore:" + userId) == Boolean.TRUE) {
-                redisTemplate.opsForValue().set("UserScore:" + userId, String.valueOf(baseScore));
-            }
-            if (redisTemplate.hasKey("UserTime:" + userId) == Boolean.TRUE) {
-                redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(0));
-            }
+            //if (redisTemplate.hasKey("UserScore:" + userId) == Boolean.TRUE) {
+            redisTemplate.opsForValue().set("UserScore:" + userId, String.valueOf(baseScore));
+            //}
+            //if (redisTemplate.hasKey("UserTime:" + userId) == Boolean.TRUE) {
+            redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(0));
+            //}
+            redisTemplate.delete("User:" + userId);
             redisTemplate.exec();
         } catch (Exception e) {
             redisTemplate.discard();
@@ -84,23 +93,91 @@ public class RankHelper {
     }
 
     public boolean addChallenge(long challenge, long originScore) {
+        redisTemplate.setEnableTransactionSupport(true);
         try {
+            redisTemplate.multi();
             redisTemplate.opsForValue().set("ChallengeScore:" + challenge, String.valueOf(originScore));
+            redisTemplate.delete("Challenge:" + challenge);
+            redisTemplate.exec();
         } catch (Exception e) {
+            redisTemplate.discard();
             return false;
         }
         return true;
     }
 
     public boolean submit(long userId, long challengeId, long timestamp) {
+        return submit(userId, challengeId, timestamp, false);
+    }
+
+    private boolean submit(long userId, long challengeId, long timestamp, boolean warmUp) {
         redisTemplate.setEnableTransactionSupport(true);
         try {
+            /*while (redisTemplate.opsForValue().setIfAbsent("lock", String.valueOf(1)) == Boolean.TRUE) {
+                try {
+                    wait(10);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            redisTemplate.expire("lock", 2, TimeUnit.SECONDS);*/
+            redisTemplate.watch("ChallengeScore:" + challengeId);
+            redisTemplate.watch("Challenge:" + challengeId);
+            String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
+            if (scoreString == null) {
+                throw new Exception();
+            }
+            Long count = redisTemplate.opsForList().size("Challenge:" + challengeId);
+            if (count == null) {
+                throw new Exception();
+            }
+            count += 1;
+            long oldScore = Long.parseLong(scoreString);
+            long newScore = calculator.getScore(challengeId, count);
+            List<String> users = redisTemplate.opsForList().range("Challenge:" + challengeId, 0, count);
+            if (users == null) {
+                throw new Exception();
+            }
+            users.add(String.valueOf(userId));
+            //
+            try {
+                redisTemplate.multi();
+                //
+                redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
+                redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
+                redisTemplate.opsForList().rightPush("User:" + userId, String.valueOf(challengeId));
+                redisTemplate.opsForValue().increment("UserScore:" + userId, calculator.getIncrementScore(oldScore, count - 1));
+                redisTemplate.opsForValue().set("ChallengeScore:" + challengeId, String.valueOf(newScore));
+                for (int i = 0; i < users.size(); i++) {
+                    long user = Long.parseLong(users.get(i));
+                    redisTemplate.opsForValue().decrement("UserScore:" + user, calculator.getDeltaScoreForUser(oldScore, newScore, i));
+                }
+                redisTemplate.exec();
+            } catch (Exception e) {
+                e.printStackTrace();
+                redisTemplate.discard();
+                return false;
+            }
+            redisTemplate.unwatch();
+            //redisTemplate.delete("lock");
+        } catch (Exception e) {
+            //redisTemplate.delete("lock");
+            e.printStackTrace();
+            redisTemplate.unwatch();
+            return false;
+        }
+        if (warmUp) {
+            return true;
+        }
+        return refreshRank();
+        /*try {
             redisTemplate.multi();
             redisTemplate.opsForValue().set("UserTime:" + userId, String.valueOf(timestamp));
             redisTemplate.opsForList().rightPush("Challenge:" + challengeId, String.valueOf(userId));
             redisTemplate.opsForList().rightPush("User:" + userId, String.valueOf(challengeId));
             String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
             if (scoreString == null) {
+                System.out.println(challengeId);
                 throw new Exception();
             }
             Long count = redisTemplate.opsForList().size("Challenge:" + challengeId);
@@ -141,14 +218,65 @@ public class RankHelper {
             }
             redisTemplate.exec();
         } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
             redisTemplate.discard();
+            return false;
+        }*/
+    }
+
+    private boolean refreshRank() {
+        redisTemplate.setEnableTransactionSupport(true);
+        try {
+            List<User> userList = userRepository.findAllByRole("member");
+            List<Long[]> scoreList = new ArrayList<>();
+            for (User user : userList) {
+                redisTemplate.watch("UserScore:" + user.getUserId());
+                String score = redisTemplate.opsForValue().get("UserScore:" + user.getUserId());
+                if (score == null) {
+                    throw new Exception();
+                }
+                redisTemplate.watch("UserTime:" + user.getUserId());
+                String time = redisTemplate.opsForValue().get("UserTime:" + user.getUserId());
+                if (time == null) {
+                    throw new Exception();
+                }
+                scoreList.add(new Long[]{user.getUserId(), Long.parseLong(score), Long.parseLong(time)});
+            }
+            scoreList.sort((Long[] a, Long[] b) -> {
+                int result = b[1].compareTo(a[1]);
+                if (result == 0) {
+                    result = a[2].compareTo(b[2]);
+                }
+                return result;
+            });
+            try {
+                redisTemplate.multi();
+                redisTemplate.delete("Rank");
+                for (Long[] item : scoreList) {
+                    redisTemplate.opsForList().rightPush("Rank", item[0].toString());
+                    redisTemplate.opsForList().rightPush("Rank", item[1].toString());
+                }
+                redisTemplate.exec();
+            } catch (Exception e) {
+                e.printStackTrace();
+                redisTemplate.discard();
+                return false;
+            }
+            redisTemplate.unwatch();
+        } catch (Exception e) {
+            e.printStackTrace();
+            redisTemplate.unwatch();
             return false;
         }
         return true;
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void warmUp() {
+    public boolean warmUp() {
+        if (!redisLock("WarmUpLock", "0", 5000)) {
+            return false;
+        }
         List<Challenge> challengeList = challengeRepository.findByState("enabled");
         for (Challenge challenge : challengeList) {
             String challengeConfigString = challenge.getConfiguration();
@@ -156,14 +284,17 @@ public class RankHelper {
             addChallenge(challenge.getChallengeId(), challengeConfiguration.getScore().getBaseScore());
         }
 
-        List<User> userList = userRepository.findAll();
+        List<User> userList = userRepository.findAllByRole("member");
         for (User user : userList) {
-            addUser(user.getUserId(), user.getScore());
+            addUser(user.getUserId(), 0/*user.getScore()*/);// TODO:
         }
 
         List<Submit> submitList = submitRepository.findAllByCorrectOrderBySubmitTimeAsc(true);
         for (Submit submit : submitList) {
-            submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime());
+            submit(submit.getUser().getUserId(), submit.getChallenge().getChallengeId(), submit.getSubmitTime().getTime(), true);
         }
+        refreshRank();
+        redisUnlock("WarmUpLock");
+        return true;
     }
 }
