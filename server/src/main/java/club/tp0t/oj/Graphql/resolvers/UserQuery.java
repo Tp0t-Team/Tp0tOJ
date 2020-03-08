@@ -2,6 +2,7 @@ package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Graphql.types.ChallengeInfosResult;
+import club.tp0t.oj.Graphql.types.CompetitionResult;
 import club.tp0t.oj.Graphql.types.RankResult;
 import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Service.ChallengeService;
@@ -111,6 +112,10 @@ public class UserQuery implements GraphQLQueryResolver {
         challengeInfosResult.setChallengeInfos(challengeService.getChallengeInfoForUser((long) session.getAttribute("userId")));
 
         return challengeInfosResult;
+    }
+
+    public CompetitionResult competition(DataFetchingEnvironment environment) {
+        //TODO:
     }
 
 }

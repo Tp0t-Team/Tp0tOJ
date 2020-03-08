@@ -139,5 +139,9 @@ public class AdminMutation implements GraphQLMutationResolver {
 
         return rankHelper.warmUp();
     }
+
+    public CompetitionMutationResult competition(CompetitionMutationInput input, DataFetchingEnvironment environment) {
+        //TODO:
+    }
 }
 
