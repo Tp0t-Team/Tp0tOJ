@@ -8,6 +8,7 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Tp0t OJ</v-toolbar-title>
       <v-spacer></v-spacer>
+      <writeup-upload></writeup-upload>
       <v-btn icon @click="WarmUp" v-if="$store.state.global.role === 'admin'">
         <v-icon color="primary">whatshot</v-icon>
       </v-btn>
@@ -29,11 +30,13 @@
 import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
+import WriteupUpload from "@/components/WrtieupUpload.vue";
 import { CompetitionResult } from "./struct";
 
 @Component({
   components: {
-    NavList
+    NavList,
+    WriteupUpload
   }
 })
 export default class App extends Vue {
