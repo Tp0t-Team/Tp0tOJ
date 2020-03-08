@@ -52,7 +52,7 @@ public class CompetitionService {
     public void setBeginTime(String beginTime) {
         SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            this.ojConfig.setEndTime(UTC.parse(beginTime));
+            this.ojConfig.setBeginTime(UTC.parse(beginTime));
         } catch (Exception e) {
             e.printStackTrace();
         }

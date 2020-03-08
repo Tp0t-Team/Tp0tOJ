@@ -44,6 +44,9 @@ public class WriteupService {
             String upload_filename = user.getStuNumber() + "-" + user.getName() + "-" + file.getOriginalFilename();//destPath is a file name
             String destPath = basePath + "/" + upload_filename;
             File dest = new File(destPath);
+            if (!dest.getParentFile().exists()) {
+                dest.getParentFile().mkdirs();
+            }
             try {
                 file.transferTo(dest);
                 result = new ResponseEntity(HttpStatus.OK);
