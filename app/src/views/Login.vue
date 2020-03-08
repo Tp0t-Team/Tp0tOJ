@@ -34,6 +34,7 @@
               text
               @click="$router.push('/forget')"
               class="forget"
+              v-if="$store.state.competition.registerAllow"
               >forget</v-btn
             >
             <v-btn
