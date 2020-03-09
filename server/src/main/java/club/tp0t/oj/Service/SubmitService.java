@@ -1,11 +1,12 @@
 package club.tp0t.oj.Service;
 
 import club.tp0t.oj.Component.FlagHelper;
+import club.tp0t.oj.Dao.FlagProxyRepository;
 import club.tp0t.oj.Dao.SubmitRepository;
 import club.tp0t.oj.Entity.Challenge;
+import club.tp0t.oj.Entity.FlagProxy;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
-import club.tp0t.oj.Util.BasicScoreCalculator;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import club.tp0t.oj.Util.RankHelper;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,17 @@ public class SubmitService {
     private final UserService userService;
     private final FlagHelper flagHelper;
     private final RankHelper rankHelper;
+    private final FlagProxyService flagProxyService;
+    private final FlagProxyRepository flagProxyRepository;
 
-    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper, RankHelper rankHelper) {
+    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper, RankHelper rankHelper, FlagProxyService flagProxyService, FlagProxyRepository flagProxyRepository) {
         this.submitRepository = submitRepository;
         this.challengeService = challengeService;
         this.userService = userService;
         this.flagHelper = flagHelper;
         this.rankHelper = rankHelper;
+        this.flagProxyService = flagProxyService;
+        this.flagProxyRepository = flagProxyRepository;
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -39,9 +44,26 @@ public class SubmitService {
         Challenge challenge = challengeService.getChallengeByChallengeId(challengeId);
 
         // get your flag and check
-        String correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
-        if (correctFlag == null) return "No replica for you.";
-        boolean correct = correctFlag.equals(flag);
+        boolean correct;
+        ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
+        if (challengeConfiguration.getFlag().isDynamic()) {  // proxied challenge
+            FlagProxy flagProxy = flagProxyRepository.findByChallengeAndUser(challenge, user);
+            if (flagProxy != null) {  // record exists
+                String correctFlag = flagProxy.getFlag();
+                correct = correctFlag.equals(flag);
+            } else {  // no record found
+                return "No proxied flag for you";
+            }
+        } else {  // not proxied challenge
+            String correctFlag = flagProxyService.getFlagByChallengeIdAndPort(challengeId, (long) -1);
+            if (!correctFlag.equals("No flag found")) {  // flag exists
+                correct = correctFlag.equals(flag);
+            } else {  // fallback to replica query
+                correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
+                if (correctFlag == null) return "No replica for you.";
+                correct = correctFlag.equals(flag);
+            }
+        }
 
         if (!isMember) {
             if (correct) {

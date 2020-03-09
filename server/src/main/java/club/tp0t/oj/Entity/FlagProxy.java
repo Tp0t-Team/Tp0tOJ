@@ -3,6 +3,7 @@ package club.tp0t.oj.Entity;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -18,7 +19,6 @@ public class FlagProxy {
     @ManyToOne
     private Challenge challenge;
 
-    @NotNull
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     @ManyToOne
     private User user;
@@ -27,6 +27,7 @@ public class FlagProxy {
     @Column(name = "port")
     private long port;
 
+    @NotEmpty
     @NotNull
     @Column(name = "flag")
     private String flag;
