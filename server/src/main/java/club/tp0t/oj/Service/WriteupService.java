@@ -23,7 +23,8 @@ public class WriteupService {
     private boolean CheckContentType(String contentType) {
         boolean flag = false;
         //allowed contentType list
-        String[] allowTypeList = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/markdown", "text/plain","multipart/form-data"};
+//        System.out.println(contentType);
+        String[] allowTypeList = {"application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/markdown", "text/plain","application/octet-stream"};
         for (String allow : allowTypeList) {
             if (allow.compareTo(contentType) == 0) {
                 flag = true;
