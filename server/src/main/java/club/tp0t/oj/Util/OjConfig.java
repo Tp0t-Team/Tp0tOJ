@@ -20,8 +20,8 @@ public class OjConfig {
     private int halfLife;
     private boolean competition;
     private boolean allowRegister;
-    private Date beginTime;
-    private Date endTime;
+    private String beginTime;
+    private String endTime;
     public String getHost() {
         return host;
     }
@@ -56,11 +56,11 @@ public class OjConfig {
         return allowRegister;
     }
 
-    public Date getBeginTime() {
+    public String getBeginTime() {
         return beginTime;
     }
 
-    public Date getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
@@ -100,30 +100,12 @@ public class OjConfig {
         this.allowRegister = allowRegister;
     }
 
-    public void setBeginTime(Date beginTime) {
+    public void setBeginTime(String beginTime) {
         this.beginTime = beginTime;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public void setBeginTime(String beginTime) {
-        SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        try {
-            this.beginTime = UTC.parse(beginTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void setEndTime(String endTime) {
-        SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        try {
-            this.endTime = UTC.parse(endTime);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.endTime = endTime;
     }
 }
 

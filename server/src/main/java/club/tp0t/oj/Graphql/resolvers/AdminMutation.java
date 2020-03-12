@@ -2,6 +2,7 @@ package club.tp0t.oj.Graphql.resolvers;
 
 import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.*;
+import club.tp0t.oj.Util.CompetitionHelper;
 import club.tp0t.oj.Util.RankHelper;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
@@ -16,14 +17,14 @@ public class AdminMutation implements GraphQLMutationResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final RankHelper rankHelper;
-    private final CompetitionService competitionService;
+    private final CompetitionHelper competitionHelper;
 
-    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper, CompetitionService competitionService) {
+    public AdminMutation(BulletinService bulletinService, ChallengeService challengeService, UserService userService, RankHelper rankHelper, CompetitionHelper competitionHelper) {
         this.bulletinService = bulletinService;
         this.challengeService = challengeService;
         this.userService = userService;
         this.rankHelper = rankHelper;
-        this.competitionService = competitionService;
+        this.competitionHelper = competitionHelper;
     }
 
     public BulletinPubResult bulletinPub(BulletinPubInput bulletinPubInput, DataFetchingEnvironment environment) {
@@ -157,10 +158,10 @@ public class AdminMutation implements GraphQLMutationResolver {
 
 
         CompetitionMutationResult competitionMutationResult = new CompetitionMutationResult("");
-        competitionService.setCompetition(input.getCompetition());
-        competitionService.setRegisterAllow(input.getRegisterAllow());
-        competitionService.setBeginTime(input.getBeginTime());
-        competitionService.setEndTime(input.getEndTime());
+        competitionHelper.setCompetition(input.getCompetition());
+        competitionHelper.setRegisterAllow(input.getRegisterAllow());
+        competitionHelper.setBeginTime(input.getBeginTime());
+        competitionHelper.setEndTime(input.getEndTime());
         return competitionMutationResult;
     }
 }

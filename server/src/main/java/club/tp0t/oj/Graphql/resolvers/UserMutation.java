@@ -5,20 +5,18 @@ import club.tp0t.oj.Graphql.types.*;
 import club.tp0t.oj.Service.SubmitService;
 import club.tp0t.oj.Service.UserService;
 import club.tp0t.oj.Util.CheckHelper;
+import club.tp0t.oj.Util.CompetitionHelper;
 import club.tp0t.oj.Util.OjConfig;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMailMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
 
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
@@ -28,23 +26,25 @@ public class UserMutation implements GraphQLMutationResolver {
     private final SubmitService submitService;
     private final UserService userService;
     private final JavaMailSender mailSender;
+    private final CompetitionHelper competitionHelper;
     private final OjConfig config;
 
     @Value("${spring.mail.username}")
     private String from;
 
     @Autowired
-    public UserMutation(SubmitService submitService, UserService userService, JavaMailSender mailSender, OjConfig config) {
+    public UserMutation(SubmitService submitService, UserService userService, JavaMailSender mailSender, CompetitionHelper competitionHelper, OjConfig config) {
         this.submitService = submitService;
         this.userService = userService;
         this.mailSender = mailSender;
+        this.competitionHelper = competitionHelper;
         this.config = config;
     }
 
     // user register
     public RegisterResult register(RegisterInput registerInput, DataFetchingEnvironment environment) {
 
-        if(!config.isAllowRegister()) {
+        if (!competitionHelper.getRegisterAllow()) {
             return new RegisterResult("disabled");
         }
 
@@ -148,7 +148,7 @@ public class UserMutation implements GraphQLMutationResolver {
 
     public ForgetResult forget(String input) {
 
-        if(!config.isAllowRegister()) {
+        if (!competitionHelper.getRegisterAllow()) {
             return new ForgetResult("disabled");
         }
 
@@ -195,9 +195,9 @@ public class UserMutation implements GraphQLMutationResolver {
     public SubmitResult submit(SubmitInput input, DataFetchingEnvironment environment) {
 
         Date now = new Date();
-        if(now.compareTo(config.getBeginTime()) < 0) {
+        if (now.compareTo(competitionHelper.getBeginTime()) < 0) {
             return new SubmitResult("disabled");
-        }else if(now.compareTo(config.getEndTime()) > 0) {
+        } else if (now.compareTo(competitionHelper.getEndTime()) > 0) {
             return new SubmitResult("competition finished");
         }
 

@@ -12,7 +12,7 @@ import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
 import org.springframework.stereotype.Component;
-import club.tp0t.oj.Service.CompetitionService;
+import club.tp0t.oj.Util.CompetitionHelper;
 
 import javax.servlet.http.HttpSession;
 import java.util.Date;
@@ -21,13 +21,13 @@ import java.util.Date;
 public class UserQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
-    private final CompetitionService competitionService;
+    private final CompetitionHelper competitionHelper;
     private final OjConfig config;
 
-    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionService competitionService, OjConfig config) {
+    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionHelper competitionHelper, OjConfig config) {
         this.challengeService = challengeService;
         this.userService = userService;
-        this.competitionService = competitionService;
+        this.competitionHelper = competitionHelper;
         this.config = config;
     }
 
@@ -114,9 +114,9 @@ public class UserQuery implements GraphQLQueryResolver {
             return new ChallengeInfosResult("forbidden");
         }
 
-        if (config.isCompetition()) {
+        if (competitionHelper.getCompetition()) {
             Date now = new Date();
-            if (now.compareTo(config.getBeginTime()) < 0) {
+            if (now.compareTo(competitionHelper.getBeginTime()) < 0) {
                 return new ChallengeInfosResult("");
             }
         }
@@ -134,10 +134,10 @@ public class UserQuery implements GraphQLQueryResolver {
         HttpSession session = context.getHttpServletRequest().getSession();
 
         CompetitionResult competitionResult = new CompetitionResult("");
-        competitionResult.setCompetition(competitionService.getCompetition());
-        competitionResult.setRegisterAllow(competitionService.getRegisterAllow());
-        competitionResult.setBeginTime(competitionService.getBeginTime());
-        competitionResult.setEndTime(competitionService.getEndTime());
+        competitionResult.setCompetition(competitionHelper.getCompetition());
+        competitionResult.setRegisterAllow(competitionHelper.getRegisterAllow());
+        competitionResult.setBeginTime(config.getBeginTime());
+        competitionResult.setEndTime(config.getEndTime());
         return competitionResult;
     }
 

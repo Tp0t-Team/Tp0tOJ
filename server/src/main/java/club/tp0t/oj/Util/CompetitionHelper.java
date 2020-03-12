@@ -1,32 +1,32 @@
-package club.tp0t.oj.Service;
+package club.tp0t.oj.Util;
 
-import club.tp0t.oj.Util.OjConfig;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
-@Service
-public class CompetitionService {
+@Component
+public class CompetitionHelper {
     private final OjConfig ojConfig;
 
-    public CompetitionService(OjConfig ojConfig) {
+    public CompetitionHelper(OjConfig ojConfig) {
         this.ojConfig = ojConfig;
     }
 
-    public String getBeginTime() {
+    public Date getBeginTime() {
         SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            return UTC.format(ojConfig.getBeginTime());
+            return UTC.parse(ojConfig.getBeginTime());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public String getEndTime() {
+    public Date getEndTime() {
         SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            return UTC.format(ojConfig.getEndTime());
+            return UTC.parse(ojConfig.getEndTime());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,7 +52,8 @@ public class CompetitionService {
     public void setBeginTime(String beginTime) {
         SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            this.ojConfig.setBeginTime(UTC.parse(beginTime));
+            UTC.parse(beginTime);
+            this.ojConfig.setBeginTime(beginTime);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +62,8 @@ public class CompetitionService {
     public void setEndTime(String endTime) {
         SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         try {
-            this.ojConfig.setEndTime(UTC.parse(endTime));
+            UTC.parse(endTime);
+            this.ojConfig.setEndTime(endTime);
         } catch (Exception e) {
             e.printStackTrace();
         }
