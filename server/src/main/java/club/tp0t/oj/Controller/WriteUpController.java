@@ -1,7 +1,7 @@
 package club.tp0t.oj.Controller;
 
 import club.tp0t.oj.Service.WriteupService;
-import club.tp0t.oj.Util.OjConfig;
+import club.tp0t.oj.Util.CompetitionHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,25 +18,25 @@ import java.util.Date;
 @Controller
 public class WriteUpController {
     private final WriteupService writeupService;
-    private final OjConfig config;
+    private final CompetitionHelper competitionHelper;
 
-    public WriteUpController(WriteupService writeupService, OjConfig config) {
+    public WriteUpController(WriteupService writeupService, CompetitionHelper competitionHelper) {
         this.writeupService = writeupService;
-        this.config = config;
+        this.competitionHelper = competitionHelper;
     }
 
     @RequestMapping(value = "/writeup")
     @ResponseBody
     public ResponseEntity writeup(@RequestParam("writeup") MultipartFile file, HttpServletRequest request) {
-        if (!config.isCompetition()) {
+        if (!competitionHelper.getCompetition()) {
             return new ResponseEntity(HttpStatus.FORBIDDEN);
         }
         Date now = new Date();
         Calendar finish = Calendar.getInstance();
-        finish.setTime(config.getEndTime());
+        finish.setTime(competitionHelper.getEndTime());
         finish.add(Calendar.HOUR, 1);
         Date finishTime = finish.getTime();
-        if (now.compareTo(config.getEndTime()) < 0 || now.compareTo(finishTime) > 0) {
+        if (now.compareTo(competitionHelper.getEndTime()) < 0 || now.compareTo(finishTime) > 0) {
             return new ResponseEntity(HttpStatus.FORBIDDEN);
         }
         HttpSession session = request.getSession();
