@@ -4,10 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
-//import java.text.ParseException;
-//import java.text.SimpleDateFormat;
-//import java.util.Date;
 
 @Component
 @PropertySource(value = {"classpath:/application.properties", "file:./application.properties"})
@@ -108,6 +106,24 @@ public class OjConfig {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public void setBeginTime(String beginTime) {
+        SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        try {
+            this.beginTime = UTC.parse(beginTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setEndTime(String endTime) {
+        SimpleDateFormat UTC = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        try {
+            this.endTime = UTC.parse(endTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
