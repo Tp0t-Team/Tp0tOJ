@@ -9,6 +9,7 @@ import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.Replica;
 import club.tp0t.oj.Entity.ResetToken;
 import club.tp0t.oj.Entity.User;
+import club.tp0t.oj.Util.FlagProxyHelper;
 import club.tp0t.oj.Util.RankHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -28,16 +29,16 @@ public class UserService {
     private final ReplicaHelper replicaHelper;
     private final ReplicaAllocHelper replicaAllocHelper;
     private final RankHelper rankHelper;
-    private final FlagProxyService flagProxyService;
+    private final FlagProxyHelper flagProxyHelper;
 
-    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyService flagProxyService) {
+    public UserService(UserRepository userRepository, ChallengeRepository challengeRepository, ResetTokenRepository resetTokenRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyHelper flagProxyHelper) {
         this.userRepository = userRepository;
         this.challengeRepository = challengeRepository;
         this.resetTokenRepository = resetTokenRepository;
         this.replicaHelper = replicaHelper;
         this.replicaAllocHelper = replicaAllocHelper;
         this.rankHelper = rankHelper;
-        this.flagProxyService = flagProxyService;
+        this.flagProxyHelper = flagProxyHelper;
     }
 
     private boolean checkStuNumberExistence(String stuNumber) {
@@ -106,7 +107,7 @@ public class UserService {
         }
         //replicaAllocHelper.allocReplicasForUser(replicas, user);
 
-        flagProxyService.addUser(user);
+        flagProxyHelper.addUser(user);
         return "";
     }
 

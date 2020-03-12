@@ -1,4 +1,4 @@
-package club.tp0t.oj.Service;
+package club.tp0t.oj.Util;
 
 import club.tp0t.oj.Dao.ChallengeRepository;
 import club.tp0t.oj.Dao.FlagProxyRepository;
@@ -7,19 +7,20 @@ import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Entity.FlagProxy;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Service
-public class FlagProxyService {
+@Component
+public class FlagProxyHelper {
     private final FlagProxyRepository flagProxyRepository;
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
 
-    public FlagProxyService(FlagProxyRepository flagProxyRepository, ChallengeRepository challengeRepository, UserRepository userRepository) {
+    public FlagProxyHelper(FlagProxyRepository flagProxyRepository, ChallengeRepository challengeRepository, UserRepository userRepository) {
         this.flagProxyRepository = flagProxyRepository;
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;

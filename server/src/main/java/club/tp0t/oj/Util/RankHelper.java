@@ -60,7 +60,6 @@ public class RankHelper {
             if (rankList == null) {
                 throw new Exception();
             }
-            System.out.println(rankList.size());
             List<Long> result = new ArrayList<>();
             for (String item : rankList) {
                 result.add(Long.parseLong(item));

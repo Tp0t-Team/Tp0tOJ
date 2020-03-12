@@ -2,7 +2,7 @@ package club.tp0t.oj.Controller;
 
 import club.tp0t.oj.Entity.Challenge;
 import club.tp0t.oj.Service.ChallengeService;
-import club.tp0t.oj.Service.FlagProxyService;
+import club.tp0t.oj.Util.FlagProxyHelper;
 import club.tp0t.oj.Util.ChallengeConfiguration;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Controller;
@@ -13,12 +13,12 @@ import java.util.List;
 
 @Controller
 public class FlagProxyController {
-    private final FlagProxyService flagProxyService;
+    private final FlagProxyHelper flagProxyHelper;
     private final ChallengeService challengeService;
 
-    public FlagProxyController(FlagProxyService flagProxyService,
+    public FlagProxyController(FlagProxyHelper flagProxyHelper,
                                ChallengeService challengeService) {
-        this.flagProxyService = flagProxyService;
+        this.flagProxyHelper = flagProxyHelper;
         this.challengeService = challengeService;
     }
 
@@ -38,7 +38,7 @@ public class FlagProxyController {
             if (key.equals(challengeConfig.getFlag().getValue()) &&
                     challengeConfig.getFlag().isDynamic()) {  // right key & dynamic flag
                 // get ports
-                List<Long> portsList = flagProxyService.getPortsByChallengeId(challengeId);
+                List<Long> portsList = flagProxyHelper.getPortsByChallengeId(challengeId);
                 JSONObject result = new JSONObject();
                 result.put("msg", "success");
                 result.put("ports", portsList);
@@ -67,7 +67,7 @@ public class FlagProxyController {
             ChallengeConfiguration challengeConfig = ChallengeConfiguration.parseConfiguration(tmpChallenge.getConfiguration());
             if (key.equals(challengeConfig.getFlag().getValue()) &&
                     challengeConfig.getFlag().isDynamic()) {  // right key & dynamic flag
-                String realFlag = flagProxyService.getFlagByChallengeIdAndPort(challengeId, port);
+                String realFlag = flagProxyHelper.getFlagByChallengeIdAndPort(challengeId, port);
                 JSONObject result = new JSONObject();
                 result.put("msg", "success");
                 result.put("flag", realFlag);

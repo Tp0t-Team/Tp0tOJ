@@ -14,6 +14,7 @@ import club.tp0t.oj.Graphql.types.BloodInfo;
 import club.tp0t.oj.Graphql.types.ChallengeInfo;
 import club.tp0t.oj.Graphql.types.ChallengeMutateInput;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Util.FlagProxyHelper;
 import club.tp0t.oj.Util.RankHelper;
 import com.alibaba.fastjson.JSON;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,9 @@ public class ChallengeService {
     private final ReplicaAllocHelper replicaAllocHelper;
     private final RankHelper rankHelper;
     private final FlagProxyRepository flagProxyRepository;
-    private final FlagProxyService flagProxyService;
+    private final FlagProxyHelper flagProxyHelper;
 
-    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyRepository flagProxyRepository, FlagProxyService flagProxyService) {
+    public ChallengeService(ChallengeRepository challengeRepository, UserRepository userRepository, SubmitRepository submitRepository, ReplicaHelper replicaHelper, ReplicaAllocHelper replicaAllocHelper, RankHelper rankHelper, FlagProxyRepository flagProxyRepository, FlagProxyHelper flagProxyHelper) {
         this.challengeRepository = challengeRepository;
         this.userRepository = userRepository;
         this.submitRepository = submitRepository;
@@ -42,7 +43,7 @@ public class ChallengeService {
         this.replicaAllocHelper = replicaAllocHelper;
         this.rankHelper = rankHelper;
         this.flagProxyRepository = flagProxyRepository;
-        this.flagProxyService = flagProxyService;
+        this.flagProxyHelper = flagProxyHelper;
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ) // maybe this level, I'm not sure.
@@ -153,7 +154,7 @@ public class ChallengeService {
             }
         }
 
-        flagProxyService.updateChallenge(challenge);
+        flagProxyHelper.updateChallenge(challenge);
         return "";
     }
 
@@ -188,7 +189,7 @@ public class ChallengeService {
         List<Replica> replicas = replicaHelper.createReplicas(challenge, 1);
         replicaAllocHelper.allocReplicasForAll(replicas);
 
-        flagProxyService.updateChallenge(challenge);
+        flagProxyHelper.updateChallenge(challenge);
         return "";
     }
 

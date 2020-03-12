@@ -8,6 +8,7 @@ import club.tp0t.oj.Entity.FlagProxy;
 import club.tp0t.oj.Entity.Submit;
 import club.tp0t.oj.Entity.User;
 import club.tp0t.oj.Util.ChallengeConfiguration;
+import club.tp0t.oj.Util.FlagProxyHelper;
 import club.tp0t.oj.Util.RankHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -23,16 +24,16 @@ public class SubmitService {
     private final UserService userService;
     private final FlagHelper flagHelper;
     private final RankHelper rankHelper;
-    private final FlagProxyService flagProxyService;
+    private final FlagProxyHelper flagProxyHelper;
     private final FlagProxyRepository flagProxyRepository;
 
-    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper, RankHelper rankHelper, FlagProxyService flagProxyService, FlagProxyRepository flagProxyRepository) {
+    public SubmitService(SubmitRepository submitRepository, ChallengeService challengeService, UserService userService, FlagHelper flagHelper, RankHelper rankHelper, FlagProxyHelper flagProxyHelper, FlagProxyRepository flagProxyRepository) {
         this.submitRepository = submitRepository;
         this.challengeService = challengeService;
         this.userService = userService;
         this.flagHelper = flagHelper;
         this.rankHelper = rankHelper;
-        this.flagProxyService = flagProxyService;
+        this.flagProxyHelper = flagProxyHelper;
         this.flagProxyRepository = flagProxyRepository;
     }
 
@@ -55,14 +56,14 @@ public class SubmitService {
                 return "No proxied flag for you";
             }
         } else {  // not proxied challenge
-            String correctFlag = flagProxyService.getFlagByChallengeIdAndPort(challengeId, (long) -1);
+            String correctFlag = flagProxyHelper.getFlagByChallengeIdAndPort(challengeId, (long) -1);
             if (!correctFlag.equals("No flag found")) {  // flag exists
                 correct = correctFlag.equals(flag);
             } else {  // fallback to replica query
                 correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
                 if (correctFlag == null) return "No replica for you.";
                 correct = correctFlag.equals(flag);
-                flagProxyService.updateChallenge(challenge);
+                flagProxyHelper.updateChallenge(challenge);
             }
         }
 
