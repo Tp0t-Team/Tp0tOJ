@@ -62,6 +62,7 @@ public class SubmitService {
                 correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
                 if (correctFlag == null) return "No replica for you.";
                 correct = correctFlag.equals(flag);
+                flagProxyService.updateChallenge(challenge);
             }
         }
 

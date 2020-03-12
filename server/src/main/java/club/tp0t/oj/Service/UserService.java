@@ -104,7 +104,7 @@ public class UserService {
             if (replica == null) continue;
             replicas.add(replica);
         }
-        replicaAllocHelper.allocReplicasForUser(replicas, user);
+        //replicaAllocHelper.allocReplicasForUser(replicas, user);
 
         flagProxyService.addUser(user);
         return "";

@@ -126,6 +126,8 @@ public class FlagProxyService {
                 flagProxy.setUser(user);
                 flagProxy.setFlag(randomFlag());
                 flagProxy.setPort(randomPort(50000, 65535));
+                System.out.println("add proxied flag for user :" + challengeConfiguration.getName() + " - " + flagProxy.getFlag());
+                flagProxyRepository.save(flagProxy);
             }
         }
     }
