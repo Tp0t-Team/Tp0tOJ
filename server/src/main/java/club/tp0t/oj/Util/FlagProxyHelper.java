@@ -73,15 +73,6 @@ public class FlagProxyHelper {
                         flagProxyRepository.save(flagProxy);
                     }
                 }
-            } else {  // not proxied challenge
-                FlagProxy flagProxy = flagProxyRepository.findByChallengeAndPort(tmpChallenge, (long)-1);
-                if (flagProxy == null) {  // create new flagProxy
-                    flagProxy = new FlagProxy();
-                    flagProxy.setChallenge(tmpChallenge);
-                    flagProxy.setFlag(challengeConfiguration.getFlag().getValue());  // use initial flag
-                    flagProxy.setPort(-1);  // set to -1
-                    flagProxyRepository.save(flagProxy);
-                }
             }
         }
     }
@@ -89,27 +80,37 @@ public class FlagProxyHelper {
     // add proxied flag for new challenge
     public void updateChallenge(Challenge challenge) {
         ChallengeConfiguration challengeConfiguration = ChallengeConfiguration.parseConfiguration(challenge.getConfiguration());
-        if (challengeConfiguration.getFlag().isDynamic()) {  // proxied challenge
-            List<User> userList = userRepository.findAllByRole("member");
-            List<User> tmpUserList = userRepository.findAllByRole("team");
-            userList.addAll(tmpUserList);
-            tmpUserList = userRepository.findAllByRole("admin");
-            userList.addAll(tmpUserList);
+        if (challengeConfiguration.getFlag().isDynamic()) {  // to proxied challenge
+            List<FlagProxy> flagProxyList = flagProxyRepository.findAllByChallenge(challenge);  // get old records
+            if (flagProxyList.size() == 0) {  // not proxied to proxied
+                List<User> userList = userRepository.findAllByRole("member");
+                List<User> tmpUserList = userRepository.findAllByRole("team");
+                userList.addAll(tmpUserList);
+                tmpUserList = userRepository.findAllByRole("admin");
+                userList.addAll(tmpUserList);
 
-            for (User tmpUser: userList) {
-                FlagProxy flagProxy = new FlagProxy();
-                flagProxy.setChallenge(challenge);
-                flagProxy.setUser(tmpUser);
-                flagProxy.setFlag(randomFlag());
-                flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
-                flagProxyRepository.save(flagProxy);
+                for (User tmpUser: userList) {
+                    FlagProxy flagProxy = new FlagProxy();
+                    flagProxy.setChallenge(challenge);
+                    flagProxy.setUser(tmpUser);
+                    flagProxy.setFlag(randomFlag());
+                    flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                    flagProxyRepository.save(flagProxy);
+                }
+
+            } else {  // proxied to proxied
+                // reallocate ports
+                for (FlagProxy flagProxy : flagProxyList) {
+                    flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                    flagProxyRepository.save(flagProxy);
+                }
             }
-        } else {  // not proxied challenge
-            FlagProxy flagProxy = new FlagProxy();
-            flagProxy.setChallenge(challenge);
-            flagProxy.setFlag(challengeConfiguration.getFlag().getValue());  // use initial flag
-            flagProxy.setPort(-1);  // set to -1
-            flagProxyRepository.save(flagProxy);
+        } else {  // to not proxied
+            // remove all records
+            List<FlagProxy> flagProxies = flagProxyRepository.findAllByChallenge(challenge);
+            for (FlagProxy flagProxy : flagProxies) {
+                flagProxyRepository.delete(flagProxy);
+            }
         }
     }
 

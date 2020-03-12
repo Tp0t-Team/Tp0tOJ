@@ -56,15 +56,8 @@ public class SubmitService {
                 return "No proxied flag for you";
             }
         } else {  // not proxied challenge
-            String correctFlag = flagProxyHelper.getFlagByChallengeIdAndPort(challengeId, (long) -1);
-            if (!correctFlag.equals("No flag found")) {  // flag exists
-                correct = correctFlag.equals(flag);
-            } else {  // fallback to replica query
-                correctFlag = flagHelper.getFlagByUserIdAndChallengeId(user, challenge);
-                if (correctFlag == null) return "No replica for you.";
-                correct = correctFlag.equals(flag);
-                flagProxyHelper.updateChallenge(challenge);
-            }
+            String correctFlag = challengeConfiguration.getFlag().getValue();
+            correct = correctFlag.equals(flag);
         }
 
         if (!isMember) {
