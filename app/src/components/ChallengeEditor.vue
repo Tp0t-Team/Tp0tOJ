@@ -1,7 +1,7 @@
 <template>
   <v-form>
     <v-row>
-      <v-col cols="4">
+      <v-col cols="6">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -13,7 +13,19 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="6">
+        <v-file-input
+          v-model="configFile"
+          accept=".yaml, .yml"
+          outlined
+          label="load config file"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-file-input>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -25,15 +37,17 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="4">
-        <v-file-input
-          v-model="configFile"
-          accept=".yaml, .yml"
-          outlined
-          label="load config file"
-          :disabled="loading || disabled"
-          @change="Changed"
-        ></v-file-input>
+      <v-col cols="6">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="proxiedFlag"
+            label="ProxiedFlag"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
       </v-col>
     </v-row>
     <v-row>
@@ -176,6 +190,7 @@ export default class ChallengeEditor extends Vue {
 
   private state: boolean = false;
   private dynamicScore: boolean = false;
+  private proxiedFlag: boolean = false;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
@@ -206,6 +221,7 @@ export default class ChallengeEditor extends Vue {
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
+        this.proxiedFlag = config.flag.dynamic || this.proxiedFlag;
       } catch (e) {
         this.EmitError(e.toString());
       }
@@ -220,6 +236,7 @@ export default class ChallengeEditor extends Vue {
     this.hints = this.config.hint;
     this.state = this.config.state == "enabled";
     this.dynamicScore = this.config.score.dynamic;
+    this.proxiedFlag = this.config.flag.dynamic;
   }
 
   @Emit("error")
@@ -237,7 +254,7 @@ export default class ChallengeEditor extends Vue {
       name: this.name,
       type: this.type,
       score: { dynamic: this.dynamicScore, base_score: this.score.toString() },
-      flag: { dynamic: false, value: this.flag },
+      flag: { dynamic: this.proxiedFlag, value: this.flag },
       description: this.description,
       external_link: this.links,
       hint: this.hints,
