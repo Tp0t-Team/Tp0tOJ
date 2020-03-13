@@ -42,8 +42,7 @@ export default class WriteupUpload extends Vue {
       this.$store.state.competition.endTime != null &&
       this.$store.state.competition.competition === true
     ) {
-      let deltaTime =
-        Date.now() - this.$store.state.competition.endTime;
+      let deltaTime = Date.now() - this.$store.state.competition.endTime;
       if (deltaTime > 0 && deltaTime <= 3600 * 1000) {
         this.allow = true;
       }

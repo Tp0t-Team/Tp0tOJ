@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import GlobalStateStore from "@/stores/GlobalState";
 import CompetitionStore from "@/stores/CompetitionState";
+import BulletinStore from "@/stores/BulletinState";
 
 Vue.use(Vuex);
 
@@ -11,6 +12,7 @@ export default new Vuex.Store({
   actions: {},
   modules: {
     global: GlobalStateStore,
-    competition: CompetitionStore
+    competition: CompetitionStore,
+    bulletin: BulletinStore
   }
 });

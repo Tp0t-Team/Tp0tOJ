@@ -18,6 +18,15 @@
 
     <v-content>
       <router-view :key="$route.query.time" />
+      <v-snackbar v-model="hasInfo" top :timeout="3000">
+        {{ infoTitle }}
+        <br />
+        {{ infoText }}
+        <v-spacer></v-spacer>
+        <v-btn icon>
+          <v-icon @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </v-snackbar>
     </v-content>
 
     <v-footer app padless class="higher">
@@ -33,7 +42,7 @@ import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
 import WriteupUpload from "@/components/WriteupUpload.vue";
-import { CompetitionResult } from "./struct";
+import { CompetitionResult, BulletinItem } from "./struct";
 
 @Component({
   components: {
@@ -43,6 +52,11 @@ import { CompetitionResult } from "./struct";
 })
 export default class App extends Vue {
   private drawer: boolean | null = null;
+  private permissioned: boolean = false;
+
+  private infoTitle: string = "";
+  private infoText: string = "";
+  private hasInfo: boolean = false;
 
   async mounted() {
     let userId = sessionStorage.getItem("user_id") || null;
@@ -75,6 +89,24 @@ export default class App extends Vue {
     } catch (e) {
       console.log(e);
     }
+    this.initSocket();
+    let permission = await Notification.requestPermission();
+    this.permissioned = permission === "granted";
+  }
+
+  beforeDestroy() {
+    this.destroySocket();
+  }
+
+  initSocket() {
+    this.$socket.on("bulletin", (items: BulletinItem[]) => {
+      this.$store.commit("Bulletin/addBulletins", items);
+    });
+  }
+
+  destroySocket() {
+    this.$socket.off("bulletin");
+    this.$socket.disconnect();
   }
 
   async WarmUp() {
@@ -90,6 +122,25 @@ export default class App extends Vue {
       if (!res.data!) throw "error";
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  @Watch("$store.state.bulletin.bulletins", { deep: true })
+  showBulletin() {
+    if ((this.$store.state.bulletins as BulletinItem[]).length == 0) {
+      return;
+    }
+    if (this.permissioned) {
+      for (let item of this.$store.state.bulletins as BulletinItem[]) {
+        new Notification(item.title, { body: item.content });
+      }
+    } else {
+      let item: BulletinItem = this.$store.state.bulletins[
+        this.$store.state.bulletins.length - 1
+      ];
+      this.infoTitle = item.title;
+      this.infoText = item.content;
+      this.hasInfo = true;
     }
   }
 }

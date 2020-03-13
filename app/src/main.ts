@@ -4,6 +4,7 @@ import router from "./router";
 import store from "./store";
 import vuetify from "./plugins/vuetify";
 import { createApolloProvider } from "./plugins/vue-apollo";
+import "./plugins/socketio";
 import "@/main.scss";
 
 Vue.config.productionTip = false;

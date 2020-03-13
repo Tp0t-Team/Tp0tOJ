@@ -284,7 +284,12 @@ export default class ChallengeEditor extends Vue {
       name: this.name,
       type: this.type,
       score: { dynamic: this.dynamicScore, base_score: this.score.toString() },
-      flag: { dynamic: this.proxiedFlag, value: this.flag, portFrom: this.portFrom, portTo: this.portTo },
+      flag: {
+        dynamic: this.proxiedFlag,
+        value: this.flag,
+        portFrom: this.portFrom,
+        portTo: this.portTo
+      },
       description: this.description,
       external_link: this.links,
       hint: this.hints,
