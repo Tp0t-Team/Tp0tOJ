@@ -127,7 +127,7 @@ public class FlagProxyHelper {
                 flagProxy.setChallenge(tmpChallenge);
                 flagProxy.setUser(user);
                 flagProxy.setFlag(randomFlag());
-                flagProxy.setPort(randomPort(50000, 65535));
+                flagProxy.setPort(randomPort(challengeConfiguration.getFlag().getPortFrom(), challengeConfiguration.getFlag().getPortTo()));
                 System.out.println("add proxied flag for user :" + challengeConfiguration.getName() + " - " + flagProxy.getFlag());
                 flagProxyRepository.save(flagProxy);
             }
@@ -139,7 +139,7 @@ public class FlagProxyHelper {
         return UUID.randomUUID().toString().replaceAll("-","");
     }
 
-    // get unused port for flag proxy, ranging from 50000 to 65535
+    // get unused port for flag proxy, ranging from start to end
     // make sure the challenge server ports are available
     private long randomPort(long start, long end) {
         List<FlagProxy> flagProxyList = flagProxyRepository.findAll();
@@ -152,6 +152,7 @@ public class FlagProxyHelper {
                 return i;
             }
         }
-        return -1; // no enough ports available
+
+        return (long)(Math.random() * ((start - end) + 1)) + start; // no enough ports available
     }
 }

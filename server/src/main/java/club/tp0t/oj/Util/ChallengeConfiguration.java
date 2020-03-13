@@ -82,6 +82,8 @@ public class ChallengeConfiguration {
         this.flag = new Flag();
         flag.setDynamic(flagtype.getDynamic());
         flag.setValue(flagtype.getValue());
+        flag.setPortFrom(flagtype.getPortFrom());
+        flag.setPortTo(flagtype.getPortTo());
     }
 
     public void setScoreEx(ScoreTypeInput scoretype) {
@@ -101,6 +103,8 @@ public class ChallengeConfiguration {
         FlagType flagtype = new FlagType();
         flagtype.setDynamic(this.getFlag().isDynamic());
         flagtype.setValue(this.getFlag().getValue());
+        flagtype.setPortFrom(this.getFlag().getPortFrom());
+        flagtype.setPortTo(this.getFlag().getPortTo());
         return flagtype;
     }
 
