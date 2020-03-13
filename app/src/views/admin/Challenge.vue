@@ -227,7 +227,7 @@ export default class Challenge extends Vue {
       type: type,
       name: "",
       score: { dynamic: false, base_score: "0" },
-      flag: { dynamic: false, value: "" },
+      flag: { dynamic: false, value: "", portFrom: 0, portTo: 0 },
       description: "",
       external_link: [],
       hint: [],
