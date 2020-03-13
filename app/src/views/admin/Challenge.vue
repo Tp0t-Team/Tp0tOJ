@@ -142,6 +142,8 @@ export default class Challenge extends Vue {
                 flag {
                   dynamic
                   value
+                  portFrom
+                  portTo
                 }
                 description
                 external_link
