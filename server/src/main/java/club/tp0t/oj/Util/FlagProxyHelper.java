@@ -69,7 +69,7 @@ public class FlagProxyHelper {
                         flagProxy.setChallenge(tmpChallenge);
                         flagProxy.setUser(tmpUser);
                         flagProxy.setFlag(randomFlag());
-                        flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                        flagProxy.setPort(randomPort(challengeConfiguration.getFlag().getPortFrom(), challengeConfiguration.getFlag().getPortTo()));
                         flagProxyRepository.save(flagProxy);
                     }
                 }
@@ -94,14 +94,14 @@ public class FlagProxyHelper {
                     flagProxy.setChallenge(challenge);
                     flagProxy.setUser(tmpUser);
                     flagProxy.setFlag(randomFlag());
-                    flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                    flagProxy.setPort(randomPort(challengeConfiguration.getFlag().getPortFrom(), challengeConfiguration.getFlag().getPortTo()));
                     flagProxyRepository.save(flagProxy);
                 }
 
             } else {  // proxied to proxied
                 // reallocate ports
                 for (FlagProxy flagProxy : flagProxyList) {
-                    flagProxy.setPort(randomPort(50000, 65535));  // TODO: add port range to challenge configuration
+                    flagProxy.setPort(randomPort(challengeConfiguration.getFlag().getPortFrom(), challengeConfiguration.getFlag().getPortTo()));
                     flagProxyRepository.save(flagProxy);
                 }
             }
