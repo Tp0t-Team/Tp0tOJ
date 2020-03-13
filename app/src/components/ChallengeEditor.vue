@@ -96,6 +96,7 @@
       <v-col cols="6">
         <v-text-field
           v-model="portFrom"
+          :value="portFrom"
           outlined
           label="port from"
           type="number"
@@ -106,6 +107,7 @@
       <v-col cols="6">
         <v-text-field
           v-model="portTo"
+          :value="portTo"
           outlined
           label="portTo"
           type="number"
