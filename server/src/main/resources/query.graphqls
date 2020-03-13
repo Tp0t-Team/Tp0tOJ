@@ -97,6 +97,8 @@ type ScoreType {
 type FlagType {
     dynamic: Boolean
     value: String
+    portFrom: Int
+    portTo: Int
 }
 
 type BulletinResult {

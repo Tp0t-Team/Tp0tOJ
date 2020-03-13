@@ -111,6 +111,8 @@ input ScoreTypeInput {
 input FlagTypeInput {
     dynamic: Boolean!
     value: String!
+    portFrom: Int!
+    portTo: Int!
 }
 
 type ChallengeMutateResult {

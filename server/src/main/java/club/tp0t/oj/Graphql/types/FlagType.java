@@ -3,6 +3,8 @@ package club.tp0t.oj.Graphql.types;
 public class FlagType {
     private Boolean dynamic;
     private String value;
+    private int portFrom;
+    private int portTo;
 
     public Boolean getDynamic() {
         return dynamic;
@@ -10,6 +12,14 @@ public class FlagType {
 
     public String getValue() {
         return value;
+    }
+
+    public int getPortFrom() {
+        return portFrom;
+    }
+
+    public int getPortTo() {
+        return portTo;
     }
 
     public void setDynamic(Boolean dynamic) {
@@ -20,5 +30,12 @@ public class FlagType {
         this.value = value;
     }
 
+    public void setPortFrom(int portFrom) {
+        this.portFrom = portFrom;
+    }
+
+    public void setPortTo(int portTo) {
+        this.portTo = portTo;
+    }
 }
 
