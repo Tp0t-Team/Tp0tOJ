@@ -59,6 +59,8 @@ export interface ChallengeConfig {
   flag: {
     dynamic: boolean;
     value: string;
+    portFrom: number;
+    portTo: number;
   };
   description: string;
   external_link: string[];

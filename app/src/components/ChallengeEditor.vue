@@ -26,32 +26,6 @@
     </v-row>
     <v-row>
       <v-col cols="6">
-        <v-row>
-          <v-spacer></v-spacer>
-          <v-switch
-            v-model="dynamicScore"
-            label="DynamicScore"
-            :disabled="loading || disabled"
-            @change="Changed"
-          ></v-switch>
-          <v-spacer></v-spacer>
-        </v-row>
-      </v-col>
-      <v-col cols="6">
-        <v-row>
-          <v-spacer></v-spacer>
-          <v-switch
-            v-model="proxiedFlag"
-            label="ProxiedFlag"
-            :disabled="loading || disabled"
-            @change="Changed"
-          ></v-switch>
-          <v-spacer></v-spacer>
-        </v-row>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="6">
         <v-text-field
           v-model="name"
           outlined
@@ -87,6 +61,54 @@
           v-model="flag"
           outlined
           label="flag"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="6">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="dynamicScore"
+            label="DynamicScore"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+      <v-col cols="6">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="proxiedFlag"
+            label="ProxiedFlag"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+    </v-row>
+    <v-row v-if="proxiedFlag">
+      <v-col cols="6">
+        <v-text-field
+          v-model="portFrom"
+          outlined
+          label="port from"
+          type="number"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="6">
+        <v-text-field
+          v-model="portTo"
+          outlined
+          label="portTo"
+          type="number"
           :disabled="loading || disabled"
           @change="Changed"
         ></v-text-field>
@@ -191,6 +213,8 @@ export default class ChallengeEditor extends Vue {
   private state: boolean = false;
   private dynamicScore: boolean = false;
   private proxiedFlag: boolean = false;
+  private portFrom: number = 0;
+  private portTo: number = 0;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
@@ -222,6 +246,8 @@ export default class ChallengeEditor extends Vue {
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
         this.proxiedFlag = config.flag.dynamic || this.proxiedFlag;
+        this.portFrom = config.flag.portFrom || this.portFrom;
+        this.portTo = config.flag.portTo || this.portTo;
       } catch (e) {
         this.EmitError(e.toString());
       }
@@ -237,6 +263,8 @@ export default class ChallengeEditor extends Vue {
     this.state = this.config.state == "enabled";
     this.dynamicScore = this.config.score.dynamic;
     this.proxiedFlag = this.config.flag.dynamic;
+    this.portFrom = this.config.flag.portFrom;
+    this.portTo = this.config.flag.portTo;
   }
 
   @Emit("error")
@@ -254,7 +282,7 @@ export default class ChallengeEditor extends Vue {
       name: this.name,
       type: this.type,
       score: { dynamic: this.dynamicScore, base_score: this.score.toString() },
-      flag: { dynamic: this.proxiedFlag, value: this.flag },
+      flag: { dynamic: this.proxiedFlag, value: this.flag, portFrom: this.portFrom, portTo: this.portTo },
       description: this.description,
       external_link: this.links,
       hint: this.hints,
