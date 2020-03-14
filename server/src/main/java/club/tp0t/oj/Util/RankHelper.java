@@ -72,6 +72,76 @@ public class RankHelper {
         }
     }
 
+    public class UserInfo {
+        private int rank;
+        private long score;
+
+        public int getRank() {
+            return rank;
+        }
+
+        public long getScore() {
+            return score;
+        }
+
+        public void setRank(int rank) {
+            this.rank = rank;
+        }
+
+        public void setScore(long score) {
+            this.score = score;
+        }
+    }
+
+    public UserInfo getUserInfo(long userId) {
+        try {
+            List<String> rankList = redisTemplate.opsForList().range("Rank", 0, -1);
+            if (rankList == null) {
+                throw new Exception();
+            }
+            for (int i = 0; i < rankList.size() / 2; i++) {
+                if (Long.parseLong(rankList.get(i * 2)) == userId) {
+                    UserInfo info = new UserInfo();
+                    info.setRank(i);
+                    info.setScore(Long.parseLong(rankList.get(i * 2 + 1)));
+                    return info;
+                }
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public long getUserScore(long userId) {
+        try {
+            String scoreString = redisTemplate.opsForValue().get("UserScore:" + userId);
+            if (scoreString == null) {
+                throw new Exception();
+            }
+            return Long.parseLong(scoreString);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int getChallengeScore(long challengeId) {
+        try {
+            String scoreString = redisTemplate.opsForValue().get("ChallengeScore:" + challengeId);
+            if (scoreString == null) {
+                throw new Exception();
+            }
+            return Integer.parseInt(scoreString);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public boolean addUser(long userId, long baseScore) {
         if (!redisLock("UserLock", "0", 100)) {
             return false;

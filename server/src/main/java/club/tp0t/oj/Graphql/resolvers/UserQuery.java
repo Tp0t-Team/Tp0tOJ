@@ -8,6 +8,7 @@ import club.tp0t.oj.Graphql.types.UserInfoResult;
 import club.tp0t.oj.Service.ChallengeService;
 import club.tp0t.oj.Service.UserService;
 import club.tp0t.oj.Util.OjConfig;
+import club.tp0t.oj.Util.RankHelper;
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.servlet.context.DefaultGraphQLServletContext;
@@ -22,12 +23,14 @@ public class UserQuery implements GraphQLQueryResolver {
     private final ChallengeService challengeService;
     private final UserService userService;
     private final CompetitionHelper competitionHelper;
+    private final RankHelper rankHelper;
     private final OjConfig config;
 
-    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionHelper competitionHelper, OjConfig config) {
+    public UserQuery(ChallengeService challengeService, UserService userService, CompetitionHelper competitionHelper, RankHelper rankHelper, OjConfig config) {
         this.challengeService = challengeService;
         this.userService = userService;
         this.competitionHelper = competitionHelper;
+        this.rankHelper = rankHelper;
         this.config = config;
     }
 
@@ -82,7 +85,7 @@ public class UserQuery implements GraphQLQueryResolver {
                 userService.adminCheckByUserId(currentUserId)) {
             User user = userService.getUserById(parsedUserId);
             UserInfoResult userInfoResult = new UserInfoResult("");
-            userInfoResult.addOwnUserInfo(user, userService.getRankByUserId(user.getUserId()));
+            userInfoResult.addOwnUserInfo(user, rankHelper.getUserInfo(user.getUserId()));
 
             return userInfoResult;
         }
@@ -96,7 +99,7 @@ public class UserQuery implements GraphQLQueryResolver {
             else {
                 User user = userService.getUserById(parsedUserId);
                 UserInfoResult userInfoResult = new UserInfoResult("");
-                userInfoResult.addOthersUserInfo(user, userService.getRankByUserId(user.getUserId()));
+                userInfoResult.addOthersUserInfo(user, rankHelper.getUserInfo(user.getUserId()));
                 return userInfoResult;
             }
         }

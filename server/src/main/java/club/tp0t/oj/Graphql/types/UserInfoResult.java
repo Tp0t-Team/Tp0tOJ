@@ -1,12 +1,7 @@
 package club.tp0t.oj.Graphql.types;
 
 import club.tp0t.oj.Entity.User;
-import com.coxautodev.graphql.tools.SchemaParserDictionary;
-import org.springframework.context.annotation.Bean;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import club.tp0t.oj.Util.RankHelper;
 
 public class UserInfoResult {
 
@@ -20,7 +15,7 @@ public class UserInfoResult {
 
 
     // hide some attributes
-    public void addOthersUserInfo(User user, int rank) {
+    public void addOthersUserInfo(User user, RankHelper.UserInfo rank) {
         this.userInfo = new UserInfo(user.getName(),
                 user.makeAvatarUrl(),
                 "",  // stuNumber
@@ -28,18 +23,18 @@ public class UserInfoResult {
                 "",  // qq
                 "", // mail
                 user.getJoinTime(),
-                user.getScore(),
+                rank.getScore(),
                 user.getTopRank(),
                 user.getProtectedTime(),
                 user.getUserId(),
                 user.getRole(),
                 user.getState(),
-                rank,
+                rank.getRank(),
                 user.getGrade());
     }
 
     // add all information
-    public void addOwnUserInfo(User user, int rank) {
+    public void addOwnUserInfo(User user, RankHelper.UserInfo rank) {
         this.userInfo = new UserInfo(user.getName(),
                 user.makeAvatarUrl(),
                 user.getStuNumber(),
@@ -47,13 +42,13 @@ public class UserInfoResult {
                 user.getQq(),
                 user.getMail(),
                 user.getJoinTime(),
-                user.getScore(),
+                rank.getScore(),
                 user.getTopRank(),
                 user.getProtectedTime(),
                 user.getUserId(),
                 user.getRole(),
                 user.getState(),
-                rank,
+                rank.getRank(),
                 user.getGrade());
     }
 

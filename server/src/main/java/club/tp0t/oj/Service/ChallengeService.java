@@ -98,7 +98,8 @@ public class ChallengeService {
             challengeInfo.setHint(challengeConfiguration.getHint());
             challengeInfo.setType(challengeConfiguration.getType());
             challengeInfo.setName(challengeConfiguration.getName());
-            challengeInfo.setScore(Integer.parseInt(challengeConfiguration.getScoreEx().getBase_score()));
+            //challengeInfo.setScore(Integer.parseInt(challengeConfiguration.getScoreEx().getBase_score()));
+            challengeInfo.setScore(rankHelper.getChallengeScore(challenge.getChallengeId()));
 
             result.add(challengeInfo);
         }

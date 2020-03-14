@@ -216,7 +216,11 @@ public class UserService {
     }
 
     public List<User> getAllUser() {
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            user.setScore(rankHelper.getUserScore(user.getUserId()));
+        }
+        return users;
     }
 
     // TODO: is this utility function necessary?
@@ -224,15 +228,15 @@ public class UserService {
         return userRepository.findByUserId(userId);
     }
 
-    public int getRankByUserId(long userId) {
-        List<User> usersRank = userRepository.getUsersRank();
-        for (int i = 0; i < usersRank.size(); i++) {
-            User tmpUser = usersRank.get(i);
-            if (tmpUser.getUserId() == userId) return i + 1;
-        }
-        // user not exists
-        return 0;
-    }
+//    public int getRankByUserId(long userId) {
+//        List<User> usersRank = userRepository.getUsersRank();
+//        for (int i = 0; i < usersRank.size(); i++) {
+//            User tmpUser = usersRank.get(i);
+//            if (tmpUser.getUserId() == userId) return i + 1;
+//        }
+//        // user not exists
+//        return 0;
+//    }
 
     // TODO: this is an utility function.
     public boolean adminCheckByUserId(long userId) {
