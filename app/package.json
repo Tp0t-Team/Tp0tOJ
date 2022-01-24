@@ -34,7 +34,7 @@
     "eslint-plugin-vue": "^5.0.0",
     "graphql-tag": "^2.9.0",
     "lint-staged": "^8.1.5",
-    "node-sass": "^4.9.0",
+    "node-sass": "^4.13.1",
     "prettier": "^1.18.2",
     "sass-loader": "^7.1.0",
     "typescript": "^3.4.3",
