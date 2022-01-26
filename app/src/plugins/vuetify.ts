@@ -1,14 +1,15 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-import { VuetifyPreset } from 'vuetify/types/presets'
+import { VuetifyPreset } from 'vuetify/types/services/presets'
 import colors from 'vuetify/es5/util/colors'
 
 Vue.use(Vuetify)
 
-const opt: VuetifyPreset = {
+const opt = {
     icons: {
-        iconfont: 'md'
+        iconfont: 'md',
+        values: {}
     },
     theme: {
         dark: true,
@@ -23,4 +24,4 @@ const opt: VuetifyPreset = {
     }
 }
 
-export default new Vuetify(opt)
+export default new Vuetify(opt as any)
