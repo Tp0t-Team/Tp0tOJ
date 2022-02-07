@@ -14,11 +14,11 @@ type Mutation {
 
 input RegisterInput {
     name: String!
-    stuNumber: String!
+#    stuNumber: String!
     password: String!
-    department: String!
-    grade: String!
-    qq: String!
+#    department: String!
+#    grade: String!
+#    qq: String!
     mail: String!
 }
 
@@ -28,7 +28,8 @@ type RegisterResult {
 }
 
 input LoginInput {
-    stuNumber: String!
+#    stuNumber: String!
+    mail: String!
     password: String!
 }
 
@@ -78,10 +79,10 @@ input UserInfoUpdateInput {
     userId: String!
     name: String!
     role: String!
-    department: String!
-    grade: String!
-    protectedTime: String!
-    qq: String!
+#    department: String!
+#    grade: String!
+#    protectedTime: String!
+#    qq: String!
     mail: String!
     state: String!
 }
