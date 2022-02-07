@@ -14,40 +14,9 @@ func init() {
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}
-	err = db.AutoMigrate(&entity.User{})
-	//, &entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}
+	err = db.AutoMigrate(&entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}, &entity.User{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 		return
 	}
-	//err = db.AutoMigrate(&entity.Bulletin{})
-	//if err != nil {
-	//	log.Panicln("DB connect error", err.Error())
-	//	return
-	//}
-	err = db.AutoMigrate(&entity.Challenge{})
-	if err != nil {
-		log.Panicln("DB connect error", err.Error())
-		return
-	}
-	//err = db.AutoMigrate(&entity.Replica{})
-	//if err != nil {
-	//	log.Panicln("DB connect error", err.Error())
-	//	return
-	//}
-	//err = db.AutoMigrate(&entity.ReplicaAlloc{})
-	//if err != nil {
-	//	log.Panicln("DB connect error", err.Error())
-	//	return
-	//}
-	//err = db.AutoMigrate(&entity.ResetToken{})
-	//if err != nil {
-	//	log.Panicln("DB connect error", err.Error())
-	//	return
-	//}
-	//err = db.AutoMigrate(&entity.Submit{})
-	//if err != nil {
-	//	log.Panicln("DB connect error", err.Error())
-	//	return
-	//}
 }
