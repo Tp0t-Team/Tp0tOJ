@@ -47,7 +47,7 @@ type Challenge struct {
 }
 
 func Parse(config *Config) {
-	f, err := ioutil.ReadFile("resources/config.yaml")
+	f, err := ioutil.ReadFile("config.yaml")
 	if err != nil {
 		log.Panicln(err.Error())
 	}
@@ -55,5 +55,5 @@ func Parse(config *Config) {
 	if err != nil {
 		log.Panicf("Unmarshal: %v", err)
 	}
-	//log.Println(*config)
+
 }
