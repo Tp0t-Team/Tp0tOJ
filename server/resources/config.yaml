@@ -1,0 +1,25 @@
+server:
+  host: 127.0.0.1
+  name: Tp0t
+  port: 8080
+  salt: QWERTY
+  debug: false
+email:
+ host: smtp.163.com
+ username: username
+ password: password
+redis:
+  database: 0
+  host: redis
+  port: 6379
+  password: password
+  maxActive: 8
+  maxWait: -1ms
+  maxIdle: 10
+  minIdle: 0
+  timeout: 1000
+challenge:
+  firstBloodReward: 0.10
+  secondBloodReward: 0.08
+  thirdBloodReward: 0.05
+  halfLift: 20

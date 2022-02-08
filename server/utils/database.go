@@ -1,16 +1,30 @@
 package utils
 
 import (
-	//"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
+	"os"
 	"server/entity"
 )
 
 func init() {
-	//dsn := "host=localhost user=gorm password=gorm dbname= port=9920 sslmode=disable TimeZone=Asia/Shanghai"
-	db, err := gorm.Open(sqlite.Open("/Users/lordcasser/Workspace/Tp0tOJ/server/resources/test.db"), &gorm.Config{})
+	prefix, _ := os.Getwd()
+	dbPath := prefix + "/resources/data.db"
+	test, err := os.Lstat(dbPath)
+	if os.IsExist(err) {
+		_, err := os.Create(dbPath)
+		if err != nil {
+			log.Panicln(err, test)
+			return
+		}
+	} else if err != nil {
+		if err != nil {
+			log.Panicln(err, test)
+			return
+		}
+	}
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}
