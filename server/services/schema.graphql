@@ -102,18 +102,18 @@ type UserInfoUpdateResult {
 input ChallengeMutateInput {
     challengeId: String!
     name: String!
-    type: String!
+    category: String!
     score: ScoreTypeInput!
     flag: FlagTypeInput!
     description: String!
-    external_link: [String]!
+    externalLink: [String]!
     hint: [String]!
     state: String!
 }
 
 input ScoreTypeInput {
     dynamic: Boolean!
-    base_score: String!
+    baseScore: String!
 }
 
 input FlagTypeInput {
@@ -214,18 +214,18 @@ type ChallengeConfigsResult {
 type ChallengeConfig {
     challengeId: String
     name: String
-    type: String
+    category: String
     score: ScoreType
     flag: FlagType
     description: String
-    external_link: [String]
+    externalLink: [String]
     hint: [String]
     state: String
 }
 
 type ScoreType {
     dynamic: Boolean
-    base_score: String
+    baseScore: String
 }
 
 type FlagType {
