@@ -11,9 +11,10 @@ import (
 
 type Resolver struct {
 	user.MutationResolver
+	user.QueryResolver
 }
 
-//go:embed test.graphql
+//go:embed schema.graphql
 var schemaStr string
 
 func init() {
