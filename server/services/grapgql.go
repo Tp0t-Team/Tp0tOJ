@@ -25,12 +25,12 @@ func init() {
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
 		// Defaults to "gosessionid"
-		Cookie: "mysessionid",
+		Cookie: "session",
 		// it's time.Duration, from the time cookie is created, how long it can be alive?
 		// 0 means no expire.
 		// -1 means expire when browser closes
 		// or set a value, like 2 hours:
-		Expires: time.Hour * 2,
+		Expires: time.Hour * 1,
 		// if you want to invalid cookies on different subdomains
 		// of the same host, then enable it
 		DisableSubdomainPersistence: false,
