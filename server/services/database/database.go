@@ -41,7 +41,7 @@ func init() {
 
 func GetAllBulletin() ([]entity.Bulletin, error) {
 	var allBulletin []entity.Bulletin
-	result := db.Table("bulletins").Find(&allBulletin)
+	result := db.Find(&allBulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -57,18 +57,18 @@ func AddBulletin(title string, content string, topping bool) error {
 	}
 	return nil
 }
-func FindBulletinByTitle(title string) ([]entity.Bulletin, error) {
-	var bulletins []entity.Bulletin
-	result := db.Table("bulletins").Where("title = ?", title).Find(&bulletins)
+func FindBulletinByTitle(title string) (*entity.Bulletin, error) {
+	var bulletin entity.Bulletin
+	result := db.Where(map[string]interface{}{"Title": title}).First(&bulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
-	return bulletins, nil
+	return &bulletin, nil
 }
 func CheckMailExistence(mail string) (bool, error) {
-	result := db.Table("users").Where("mail = ?", mail).First(&entity.User{})
+	result := db.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if result.Error != nil {
@@ -79,7 +79,7 @@ func CheckMailExistence(mail string) (bool, error) {
 
 func FindChallengeByState(state string) ([]entity.Challenge, error) {
 	var challenges []entity.Challenge
-	result := db.Table("challenges").Where("state = ?", state).Find(&challenges)
+	result := db.Where(map[string]interface{}{"State": state}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -89,7 +89,7 @@ func FindChallengeByState(state string) ([]entity.Challenge, error) {
 }
 func FindChallengeById(id uint64) (*entity.Challenge, error) {
 	var challenge entity.Challenge
-	result := db.Table("challenges").Where("id = ?", id).Find(&challenge)
+	result := db.Where(map[string]interface{}{"ChallengeId": id}).First(&challenge)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -110,7 +110,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 
 func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
 	var replicaAllocs []entity.ReplicaAlloc
-	result := db.Table("replica_allocs").Where("user_id").Find(&replicaAllocs)
+	result := db.Where(map[string]interface{}{"UserId": userId}).Find(&replicaAllocs)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -121,7 +121,7 @@ func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
 
 func FindReplicaByChallengeId(challengeId uint64) ([]entity.Replica, error) {
 	var replicas []entity.Replica
-	result := db.Table("replicas").Where("challenge_id").Find(&replicas)
+	result := db.Where(map[string]interface{}{"ChallengeId": challengeId}).Find(&replicas)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -132,11 +132,64 @@ func FindReplicaByChallengeId(challengeId uint64) ([]entity.Replica, error) {
 
 func FindResetTokenByUserId(userId uint64) (*entity.ResetToken, error) {
 	var resetToken entity.ResetToken
-	result := db.Table("reset_tokens").Where("user_id").Find(&resetToken)
+	result := db.Where(map[string]interface{}{"UserId": userId}).First(&resetToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
 	return &resetToken, nil
+}
+
+func FindResetTokenByToken(token string) (*entity.ResetToken, error) {
+	var resetToken entity.ResetToken
+	result := db.Where(map[string]interface{}{"Token": token}).First(&resetToken)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return &resetToken, nil
+}
+
+func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) (bool, error) {
+	result := db.Where(map[string]interface{}{"UserId": userId, "ChallengeId": challengeId, "Correct": true}).Find(&entity.Submit{})
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if result.Error != nil {
+		return false, result.Error
+	}
+	return true, nil
+}
+
+func FindSubmitCorrectByChallengeId(challengeId uint64) ([]entity.Submit, error) {
+	var submits []entity.Submit
+	result := db.Where(map[string]interface{}{"ChallengeId": challengeId, "Correct": true}).Find(&submits)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return submits, nil
+}
+
+func FindSubmitCorrectByUserId(userId uint64) ([]entity.Submit, error) {
+	var submits []entity.Submit
+	result := db.Where(map[string]interface{}{"UserId": userId, "Correct": true}).Find(&submits)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return submits, nil
+}
+func FindSubmitCorrectSorted() ([]entity.Submit, error) {
+	var submits []entity.Submit
+	result := db.Where(map[string]interface{}{"Correct": true}).Order("SubmitTime").Find(&submits)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return submits, nil
 }
