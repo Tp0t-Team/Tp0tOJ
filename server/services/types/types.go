@@ -1,9 +1,27 @@
 package types
 
+import (
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+var blankRegexp *regexp.Regexp
+
+func init() {
+	blankRegexp, _ = regexp.Compile("\\s")
+}
+
 type RegisterInput struct {
 	Name     string
 	Password string
 	Mail     string
+}
+
+func (input *RegisterInput) CheckPass() bool {
+	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
+	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
+	return input.Name != "" && input.Mail != "" && input.Password != ""
 }
 
 type RegisterResult struct {
@@ -14,6 +32,11 @@ type RegisterResult struct {
 type LoginInput struct {
 	Mail     string
 	Password string
+}
+
+func (input *LoginInput) CheckPass() bool {
+	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
+	return input.Mail != "" && input.Password != ""
 }
 
 type LoginResult struct {
@@ -35,6 +58,10 @@ type ResetInput struct {
 	Token    string
 }
 
+func (input *ResetInput) CheckPass() bool {
+	return input.Password != "" && input.Token != ""
+}
+
 type ResetResult struct {
 	Message string
 }
@@ -42,6 +69,11 @@ type ResetResult struct {
 type SubmitInput struct {
 	ChallengeId string
 	Flag        string
+}
+
+func (input *SubmitInput) CheckPass() bool {
+	input.Flag = blankRegexp.ReplaceAllString(input.Flag, "")
+	return input.Flag != ""
 }
 
 type SubmitResult struct {
@@ -54,6 +86,12 @@ type BulletinPubInput struct {
 	Topping bool
 }
 
+func (input *BulletinPubInput) CheckPass() bool {
+	input.Title = strings.TrimSpace(input.Title)
+	input.Content = strings.TrimSpace(input.Content)
+	return input.Title != ""
+}
+
 type BulletinPubResult struct {
 	Message string
 }
@@ -64,6 +102,20 @@ type UserInfoUpdateInput struct {
 	Role   string
 	Mail   string
 	State  string
+}
+
+func (input *UserInfoUpdateInput) CheckPass() bool {
+	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
+	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
+	return input.Name != "" && input.Mail != "" && checkRole(input.Role) && checkUserState(input.State)
+}
+
+func checkRole(str string) bool {
+	return str == "member" || str == "team" || str == "admin"
+}
+
+func checkUserState(str string) bool {
+	return str == "normal" || str == "disabled"
 }
 
 type UserInfoUpdateResult struct {
@@ -82,14 +134,41 @@ type ChallengeMutateInput struct {
 	State        string
 }
 
+func (input *ChallengeMutateInput) CheckPass() bool {
+	input.Name = strings.TrimSpace(input.Name)
+	input.Description = strings.TrimSpace(input.Description)
+	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State)
+}
+
+func checkChallengeCategory(str string) bool {
+	return str == "WEB" || str == "RE" || str == "PWN" || str == "MISC" || str == "CRYPTO" // TODO:
+}
+
+func checkChallengeState(str string) bool {
+	return str == "enabled" || str == "disabled"
+}
+
 type ScoreTypeInput struct {
 	Dynamic   bool
 	BaseScore string
 }
 
+func (input *ScoreTypeInput) CheckPass() bool {
+	parsedScore, err := strconv.Atoi(input.BaseScore)
+	if err != nil {
+		return false
+	}
+	return parsedScore >= 0
+}
+
 type FlagTypeInput struct {
 	Dynamic bool
 	Value   string
+}
+
+func (input *FlagTypeInput) CheckPass() bool {
+	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
+	return input.Value != ""
 }
 
 type ChallengeMutateResult struct {
