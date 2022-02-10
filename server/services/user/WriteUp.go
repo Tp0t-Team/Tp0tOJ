@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func WirteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
+func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 	if req.Method != "POST" {
 		w.WriteHeader(404)
 		w.Write(nil)

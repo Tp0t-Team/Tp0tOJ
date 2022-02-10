@@ -183,6 +183,7 @@ func FindSubmitCorrectByUserId(userId uint64) ([]entity.Submit, error) {
 	}
 	return submits, nil
 }
+
 func FindSubmitCorrectSorted() ([]entity.Submit, error) {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"Correct": true}).Order("SubmitTime").Find(&submits)
