@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"server/entity"
+	"server/services/types"
 	"time"
 )
 
@@ -235,6 +236,7 @@ func FindSubmitCorrectByUserId(userId uint64) ([]entity.Submit, error) {
 	}
 	return submits, nil
 }
+
 func FindSubmitCorrectSorted() ([]entity.Submit, error) {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"Correct": true}).Order("SubmitTime").Find(&submits)
@@ -244,4 +246,32 @@ func FindSubmitCorrectSorted() ([]entity.Submit, error) {
 		return nil, result.Error
 	}
 	return submits, nil
+}
+
+func CheckAdminByUserId(userId uint64) (bool, error) {
+	var users entity.User
+	result := db.Where(map[string]interface{}{"UserId": userId, "Role": "admin"}).First(&users)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if result.Error != nil {
+		return false, result.Error
+	}
+	return true, nil
+}
+
+func UpdateUserInfo(userId uint64, name string, role string, mail string, state string) error {
+	var users entity.User
+	result := db.Where(map[string]interface{}{"UserId": userId}).First(&users)
+	if result.Error != nil {
+		return result.Error
+	}
+	users.Name = name
+	users.Role = role
+	users.Mail = mail
+	users.State = state
+	db.Save(&users)
+}
+
+func AddChallenge(input types.ChallengeMutateInput) error {
+	//TODO:
 }
