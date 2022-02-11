@@ -57,3 +57,10 @@ func Parse(config *Config) {
 	}
 
 }
+
+var Configure *Config
+
+func init() {
+	Configure = new(Config)
+	Parse(Configure)
+}

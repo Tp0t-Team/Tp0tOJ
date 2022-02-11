@@ -67,15 +67,16 @@ func FindBulletinByTitle(title string) (*entity.Bulletin, error) {
 	}
 	return &bulletin, nil
 }
-func CheckMailExistence(mail string) (bool, error) {
-	result := db.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return false, nil
-	} else if result.Error != nil {
-		return false, result.Error
-	}
-	return true, nil
-}
+
+//func CheckMailExistence(mail string) (bool, error) {
+//	result := db.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
+//	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+//		return false, nil
+//	} else if result.Error != nil {
+//		return false, result.Error
+//	}
+//	return true, nil
+//}
 
 func FindChallengeByState(state string) ([]entity.Challenge, error) {
 	var challenges []entity.Challenge
@@ -100,12 +101,47 @@ func FindChallengeById(id uint64) (*entity.Challenge, error) {
 
 // AddUser support role[admin|member|team] state[banned|disabled|normal]
 func AddUser(name string, password string, mail string, role string, state string) error {
-	newUser := entity.User{Name: name, Password: password, Mail: mail, Role: role, State: state, JoinTime: time.Now(), Score: 0}
-	result := db.Create(&newUser)
-	if result.Error != nil {
-		return result.Error
+	err := db.Transaction(func(tx *gorm.DB) error {
+		checkResult := tx.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
+		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
+			newUser := entity.User{Name: name, Password: password, Mail: mail, Role: role, State: state, JoinTime: time.Now(), Score: 0}
+			result := tx.Create(&newUser)
+			if result.Error != nil {
+				return result.Error
+			}
+			return nil
+		} else if checkResult.Error != nil {
+			return checkResult.Error
+		} else {
+			return errors.New("exists")
+		}
+	})
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func FindUserByMail(mail string) (*entity.User, error) {
+	var user entity.User
+	result := db.Where(map[string]interface{}{"Mail": mail}).First(&user)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
+func FindUser(id uint64) (*entity.User, error) {
+	var user entity.User
+	result := db.Find(&user, []uint64{id})
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
 }
 
 func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
@@ -150,6 +186,22 @@ func FindResetTokenByToken(token string) (*entity.ResetToken, error) {
 		return nil, result.Error
 	}
 	return &resetToken, nil
+}
+
+func ResetPassword(token string, password string) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		var resetToken entity.ResetToken
+		result := tx.Where(map[string]interface{}{"Token": token}).First(&resetToken)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return errors.New("invalid")
+		} else if result.Error != nil {
+			return result.Error
+		}
+		resetToken.User.Password = password
+		tx.Save(&resetToken.User)
+		tx.Delete(&resetToken)
+		return nil
+	})
 }
 
 func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) (bool, error) {
