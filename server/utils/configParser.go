@@ -42,7 +42,7 @@ type Redis struct {
 type Challenge struct {
 	SecondBloodReward float64 `yaml:"secondBloodReward"`
 	ThirdBloodReward  float64 `yaml:"thirdBloodReward"`
-	HalfLift          int     `yaml:"halfLift"`
+	HalfLife          int     `yaml:"halfLife"`
 	FirstBloodReward  float64 `yaml:"firstBloodReward"`
 }
 

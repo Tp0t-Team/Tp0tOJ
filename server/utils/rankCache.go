@@ -1,8 +1,12 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
+	"server/services/database/resolvers"
+	"server/services/types"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -131,7 +135,40 @@ func (cache *RAMRankCache) refreshRank() {
 }
 
 func (cache *RAMRankCache) WarmUp() error {
-	// TODO:
-	// do add & submitImpl then refreshRank
-
+	challenges, err := resolvers.FindAllChallenges()
+	if err != nil {
+		return err
+	}
+	for _, challenge := range challenges {
+		var config types.ChallengeConfig
+		err := json.Unmarshal([]byte(challenge.Configuration), &config)
+		if err != nil {
+			return err
+		}
+		var score uint64
+		score, err = strconv.ParseUint(config.Score.BaseScore, 10, 64)
+		if err != nil {
+			return err
+		}
+		cache.AddChallenge(challenge.ChallengeId, score)
+	}
+	users, err := resolvers.FindAllUser()
+	if err != nil {
+		return err
+	}
+	for _, user := range users {
+		cache.AddUser(user.UserId)
+	}
+	submits, err := resolvers.FindSubmitCorrectSorted()
+	if err != nil {
+		return err
+	}
+	for _, submit := range submits {
+		err := cache.submitImpl(submit.UserId, submit.ChallengeId, submit.SubmitTime)
+		if err != nil {
+			return err
+		}
+	}
+	cache.refreshRank()
+	return nil
 }
