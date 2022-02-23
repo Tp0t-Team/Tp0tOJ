@@ -46,7 +46,13 @@ func init() {
 	})
 	http.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
-		// TODO: check auth & get userId
+		isLogin := session.Get("isLogin").(*bool)
+		if isLogin == nil || !*isLogin {
+			w.WriteHeader(403)
+			w.Write(nil)
+			return
+		}
+		userId := *session.Get("userId").(*uint64)
 		user.WriteUpHandle(w, r, userId)
 	})
 	log.Fatal(http.ListenAndServe(":8888", nil))
