@@ -81,7 +81,7 @@ func FindAllUser() ([]entity.User, error) {
 	var users []entity.User
 	result := db.Where(map[string]interface{}{}).Find(&users)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.User{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}

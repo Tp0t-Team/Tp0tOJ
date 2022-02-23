@@ -222,7 +222,7 @@ type ChallengeInfo struct {
 	ChallengeId  string
 	Category     string
 	Name         string
-	Score        int
+	Score        string
 	Description  string
 	ExternalLink []string
 	Hint         []string
