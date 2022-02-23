@@ -275,3 +275,14 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 func AddChallenge(input types.ChallengeMutateInput) error {
 	//TODO:
 }
+
+func FindEnabledChallenges() ([]entity.Challenge, error) {
+	var challenges []entity.Challenge
+	result := db.Where(map[string]interface{}{"State": "enabled"}).Find(&challenges)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return challenges, nil
+}
