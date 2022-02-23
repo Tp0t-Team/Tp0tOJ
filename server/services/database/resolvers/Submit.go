@@ -20,7 +20,7 @@ func FindSubmitCorrectByChallengeId(challengeId uint64) ([]entity.Submit, error)
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"ChallengeId": challengeId, "Correct": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Submit{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
@@ -31,7 +31,7 @@ func FindSubmitCorrectByUserId(userId uint64) ([]entity.Submit, error) {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"UserId": userId, "Correct": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Submit{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
@@ -42,7 +42,7 @@ func FindSubmitCorrectSorted() ([]entity.Submit, error) {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"Correct": true}).Order("SubmitTime").Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Submit{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}

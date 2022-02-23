@@ -10,7 +10,7 @@ func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
 	var replicaAllocs []entity.ReplicaAlloc
 	result := db.Where(map[string]interface{}{"UserId": userId}).Find(&replicaAllocs)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.ReplicaAlloc{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}

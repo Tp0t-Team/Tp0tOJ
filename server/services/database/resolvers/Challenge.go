@@ -14,7 +14,7 @@ func FindChallengeByState(state string) ([]entity.Challenge, error) {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{"State": state}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Challenge{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
@@ -36,7 +36,7 @@ func FindAllChallenges() ([]entity.Challenge, error) {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Challenge{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
@@ -109,7 +109,7 @@ func FindEnabledChallenges() ([]entity.Challenge, error) {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{"State": "enabled"}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Challenge{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}

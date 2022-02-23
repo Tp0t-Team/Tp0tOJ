@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/kataras/go-sessions/v3"
 	"server/entity"
 	"server/services/database/resolvers"
@@ -108,14 +109,19 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 			})
 		}
 		correct, _ := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
+		var config types.ChallengeConfig
+		err := json.Unmarshal([]byte(challenge.Configuration), &config)
+		if err != nil {
+			return &types.ChallengeInfosResult{Message: err.Error()}, nil
+		}
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
-			Category:     "",  // TODO:
-			Name:         "",  // TODO:
-			Score:        0,   // TODO:
-			Description:  "",  // TODO:
-			ExternalLink: nil, // TODO:
-			Hint:         nil, // TODO:
+			Category:     config.Category,
+			Name:         config.Name,
+			Score:        config.Score.BaseScore,
+			Description:  config.Description,
+			ExternalLink: config.ExternalLink,
+			Hint:         config.Hint,
 			Blood:        bloodInfo,
 			Done:         correct,
 		}

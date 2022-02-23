@@ -10,7 +10,7 @@ func GetAllBulletin() ([]entity.Bulletin, error) {
 	var allBulletin []entity.Bulletin
 	result := db.Find(&allBulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return []entity.Bulletin{}, nil
 	} else if result.Error != nil {
 		return nil, result.Error
 	}
