@@ -126,8 +126,8 @@ type ChallengeMutateInput struct {
 	ChallengeId  string
 	Name         string
 	Category     string
-	Score        ScoreTypeInput
-	Flag         FlagTypeInput
+	Score        ScoreType
+	Flag         FlagType
 	Description  string
 	ExternalLink []string
 	Hint         []string
@@ -148,12 +148,12 @@ func checkChallengeState(str string) bool {
 	return str == "enabled" || str == "disabled"
 }
 
-type ScoreTypeInput struct {
+type ScoreType struct {
 	Dynamic   bool
 	BaseScore string
 }
 
-func (input *ScoreTypeInput) CheckPass() bool {
+func (input *ScoreType) CheckPass() bool {
 	parsedScore, err := strconv.Atoi(input.BaseScore)
 	if err != nil {
 		return false
@@ -161,12 +161,12 @@ func (input *ScoreTypeInput) CheckPass() bool {
 	return parsedScore >= 0
 }
 
-type FlagTypeInput struct {
+type FlagType struct {
 	Dynamic bool
 	Value   string
 }
 
-func (input *FlagTypeInput) CheckPass() bool {
+func (input *FlagType) CheckPass() bool {
 	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
 	return input.Value != ""
 }
@@ -242,7 +242,6 @@ type ChallengeConfigsResult struct {
 }
 
 type ChallengeConfig struct {
-	ChallengeId  string
 	Name         string
 	Category     string
 	Score        ScoreType
@@ -251,16 +250,6 @@ type ChallengeConfig struct {
 	ExternalLink []string
 	Hint         []string
 	State        string
-}
-
-type ScoreType struct {
-	Dynamic   bool
-	BaseScore string
-}
-
-type FlagType struct {
-	Dynamic bool
-	Value   string
 }
 
 type BulletinResult struct {

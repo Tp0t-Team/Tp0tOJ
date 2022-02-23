@@ -61,7 +61,7 @@ func (r *MutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx c
 		return &types.UserInfoUpdateResult{Message: ""}, nil
 
 	}
-
+	return &types.UserInfoUpdateResult{Message: "user ID is nil"}, nil
 }
 
 func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx context.Context) (*types.ChallengeMutateResult, error) {
@@ -75,18 +75,25 @@ func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}, nil
 	}
 	if input.ChallengeId == "" {
-		//database.
-		//TODO:
+		err := database.AddChallenge(input)
+		if err != nil {
+			return nil, err
+		}
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}, nil
 	}
-	inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
+
+	err := database.UpdateChallenge(input)
 	if err != nil {
-		log.Println("challengeId parse error", err)
+		return nil, err
 	}
+	return &types.ChallengeMutateResult{Message: ""}, nil
 }
+
 func (r *MutationResolver) ChallengeRemove(id string) (*types.ChallengeRemoveResult, error) {
+	//TODO: impl
 	return &types.ChallengeRemoveResult{Message: "Can't remove any challenge"}, nil
 }
 func (r *MutationResolver) WarmUp() (bool, error) {
-
+	//TODO: impl
+	return true, nil
 }
