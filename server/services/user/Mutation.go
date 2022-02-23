@@ -2,17 +2,15 @@ package user
 
 import (
 	"context"
-	"crypto/md5"
 	"crypto/sha256"
 	"fmt"
 	"github.com/kataras/go-sessions/v3"
 	"io"
 	"log"
 	"regexp"
-	"server/services/database"
+	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils"
-	"strings"
 )
 
 type MutationResolver struct {
@@ -50,7 +48,7 @@ func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Conte
 	if !MailTattern.MatchString(input.Mail) {
 		return &types.RegisterResult{Message: "invalid mail"}, nil
 	}
-	err := database.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
+	err := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
 	if err != nil {
 		return &types.RegisterResult{Message: err.Error()}, nil
 	}
@@ -66,7 +64,7 @@ func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) (*
 	if !input.CheckPass() {
 		return &types.LoginResult{Message: "not empty error"}, nil
 	}
-	user, err := database.FindUserByMail(input.Mail)
+	user, err := resolvers.FindUserByMail(input.Mail)
 	if err != nil {
 		return &types.LoginResult{Message: err.Error()}, nil
 	}
@@ -110,6 +108,7 @@ func (r *MutationResolver) Logout(ctx context.Context) (*types.LogoutResult, err
 
 func (r *MutationResolver) Forget(input string) (*types.ForgetResult, error) {
 	// TODO:
+	return nil, nil
 }
 
 func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*types.ResetResult, error) {
@@ -118,7 +117,7 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 	if isLogin != nil && *isLogin {
 		return &types.ResetResult{Message: "already login"}, nil
 	}
-	err := database.ResetPassword(input.Token, passwordHash(input.Password))
+	err := resolvers.ResetPassword(input.Token, passwordHash(input.Password))
 	if err != nil {
 		return &types.ResetResult{Message: err.Error()}, nil
 	}
@@ -127,4 +126,5 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 
 func (r *MutationResolver) Submit(input types.SubmitInput) (*types.SubmitResult, error) {
 	// TODO:
+	return nil, nil
 }

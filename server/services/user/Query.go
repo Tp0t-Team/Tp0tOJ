@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/kataras/go-sessions/v3"
 	"server/entity"
-	"server/services/database"
+	"server/services/database/resolvers"
 	"server/services/types"
 	"strconv"
 	"time"
@@ -14,7 +14,7 @@ type QueryResolver struct {
 }
 
 func (r *QueryResolver) AllBulletin() (*types.BulletinResult, error) {
-	bulletins, err := database.GetAllBulletin()
+	bulletins, err := resolvers.GetAllBulletin()
 	if err != nil {
 		return &types.BulletinResult{Message: err.Error()}, nil
 	}
@@ -31,6 +31,7 @@ func (r *QueryResolver) AllBulletin() (*types.BulletinResult, error) {
 
 func (r *QueryResolver) Rank(ctx context.Context) (*types.RankResult, error) {
 	// TODO:
+	return nil, nil
 }
 
 func (r *QueryResolver) UserInfo(userId string, ctx context.Context) (*types.UserInfoResult, error) {
@@ -45,7 +46,7 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) (*types.Use
 	}
 	currentUserId := *session.Get("userId").(*uint64)
 	var user *entity.User
-	user, err = database.FindUser(parsedUserId)
+	user, err = resolvers.FindUser(parsedUserId)
 	if err != nil {
 		return &types.UserInfoResult{Message: err.Error()}, nil
 	}
@@ -60,7 +61,7 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) (*types.Use
 			Score:    "0", // TODO: strconv.FormatInt(user.Score, 10),
 			Role:     user.Role,
 			State:    user.State,
-			Rank:     0, // TODO:
+			//Rank:     0, //
 		}}
 	if *session.Get("isAdmin").(*bool) || parsedUserId == currentUserId {
 		result.UserInfo.Mail = user.Mail
@@ -75,7 +76,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 		return &types.ChallengeInfosResult{Message: "forbidden"}, nil
 	}
 	currentUserId := *session.Get("userId").(*uint64)
-	challenges, err := database.FindEnabledChallenges()
+	challenges, err := resolvers.FindEnabledChallenges()
 	if err != nil {
 		return &types.ChallengeInfosResult{Message: err.Error()}, nil
 	}
@@ -84,7 +85,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 		ChallengeInfos: []types.ChallengeInfo{},
 	}
 	for _, challenge := range challenges {
-		bloodInfo := []types.BloodInfo{}
+		var bloodInfo []types.BloodInfo
 		if challenge.FirstBlood != nil {
 			bloodInfo = append(bloodInfo, types.BloodInfo{
 				UserId: strconv.FormatUint(challenge.FirstBlood.UserId, 10),
@@ -106,7 +107,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 				Avatar: challenge.ThirdBlood.MakeAvatarUrl(),
 			})
 		}
-		correct, _ := database.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
+		correct, _ := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     "",  // TODO:

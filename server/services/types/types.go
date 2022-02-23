@@ -193,7 +193,7 @@ type UserInfo struct {
 	Score    string
 	Role     string
 	State    string
-	Rank     int
+	//Rank     int
 }
 
 type AllUserInfoResult struct {
