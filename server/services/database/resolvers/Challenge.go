@@ -20,6 +20,7 @@ func FindChallengeByState(state string) ([]entity.Challenge, error) {
 	}
 	return challenges, nil
 }
+
 func FindChallengeById(id uint64) (*entity.Challenge, error) {
 	var challenge entity.Challenge
 	result := db.Where(map[string]interface{}{"ChallengeId": id}).First(&challenge)
@@ -29,6 +30,17 @@ func FindChallengeById(id uint64) (*entity.Challenge, error) {
 		return nil, result.Error
 	}
 	return &challenge, nil
+}
+
+func FindAllChallenges() ([]entity.Challenge, error) {
+	var challenges []entity.Challenge
+	result := db.Where(map[string]interface{}{}).Find(&challenges)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return challenges, nil
 }
 
 func AddChallenge(input types.ChallengeMutateInput) error {
@@ -60,6 +72,7 @@ func AddChallenge(input types.ChallengeMutateInput) error {
 
 	return nil
 }
+
 func UpdateChallenge(input types.ChallengeMutateInput) error {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
