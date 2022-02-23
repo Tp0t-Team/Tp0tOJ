@@ -16,10 +16,10 @@ import (
 type MutationResolver struct {
 }
 
-var MailTattern *regexp.Regexp
+var MailPattern *regexp.Regexp
 
 func init() {
-	MailTattern, _ = regexp.Compile("^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$")
+	MailPattern, _ = regexp.Compile("^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$")
 }
 
 func passwordHash(password string) string {
@@ -45,7 +45,7 @@ func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Conte
 	if !input.CheckPass() {
 		return &types.RegisterResult{Message: "invalid information"}, nil
 	}
-	if !MailTattern.MatchString(input.Mail) {
+	if !MailPattern.MatchString(input.Mail) {
 		return &types.RegisterResult{Message: "invalid mail"}, nil
 	}
 	err := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")

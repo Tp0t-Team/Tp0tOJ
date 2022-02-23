@@ -6,6 +6,7 @@ import (
 	"log"
 	"server/services/database/resolvers"
 	"server/services/types"
+	"server/utils"
 	"strconv"
 )
 
@@ -94,6 +95,9 @@ func (r *MutationResolver) ChallengeRemove(id string) (*types.ChallengeRemoveRes
 	return &types.ChallengeRemoveResult{Message: "Can't remove any challenge"}, nil
 }
 func (r *MutationResolver) WarmUp() (bool, error) {
-	//TODO: impl
+	err := utils.Cache.WarmUp()
+	if err != nil {
+		return false, nil
+	}
 	return true, nil
 }

@@ -12,8 +12,8 @@ type RankCache interface {
 	GetRank() []uint64
 	AddUser(userId uint64)
 	AddChallenge(challengeId uint64, originScore uint64)
-	Submit(userId uint64, challengeId uint64, stamp time.Time)
-	WarmUp()
+	Submit(userId uint64, challengeId uint64, stamp time.Time) error
+	WarmUp() error
 }
 
 type RAMRankCache struct {
@@ -24,6 +24,13 @@ type RAMRankCache struct {
 	challengeSolve map[uint64][]uint64
 	userScore      map[uint64]uint64
 	userTime       map[uint64]time.Time
+}
+
+var Cache RankCache
+
+func init() {
+	//calculator need to be init before usage
+	Cache = &RAMRankCache{rank: []uint64{}, challengeScore: map[uint64]uint64{}, challengeSolve: map[uint64][]uint64{}, userScore: map[uint64]uint64{}, userTime: map[uint64]time.Time{}}
 }
 
 func (cache *RAMRankCache) SetCalculator(calculator ScoreCalculator) {
@@ -116,14 +123,15 @@ func (cache *RAMRankCache) refreshRank() {
 		})
 	}
 	sort.Sort(RankSorter{rank})
-	rankSaved := []uint64{}
+	var rankSaved []uint64
 	for _, item := range rank {
 		rankSaved = append(rankSaved, item.userId)
 	}
 	cache.rank = rankSaved
 }
 
-func (cache *RAMRankCache) WarmUp() {
+func (cache *RAMRankCache) WarmUp() error {
 	// TODO:
 	// do add & submitImpl then refreshRank
+
 }
