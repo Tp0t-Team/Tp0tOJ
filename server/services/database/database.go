@@ -335,3 +335,14 @@ func UpdateChallenge(input types.ChallengeMutateInput) error {
 	}
 	return nil
 }
+
+func FindEnabledChallenges() ([]entity.Challenge, error) {
+	var challenges []entity.Challenge
+	result := db.Where(map[string]interface{}{"State": "enabled"}).Find(&challenges)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		return nil, result.Error
+	}
+	return challenges, nil
+}

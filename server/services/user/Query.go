@@ -69,5 +69,56 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) (*types.Use
 }
 
 func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInfosResult, error) {
-
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin").(*bool)
+	if isLogin == nil || !*isLogin {
+		return &types.ChallengeInfosResult{Message: "forbidden"}, nil
+	}
+	currentUserId := *session.Get("userId").(*uint64)
+	challenges, err := database.FindEnabledChallenges()
+	if err != nil {
+		return &types.ChallengeInfosResult{Message: err.Error()}, nil
+	}
+	result := types.ChallengeInfosResult{
+		Message:        "",
+		ChallengeInfos: []types.ChallengeInfo{},
+	}
+	for _, challenge := range challenges {
+		bloodInfo := []types.BloodInfo{}
+		if challenge.FirstBlood != nil {
+			bloodInfo = append(bloodInfo, types.BloodInfo{
+				UserId: strconv.FormatUint(challenge.FirstBlood.UserId, 10),
+				Name:   challenge.FirstBlood.Name,
+				Avatar: challenge.FirstBlood.MakeAvatarUrl(),
+			})
+		}
+		if challenge.SecondBlood != nil {
+			bloodInfo = append(bloodInfo, types.BloodInfo{
+				UserId: strconv.FormatUint(challenge.SecondBlood.UserId, 10),
+				Name:   challenge.SecondBlood.Name,
+				Avatar: challenge.SecondBlood.MakeAvatarUrl(),
+			})
+		}
+		if challenge.ThirdBlood != nil {
+			bloodInfo = append(bloodInfo, types.BloodInfo{
+				UserId: strconv.FormatUint(challenge.ThirdBlood.UserId, 10),
+				Name:   challenge.ThirdBlood.Name,
+				Avatar: challenge.ThirdBlood.MakeAvatarUrl(),
+			})
+		}
+		correct, _ := database.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
+		item := types.ChallengeInfo{
+			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
+			Category:     "",  // TODO:
+			Name:         "",  // TODO:
+			Score:        0,   // TODO:
+			Description:  "",  // TODO:
+			ExternalLink: nil, // TODO:
+			Hint:         nil, // TODO:
+			Blood:        bloodInfo,
+			Done:         correct,
+		}
+		result.ChallengeInfos = append(result.ChallengeInfos, item)
+	}
+	return &result, nil
 }
