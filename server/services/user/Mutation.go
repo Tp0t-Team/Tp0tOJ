@@ -11,6 +11,7 @@ import (
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils"
+	"strconv"
 )
 
 type MutationResolver struct {
@@ -117,6 +118,9 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 	if isLogin != nil && *isLogin {
 		return &types.ResetResult{Message: "already login"}, nil
 	}
+	if !input.CheckPass() {
+		return &types.ResetResult{Message: "not empty error"}, nil
+	}
 	err := resolvers.ResetPassword(input.Token, passwordHash(input.Password))
 	if err != nil {
 		return &types.ResetResult{Message: err.Error()}, nil
@@ -125,6 +129,22 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 }
 
 func (r *MutationResolver) Submit(input types.SubmitInput) (*types.SubmitResult, error) {
-	// TODO:
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin").(*bool)
+	if isLogin != nil && *isLogin {
+		return &types.SubmitResult{Message: "already login"}, nil
+	}
+	if !input.CheckPass() {
+		return &types.SubmitResult{Message: "not empty error"}, nil
+	}
+	userId := *session.Get("userId").(*uint64)
+	challengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
+	if err != nil {
+		return &types.SubmitResult{Message: err.Error()}, nil
+	}
+	err := resolvers.AddSubmit(userId, challengeId, input.Flag)
+	if err != nil {
+		return &types.SubmitResult{Message: err.Error()}, nil
+	}
 	return nil, nil
 }

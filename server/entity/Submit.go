@@ -10,6 +10,7 @@ type Submit struct {
 	SubmitTime  time.Time `gorm:"not null"`
 	Flag        string    `gorm:"check: flag <> ''"`
 	Correct     bool
+	Available   bool
 	CreatedAt   time.Time `gorm:"autoCreateTime;not null;"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime;not null;"`
 	ChallengeId uint64    `gorm:"not null"`

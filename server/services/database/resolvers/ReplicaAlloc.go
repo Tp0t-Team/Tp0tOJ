@@ -16,3 +16,36 @@ func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
 	}
 	return replicaAllocs, nil
 }
+
+func AddReplicaAlloc(replicaId uint64, userId uint64) error {
+	replicaAlloc := entity.ReplicaAlloc{
+		ReplicaId: replicaId,
+		UserId:    userId,
+	}
+	result := db.Create(&replicaAlloc)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
+
+func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) error {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	err := outsideTX.Transaction(func(tx *gorm.DB) error {
+		var replicaAllocs []entity.ReplicaAlloc
+		getResult := tx.Where(map[string]interface{}{"ReplicaId": replicaId}).Find(&replicaAllocs)
+		if getResult.Error != nil {
+			return getResult.Error
+		}
+		for _, replicaAlloc := range replicaAllocs {
+			db.Delete(&replicaAlloc)
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}

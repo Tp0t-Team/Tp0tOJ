@@ -64,7 +64,7 @@ func AddChallenge(input types.ChallengeMutateInput) error {
 		} else {
 			return errors.New("database item exists")
 		}
-		// TODO:create replicas and allocate to all users
+		// TODO: create replicas and allocate to all users
 	})
 	if err != nil {
 		return err
@@ -97,6 +97,10 @@ func UpdateChallenge(input types.ChallengeMutateInput) error {
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		db.Save(&challenge)
 		// TODO: update flag replicas
+		// TODO: if change state "disabled", replica delete
+		// TODO: if change dockerfile, replica re-create
+		// TODO: you can't change flag dynamic-able
+		// TODO: you can't change score dynamic-able
 		return nil
 	})
 	if err != nil {

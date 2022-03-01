@@ -114,6 +114,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 		if err != nil {
 			return &types.ChallengeInfosResult{Message: err.Error()}, nil
 		}
+		// TODO: add thr replica url to external links
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     config.Category,
