@@ -50,9 +50,9 @@ func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Conte
 	if !MailPattern.MatchString(input.Mail) {
 		return &types.RegisterResult{Message: "invalid mail"}, nil
 	}
-	err := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
-	if err != nil {
-		return &types.RegisterResult{Message: err.Error()}, nil
+	ok := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
+	if !ok {
+		return &types.RegisterResult{Message: "Register Error!"}, nil
 	}
 	return &types.RegisterResult{Message: ""}, nil
 }
@@ -66,9 +66,9 @@ func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) (*
 	if !input.CheckPass() {
 		return &types.LoginResult{Message: "not empty error"}, nil
 	}
-	user, err := resolvers.FindUserByMail(input.Mail)
-	if err != nil {
-		return &types.LoginResult{Message: err.Error()}, nil
+	user := resolvers.FindUserByMail(input.Mail)
+	if user == nil {
+		return &types.LoginResult{Message: "Login Service Error!"}, nil
 	}
 	if user.Password != passwordHash(input.Password) {
 		return &types.LoginResult{Message: "failed"}, nil
@@ -122,9 +122,9 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 	if !input.CheckPass() {
 		return &types.ResetResult{Message: "not empty error"}, nil
 	}
-	err := resolvers.ResetPassword(input.Token, passwordHash(input.Password))
-	if err != nil {
-		return &types.ResetResult{Message: err.Error()}, nil
+	ok := resolvers.ResetPassword(input.Token, passwordHash(input.Password))
+	if !ok {
+		return &types.ResetResult{Message: "Password Reset Service Error!"}, nil
 	}
 	return &types.ResetResult{Message: ""}, nil
 }
@@ -141,11 +141,12 @@ func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) 
 	userId := *session.Get("userId").(*uint64)
 	challengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 	if err != nil {
-		return &types.SubmitResult{Message: err.Error()}, nil
+		log.Println(err)
+		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
 	}
-	err = resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
-	if err != nil {
-		return &types.SubmitResult{Message: err.Error()}, nil
+	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
+	if !ok {
+		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
 	}
-	return nil, nil
+	return &types.SubmitResult{Message: ""}, nil
 }

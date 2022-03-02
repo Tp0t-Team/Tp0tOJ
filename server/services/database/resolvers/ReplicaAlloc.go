@@ -3,21 +3,23 @@ package resolvers
 import (
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	"server/entity"
 )
 
-func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
+func FindReplicaAllocByUserId(userId uint64) []entity.ReplicaAlloc {
 	var replicaAllocs []entity.ReplicaAlloc
 	result := db.Where(map[string]interface{}{"UserId": userId}).Find(&replicaAllocs)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.ReplicaAlloc{}, nil
+		return []entity.ReplicaAlloc{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return replicaAllocs, nil
+	return replicaAllocs
 }
 
-func AddReplicaAlloc(replicaId uint64, userId uint64) error {
+func AddReplicaAlloc(replicaId uint64, userId uint64) bool {
 	// TODO: maybe need some more check, to ensure user only have one replica for each challenge
 	replicaAlloc := entity.ReplicaAlloc{
 		ReplicaId: replicaId,
@@ -25,12 +27,14 @@ func AddReplicaAlloc(replicaId uint64, userId uint64) error {
 	}
 	result := db.Create(&replicaAlloc)
 	if result.Error != nil {
-		return result.Error
+		log.Println(result.Error)
+		return false
 	}
-	return nil
+	return true
+
 }
 
-func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) error {
+func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) bool {
 	if outsideTX == nil {
 		outsideTX = db
 	}
@@ -46,7 +50,8 @@ func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
 }

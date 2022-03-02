@@ -3,34 +3,38 @@ package resolvers
 import (
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	"server/entity"
 )
 
-func GetAllBulletin() ([]entity.Bulletin, error) {
+func GetAllBulletin() []entity.Bulletin {
 	var allBulletin []entity.Bulletin
 	result := db.Find(&allBulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Bulletin{}, nil
+		return []entity.Bulletin{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return allBulletin, nil
+	return allBulletin
 }
-func AddBulletin(title string, content string, topping bool) error {
+func AddBulletin(title string, content string, topping bool) bool {
 	newBulletin := entity.Bulletin{Title: title, Content: content, Topping: topping}
 	result := db.Create(&newBulletin)
 	if result.Error != nil {
-		return result.Error
+		log.Println(result.Error)
+		return false
 	}
-	return nil
+	return true
 }
-func FindBulletinByTitle(title string) (*entity.Bulletin, error) {
+func FindBulletinByTitle(title string) *entity.Bulletin {
 	var bulletin entity.Bulletin
 	result := db.Where(map[string]interface{}{"Title": title}).First(&bulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return nil
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return &bulletin, nil
+	return &bulletin
 }

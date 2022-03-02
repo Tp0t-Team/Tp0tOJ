@@ -4,22 +4,24 @@ import (
 	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	"server/entity"
 	"server/services/types"
 )
 
-func FindReplicaByChallengeId(challengeId uint64) ([]entity.Replica, error) {
+func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	var replicas []entity.Replica
 	result := db.Where(map[string]interface{}{"ChallengeId": challengeId}).Find(&replicas)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Replica{}, nil
+		return []entity.Replica{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return replicas, nil
+	return replicas
 }
 
-func AddReplica(challengeId uint64) error {
+func AddReplica(challengeId uint64) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
 		challengeResult := tx.Where(map[string]interface{}{"ChallengeId": challengeId}).First(&challenge)
@@ -52,12 +54,13 @@ func AddReplica(challengeId uint64) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
 }
 
-func EnableReplica(replicaId uint64, outsideTX *gorm.DB) error {
+func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	if outsideTX == nil {
 		outsideTX = db
 	}
@@ -73,12 +76,13 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
 }
 
-func DisableReplica(replicaId uint64, outsideTX *gorm.DB) error {
+func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	if outsideTX == nil {
 		outsideTX = db
 	}
@@ -94,12 +98,14 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
+
 }
 
-func DeleteReplicaByChallangeId(challengeId uint64, outsideTX *gorm.DB) error {
+func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 	if outsideTX == nil {
 		outsideTX = db
 	}
@@ -111,20 +117,18 @@ func DeleteReplicaByChallangeId(challengeId uint64, outsideTX *gorm.DB) error {
 		}
 		for _, replica := range replicas {
 			// TODO: delete replicaAlloc
-			err := DeleteReplicaAllocByReplicaId(replica.ReplicaId, tx)
-			if err != nil {
-				return err
+			ok := DeleteReplicaAllocByReplicaId(replica.ReplicaId, tx)
+			if !ok {
+				return errors.New("deleteReplicaAllocByReplicaId occurred error")
 			}
-			err = DisableReplica(replica.ReplicaId, tx)
-			if err != nil {
-				return err
-			}
+			DisableReplica(replica.ReplicaId, tx)
 			db.Delete(&replica)
 		}
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
 }

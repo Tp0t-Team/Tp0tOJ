@@ -10,40 +10,43 @@ import (
 	"strconv"
 )
 
-func FindChallengeByState(state string) ([]entity.Challenge, error) {
+func FindChallengeByState(state string) []entity.Challenge {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{"State": state}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Challenge{}, nil
+		return []entity.Challenge{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return challenges, nil
+	return challenges
 }
 
-func FindChallengeById(id uint64) (*entity.Challenge, error) {
+func FindChallengeById(id uint64) *entity.Challenge {
 	var challenge entity.Challenge
 	result := db.Where(map[string]interface{}{"ChallengeId": id}).First(&challenge)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return nil
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return &challenge, nil
+	return &challenge
 }
 
-func FindAllChallenges() ([]entity.Challenge, error) {
+func FindAllChallenges() []entity.Challenge {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Challenge{}, nil
+		return []entity.Challenge{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return challenges, nil
+	return challenges
 }
 
-func AddChallenge(input types.ChallengeMutateInput) error {
+func AddChallenge(input types.ChallengeMutateInput) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		//wo don't allow the same name between two challenges
 		checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).First(&entity.Challenge{})
@@ -76,23 +79,26 @@ func AddChallenge(input types.ChallengeMutateInput) error {
 		} else if checkResult.Error != nil {
 			return checkResult.Error
 		} else {
-			return errors.New("database item exists")
+			return errors.New("database item challenge already exists")
 		}
 		// TODO: create replicas and allocate to all users if challenge is a singleton & enabled
+		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
 
-	return nil
+	return true
 }
 
-func UpdateChallenge(input types.ChallengeMutateInput) error {
+func UpdateChallenge(input types.ChallengeMutateInput) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
 		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 		if err != nil {
-			log.Println("challengeId parse error", err)
+			return errors.New("challengeId Parse Error:\n" + err.Error())
+
 		}
 		challengeItem := tx.Where(map[string]interface{}{"ChallengeId": inputChallengeId}).First(&challenge)
 		if challengeItem.Error != nil {
@@ -132,18 +138,20 @@ func UpdateChallenge(input types.ChallengeMutateInput) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
 }
 
-func FindEnabledChallenges() ([]entity.Challenge, error) {
+func FindEnabledChallenges() []entity.Challenge {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{"State": "enabled"}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Challenge{}, nil
+		return []entity.Challenge{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return challenges, nil
+	return challenges
 }
