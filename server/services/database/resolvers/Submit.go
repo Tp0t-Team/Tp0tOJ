@@ -83,7 +83,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			Mark:        int64(len(submits)),
 			Flag:        flag,
 			Correct:     alloc.Replica.Flag == flag,
-			Available:   config.State == "enabled",
+			Available:   alloc.Replica.Challenge.State == "enabled",
 		}
 		tx.Create(&newSubmit)
 		return nil

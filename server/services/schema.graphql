@@ -230,7 +230,12 @@ type BloodInfo {
 
 type ChallengeConfigsResult {
     message: String
-    challengeConfigs: [ChallengeConfig]
+    challengeConfigs: [ChallengeConfigAndState]
+}
+
+type ChallengeConfigAndState {
+    config: ChallengeConfig
+    state: String
 }
 
 type ChallengeConfig {

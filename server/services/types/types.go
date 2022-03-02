@@ -142,10 +142,15 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 	if len(input.NodeConfig) == 0 {
 		input.Singleton = true
 	}
+	nodeNameSet := map[string]struct{}{}
 	for _, node := range input.NodeConfig {
 		if !node.CheckPass() {
 			return false
 		}
+		nodeNameSet[node.Name] = struct{}{}
+	}
+	if len(nodeNameSet) != len(input.NodeConfig) {
+		return false
 	}
 	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
 }
@@ -189,17 +194,22 @@ type NodeConfigInput struct {
 }
 
 func (input *NodeConfigInput) CheckPass() bool {
-	input.Name = strings.TrimSpace(input.Name)
+	input.Name = strings.ToLower(strings.TrimSpace(input.Name))
 	input.Image = strings.TrimSpace(input.Image)
 	for _, port := range input.Ports {
 		if !port.CheckPass() {
 			return false
 		}
 	}
+	portNameSet := map[string]struct{}{}
 	for _, port := range input.ServicePorts {
 		if !port.CheckPass() {
 			return false
 		}
+		portNameSet[port.Name] = struct{}{}
+	}
+	if len(portNameSet) != len(input.ServicePorts) {
+		return false
 	}
 	return input.Name != "" && input.Image != ""
 }
@@ -222,7 +232,7 @@ type ServicePortInput struct {
 }
 
 func (input *ServicePortInput) CheckPass() bool {
-	input.Name = strings.TrimSpace(input.Name)
+	input.Name = strings.ToLower(strings.TrimSpace(input.Name))
 	return input.Name != "" &&
 		(input.Protocol == "TCP" || input.Protocol == "UDP") &&
 		input.External > 0 && input.External < 65535 &&
@@ -297,7 +307,12 @@ type BloodInfo struct {
 
 type ChallengeConfigsResult struct {
 	Message          string
-	ChallengeConfigs []ChallengeConfig
+	ChallengeConfigs []ChallengeConfigAndState
+}
+
+type ChallengeConfigAndState struct {
+	Config ChallengeConfig
+	State  string
 }
 
 type ChallengeConfig struct {
@@ -308,7 +323,6 @@ type ChallengeConfig struct {
 	Description  string
 	ExternalLink []string
 	Hint         []string
-	State        string
 	Singleton    bool
 	NodeConfig   []NodeConfig
 }
