@@ -49,9 +49,13 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) *types.User
 	}
 	currentUserId := *session.Get("userId").(*uint64)
 	var user *entity.User
-	user = resolvers.FindUser(parsedUserId)
-	if user == nil {
+	user, err = resolvers.FindUser(parsedUserId)
+	if err != nil {
+		log.Println(err)
 		return &types.UserInfoResult{Message: "Get User Info Error!"}
+	}
+	if user == nil {
+		return &types.UserInfoResult{Message: "No such user."}
 	}
 	result := types.UserInfoResult{
 		Message: "",

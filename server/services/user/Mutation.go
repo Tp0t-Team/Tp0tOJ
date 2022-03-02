@@ -66,9 +66,13 @@ func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) *t
 	if !input.CheckPass() {
 		return &types.LoginResult{Message: "not empty error"}
 	}
-	user := resolvers.FindUserByMail(input.Mail)
-	if user == nil {
+	user, err := resolvers.FindUserByMail(input.Mail)
+	if err != nil {
+		log.Println(err)
 		return &types.LoginResult{Message: "Login Service Error!"}
+	}
+	if user == nil {
+		return &types.LoginResult{Message: "No such user."}
 	}
 	if user.Password != passwordHash(input.Password) {
 		return &types.LoginResult{Message: "failed"}
