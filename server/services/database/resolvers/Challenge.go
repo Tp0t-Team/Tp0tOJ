@@ -51,6 +51,10 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 		//wo don't allow the same name between two challenges
 		checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).First(&entity.Challenge{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
+			nodes := []types.NodeConfig{}
+			for _, node := range input.NodeConfig {
+				nodes = append(nodes, node.ToNodeConfig())
+			}
 			newChallengeConfig := types.ChallengeConfig{
 				Name:     input.Name,
 				Category: input.Category,
@@ -65,6 +69,8 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 				Description:  input.Description,
 				ExternalLink: input.ExternalLink,
 				Hint:         input.Hint,
+				Singleton:    input.Singleton,
+				NodeConfig:   nodes,
 			}
 			marshalConfig, err := json.Marshal(newChallengeConfig)
 			if err != nil {
@@ -104,6 +110,10 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		if challengeItem.Error != nil {
 			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
 		}
+		nodes := []types.NodeConfig{}
+		for _, node := range input.NodeConfig {
+			nodes = append(nodes, node.ToNodeConfig())
+		}
 		newChallengeConfig := types.ChallengeConfig{
 			Name:     input.Name,
 			Category: input.Category,
@@ -118,6 +128,8 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 			Description:  input.Description,
 			ExternalLink: input.ExternalLink,
 			Hint:         input.Hint,
+			Singleton:    input.Singleton,
+			NodeConfig:   nodes,
 		}
 		marshalConfig, err := json.Marshal(newChallengeConfig)
 		if err != nil {
@@ -127,7 +139,8 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		if input.State != "" {
 			challenge.State = input.State
 		}
-		//TODO: wo don't allow the same name between two challenges
+		// TODO: we don't allow the same name between two challenges
+		// TODO: we don't allow change singleton
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		db.Save(&challenge)
 		// TODO: update flag replicas
@@ -135,6 +148,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		// TODO: if change dockerfile, replica re-create
 		// TODO: you can't change flag dynamic-able
 		// TODO: you can't change score dynamic-able
+		// TODO: if change state "enabled", create replicas & alloc to users (only for singleton)
 		return nil
 	})
 	if err != nil {

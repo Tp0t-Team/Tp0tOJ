@@ -214,6 +214,23 @@ func (input *NodeConfigInput) CheckPass() bool {
 	return input.Name != "" && input.Image != ""
 }
 
+func (input *NodeConfigInput) ToNodeConfig() NodeConfig {
+	ports := []ContainerPort{}
+	for _, port := range input.Ports {
+		ports = append(ports, port.ToContainerPort())
+	}
+	servicePorts := []ServicePort{}
+	for _, port := range input.ServicePorts {
+		servicePorts = append(servicePorts, port.ToServicePort())
+	}
+	return NodeConfig{
+		Name:         input.Name,
+		Image:        input.Name,
+		Ports:        ports,
+		ServicePorts: servicePorts,
+	}
+}
+
 type ContainerPortInput struct {
 	Port     int
 	Protocol string
@@ -223,12 +240,29 @@ func (input *ContainerPortInput) CheckPass() bool {
 	return input.Port > 0 && input.Port <= 65535 && (input.Protocol == "TCP" || input.Protocol == "UDP")
 }
 
+func (input *ContainerPortInput) ToContainerPort() ContainerPort {
+	return ContainerPort{
+		Port:     input.Port,
+		Protocol: input.Protocol,
+	}
+}
+
 type ServicePortInput struct {
 	Name     string
 	Protocol string
 	External int
 	Internal int
 	Pod      int
+}
+
+func (input *ServicePortInput) ToServicePort() ServicePort {
+	return ServicePort{
+		Name:     input.Name,
+		Protocol: input.Protocol,
+		External: input.External,
+		Internal: input.Internal,
+		Pod:      input.Pod,
+	}
 }
 
 func (input *ServicePortInput) CheckPass() bool {
