@@ -3,59 +3,66 @@ package resolvers
 import (
 	"errors"
 	"gorm.io/gorm"
+	"log"
 	"server/entity"
 )
 
-func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) (bool, error) {
+func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) bool {
 	result := db.Where(map[string]interface{}{"UserId": userId, "ChallengeId": challengeId, "Correct": true, "Available": true}).Find(&entity.Submit{})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return false, nil
+		return false
 	} else if result.Error != nil {
-		return false, result.Error
+		log.Println(result.Error)
+		return false
 	}
-	return true, nil
+	return true
 }
 
-func FindSubmitCorrectByChallengeId(challengeId uint64) ([]entity.Submit, error) {
+func FindSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"ChallengeId": challengeId, "Correct": true, "Available": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Submit{}, nil
+		return []entity.Submit{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return submits, nil
+	return submits
 }
 
-func FindSubmitCorrectByUserId(userId uint64) ([]entity.Submit, error) {
+func FindSubmitCorrectByUserId(userId uint64) []entity.Submit {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"UserId": userId, "Correct": true, "Available": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Submit{}, nil
+		return []entity.Submit{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return submits, nil
+	return submits
 }
 
-func FindSubmitCorrectSorted() ([]entity.Submit, error) {
+func FindSubmitCorrectSorted() []entity.Submit {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"Correct": true, "Available": true}).Order("SubmitTime").Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return []entity.Submit{}, nil
+		return []entity.Submit{}
 	} else if result.Error != nil {
-		return nil, result.Error
+		log.Println(result.Error)
+		return nil
 	}
-	return submits, nil
+	return submits
 }
 
-func AddSubmit(userId uint64, challengeId uint64, flag string) error {
+func AddSubmit(userId uint64, challengeId uint64, flag string) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// TODO:
 		return nil
 	})
 	if err != nil {
-		return err
+		log.Println(err)
+		return false
 	}
-	return nil
+	return true
+
 }

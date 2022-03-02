@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/kataras/go-sessions/v3"
+	"log"
 	"server/entity"
 	"server/services/database/resolvers"
 	"server/services/types"
@@ -15,9 +16,9 @@ type QueryResolver struct {
 }
 
 func (r *QueryResolver) AllBulletin() (*types.BulletinResult, error) {
-	bulletins, err := resolvers.GetAllBulletin()
-	if err != nil {
-		return &types.BulletinResult{Message: err.Error()}, nil
+	bulletins := resolvers.GetAllBulletin()
+	if bulletins == nil {
+		return &types.BulletinResult{Message: "Get Bulletin Error!"}, nil
 	}
 	result := types.BulletinResult{Message: "", Bulletins: []types.Bulletin{}}
 	for _, bulletin := range bulletins {
@@ -43,13 +44,14 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) (*types.Use
 	}
 	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
 	if err != nil {
-		return &types.UserInfoResult{Message: err.Error()}, nil
+		log.Println(err)
+		return &types.UserInfoResult{Message: "Get User Info Error!"}, nil
 	}
 	currentUserId := *session.Get("userId").(*uint64)
 	var user *entity.User
-	user, err = resolvers.FindUser(parsedUserId)
-	if err != nil {
-		return &types.UserInfoResult{Message: err.Error()}, nil
+	user = resolvers.FindUser(parsedUserId)
+	if user == nil {
+		return &types.UserInfoResult{Message: "Get User Info Error!"}, nil
 	}
 	result := types.UserInfoResult{
 		Message: "",
@@ -77,9 +79,9 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 		return &types.ChallengeInfosResult{Message: "forbidden"}, nil
 	}
 	currentUserId := *session.Get("userId").(*uint64)
-	challenges, err := resolvers.FindEnabledChallenges()
-	if err != nil {
-		return &types.ChallengeInfosResult{Message: err.Error()}, nil
+	challenges := resolvers.FindEnabledChallenges()
+	if challenges == nil {
+		return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}, nil
 	}
 	result := types.ChallengeInfosResult{
 		Message:        "",
@@ -108,11 +110,12 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) (*types.ChallengeInf
 				Avatar: challenge.ThirdBlood.MakeAvatarUrl(),
 			})
 		}
-		correct, _ := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
+		correct := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)
 		if err != nil {
-			return &types.ChallengeInfosResult{Message: err.Error()}, nil
+			log.Println(err)
+			return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}, nil
 		}
 		// TODO: add thr replica url to external links
 		item := types.ChallengeInfo{

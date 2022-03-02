@@ -23,9 +23,8 @@ func (r *MutationResolver) BulletinPub(input types.BulletinPubInput, ctx context
 	if input.CheckPass() {
 		return &types.BulletinPubResult{Message: "not empty error"}, nil
 	}
-	err := resolvers.AddBulletin(input.Title, input.Content, input.Topping)
-	if err != nil {
-		log.Println("resolvers addition Error: ", err.Error())
+	ok := resolvers.AddBulletin(input.Title, input.Content, input.Topping)
+	if !ok {
 		return &types.BulletinPubResult{Message: "resolvers addition Error!"}, nil
 	}
 	return &types.BulletinPubResult{Message: ""}, nil
@@ -43,21 +42,18 @@ func (r *MutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx c
 		return &types.UserInfoUpdateResult{Message: "user information check failed"}, nil
 	}
 	if userId != nil {
-		checkResult, err := resolvers.CheckAdminByUserId(*userId)
-		if err != nil {
-			return nil, err
-		}
+		checkResult := resolvers.CheckAdminByUserId(*userId)
 		inputUserId, err := strconv.ParseUint(input.UserId, 10, 64)
 		if err != nil {
 			log.Println("userId parse error", err)
-			return nil, err
+			return &types.UserInfoUpdateResult{Message: "Update Error!"}, nil
 		}
 		if checkResult && inputUserId == *userId && !(input.Role == "admin") {
 			return &types.UserInfoUpdateResult{Message: "downgrade not permitted"}, nil
 		}
-		err = resolvers.UpdateUserInfo(inputUserId, input.Name, input.Role, input.Mail, input.State)
-		if err != nil {
-			return nil, err
+		ok := resolvers.UpdateUserInfo(inputUserId, input.Name, input.Role, input.Mail, input.State)
+		if !ok {
+			return &types.UserInfoUpdateResult{Message: "Update Error!"}, err
 		}
 		return &types.UserInfoUpdateResult{Message: ""}, nil
 
@@ -76,16 +72,16 @@ func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}, nil
 	}
 	if input.ChallengeId == "" {
-		err := resolvers.AddChallenge(input)
-		if err != nil {
-			return nil, err
+		ok := resolvers.AddChallenge(input)
+		if !ok {
+			return &types.ChallengeMutateResult{Message: "Add Challenge Error!"}, nil
 		}
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}, nil
 	}
 
-	err := resolvers.UpdateChallenge(input)
-	if err != nil {
-		return nil, err
+	ok := resolvers.UpdateChallenge(input)
+	if !ok {
+		return &types.ChallengeMutateResult{Message: "Add Challenge Error!"}, nil
 	}
 	return &types.ChallengeMutateResult{Message: ""}, nil
 }

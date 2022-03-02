@@ -21,9 +21,9 @@ func (r *QueryResolver) AllUserInfos(ctx context.Context) (*types.AllUserInfoRes
 		return &types.AllUserInfoResult{Message: "forbidden"}, nil
 	}
 	var userInfos []types.UserInfo
-	users, err := resolvers.FindAllUser()
-	if err != nil {
-		return nil, err
+	users := resolvers.FindAllUser()
+	if users == nil {
+		return &types.AllUserInfoResult{Message: "Get User Info Error!", AllUserInfos: userInfos}, nil
 	}
 	//TODO: May need some method to cache
 	for _, v := range users {
@@ -39,9 +39,9 @@ func (r *QueryResolver) ChallengeConfigs(ctx context.Context) (*types.ChallengeC
 	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
 		return &types.ChallengeConfigsResult{Message: "forbidden"}, nil
 	}
-	challenges, err := resolvers.FindAllChallenges()
-	if err != nil {
-		return nil, err
+	challenges := resolvers.FindAllChallenges()
+	if challenges == nil {
+		return &types.ChallengeConfigsResult{Message: "Challenge Config Error!"}, nil
 	}
 	var challengeConfigs []types.ChallengeConfig
 	for _, challenge := range challenges {
@@ -49,7 +49,8 @@ func (r *QueryResolver) ChallengeConfigs(ctx context.Context) (*types.ChallengeC
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)
 		if err != nil {
-			return nil, err
+			log.Println(err)
+			return &types.ChallengeConfigsResult{Message: "Challenge Config Error!"}, nil
 		}
 		challengeConfigs = append(challengeConfigs, config)
 	}
@@ -66,18 +67,20 @@ func (r *QueryResolver) SubmitHistory(userId string, ctx context.Context) (*type
 
 	id, err := strconv.ParseUint(userId, 10, 64)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return &types.SubmitHistoryResult{Message: "Submit History Error!"}, nil
 	}
-	submits, err := resolvers.FindSubmitCorrectByUserId(id)
-	if err != nil {
-		return nil, err
+	submits := resolvers.FindSubmitCorrectByUserId(id)
+	if submits == nil {
+		return &types.SubmitHistoryResult{Message: "Submit History Error!"}, nil
 	}
 	var submitInfos []types.SubmitInfo
 	for _, submit := range submits {
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(submit.Challenge.Configuration), &config)
 		if err != nil {
-			return nil, err
+			log.Println(err)
+			return &types.SubmitHistoryResult{Message: "Submit History Error!"}, nil
 		}
 		submitInfo := types.SubmitInfo{SubmitTime: submit.SubmitTime.String(), ChallengeName: config.Name}
 		submitInfos = append(submitInfos, submitInfo)
