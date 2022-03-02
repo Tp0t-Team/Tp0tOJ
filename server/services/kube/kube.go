@@ -26,8 +26,8 @@ func init() {
 	}
 }
 
-func NewContainerPortConfig(portName string, protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
-	return &corev1.ContainerPort{Name: portName, Protocol: protocol, ContainerPort: containerPort}
+func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
+	return &corev1.ContainerPort{Name: strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
 }
 
 //NewServicePortConfig
@@ -37,9 +37,9 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 	return &corev1.ServicePort{Name: portName, Protocol: protocol, Port: externalPort, TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: internalPort}, NodePort: podPort}
 }
 
-//k8sPodAlloc
-func k8sPodAlloc(replicaId int64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) {
-	id := strconv.FormatInt(replicaId, 10)
+//K8sPodAlloc
+func K8sPodAlloc(replicaId int64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) {
+	id := strconv.FormatInt(replicaId, 10) + containerName
 	clientSet, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		log.Panicln(err)
@@ -107,30 +107,30 @@ func k8sPodAlloc(replicaId int64, containerName string, imgLabel string, portCon
 
 }
 
-func k8sPodList() {
+func K8sPodList() {
 
 }
 
-func k8sPodDestroy() {
+func K8sPodDestroy() {
 
 }
 
-func k8sPodStatus() {
+func K8sPodStatus() {
 
 }
 
-func dockerFileUpload() {
+func DockerFileUpload() {
 
 }
 
-func imgBuild() {
+func ImgBuild() {
 
 }
 
-func imgDelete() {
+func ImgDelete() {
 
 }
 
-func imgStatus() {
+func ImgStatus() {
 
 }
