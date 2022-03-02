@@ -43,7 +43,7 @@ func (r *QueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeCo
 	if challenges == nil {
 		return &types.ChallengeConfigsResult{Message: "Challenge Config Error!"}
 	}
-	var challengeConfigs []types.ChallengeConfig
+	var challengeConfigs []types.ChallengeConfigAndState
 	for _, challenge := range challenges {
 		log.Println(challenge.Configuration)
 		var config types.ChallengeConfig
@@ -52,7 +52,10 @@ func (r *QueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeCo
 			log.Println(err)
 			return &types.ChallengeConfigsResult{Message: "Challenge Config Error!"}
 		}
-		challengeConfigs = append(challengeConfigs, config)
+		challengeConfigs = append(challengeConfigs, types.ChallengeConfigAndState{
+			Config: config,
+			State:  challenge.State,
+		})
 	}
 	return &types.ChallengeConfigsResult{Message: "", ChallengeConfigs: challengeConfigs}
 }

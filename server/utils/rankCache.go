@@ -135,9 +135,9 @@ func (cache *RAMRankCache) refreshRank() {
 }
 
 func (cache *RAMRankCache) WarmUp() error {
-	challenges, err := resolvers.FindAllChallenges()
-	if err != nil {
-		return err
+	challenges := resolvers.FindAllChallenges()
+	if challenges == nil {
+		return errors.New("") // TODO:
 	}
 	for _, challenge := range challenges {
 		var config types.ChallengeConfig
@@ -152,16 +152,16 @@ func (cache *RAMRankCache) WarmUp() error {
 		}
 		cache.AddChallenge(challenge.ChallengeId, score)
 	}
-	users, err := resolvers.FindAllUser()
-	if err != nil {
-		return err
+	users := resolvers.FindAllUser()
+	if users == nil {
+		return errors.New("") // TODO:
 	}
 	for _, user := range users {
 		cache.AddUser(user.UserId)
 	}
-	submits, err := resolvers.FindSubmitCorrectSorted()
-	if err != nil {
-		return err
+	submits := resolvers.FindSubmitCorrectSorted()
+	if submits == nil {
+		return errors.New("") // TODO:
 	}
 	for _, submit := range submits {
 		err := cache.submitImpl(submit.UserId, submit.ChallengeId, submit.SubmitTime)

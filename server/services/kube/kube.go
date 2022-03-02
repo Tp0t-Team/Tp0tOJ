@@ -119,6 +119,10 @@ func K8sPodStatus() {
 
 }
 
+func K8sServiceGetUrls() []string {
+	// TODO:
+}
+
 func DockerFileUpload() {
 
 }
