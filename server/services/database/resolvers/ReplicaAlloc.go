@@ -46,13 +46,16 @@ func FindReplicaAllocByUserIdAndChallengeId(userId uint64, challengeId uint64, o
 	return &found[0], nil
 }
 
-func AddReplicaAlloc(replicaId uint64, userId uint64) bool {
+func AddReplicaAlloc(replicaId uint64, userId uint64, outsideTX *gorm.DB) bool {
+	if outsideTX == nil {
+		outsideTX = db
+	}
 	// TODO: maybe need some more check, to ensure user only have one replica for each challenge
 	replicaAlloc := entity.ReplicaAlloc{
 		ReplicaId: replicaId,
 		UserId:    userId,
 	}
-	result := db.Create(&replicaAlloc)
+	result := outsideTX.Create(&replicaAlloc)
 	if result.Error != nil {
 		log.Println(result.Error)
 		return false

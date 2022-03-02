@@ -38,7 +38,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 						return errors.New("found more than one or none replica for singleton challenge")
 					}
 					log.Println(newUser.UserId)
-					ok := AddReplicaAlloc(replicas[0].ReplicaId, newUser.UserId)
+					ok := AddReplicaAlloc(replicas[0].ReplicaId, newUser.UserId, tx)
 					if !ok {
 						return errors.New("add replicaAlloc error")
 					}
