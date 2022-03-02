@@ -47,7 +47,7 @@ type Challenge struct {
 }
 
 func Parse(config *Config) {
-	f, err := ioutil.ReadFile("config.yaml")
+	f, err := ioutil.ReadFile("resources/config.yaml")
 	if err != nil {
 		log.Panicln(err.Error())
 	}
