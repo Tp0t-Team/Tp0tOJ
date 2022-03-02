@@ -132,12 +132,22 @@ type ChallengeMutateInput struct {
 	ExternalLink []string
 	Hint         []string
 	State        string
+	Singleton    bool
+	NodeConfig   []NodeConfigInput
 }
 
 func (input *ChallengeMutateInput) CheckPass() bool {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Description = strings.TrimSpace(input.Description)
-	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State)
+	if len(input.NodeConfig) == 0 {
+		input.Singleton = true
+	}
+	for _, node := range input.NodeConfig {
+		if !node.CheckPass() {
+			return false
+		}
+	}
+	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
 }
 
 func checkChallengeCategory(str string) bool {
@@ -169,6 +179,55 @@ type FlagTypeInput struct {
 func (input *FlagTypeInput) CheckPass() bool {
 	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
 	return input.Value != ""
+}
+
+type NodeConfigInput struct {
+	Name         string
+	Image        string
+	Ports        []ContainerPortInput
+	ServicePorts []ServicePortInput
+}
+
+func (input *NodeConfigInput) CheckPass() bool {
+	input.Name = strings.TrimSpace(input.Name)
+	input.Image = strings.TrimSpace(input.Image)
+	for _, port := range input.Ports {
+		if !port.CheckPass() {
+			return false
+		}
+	}
+	for _, port := range input.ServicePorts {
+		if !port.CheckPass() {
+			return false
+		}
+	}
+	return input.Name != "" && input.Image != ""
+}
+
+type ContainerPortInput struct {
+	Port     int
+	Protocol string
+}
+
+func (input *ContainerPortInput) CheckPass() bool {
+	return input.Port > 0 && input.Port <= 65535 && (input.Protocol == "TCP" || input.Protocol == "UDP")
+}
+
+type ServicePortInput struct {
+	Name     string
+	Protocol string
+	External int
+	Internal int
+	Pod      int
+}
+
+func (input *ServicePortInput) CheckPass() bool {
+	input.Name = strings.TrimSpace(input.Name)
+	return input.Name != "" &&
+		(input.Protocol == "TCP" || input.Protocol == "UDP") &&
+		input.External > 0 && input.External < 65535 &&
+		input.Internal > 0 && input.Internal < 65535 &&
+		input.Pod > 0 && input.Pod < 65535
 }
 
 type ChallengeMutateResult struct {
@@ -250,6 +309,28 @@ type ChallengeConfig struct {
 	ExternalLink []string
 	Hint         []string
 	State        string
+	Singleton    bool
+	NodeConfig   []NodeConfig
+}
+
+type NodeConfig struct {
+	Name         string
+	Image        string
+	Ports        []ContainerPort
+	ServicePorts []ServicePort
+}
+
+type ContainerPort struct {
+	Port     int
+	Protocol string
+}
+
+type ServicePort struct {
+	Name     string
+	Protocol string
+	External int
+	Internal int
+	Pod      int
 }
 
 type ScoreType struct {

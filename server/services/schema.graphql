@@ -109,6 +109,8 @@ input ChallengeMutateInput {
     externalLink: [String]!
     hint: [String]!
     state: String!
+    singleton: Boolean!
+    nodeConfig: [NodeConfigInput]!
 }
 
 input ScoreTypeInput {
@@ -119,6 +121,26 @@ input ScoreTypeInput {
 input FlagTypeInput {
     dynamic: Boolean!
     value: String!
+}
+
+input NodeConfigInput {
+    name: String!
+    image: String!
+    ports: [ContainerPortInput]!
+    servicePorts: [ServicePortInput]!
+}
+
+input ContainerPortInput {
+    port: Int!
+    protocol: String!
+}
+
+input ServicePortInput {
+    name: String!
+    protocol: String!
+    external: Int!
+    internal: Int!
+    pod: Int!
 }
 
 type ChallengeMutateResult {
@@ -221,6 +243,28 @@ type ChallengeConfig {
     externalLink: [String]
     hint: [String]
     state: String
+    singleton: Boolean
+    nodeConfig: [NodeConfig]
+}
+
+type NodeConfig {
+    name: String
+    image: String
+    ports: [ContainerPort]
+    servicePorts: [ServicePort]
+}
+
+type ContainerPort {
+    port: Int
+    protocol: String
+}
+
+type ServicePort {
+    name: String
+    protocol: String
+    external: Int
+    internal: Int
+    pod: Int
 }
 
 type ScoreType {
