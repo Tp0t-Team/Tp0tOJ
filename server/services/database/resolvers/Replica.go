@@ -1,10 +1,15 @@
 package resolvers
 
 import (
+	"crypto/md5"
+	"crypto/rand"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"log"
+	unsafeRand "math/rand"
 	"server/entity"
 	"server/services/types"
 )
@@ -38,7 +43,20 @@ func AddReplica(challengeId uint64) bool {
 		}
 		var flag string
 		if config.Flag.Dynamic {
-			// TODO: generate dynamic flag
+			//dynamic flag should be generated in here,and transfer to starting Pod as environment value,
+			//the entrypoint.sh of dockerfile need to clear the FLAG environment value before starting the service
+			seed := make([]byte, 8)
+			_, err := rand.Read(seed)
+			if err != nil {
+				return err
+			}
+			unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
+			init := make([]byte, 16)
+			_, err = unsafeRand.Read(init)
+			if err != nil {
+				return err
+			}
+			flag = fmt.Sprintf("%x", md5.Sum(init))
 		} else {
 			flag = config.Flag.Value
 		}
@@ -116,7 +134,6 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 			return getResult.Error
 		}
 		for _, replica := range replicas {
-			// TODO: delete replicaAlloc
 			ok := DeleteReplicaAllocByReplicaId(replica.ReplicaId, tx)
 			if !ok {
 				return errors.New("deleteReplicaAllocByReplicaId occurred error")
