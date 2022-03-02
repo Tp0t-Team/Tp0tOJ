@@ -48,7 +48,21 @@ func AddChallenge(input types.ChallengeMutateInput) error {
 		//wo don't allow the same name between two challenges
 		checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).First(&entity.Challenge{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
-			newChallengeConfig := types.ChallengeConfig{Name: input.Name, Category: input.Category, Score: input.Score, Flag: input.Flag, Description: input.Description, ExternalLink: input.ExternalLink, Hint: input.Hint}
+			newChallengeConfig := types.ChallengeConfig{
+				Name:     input.Name,
+				Category: input.Category,
+				Score: types.ScoreType{
+					Dynamic:   input.Score.Dynamic,
+					BaseScore: input.Score.BaseScore,
+				},
+				Flag: types.FlagType{
+					Dynamic: input.Flag.Dynamic,
+					Value:   input.Flag.Value,
+				},
+				Description:  input.Description,
+				ExternalLink: input.ExternalLink,
+				Hint:         input.Hint,
+			}
 			marshalConfig, err := json.Marshal(newChallengeConfig)
 			if err != nil {
 				return err
@@ -84,7 +98,21 @@ func UpdateChallenge(input types.ChallengeMutateInput) error {
 		if challengeItem.Error != nil {
 			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
 		}
-		newChallengeConfig := types.ChallengeConfig{Name: input.Name, Category: input.Category, Score: input.Score, Flag: input.Flag, Description: input.Description, ExternalLink: input.ExternalLink, Hint: input.Hint}
+		newChallengeConfig := types.ChallengeConfig{
+			Name:     input.Name,
+			Category: input.Category,
+			Score: types.ScoreType{
+				Dynamic:   input.Score.Dynamic,
+				BaseScore: input.Score.BaseScore,
+			},
+			Flag: types.FlagType{
+				Dynamic: input.Flag.Dynamic,
+				Value:   input.Flag.Value,
+			},
+			Description:  input.Description,
+			ExternalLink: input.ExternalLink,
+			Hint:         input.Hint,
+		}
 		marshalConfig, err := json.Marshal(newChallengeConfig)
 		if err != nil {
 			return err

@@ -162,7 +162,7 @@ type UserInfo {
     #    protectedTime: String # Timestamp to String
     role: String
     state: String
-    rank: Int
+    #    rank: Int
     #    grade: String
 }
 
