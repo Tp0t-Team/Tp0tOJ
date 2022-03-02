@@ -27,14 +27,14 @@ func AddBulletin(title string, content string, topping bool) bool {
 	}
 	return true
 }
-func FindBulletinByTitle(title string) *entity.Bulletin {
+func FindBulletinByTitle(title string) (*entity.Bulletin, error) {
 	var bulletin entity.Bulletin
 	result := db.Where(map[string]interface{}{"Title": title}).First(&bulletin)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil
+		return nil, nil
 	} else if result.Error != nil {
-		log.Println(result.Error)
-		return nil
+		//log.Println(result.Error)
+		return nil, result.Error
 	}
-	return &bulletin
+	return &bulletin, nil
 }
