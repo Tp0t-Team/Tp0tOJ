@@ -7,6 +7,7 @@ import (
 	"log"
 	"server/entity"
 	"server/services/database/resolvers"
+	"server/services/kube"
 	"server/services/types"
 	"strconv"
 	"time"
@@ -121,6 +122,18 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			log.Println(err)
 			return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
 		}
+		replicaUrls := []string{}
+		var alloc *entity.ReplicaAlloc
+		alloc, err = resolvers.FindReplicaAllocByUserIdAndChallengeId(currentUserId, challenge.ChallengeId, nil)
+		if err != nil {
+			return &types.ChallengeInfosResult{Message: "Error"} // TODO:
+		}
+		if alloc != nil {
+			for _, node := range config.NodeConfig {
+				replicaUrls = append(replicaUrls, kube.K8sServiceGetUrls(alloc.ReplicaId, node.Name)...)
+			}
+		}
+		replicaUrls = append(replicaUrls, config.ExternalLink...)
 		// TODO: add thr replica url to external links
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
@@ -128,7 +141,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			Name:         config.Name,
 			Score:        config.Score.BaseScore,
 			Description:  config.Description,
-			ExternalLink: config.ExternalLink,
+			ExternalLink: replicaUrls,
 			Hint:         config.Hint,
 			Blood:        bloodInfo,
 			Done:         correct,

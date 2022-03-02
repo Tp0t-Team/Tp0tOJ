@@ -15,12 +15,18 @@ import (
 	"strconv"
 )
 
-var kubeConfig *rest.Config
+//var kubeConfig *rest.Config
+var clientSet *kubernetes.Clientset
 
 func init() {
 	const config = "/etc/rancher/k3s/k3s.yaml"
+	var kubeConfig *rest.Config
 	var err error
 	kubeConfig, err = clientcmd.BuildConfigFromFlags("", config)
+	if err != nil {
+		log.Panicln(err)
+	}
+	clientSet, err = kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -38,13 +44,8 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 }
 
 //K8sPodAlloc
-func K8sPodAlloc(replicaId int64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) {
-	id := strconv.FormatInt(replicaId, 10) + containerName
-	clientSet, err := kubernetes.NewForConfig(kubeConfig)
-	if err != nil {
-		log.Panicln(err)
-	}
-	deploymentsClient := clientSet.AppsV1().Deployments(corev1.NamespaceDefault)
+func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) {
+	id := strconv.FormatUint(replicaId, 10) + containerName
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
@@ -85,18 +86,20 @@ func K8sPodAlloc(replicaId int64, containerName string, imgLabel string, portCon
 			Type: corev1.ServiceTypeNodePort,
 		},
 	}
-	_, err = deploymentsClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
+	var err error
+	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		log.Panicln(err)
 	}
-	list, err := clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
+	var list *corev1.PodList
+	list, err = clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{"app": id}).String(),
 	})
 	if err != nil {
 		return
 	}
 	deployment.Spec.Template.Spec.NodeName = list.Items[0].Spec.NodeName
-	_, err = deploymentsClient.Update(context.TODO(), deployment, metav1.UpdateOptions{})
+	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Update(context.TODO(), deployment, metav1.UpdateOptions{})
 	if err != nil {
 		return
 	}
@@ -119,8 +122,30 @@ func K8sPodStatus() {
 
 }
 
-func K8sServiceGetUrls() []string {
-	// TODO:
+func K8sServiceGetUrls(replicaId uint64, containerName string) []string {
+	id := strconv.FormatUint(replicaId, 10) + containerName
+	var deployment *appsv1.Deployment
+	var err error
+	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
+	if err != nil {
+		return nil
+	}
+	host := deployment.Spec.Template.Spec.NodeName
+	var service *corev1.Service
+	service, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	if service == nil {
+		return nil
+	}
+	result := []string{}
+	for _, port := range service.Spec.Ports {
+		url := host + ":" + strconv.FormatInt(int64(port.NodePort), 10)
+		result = append(result, url)
+	}
+	return result
 }
 
 func DockerFileUpload() {
