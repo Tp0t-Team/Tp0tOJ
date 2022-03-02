@@ -58,6 +58,8 @@ func AddReplica(challengeId uint64) bool {
 			}
 			flag = fmt.Sprintf("%x", md5.Sum(init))
 		} else {
+			//strings.Split(config.Flag.Value,"\n")
+			//TODO: for muti-flag typed challenge, may need some extra method to map flags to replica
 			flag = config.Flag.Value
 		}
 		newReplica := entity.Replica{
