@@ -12,6 +12,7 @@ import (
 	"server/services/types"
 	"server/utils"
 	"strconv"
+	"time"
 )
 
 type MutationResolver struct {
@@ -128,7 +129,7 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*
 	return &types.ResetResult{Message: ""}, nil
 }
 
-func (r *MutationResolver) Submit(input types.SubmitInput) (*types.SubmitResult, error) {
+func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) (*types.SubmitResult, error) {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
@@ -142,7 +143,7 @@ func (r *MutationResolver) Submit(input types.SubmitInput) (*types.SubmitResult,
 	if err != nil {
 		return &types.SubmitResult{Message: err.Error()}, nil
 	}
-	err := resolvers.AddSubmit(userId, challengeId, input.Flag)
+	err = resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
 	if err != nil {
 		return &types.SubmitResult{Message: err.Error()}, nil
 	}

@@ -18,6 +18,7 @@ func FindReplicaAllocByUserId(userId uint64) ([]entity.ReplicaAlloc, error) {
 }
 
 func AddReplicaAlloc(replicaId uint64, userId uint64) error {
+	// TODO: maybe need some more check, to ensure user only have one replica for each challenge
 	replicaAlloc := entity.ReplicaAlloc{
 		ReplicaId: replicaId,
 		UserId:    userId,
