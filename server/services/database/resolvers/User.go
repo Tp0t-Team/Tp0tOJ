@@ -3,8 +3,10 @@ package resolvers
 import (
 	"errors"
 	"gorm.io/gorm"
+	"k8s.io/apimachinery/pkg/util/json"
 	"log"
 	"server/entity"
+	"server/services/types"
 	"time"
 )
 
@@ -18,14 +20,37 @@ func AddUser(name string, password string, mail string, role string, state strin
 			if result.Error != nil {
 				return result.Error
 			}
-			return nil
+			challenges := FindAllChallenges()
+			if challenges == nil {
+				return errors.New("error occurred getting challenges")
+			}
+			for _, challenge := range challenges {
+				var config types.ChallengeConfig
+				err := json.Unmarshal([]byte(challenge.Configuration), &config)
+				if err != nil {
+					log.Println(err)
+					return errors.New("challenge Config Error")
+				}
+				//Alloc all replicas for the singleton and enabled challenge
+				if challenge.State == "enabled" && config.Singleton {
+					replicas := FindReplicaByChallengeId(challenge.ChallengeId)
+					if replicas == nil || len(replicas) != 1 {
+						return errors.New("found more than one or none replica for singleton challenge")
+					}
+					log.Println(newUser.UserId)
+					ok := AddReplicaAlloc(replicas[0].ReplicaId, newUser.UserId)
+					if !ok {
+						return errors.New("add replicaAlloc error")
+					}
+				}
+
+			}
 		} else if checkResult.Error != nil {
 			return checkResult.Error
 		} else {
 			return errors.New("exists")
 		}
-		// TODO: for each enabled singleton challenge, make a replicaAlloc to this user
-
+		return nil
 	})
 	if err != nil {
 		log.Println(err)
