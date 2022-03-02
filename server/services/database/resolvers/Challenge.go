@@ -127,7 +127,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		if input.State != "" {
 			challenge.State = input.State
 		}
-		//TODO: wo don't allow the same name between two challenges
+		//TODO: we don't allow the same name between two challenges
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		db.Save(&challenge)
 		// TODO: update flag replicas

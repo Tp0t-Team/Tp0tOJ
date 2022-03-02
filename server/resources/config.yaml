@@ -19,6 +19,7 @@ redis:
   minIdle: 0
   timeout: 1000
 challenge:
+#  flagPrefix: Tp0t
   firstBloodReward: 0.10
   secondBloodReward: 0.08
   thirdBloodReward: 0.05
