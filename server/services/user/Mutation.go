@@ -38,40 +38,40 @@ func passwordHash(password string) string {
 	return fmt.Sprintf("%x", hash2.Sum(nil))
 }
 
-func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Context) (*types.RegisterResult, error) {
+func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Context) *types.RegisterResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
-		return &types.RegisterResult{Message: "already login cannot register"}, nil
+		return &types.RegisterResult{Message: "already login cannot register"}
 	}
 	if !input.CheckPass() {
-		return &types.RegisterResult{Message: "invalid information"}, nil
+		return &types.RegisterResult{Message: "invalid information"}
 	}
 	if !MailPattern.MatchString(input.Mail) {
-		return &types.RegisterResult{Message: "invalid mail"}, nil
+		return &types.RegisterResult{Message: "invalid mail"}
 	}
 	ok := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
 	if !ok {
-		return &types.RegisterResult{Message: "Register Error!"}, nil
+		return &types.RegisterResult{Message: "Register Error!"}
 	}
-	return &types.RegisterResult{Message: ""}, nil
+	return &types.RegisterResult{Message: ""}
 }
 
-func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) (*types.LoginResult, error) {
+func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) *types.LoginResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
-		return &types.LoginResult{Message: "already login"}, nil
+		return &types.LoginResult{Message: "already login"}
 	}
 	if !input.CheckPass() {
-		return &types.LoginResult{Message: "not empty error"}, nil
+		return &types.LoginResult{Message: "not empty error"}
 	}
 	user := resolvers.FindUserByMail(input.Mail)
 	if user == nil {
-		return &types.LoginResult{Message: "Login Service Error!"}, nil
+		return &types.LoginResult{Message: "Login Service Error!"}
 	}
 	if user.Password != passwordHash(input.Password) {
-		return &types.LoginResult{Message: "failed"}, nil
+		return &types.LoginResult{Message: "failed"}
 	}
 	state := true
 	session.Set("isLogin", &state)
@@ -91,62 +91,62 @@ func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) (*
 		teamState = false
 	}
 	session.Set("isTeam", teamState)
-	return &types.LoginResult{Message: ""}, nil
+	return &types.LoginResult{Message: ""}
 }
 
-func (r *MutationResolver) Logout(ctx context.Context) (*types.LogoutResult, error) {
+func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin == nil || !*isLogin {
-		return &types.LogoutResult{Message: "not login yet"}, nil
+		return &types.LogoutResult{Message: "not login yet"}
 	}
 	session.Delete("isTeam")
 	session.Delete("isAdmin")
 	session.Delete("userId")
 	var state = false
 	session.Set("isLogin", &state)
-	return &types.LogoutResult{Message: ""}, nil
+	return &types.LogoutResult{Message: ""}
 }
 
-func (r *MutationResolver) Forget(input string) (*types.ForgetResult, error) {
+func (r *MutationResolver) Forget(input string) *types.ForgetResult {
 	// TODO:
-	return nil, nil
+	return nil
 }
 
-func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) (*types.ResetResult, error) {
+func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) *types.ResetResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
-		return &types.ResetResult{Message: "already login"}, nil
+		return &types.ResetResult{Message: "already login"}
 	}
 	if !input.CheckPass() {
-		return &types.ResetResult{Message: "not empty error"}, nil
+		return &types.ResetResult{Message: "not empty error"}
 	}
 	ok := resolvers.ResetPassword(input.Token, passwordHash(input.Password))
 	if !ok {
-		return &types.ResetResult{Message: "Password Reset Service Error!"}, nil
+		return &types.ResetResult{Message: "Password Reset Service Error!"}
 	}
-	return &types.ResetResult{Message: ""}, nil
+	return &types.ResetResult{Message: ""}
 }
 
-func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) (*types.SubmitResult, error) {
+func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) *types.SubmitResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
-		return &types.SubmitResult{Message: "already login"}, nil
+		return &types.SubmitResult{Message: "already login"}
 	}
 	if !input.CheckPass() {
-		return &types.SubmitResult{Message: "not empty error"}, nil
+		return &types.SubmitResult{Message: "not empty error"}
 	}
 	userId := *session.Get("userId").(*uint64)
 	challengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 	if err != nil {
 		log.Println(err)
-		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
+		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
 	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
 	if !ok {
-		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
+		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	return &types.SubmitResult{Message: ""}, nil
+	return &types.SubmitResult{Message: ""}
 }
