@@ -25,6 +25,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 			return errors.New("exists")
 		}
 		// TODO: for each enabled singleton challenge, make a replicaAlloc to this user
+
 	})
 	if err != nil {
 		log.Println(err)
@@ -33,28 +34,28 @@ func AddUser(name string, password string, mail string, role string, state strin
 	return true
 }
 
-func FindUserByMail(mail string) *entity.User {
+func FindUserByMail(mail string) (*entity.User, error) {
 	var user entity.User
 	result := db.Where(map[string]interface{}{"Mail": mail}).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil
+		return nil, nil
 	} else if result.Error != nil {
-		log.Println(result.Error)
-		return nil
+		//log.Println(result.Error)
+		return nil, result.Error
 	}
-	return &user
+	return &user, nil
 }
 
-func FindUser(id uint64) *entity.User {
+func FindUser(id uint64) (*entity.User, error) {
 	var user entity.User
 	result := db.Find(&user, []uint64{id})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil
+		return nil, nil
 	} else if result.Error != nil {
 		log.Println(result.Error)
-		return nil
+		return nil, result.Error
 	}
-	return &user
+	return &user, nil
 }
 
 func CheckAdminByUserId(userId uint64) bool {

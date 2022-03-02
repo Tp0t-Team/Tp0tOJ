@@ -22,16 +22,16 @@ func FindChallengeByState(state string) []entity.Challenge {
 	return challenges
 }
 
-func FindChallengeById(id uint64) *entity.Challenge {
+func FindChallengeById(id uint64) (*entity.Challenge, error) {
 	var challenge entity.Challenge
 	result := db.Where(map[string]interface{}{"ChallengeId": id}).First(&challenge)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return nil
+		return nil, nil
 	} else if result.Error != nil {
-		log.Println(result.Error)
-		return nil
+		//log.Println(result.Error)
+		return nil, result.Error
 	}
-	return &challenge
+	return &challenge, nil
 }
 
 func FindAllChallenges() []entity.Challenge {
