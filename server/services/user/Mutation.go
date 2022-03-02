@@ -12,6 +12,7 @@ import (
 	"server/services/types"
 	"server/utils"
 	"strconv"
+	"time"
 )
 
 type MutationResolver struct {
@@ -143,7 +144,7 @@ func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) 
 		log.Println(err)
 		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
 	}
-	ok := resolvers.AddSubmit(userId, challengeId, input.Flag)
+	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}, nil
 	}

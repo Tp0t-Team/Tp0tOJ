@@ -67,13 +67,14 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 		} else {
 			return errors.New("database item challenge already exists")
 		}
-		// TODO: create replicas and allocate to all users
+		// TODO: create replicas and allocate to all users if challenge is a singleton & enabled
 		return nil
 	})
 	if err != nil {
 		log.Println(err)
 		return false
 	}
+
 	return true
 }
 
@@ -102,7 +103,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		db.Save(&challenge)
 		// TODO: update flag replicas
-		// TODO: if change state "disabled", replica delete
+		// TODO: if change state "disabled", replica delete & set all submits unavailable
 		// TODO: if change dockerfile, replica re-create
 		// TODO: you can't change flag dynamic-able
 		// TODO: you can't change score dynamic-able

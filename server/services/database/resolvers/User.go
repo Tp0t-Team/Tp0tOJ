@@ -24,6 +24,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 		} else {
 			return errors.New("exists")
 		}
+		// TODO: for each enabled singleton challenge, make a replicaAlloc to this user
 	})
 	if err != nil {
 		log.Println(err)
