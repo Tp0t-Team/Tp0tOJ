@@ -23,7 +23,6 @@ type User struct {
 
 func (t User) MakeAvatarUrl() string {
 	hash := md5.New()
-	// TODO: user info leakage risk
 	_, err := io.WriteString(hash, strings.ToLower(t.Mail))
 	if err != nil {
 		log.Fatalln("Can not calculate MD5 for making AvatarUrl")
