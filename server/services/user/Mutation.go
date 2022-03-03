@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"github.com/domodwyer/mailyak/v3"
 	"github.com/kataras/go-sessions/v3"
 	"io"
 	"log"
+	"net/smtp"
 	"regexp"
 	"server/services/database/resolvers"
 	"server/services/types"
@@ -112,9 +114,40 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	return &types.LogoutResult{Message: ""}
 }
 
+func sendMail(address string, subject string, content string) bool {
+	auth := smtp.PlainAuth("", utils.Configure.Email.Username, utils.Configure.Email.Password, utils.Configure.Email.Host)
+	mail := mailyak.New(utils.Configure.Email.Host+":25", auth)
+	mail.To(address)
+	mail.From(utils.Configure.Email.Username)
+	mail.Subject(subject)
+	mail.Plain().Set(content)
+	err := mail.Send()
+	if err != nil {
+		return false
+	}
+	return true
+}
+
 func (r *MutationResolver) Forget(input string) *types.ForgetResult {
-	// TODO:
-	return nil
+	if input == "" {
+		return &types.ForgetResult{Message: "empty"}
+	}
+	user, err := resolvers.FindUserByMail(input)
+	if err != nil {
+		log.Println(err)
+		return &types.ForgetResult{Message: "error"}
+	}
+	if user == nil {
+		return &types.ForgetResult{Message: "no such user"}
+	}
+	result := resolvers.AddResetToken(user.UserId)
+	if result == nil {
+		return &types.ForgetResult{Message: "failed"}
+	}
+	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\\n%s/reset?token=%s", utils.Configure.Server.Host, result.Token)) {
+		return &types.ForgetResult{Message: "send mail failed"}
+	}
+	return &types.ForgetResult{Message: ""}
 }
 
 func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) *types.ResetResult {

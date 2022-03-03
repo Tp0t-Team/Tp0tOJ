@@ -2,9 +2,12 @@ package resolvers
 
 import (
 	"errors"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"log"
 	"server/entity"
+	"strconv"
+	"time"
 )
 
 func FindResetTokenByUserId(userId uint64) *entity.ResetToken {
@@ -28,6 +31,46 @@ func FindResetTokenByToken(token string) *entity.ResetToken {
 		log.Println(result.Error)
 		return nil
 	}
+	return &resetToken
+}
+
+func makeToken() (string, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	return id.String() + "-" + strconv.FormatInt(time.Now().UnixMilli(), 16), nil
+}
+
+func AddResetToken(userId uint64) *entity.ResetToken {
+	var resetToken entity.ResetToken
+	result := db.Where(map[string]interface{}{"UserId": userId}).First(&resetToken)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		token, err := makeToken()
+		if err != nil {
+			log.Println(result.Error)
+			return nil
+		}
+		resetToken = entity.ResetToken{
+			Token:  token,
+			UserId: userId,
+		}
+		db.Create(&resetToken)
+		return &resetToken
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return nil
+	}
+	if time.Now().Sub(resetToken.UpdatedAt) < 5*time.Minute {
+		return nil
+	}
+	token, err := makeToken()
+	if err != nil {
+		log.Println(result.Error)
+		return nil
+	}
+	resetToken.Token = token
+	db.Save(&resetToken)
 	return &resetToken
 }
 
