@@ -89,14 +89,14 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 	var err error
 	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
-		log.Panicln(err)
+		log.Panicln(err) // TODO: don't panic & rollback
 	}
 	var list *corev1.PodList
 	list, err = clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{"app": id}).String(),
 	})
 	if err != nil {
-		return
+		log.Panicln(err) // TODO: don't panic & rollback
 	}
 	deployment.Spec.Template.Spec.NodeName = list.Items[0].Spec.NodeName
 	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Update(context.TODO(), deployment, metav1.UpdateOptions{})
@@ -105,7 +105,7 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 	}
 	_, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Create(context.TODO(), service, metav1.CreateOptions{})
 	if err != nil {
-		log.Panicln(err)
+		log.Panicln(err) // TODO: don't panic & rollback
 	}
 
 }
@@ -114,8 +114,35 @@ func K8sPodList() {
 
 }
 
-func K8sPodDestroy() {
-
+func K8sPodDestroy(replicaId uint64, containerName string) {
+	id := strconv.FormatUint(replicaId, 10) + containerName
+	var deployment *appsv1.Deployment
+	var err error
+	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if deployment != nil {
+		err := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	var service *corev1.Service
+	service, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if service != nil {
+		err := clientSet.CoreV1().Services(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
 }
 
 func K8sPodStatus() {
