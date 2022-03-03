@@ -168,6 +168,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		// TODO: you can't change flag dynamic-able
 		// TODO: you can't change score dynamic-able
 		// TODO: if change state "enabled", create replicas & alloc to users (only for singleton)
+		// TODO: if change score or state from "enabled" to "disabled", refresh rank
 		return nil
 	})
 	if err != nil {
