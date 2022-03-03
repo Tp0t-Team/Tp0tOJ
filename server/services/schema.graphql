@@ -179,7 +179,7 @@ type UserInfo {
     #    qq: String
     mail: String
     joinTime: String # Timestamp to String
-    score: String # long to String
+    score: Int
     #    topRank: Int
     #    protectedTime: String # Timestamp to String
     role: String
@@ -220,6 +220,8 @@ type ChallengeInfo {
     hint: [String]
     blood: [BloodInfo]
     done: Boolean
+    manual: Boolean
+    allocated: Boolean
 }
 
 type BloodInfo {

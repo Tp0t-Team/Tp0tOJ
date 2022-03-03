@@ -7,6 +7,7 @@ import (
 	"log"
 	"server/services/database/resolvers"
 	"server/services/types"
+	"server/utils"
 	"strconv"
 )
 
@@ -27,7 +28,7 @@ func (r *QueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInfoResu
 	}
 	//TODO: May need some method to cache
 	for _, v := range users {
-		userInfos = append(userInfos, types.UserInfo{UserId: strconv.FormatUint(v.UserId, 10), Name: v.Name, Avatar: v.MakeAvatarUrl(), Mail: v.Mail, JoinTime: v.JoinTime.String(), Score: strconv.FormatInt(v.Score, 10), Role: v.Role, State: v.State})
+		userInfos = append(userInfos, types.UserInfo{UserId: strconv.FormatUint(v.UserId, 10), Name: v.Name, Avatar: v.MakeAvatarUrl(), Mail: v.Mail, JoinTime: v.JoinTime.String(), Score: int(utils.Cache.GetUserScore(v.UserId)), Role: v.Role, State: v.State})
 	}
 	return &types.AllUserInfoResult{Message: "", AllUserInfos: userInfos}
 }

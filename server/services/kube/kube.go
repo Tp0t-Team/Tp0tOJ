@@ -32,6 +32,16 @@ func init() {
 	}
 }
 
+func ParseProtocol(name string) corev1.Protocol {
+	if name == "TCP" {
+		return corev1.ProtocolTCP
+	} else if name == "UDP" {
+		return corev1.ProtocolUDP
+	} else {
+		return corev1.ProtocolTCP
+	}
+}
+
 func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
 	return &corev1.ContainerPort{Name: strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
 }
@@ -44,7 +54,7 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 }
 
 //K8sPodAlloc
-func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) {
+func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort) bool {
 	id := strconv.FormatUint(replicaId, 10) + containerName
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -89,60 +99,68 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 	var err error
 	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
-		log.Panicln(err) // TODO: don't panic & rollback
+		// don't panic & rollback
+		log.Println(err)
+		return false
 	}
 	var list *corev1.PodList
 	list, err = clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{"app": id}).String(),
 	})
 	if err != nil {
-		log.Panicln(err) // TODO: don't panic & rollback
+		// don't panic & rollback
+		log.Println(err)
+		return false
 	}
 	deployment.Spec.Template.Spec.NodeName = list.Items[0].Spec.NodeName
 	_, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Update(context.TODO(), deployment, metav1.UpdateOptions{})
 	if err != nil {
-		return
+		log.Println(err)
+		return false
 	}
 	_, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Create(context.TODO(), service, metav1.CreateOptions{})
 	if err != nil {
-		log.Panicln(err) // TODO: don't panic & rollback
+		// don't panic & rollback
+		log.Println(err)
+		return false
 	}
-
+	return true
 }
 
 func K8sPodList() {
 
 }
 
-func K8sPodDestroy(replicaId uint64, containerName string) {
+func K8sPodDestroy(replicaId uint64, containerName string) bool {
 	id := strconv.FormatUint(replicaId, 10) + containerName
 	var deployment *appsv1.Deployment
 	var err error
 	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
-		return
+		return false
 	}
 	if deployment != nil {
 		err := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
 		if err != nil {
 			log.Println(err)
-			return
+			return false
 		}
 	}
 	var service *corev1.Service
 	service, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 	if err != nil {
 		log.Println(err)
-		return
+		return false
 	}
 	if service != nil {
 		err := clientSet.CoreV1().Services(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
 		if err != nil {
 			log.Println(err)
-			return
+			return false
 		}
 	}
+	return true
 }
 
 func K8sPodStatus() {

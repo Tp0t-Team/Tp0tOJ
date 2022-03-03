@@ -13,11 +13,17 @@ import (
 
 type RankCache interface {
 	SetCalculator(calculator ScoreCalculator)
-	GetRank() []uint64
+	GetRank() []RankItem
+	GetUserScore(userId uint64) uint64
 	AddUser(userId uint64)
 	AddChallenge(challengeId uint64, originScore uint64)
 	Submit(userId uint64, challengeId uint64, stamp time.Time) error
 	WarmUp() error
+}
+
+type RankItem struct {
+	UserId uint64
+	Score  uint64
 }
 
 type RAMRankCache struct {
@@ -41,12 +47,27 @@ func (cache *RAMRankCache) SetCalculator(calculator ScoreCalculator) {
 	cache.calculator = calculator
 }
 
-func (cache *RAMRankCache) GetRank() []uint64 {
+func (cache *RAMRankCache) GetRank() []RankItem {
 	cache.mutex.RLock()
 	defer cache.mutex.RUnlock()
-	ret := make([]uint64, len(cache.rank))
-	copy(ret, cache.rank)
+	ret := []RankItem{}
+	for _, user := range cache.rank {
+		ret = append(ret, RankItem{
+			UserId: user,
+			Score:  cache.userScore[user],
+		})
+	}
 	return ret
+}
+
+func (cache *RAMRankCache) GetUserScore(userId uint64) uint64 {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+	score, ok := cache.userScore[userId]
+	if !ok {
+		return 0
+	}
+	return score
 }
 
 func (cache *RAMRankCache) AddUser(userId uint64) {

@@ -48,7 +48,7 @@ func FindAllChallenges() []entity.Challenge {
 
 func AddChallenge(input types.ChallengeMutateInput) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
-		//wo don't allow the same name between two challenges
+		// we don't allow the same name between two challenges
 		checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).First(&entity.Challenge{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
 			nodes := []types.NodeConfig{}
@@ -81,13 +81,32 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 			if result.Error != nil {
 				return result.Error
 			}
+			if input.State == "enabled" && input.Singleton {
+				replica := AddReplica(newChallenge.ChallengeId, tx)
+				if replica == nil {
+					return errors.New("create replica failed")
+				}
+				ok := EnableReplica(replica.ReplicaId, tx)
+				if !ok {
+					return errors.New("enabled replica failed")
+				}
+				users := FindAllUser()
+				if users == nil {
+					return errors.New("find all users failed")
+				}
+				for _, user := range users {
+					ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+					if !ok {
+						return errors.New("add replicaAlloc error")
+					}
+				}
+			}
 			return nil
 		} else if checkResult.Error != nil {
 			return checkResult.Error
 		} else {
 			return errors.New("database item challenge already exists")
 		}
-		// TODO: create replicas and allocate to all users if challenge is a singleton & enabled
 		return nil
 	})
 	if err != nil {

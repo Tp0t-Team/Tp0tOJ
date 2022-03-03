@@ -293,7 +293,7 @@ type UserInfo struct {
 	Avatar   string
 	Mail     string
 	JoinTime string
-	Score    string
+	Score    int
 	Role     string
 	State    string
 	//Rank     int
@@ -331,6 +331,8 @@ type ChallengeInfo struct {
 	Hint         []string
 	Blood        []BloodInfo
 	Done         bool
+	Manual       bool
+	Allocated    bool
 }
 
 type BloodInfo struct {

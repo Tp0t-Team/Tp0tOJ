@@ -17,13 +17,13 @@ type User struct {
 	Mail      string    `gorm:"check: mail <> ''"`
 	JoinTime  time.Time `gorm:"not null"`
 	Role      string    `gorm:"check: role <> ''"`
-	Score     int64
 	CreatedAt time.Time `gorm:"autoCreateTime;not null;"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime;not null;"`
 }
 
 func (t User) MakeAvatarUrl() string {
 	hash := md5.New()
+	// TODO: user info leakage risk
 	_, err := io.WriteString(hash, strings.ToLower(t.Mail))
 	if err != nil {
 		log.Fatalln("Can not calculate MD5 for making AvatarUrl")

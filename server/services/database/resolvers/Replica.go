@@ -8,10 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
+	corev1 "k8s.io/api/core/v1"
 	"log"
 	unsafeRand "math/rand"
 	"server/entity"
+	"server/services/kube"
 	"server/services/types"
+	"strconv"
 )
 
 func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
@@ -26,8 +29,12 @@ func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	return replicas
 }
 
-func AddReplica(challengeId uint64) bool {
-	err := db.Transaction(func(tx *gorm.DB) error {
+func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	var newReplica entity.Replica
+	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
 		challengeResult := tx.Where(map[string]interface{}{"ChallengeId": challengeId}).First(&challenge)
 		if challengeResult.Error != nil {
@@ -62,7 +69,7 @@ func AddReplica(challengeId uint64) bool {
 			//TODO: for muti-flag typed challenge, may need some extra method to map flags to replica
 			flag = config.Flag.Value
 		}
-		newReplica := entity.Replica{
+		newReplica = entity.Replica{
 			ChallengeId: challengeId,
 			Status:      "disabled",
 			Flag:        flag,
@@ -75,9 +82,9 @@ func AddReplica(challengeId uint64) bool {
 	})
 	if err != nil {
 		log.Println(err)
-		return false
+		return nil
 	}
-	return true
+	return &newReplica
 }
 
 func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
@@ -90,9 +97,44 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		if getResult.Error != nil {
 			return getResult.Error
 		}
+		if replica.Status == "enabled" {
+			return nil
+		}
 		replica.Status = "enabled"
+
+		var config types.ChallengeConfig
+		err := json.Unmarshal([]byte(replica.Challenge.Configuration), &config)
+		if err != nil {
+			return err
+		}
+		createPodSuccess := true
+		for _, node := range config.NodeConfig {
+			ports := []corev1.ContainerPort{}
+			for _, port := range node.Ports {
+				ports = append(ports, *kube.NewContainerPortConfig(kube.ParseProtocol(port.Protocol), int32(port.Port)))
+			}
+			servicePorts := []corev1.ServicePort{}
+			for _, port := range node.ServicePorts {
+				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), int32(port.External), int32(port.Internal), int32(port.Pod)))
+			}
+			ok := kube.K8sPodAlloc(replicaId, node.Name, node.Image, ports, servicePorts)
+			if !ok {
+				createPodSuccess = false
+				break
+			}
+		}
+		if !createPodSuccess {
+			for _, node := range config.NodeConfig {
+				ok := kube.K8sPodDestroy(replicaId, node.Name)
+				if !ok {
+					// TODO: this a uncorrectable error
+					return errors.New("alloc pod failed & rollback pod failed - replica: " + strconv.FormatUint(replicaId, 10))
+				}
+			}
+			return errors.New("create pod failed")
+		}
+
 		db.Save(&replica)
-		// TODO: K8sPodAlloc
 		return nil
 	})
 	if err != nil {
@@ -112,9 +154,25 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		if getResult.Error != nil {
 			return getResult.Error
 		}
+		if replica.Status == "disabled" {
+			return nil
+		}
 		replica.Status = "disabled"
-		// TODO: K8sPodDestroy
 		db.Save(&replica)
+
+		var config types.ChallengeConfig
+		err := json.Unmarshal([]byte(replica.Challenge.Configuration), &config)
+		if err != nil {
+			return err
+		}
+		for _, node := range config.NodeConfig {
+			ok := kube.K8sPodDestroy(replicaId, node.Name)
+			if !ok {
+				// TODO: this a uncorrectable error
+				return errors.New("destroy pod failed - replica: " + strconv.FormatUint(replicaId, 10))
+			}
+		}
+
 		return nil
 	})
 	if err != nil {

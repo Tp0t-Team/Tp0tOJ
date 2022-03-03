@@ -15,7 +15,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 	err := db.Transaction(func(tx *gorm.DB) error {
 		checkResult := tx.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
-			newUser := entity.User{Name: name, Password: password, Mail: mail, Role: role, State: state, JoinTime: time.Now(), Score: 0}
+			newUser := entity.User{Name: name, Password: password, Mail: mail, Role: role, State: state, JoinTime: time.Now()}
 			result := tx.Create(&newUser)
 			if result.Error != nil {
 				return result.Error

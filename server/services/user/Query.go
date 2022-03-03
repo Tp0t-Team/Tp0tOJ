@@ -9,6 +9,7 @@ import (
 	"server/services/database/resolvers"
 	"server/services/kube"
 	"server/services/types"
+	"server/utils"
 	"strconv"
 	"time"
 )
@@ -33,8 +34,21 @@ func (r *QueryResolver) AllBulletin() *types.BulletinResult {
 }
 
 func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
-	// TODO:
-	return nil
+	rank := utils.Cache.GetRank()
+	ret := []types.RankResultDesc{}
+	for _, item := range rank {
+		user, err := resolvers.FindUser(item.UserId)
+		if err != nil || user == nil {
+			return &types.RankResult{Message: "get rank error"}
+		}
+		ret = append(ret, types.RankResultDesc{
+			UserId: strconv.FormatUint(item.UserId, 10),
+			Name:   user.Name,
+			Avatar: user.MakeAvatarUrl(),
+			Score:  int(item.Score),
+		})
+	}
+	return &types.RankResult{Message: "", RankResultDescs: ret}
 }
 
 func (r *QueryResolver) UserInfo(userId string, ctx context.Context) *types.UserInfoResult {
@@ -66,7 +80,7 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) *types.User
 			Avatar:   user.MakeAvatarUrl(),
 			Mail:     "",
 			JoinTime: user.JoinTime.Format(time.RFC3339),
-			Score:    "0", // TODO: strconv.FormatInt(user.Score, 10),
+			Score:    int(utils.Cache.GetUserScore(user.UserId)),
 			Role:     user.Role,
 			State:    user.State,
 			//Rank:     0, //
@@ -134,7 +148,6 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			}
 		}
 		replicaUrls = append(replicaUrls, config.ExternalLink...)
-		// TODO: add thr replica url to external links
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     config.Category,
@@ -145,6 +158,8 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			Hint:         config.Hint,
 			Blood:        bloodInfo,
 			Done:         correct,
+			Manual:       !config.Singleton && len(config.NodeConfig) > 0, // TODO: maybe need more conditions
+			Allocated:    alloc != nil,
 		}
 		result.ChallengeInfos = append(result.ChallengeInfos, item)
 	}
