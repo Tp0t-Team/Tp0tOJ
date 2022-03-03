@@ -24,3 +24,6 @@ challenge:
   secondBloodReward: 0.08
   thirdBloodReward: 0.05
   halfLift: 20
+kubernetes:
+  portAllocBegin: 30000
+  portAllocEnd: 40000

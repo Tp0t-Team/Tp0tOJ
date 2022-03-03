@@ -140,7 +140,7 @@ input ServicePortInput {
     protocol: String!
     external: Int!
     internal: Int!
-    pod: Int!
+    pod: Int! # 0 for auto allocate port
 }
 
 type ChallengeMutateResult {

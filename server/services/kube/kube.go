@@ -12,11 +12,19 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/utils/pointer"
 	"log"
+	"server/utils"
 	"strconv"
 )
 
 //var kubeConfig *rest.Config
 var clientSet *kubernetes.Clientset
+
+type portAllocInfo struct {
+	allocated map[int32]struct{}
+	current   int32
+}
+
+var AutoPortSet map[string]*portAllocInfo
 
 func init() {
 	const config = "/etc/rancher/k3s/k3s.yaml"
@@ -30,6 +38,7 @@ func init() {
 	if err != nil {
 		log.Panicln(err)
 	}
+	AutoPortSet = map[string]*portAllocInfo{}
 }
 
 func ParseProtocol(name string) corev1.Protocol {
@@ -118,6 +127,36 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 		log.Println(err)
 		return false
 	}
+	// auto alloc port
+	if _, ok := AutoPortSet[deployment.Spec.Template.Spec.NodeName]; !ok {
+		AutoPortSet[deployment.Spec.Template.Spec.NodeName] = &portAllocInfo{
+			allocated: map[int32]struct{}{},
+			current:   utils.Configure.Kubernetes.PortAllocBegin,
+		}
+	}
+	portMaxSize := int(utils.Configure.Kubernetes.PortAllocEnd - utils.Configure.Kubernetes.PortAllocBegin)
+	host := deployment.Spec.Template.Spec.NodeName
+	for index, _ := range service.Spec.Ports {
+		if service.Spec.Ports[index].NodePort == 0 {
+			if len(AutoPortSet[host].allocated) >= portMaxSize {
+				log.Println(host + " has not enough ports to alloc")
+				return false
+			}
+			for {
+				if AutoPortSet[host].current >= utils.Configure.Kubernetes.PortAllocEnd {
+					AutoPortSet[host].current = utils.Configure.Kubernetes.PortAllocBegin
+				}
+				if _, ok := AutoPortSet[host].allocated[AutoPortSet[host].current]; !ok {
+					service.Spec.Ports[index].NodePort = AutoPortSet[host].current
+					AutoPortSet[host].allocated[AutoPortSet[host].current] = struct{}{}
+					AutoPortSet[host].current += 1
+					break
+				}
+				AutoPortSet[host].current += 1
+			}
+		}
+	}
+
 	_, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Create(context.TODO(), service, metav1.CreateOptions{})
 	if err != nil {
 		// don't panic & rollback
@@ -140,7 +179,9 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 		log.Println(err)
 		return false
 	}
+	host := ""
 	if deployment != nil {
+		host = deployment.Spec.Template.Spec.NodeName
 		err := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
 		if err != nil {
 			log.Println(err)
@@ -158,6 +199,13 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 		if err != nil {
 			log.Println(err)
 			return false
+		}
+		if host != "" {
+			for _, port := range service.Spec.Ports {
+				if port.NodePort >= utils.Configure.Kubernetes.PortAllocBegin && port.NodePort < utils.Configure.Kubernetes.PortAllocEnd {
+					delete(AutoPortSet[host].allocated, port.NodePort)
+				}
+			}
 		}
 	}
 	return true

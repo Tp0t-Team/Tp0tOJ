@@ -271,7 +271,7 @@ func (input *ServicePortInput) CheckPass() bool {
 		(input.Protocol == "TCP" || input.Protocol == "UDP") &&
 		input.External > 0 && input.External < 65535 &&
 		input.Internal > 0 && input.Internal < 65535 &&
-		input.Pod > 0 && input.Pod < 65535
+		input.Pod >= 0 && input.Pod < 65535
 }
 
 type ChallengeMutateResult struct {

@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Server    Server    `yaml:"server"`
-	Email     Email     `yaml:"email"`
-	Redis     Redis     `yaml:"redis"`
-	Challenge Challenge `yaml:"challenge"`
+	Server     Server     `yaml:"server"`
+	Email      Email      `yaml:"email"`
+	Redis      Redis      `yaml:"redis"`
+	Challenge  Challenge  `yaml:"challenge"`
+	Kubernetes Kubernetes `yaml:"kubernetes"`
 }
 
 type Server struct {
@@ -44,6 +45,11 @@ type Challenge struct {
 	ThirdBloodReward  float64 `yaml:"thirdBloodReward"`
 	HalfLife          int     `yaml:"halfLife"`
 	FirstBloodReward  float64 `yaml:"firstBloodReward"`
+}
+
+type Kubernetes struct {
+	PortAllocBegin int32 `yaml:"portAllocBegin"`
+	PortAllocEnd   int32 `yaml:"portAllocEnd"`
 }
 
 func Parse(config *Config) {
