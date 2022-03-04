@@ -48,8 +48,11 @@ type Challenge struct {
 }
 
 type Kubernetes struct {
-	PortAllocBegin int32 `yaml:"portAllocBegin"`
-	PortAllocEnd   int32 `yaml:"portAllocEnd"`
+	PortAllocBegin int32  `yaml:"portAllocBegin"`
+	PortAllocEnd   int32  `yaml:"portAllocEnd"`
+	Username       string `yaml:"username"`
+	Password       string `yaml:"password"`
+	RegistryHost   string `yaml:"registryHost"`
 }
 
 func Parse(config *Config) {

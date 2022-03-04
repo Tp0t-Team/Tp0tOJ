@@ -2,6 +2,12 @@ package kube
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+	"github.com/heroku/docker-registry-client/registry"
+	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,12 +18,16 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/utils/pointer"
 	"log"
+	"os"
 	"server/utils"
 	"strconv"
 )
 
 //var kubeConfig *rest.Config
 var clientSet *kubernetes.Clientset
+var dockerClient *client.Client
+var dockerPushAuth string
+var registryClient *registry.Registry
 
 type portAllocInfo struct {
 	allocated map[int32]struct{}
@@ -38,7 +48,74 @@ func init() {
 	if err != nil {
 		log.Panicln(err)
 	}
+	//AutoPortSet = map[string]*portAllocInfo{}
+	autoPortSetLoad()
+
+	dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig("resources/ca.crt", "resources/tls.crt", "resources/tls.key"))
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	authConfig := types.AuthConfig{
+		Username:      utils.Configure.Kubernetes.Username,
+		Password:      utils.Configure.Kubernetes.Password,
+		ServerAddress: utils.Configure.Kubernetes.RegistryHost,
+	}
+	marshal, err := json.Marshal(authConfig)
+	if err != nil {
+		log.Panicln(err)
+	}
+	dockerPushAuth = base64.URLEncoding.EncodeToString(marshal)
+
+	registryClient, err = registry.NewInsecure(utils.Configure.Kubernetes.RegistryHost, utils.Configure.Kubernetes.Username, utils.Configure.Kubernetes.Password)
+	if err != nil {
+		log.Panicln(err)
+	}
+}
+
+type serialType struct {
+	ports   []int32
+	current int32
+}
+
+func autoPortSetSave() {
+	temp := map[string]*serialType{}
+	for key, info := range AutoPortSet {
+		temp[key] = &serialType{ports: []int32{}, current: info.current}
+		for port, _ := range info.allocated {
+			temp[key].ports = append(temp[key].ports, port)
+		}
+	}
+	marshal, err := json.Marshal(AutoPortSet)
+	if err != nil {
+		log.Panicln(err)
+	}
+	err = ioutil.WriteFile("resources/auto-port-alloc-cache.json", marshal, 0600)
+	if err != nil {
+		log.Panicln(err)
+	}
+}
+
+func autoPortSetLoad() {
 	AutoPortSet = map[string]*portAllocInfo{}
+	if _, err := os.Stat("resources/auto-port-alloc-cache.json"); err != nil {
+		return
+	}
+	file, err := ioutil.ReadFile("resources/auto-port-alloc-cache.json")
+	if err != nil {
+		log.Panicln(err)
+	}
+	var temp map[string]*serialType
+	err = json.Unmarshal(file, &temp)
+	if err != nil {
+		log.Panicln(err)
+	}
+	for key, desc := range temp {
+		AutoPortSet[key] = &portAllocInfo{allocated: map[int32]struct{}{}, current: desc.current}
+		for _, port := range desc.ports {
+			AutoPortSet[key].allocated[port] = struct{}{}
+		}
+	}
 }
 
 func ParseProtocol(name string) corev1.Protocol {
@@ -157,6 +234,8 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 		}
 	}
 
+	autoPortSetSave()
+
 	_, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Create(context.TODO(), service, metav1.CreateOptions{})
 	if err != nil {
 		// don't panic & rollback
@@ -245,12 +324,46 @@ func DockerFileUpload() {
 
 }
 
-func ImgBuild() {
-
+func ImgBuild(tarArchive string, imageName string) error {
+	file, err := os.Open(tarArchive)
+	if err != nil {
+		return err
+	}
+	_, err = dockerClient.ImageBuild(context.TODO(), file, types.ImageBuildOptions{
+		Dockerfile: "dockerfile",
+		Tags:       []string{imageName},
+		Remove:     true,
+	})
+	err = file.Close()
+	if err != nil {
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	_, err = dockerClient.ImagePush(context.TODO(), imageName, types.ImagePushOptions{
+		RegistryAuth: dockerPushAuth,
+	})
+	if err != nil {
+		return err
+	}
+	_, err = dockerClient.ImageRemove(context.TODO(), imageName, types.ImageRemoveOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func ImgDelete() {
-
+func ImgDelete(imageName string) error {
+	digest, err := registryClient.ManifestDigest(imageName, "latest")
+	if err != nil {
+		return err
+	}
+	err = registryClient.DeleteManifest(imageName, digest)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ImgStatus() {
