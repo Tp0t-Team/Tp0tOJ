@@ -86,7 +86,7 @@ func (r *QueryResolver) SubmitHistory(userId string, ctx context.Context) *types
 			log.Println(err)
 			return &types.SubmitHistoryResult{Message: "Submit History Error!"}
 		}
-		submitInfo := types.SubmitInfo{SubmitTime: submit.SubmitTime.String(), ChallengeName: config.Name}
+		submitInfo := types.SubmitInfo{SubmitTime: submit.SubmitTime.String(), ChallengeName: submit.Challenge.Name}
 		submitInfos = append(submitInfos, submitInfo)
 	}
 	return &types.SubmitHistoryResult{Message: "", SubmitInfos: submitInfos}

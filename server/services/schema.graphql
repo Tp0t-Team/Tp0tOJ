@@ -110,7 +110,7 @@ input ChallengeMutateInput {
     hint: [String]!
     state: String!
     singleton: Boolean!
-    nodeConfig: [NodeConfigInput]!
+    nodeConfig: [NodeConfigInput]
 }
 
 input ScoreTypeInput {
@@ -213,11 +213,11 @@ type RankResultDesc {
 type ChallengeInfo {
     challengeId: String
     type: String
-    name: String
+#    name: String
     score: Int
     description: String
     externalLink: [String]
-    hint: [String]
+#    hint: [String]
     blood: [BloodInfo]
     done: Boolean
     manual: Boolean
@@ -236,19 +236,20 @@ type ChallengeConfigsResult {
 }
 
 type ChallengeConfigAndState {
+    name: String
     config: ChallengeConfig
     state: String
 }
 
 type ChallengeConfig {
     challengeId: String
-    name: String
+#    name: String
     category: String
     score: ScoreType
     flag: FlagType
     description: String
     externalLink: [String]
-    hint: [String]
+#    hint: [String]
     state: String
     singleton: Boolean
     nodeConfig: [NodeConfig]

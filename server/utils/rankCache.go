@@ -161,6 +161,9 @@ func (cache *RAMRankCache) WarmUp() error {
 		return errors.New("challenges equals nil")
 	}
 	for _, challenge := range challenges {
+		if challenge.State == "disabled" {
+			continue
+		}
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)
 		if err != nil {

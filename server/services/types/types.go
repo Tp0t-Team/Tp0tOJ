@@ -130,7 +130,6 @@ type ChallengeMutateInput struct {
 	Flag         FlagTypeInput
 	Description  string
 	ExternalLink []string
-	Hint         []string
 	State        string
 	Singleton    bool
 	NodeConfig   []NodeConfigInput
@@ -346,6 +345,7 @@ type ChallengeConfigsResult struct {
 }
 
 type ChallengeConfigAndState struct {
+	Name   string
 	Config ChallengeConfig
 	State  string
 }

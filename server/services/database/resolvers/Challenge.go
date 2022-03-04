@@ -130,6 +130,7 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 
 // UpdateChallenge we don't allow update challenge name/singleton/[isDynamic]Flag/[isDynamic]Score
 func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we should checkout if the value need to be update
+	needWarmUp := false
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if input.Name != "" {
 			return errors.New("can not update challenge name")
@@ -186,16 +187,19 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			return err
 		}
 
-		challenge.Configuration = string(marshalConfig)
-		if input.State != challenge.State { //TODO: maybe need check
-			challenge.State = input.State
-		}
-
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
-		db.Save(&challenge)
 		// TODO: update flag replicas
 
-		// if change state "enabled", create replicas & alloc to users (only for singleton),set all submits available
+		// if change state "disabled", replica delete & set all submits unavailable
+		if challenge.State == "enabled" && input.State == "disabled" {
+			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+			if !ok {
+				return errors.New("delete replica error")
+			}
+			//TODO: set all submits unavailable
+		}
+
+		// if change state "enabled" or change node-config, create replicas & alloc to users (only for singleton),set all submits available
 		if challenge.State == "disabled" && input.State == "enabled" {
 			if oldConfig.Singleton {
 				replica := AddReplica(challenge.ChallengeId, tx)
@@ -216,37 +220,50 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			//TODO: set all submits available
 		}
 
-		// if change state "disabled", replica delete & set all submits unavailable
-		if challenge.State == "enabled" && input.State == "disabled" {
-			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-			if !ok {
-				return errors.New("delete replica error")
-			}
-			//TODO: set all submits unavailable
-		}
-
 		// if change dockerfile, replica re-create
 		if nodeRefreshFlag {
-			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-			if !ok {
-				return errors.New("delete replica error")
+			if challenge.State == "enabled" {
+				ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+				if !ok {
+					return errors.New("delete replica error")
+				}
 			}
-			replica := AddReplica(challenge.ChallengeId, tx)
-			if replica == nil {
-				return errors.New("add replica error")
+			if input.State == "enabled" {
+				if oldConfig.Singleton {
+					replica := AddReplica(challenge.ChallengeId, tx)
+					if replica == nil {
+						return errors.New("add replica error")
+					}
+					users := FindAllUser()
+					if users == nil {
+						return errors.New("find users error")
+					}
+					for _, user := range users {
+						ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+						if !ok {
+							return errors.New("add replica alloc error")
+						}
+					}
+				}
 			}
 		}
 		//  if change score or state, warm up all rank
 		if (challenge.State != input.State) || (oldConfig.Score.BaseScore != input.Score.BaseScore) {
-			err := utils.Cache.WarmUp()
-			if err != nil {
-				return errors.New("warmup error :\n" + err.Error())
-			}
+			needWarmUp = true
 		}
+
+		challenge.Configuration = string(marshalConfig)
+		challenge.State = input.State
+		db.Save(&challenge)
 		return nil
 	})
 	if err != nil {
 		log.Println(err)
+		return false
+	}
+	err = utils.Cache.WarmUp()
+	if err != nil {
+		log.Println("warm up error:\n" + err.Error())
 		return false
 	}
 	return true
