@@ -59,6 +59,7 @@ func FindChallengeByName(name string) (*entity.Challenge, error) {
 	return &challenge, nil
 }
 func AddChallenge(input types.ChallengeMutateInput) bool {
+	var challenge *entity.Challenge = nil
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// we don't allow the same name between two challenges
 		challenge, err := FindChallengeByName(input.Name)
@@ -102,10 +103,10 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 			if replica == nil {
 				return errors.New("create replica failed")
 			}
-			ok := EnableReplica(replica.ReplicaId, tx)
-			if !ok {
-				return errors.New("enabled replica failed")
-			}
+			//ok := EnableReplica(replica.ReplicaId, tx)
+			//if !ok {
+			//	return errors.New("enabled replica failed")
+			//}
 			users := FindAllUser()
 			if users == nil {
 				return errors.New("find all users failed")
@@ -117,14 +118,23 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 				}
 			}
 		}
-
+		if input.State == "enabled" {
+			challenge = &newChallenge
+		}
 		return nil
 	})
 	if err != nil {
 		log.Println(err)
 		return false
 	}
-
+	if challenge != nil {
+		originScore, err := strconv.ParseUint(input.Score.BaseScore, 10, 64)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		utils.Cache.AddChallenge(challenge.ChallengeId, originScore)
+	}
 	return true
 }
 

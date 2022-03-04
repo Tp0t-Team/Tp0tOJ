@@ -78,6 +78,9 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 		if result.Error != nil {
 			return result.Error
 		}
+		if ok := EnableReplica(newReplica.ReplicaId, tx); !ok {
+			return errors.New("enable replica failed")
+		}
 		return nil
 	})
 	if err != nil {
@@ -198,7 +201,9 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 			if !ok {
 				return errors.New("deleteReplicaAllocByReplicaId occurred error")
 			}
-			DisableReplica(replica.ReplicaId, tx)
+			if ok := DisableReplica(replica.ReplicaId, tx); !ok {
+				return errors.New("disable replica failed")
+			}
 			db.Delete(&replica)
 		}
 		return nil
