@@ -4,6 +4,7 @@ import "time"
 
 type Challenge struct {
 	ChallengeId   uint64 `gorm:"primaryKey"`
+	Name          string `gorm:"check: name <> ''"`
 	Configuration string `gorm:"check: configuration <> ''"`
 	FirstBloodId  uint64
 	SecondBloodId uint64

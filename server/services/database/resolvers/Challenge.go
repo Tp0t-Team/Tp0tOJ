@@ -7,6 +7,7 @@ import (
 	"log"
 	"server/entity"
 	"server/services/types"
+	"server/utils"
 	"strconv"
 )
 
@@ -46,95 +47,33 @@ func FindAllChallenges() []entity.Challenge {
 	return challenges
 }
 
+func FindChallengeByName(name string) (*entity.Challenge, error) {
+	var challenge entity.Challenge
+	result := db.Where(map[string]interface{}{"Name": name}).First(&challenge)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		//log.Println(result.Error)
+		return nil, result.Error
+	}
+	return &challenge, nil
+}
 func AddChallenge(input types.ChallengeMutateInput) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// we don't allow the same name between two challenges
-		checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).First(&entity.Challenge{})
-		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
-			nodes := []types.NodeConfig{}
-			for _, node := range input.NodeConfig {
-				nodes = append(nodes, node.ToNodeConfig())
-			}
-			newChallengeConfig := types.ChallengeConfig{
-				Name:     input.Name,
-				Category: input.Category,
-				Score: types.ScoreType{
-					Dynamic:   input.Score.Dynamic,
-					BaseScore: input.Score.BaseScore,
-				},
-				Flag: types.FlagType{
-					Dynamic: input.Flag.Dynamic,
-					Value:   input.Flag.Value,
-				},
-				Description:  input.Description,
-				ExternalLink: input.ExternalLink,
-				Hint:         input.Hint,
-				Singleton:    input.Singleton,
-				NodeConfig:   nodes,
-			}
-			marshalConfig, err := json.Marshal(newChallengeConfig)
-			if err != nil {
-				return err
-			}
-			newChallenge := entity.Challenge{Configuration: string(marshalConfig), State: input.State}
-			result := tx.Create(&newChallenge)
-			if result.Error != nil {
-				return result.Error
-			}
-			if input.State == "enabled" && input.Singleton {
-				replica := AddReplica(newChallenge.ChallengeId, tx)
-				if replica == nil {
-					return errors.New("create replica failed")
-				}
-				ok := EnableReplica(replica.ReplicaId, tx)
-				if !ok {
-					return errors.New("enabled replica failed")
-				}
-				users := FindAllUser()
-				if users == nil {
-					return errors.New("find all users failed")
-				}
-				for _, user := range users {
-					ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
-					if !ok {
-						return errors.New("add replicaAlloc error")
-					}
-				}
-			}
-			return nil
-		} else if checkResult.Error != nil {
-			return checkResult.Error
-		} else {
-			return errors.New("database item challenge already exists")
-		}
-		return nil
-	})
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-
-	return true
-}
-
-func UpdateChallenge(input types.ChallengeMutateInput) bool {
-	err := db.Transaction(func(tx *gorm.DB) error {
-		var challenge entity.Challenge
-		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
+		challenge, err := FindChallengeByName(input.Name)
 		if err != nil {
-			return errors.New("challengeId Parse Error:\n" + err.Error())
+			return err
+		}
+		if challenge != nil {
+			return errors.New("can not add challenge,cause same name already existed")
+		}
 
-		}
-		challengeItem := tx.Where(map[string]interface{}{"ChallengeId": inputChallengeId}).First(&challenge)
-		if challengeItem.Error != nil {
-			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
-		}
 		nodes := []types.NodeConfig{}
 		for _, node := range input.NodeConfig {
 			nodes = append(nodes, node.ToNodeConfig())
 		}
 		newChallengeConfig := types.ChallengeConfig{
-			Name:     input.Name,
 			Category: input.Category,
 			Score: types.ScoreType{
 				Dynamic:   input.Score.Dynamic,
@@ -146,7 +85,6 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 			},
 			Description:  input.Description,
 			ExternalLink: input.ExternalLink,
-			Hint:         input.Hint,
 			Singleton:    input.Singleton,
 			NodeConfig:   nodes,
 		}
@@ -154,21 +92,157 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool {
 		if err != nil {
 			return err
 		}
+		newChallenge := entity.Challenge{Configuration: string(marshalConfig), State: input.State, Name: input.Name}
+		result := tx.Create(&newChallenge)
+		if result.Error != nil {
+			return result.Error
+		}
+		if input.State == "enabled" && input.Singleton {
+			replica := AddReplica(newChallenge.ChallengeId, tx)
+			if replica == nil {
+				return errors.New("create replica failed")
+			}
+			ok := EnableReplica(replica.ReplicaId, tx)
+			if !ok {
+				return errors.New("enabled replica failed")
+			}
+			users := FindAllUser()
+			if users == nil {
+				return errors.New("find all users failed")
+			}
+			for _, user := range users {
+				ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+				if !ok {
+					return errors.New("add replicaAlloc error")
+				}
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
+}
+
+// UpdateChallenge we don't allow update challenge name/singleton/[isDynamic]Flag/[isDynamic]Score
+func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we should checkout if the value need to be update
+	err := db.Transaction(func(tx *gorm.DB) error {
+		if input.Name != "" {
+			return errors.New("can not update challenge name")
+		}
+
+		var challenge entity.Challenge
+		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
+		if err != nil {
+			return errors.New("challengeId Parse Error:\n" + err.Error())
+
+		}
+		challengeItem := tx.Where(map[string]interface{}{"ChallengeId": inputChallengeId}).First(&challenge)
+		if challengeItem.Error != nil {
+			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
+		}
+
+		var oldConfig types.ChallengeConfig
+		//we don't allow user to change singleton
+		err = json.Unmarshal([]byte(challenge.Configuration), &oldConfig)
+		if err != nil {
+			return err
+		}
+
+		//check that user change NodeConfig or not
+		var nodes []types.NodeConfig
+		var nodeRefreshFlag = false
+		if input.NodeConfig != nil {
+			for _, node := range input.NodeConfig {
+				nodes = append(nodes, node.ToNodeConfig())
+			}
+			nodeRefreshFlag = true
+		} else {
+			nodes = oldConfig.NodeConfig
+		}
+
+		newChallengeConfig := types.ChallengeConfig{
+			Category: input.Category,
+			Score: types.ScoreType{
+				Dynamic:   oldConfig.Score.Dynamic,
+				BaseScore: input.Score.BaseScore,
+			},
+			Flag: types.FlagType{
+				Dynamic: oldConfig.Flag.Dynamic,
+				Value:   input.Flag.Value,
+			},
+			Description:  input.Description,
+			ExternalLink: input.ExternalLink,
+
+			Singleton:  oldConfig.Singleton,
+			NodeConfig: nodes,
+		}
+		marshalConfig, err := json.Marshal(newChallengeConfig)
+		if err != nil {
+			return err
+		}
+
 		challenge.Configuration = string(marshalConfig)
-		if input.State != "" {
+		if input.State != challenge.State { //TODO: maybe need check
 			challenge.State = input.State
 		}
-		// TODO: we don't allow the same name between two challenges
-		// TODO: we don't allow change singleton
+
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		db.Save(&challenge)
 		// TODO: update flag replicas
-		// TODO: if change state "disabled", replica delete & set all submits unavailable
-		// TODO: if change dockerfile, replica re-create
-		// TODO: you can't change flag dynamic-able
-		// TODO: you can't change score dynamic-able
-		// TODO: if change state "enabled", create replicas & alloc to users (only for singleton)
-		// TODO: if change score or state from "enabled" to "disabled", refresh rank
+
+		// if change state "enabled", create replicas & alloc to users (only for singleton),set all submits available
+		if challenge.State == "disabled" && input.State == "enabled" {
+			if oldConfig.Singleton {
+				replica := AddReplica(challenge.ChallengeId, tx)
+				if replica == nil {
+					return errors.New("add replica error")
+				}
+				users := FindAllUser()
+				if users == nil {
+					return errors.New("find users error")
+				}
+				for _, user := range users {
+					ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+					if !ok {
+						return errors.New("add replica alloc error")
+					}
+				}
+			}
+			//TODO: set all submits available
+		}
+
+		// if change state "disabled", replica delete & set all submits unavailable
+		if challenge.State == "enabled" && input.State == "disabled" {
+			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+			if !ok {
+				return errors.New("delete replica error")
+			}
+			//TODO: set all submits unavailable
+		}
+
+		// if change dockerfile, replica re-create
+		if nodeRefreshFlag {
+			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+			if !ok {
+				return errors.New("delete replica error")
+			}
+			replica := AddReplica(challenge.ChallengeId, tx)
+			if replica == nil {
+				return errors.New("add replica error")
+			}
+		}
+		//  if change score or state, warm up all rank
+		if (challenge.State != input.State) || (oldConfig.Score.BaseScore != input.Score.BaseScore) {
+			err := utils.Cache.WarmUp()
+			if err != nil {
+				return errors.New("warmup error :\n" + err.Error())
+			}
+		}
 		return nil
 	})
 	if err != nil {

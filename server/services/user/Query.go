@@ -140,7 +140,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 		var alloc *entity.ReplicaAlloc
 		alloc, err = resolvers.FindReplicaAllocByUserIdAndChallengeId(currentUserId, challenge.ChallengeId, nil)
 		if err != nil {
-			return &types.ChallengeInfosResult{Message: "Error"} // TODO:
+			return &types.ChallengeInfosResult{Message: "Error"}
 		}
 		if alloc != nil {
 			for _, node := range config.NodeConfig {
@@ -151,11 +151,10 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     config.Category,
-			Name:         config.Name,
+			Name:         challenge.Name,
 			Score:        config.Score.BaseScore,
 			Description:  config.Description,
 			ExternalLink: replicaUrls,
-			Hint:         config.Hint,
 			Blood:        bloodInfo,
 			Done:         correct,
 			Manual:       !config.Singleton && len(config.NodeConfig) > 0, // TODO: maybe need more conditions

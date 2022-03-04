@@ -10,7 +10,7 @@ import (
 
 var DataBase *gorm.DB
 
-//TODO: any database error log should be handle and log out inside resolvers, should not return to caller
+//any database error log should be handle and log out inside resolvers, should not return to caller
 func init() {
 	prefix, _ := os.Getwd()
 	dbPath := prefix + "/resources/data.db"

@@ -328,7 +328,6 @@ type ChallengeInfo struct {
 	Score        string
 	Description  string
 	ExternalLink []string
-	Hint         []string
 	Blood        []BloodInfo
 	Done         bool
 	Manual       bool
@@ -352,13 +351,11 @@ type ChallengeConfigAndState struct {
 }
 
 type ChallengeConfig struct {
-	Name         string
 	Category     string
 	Score        ScoreType
 	Flag         FlagType
 	Description  string
 	ExternalLink []string
-	Hint         []string
 	Singleton    bool
 	NodeConfig   []NodeConfig
 }
