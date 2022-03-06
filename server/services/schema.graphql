@@ -107,7 +107,7 @@ input ChallengeMutateInput {
     flag: FlagTypeInput!
     description: String!
     externalLink: [String]!
-    hint: [String]!
+    # hint: [String]!
     state: String!
     singleton: Boolean!
     nodeConfig: [NodeConfigInput]
