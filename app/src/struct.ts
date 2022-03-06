@@ -7,33 +7,35 @@ export interface UserInfo {
     name: string
     avatar: string
     role: string
-    stuNumber: string
-    department: string
-    grade: string
-    protectedTime: string
-    qq: string
+    // stuNumber: string
+    // department: string
+    // grade: string
+    // protectedTime: string
+    // qq: string
     mail: string
-    topRank: string
+    // topRank: string
     joinTime: string
     score: string
     state: string
-    rank: number
+    // rank: number
 }
 
 export interface ChallengeDesc {
     challengeId: string
     type: string
-    name: string
+    // name: string
     score: number
     description: string
-    external_link: string[]
-    hint: string[]
+    externalLink: string[]
+    // hint: string[]
     blood: {
         userId: string
         name: string
         avatar: string
     }[]
     done: boolean
+    manual: boolean
+    allocated: boolean
 }
 
 export interface RankDesc {
@@ -51,24 +53,45 @@ export interface BulletinItem {
 
 export interface ChallengeConfig {
     name: string
-    type: string
+    category: string
     score: {
         dynamic: boolean
-        base_score: string | number
+        baseScore: string | number
     }
     flag: {
         dynamic: boolean
         value: string
     }
     description: string
-    external_link: string[]
-    hint: string[]
+    externalLink: string[]
+    // hint: string[]
+    singleton: boolean
+    nodeConfig: NodeConfig[] | undefined
+}
+
+export interface NodeConfig {
+    name: string
+    image: string
+    ports: {
+        port: number
+        protocol: string
+    }[]
+    servicePorts: {
+        name: string
+        protocol: string
+        external: number
+        internal: number
+        pod: number
+    }[]
 }
 
 export type ChallengeConfigWithId = {
-    challengeId: string
     state: string
-} & ChallengeConfig
+    name: string
+    config: {
+        challengeId: string
+    } & ChallengeConfig
+}
 
 export interface SubmitInfo {
     submitTime: String
@@ -111,7 +134,7 @@ export type SubmitHistoryResult = {
 // mutation login
 export interface LoginInput {
     input: {
-        stuNumber: string
+        mail: string
         password: string
     }
 }
@@ -126,11 +149,11 @@ export type LoginResult = {
 export interface RegisterInput {
     input: {
         name: string
-        stuNumber: string
+        // stuNumber: string
         password: string
-        department: string
-        grade: string
-        qq: string
+        // department: string
+        // grade: string
+        // qq: string
         mail: string
     }
 }
@@ -178,10 +201,10 @@ export interface UserInfoUpdateInput {
         userId: string
         name: string
         role: string
-        department: string
-        grade: string
-        protectedTime: string
-        qq: string
+        // department: string
+        // grade: string
+        // protectedTime: string
+        // qq: string
         mail: string
         state: string
     }
@@ -190,6 +213,9 @@ export type UserInfoUpdateResult = { userInfoUpdate: Result }
 
 // mutation challengeMutate
 export type ChallengeMutateResult = { challengeMutate: Result }
+
+// mutation challengeRemove
+export type ChallengeRemoveResult = { challengeRemove: Result }
 
 // subscription bulletin
 export type BulletinSubResult = { bulletin: BulletinItem }
