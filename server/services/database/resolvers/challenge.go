@@ -71,7 +71,7 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 		}
 
 		nodes := []types.NodeConfig{}
-		for _, node := range input.NodeConfig {
+		for _, node := range *input.NodeConfig {
 			nodes = append(nodes, node.ToNodeConfig())
 		}
 		newChallengeConfig := types.ChallengeConfig{
@@ -168,7 +168,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		var nodes []types.NodeConfig
 		var nodeRefreshFlag = false
 		if input.NodeConfig != nil {
-			for _, node := range input.NodeConfig {
+			for _, node := range *input.NodeConfig {
 				nodes = append(nodes, node.ToNodeConfig())
 			}
 			nodeRefreshFlag = true

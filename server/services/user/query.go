@@ -45,7 +45,7 @@ func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
 			UserId: strconv.FormatUint(item.UserId, 10),
 			Name:   user.Name,
 			Avatar: user.MakeAvatarUrl(),
-			Score:  int(item.Score),
+			Score:  int32(item.Score),
 		})
 	}
 	return &types.RankResult{Message: "", RankResultDescs: ret}

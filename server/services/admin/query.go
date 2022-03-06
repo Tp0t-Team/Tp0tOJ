@@ -54,8 +54,10 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 			return &types.ChallengeConfigsResult{Message: "Challenge Config Error!"}
 		}
 		challengeConfigs = append(challengeConfigs, types.ChallengeConfigAndState{
-			Config: config,
-			State:  challenge.State,
+			ChallengeId: strconv.FormatUint(challenge.ChallengeId, 10),
+			Name:        challenge.Name,
+			Config:      config,
+			State:       challenge.State,
 		})
 	}
 	return &types.ChallengeConfigsResult{Message: "", ChallengeConfigs: challengeConfigs}

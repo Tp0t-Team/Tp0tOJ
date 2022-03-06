@@ -63,8 +63,8 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 	return &types.UserInfoUpdateResult{Message: "user ID is nil"}
 }
 
-func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct{ input types.ChallengeMutateInput }) *types.ChallengeMutateResult {
-	input := args.input
+func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct{ Input types.ChallengeMutateInput }) *types.ChallengeMutateResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)

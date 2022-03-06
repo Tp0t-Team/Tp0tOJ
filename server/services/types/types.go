@@ -132,24 +132,26 @@ type ChallengeMutateInput struct {
 	ExternalLink []string
 	State        string
 	Singleton    bool
-	NodeConfig   []NodeConfigInput
+	NodeConfig   *[]NodeConfigInput
 }
 
 func (input *ChallengeMutateInput) CheckPass() bool {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Description = strings.TrimSpace(input.Description)
-	if len(input.NodeConfig) == 0 {
-		input.Singleton = true
-	}
-	nodeNameSet := map[string]struct{}{}
-	for _, node := range input.NodeConfig {
-		if !node.CheckPass() {
+	if input.NodeConfig != nil {
+		if len(*input.NodeConfig) == 0 {
+			input.Singleton = true
+		}
+		nodeNameSet := map[string]struct{}{}
+		for _, node := range *input.NodeConfig {
+			if !node.CheckPass() {
+				return false
+			}
+			nodeNameSet[node.Name] = struct{}{}
+		}
+		if len(nodeNameSet) != len(*input.NodeConfig) {
 			return false
 		}
-		nodeNameSet[node.Name] = struct{}{}
-	}
-	if len(nodeNameSet) != len(input.NodeConfig) {
-		return false
 	}
 	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
 }
@@ -345,9 +347,10 @@ type ChallengeConfigsResult struct {
 }
 
 type ChallengeConfigAndState struct {
-	Name   string
-	Config ChallengeConfig
-	State  string
+	ChallengeId string
+	Name        string
+	Config      ChallengeConfig
+	State       string
 }
 
 type ChallengeConfig struct {
