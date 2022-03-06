@@ -3,8 +3,8 @@
     <v-card width="500">
       <v-form v-model="valid" class="pa-6" ref="form">
         <v-text-field
-          v-model="username"
-          label="Student Number"
+          v-model="mail"
+          label="E-mail"
           :rules="[rules.required]"
           :disabled="loading"
         ></v-text-field>
@@ -39,7 +39,7 @@ import { ForgetResult } from "../struct";
 export default class Forget extends Vue {
   private valid: boolean = false;
 
-  private username: string = "";
+  private mail: string = "";
 
   private loading: boolean = false;
 
@@ -66,7 +66,7 @@ export default class Forget extends Vue {
           }
         `,
         variables: {
-          input: this.username
+          input: this.mail
         }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");

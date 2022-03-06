@@ -24,7 +24,7 @@
         <user-editor
           :disabled="withoutInit"
           :loading="loading"
-          :key="currentUser && currentUser.stuNumber || ''"
+          :key="currentUser && currentUser.mail || ''"
           :user="currentUser"
           @submit="submit"
         ></user-editor>
@@ -92,8 +92,6 @@ export default class User extends Vue {
     { text: "name", value: "name" },
     { text: "role", value: "role" },
     { text: "state", value: "state" },
-    { text: "grade", value: "grade" },
-    { text: "protected_time", value: "protectedTime" },
     { text: "score", value: "score" }
   ];
   private rankColor = ["amber", "light-blue", "green"];
@@ -125,17 +123,10 @@ export default class User extends Vue {
                 name
                 avatar
                 role
-                stuNumber
-                department
-                grade
-                protectedTime
-                qq
                 mail
-                topRank
                 joinTime
                 score
                 state
-                rank
               }
             }
           }
@@ -209,10 +200,6 @@ export default class User extends Vue {
             userId: info.userId,
             name: info.name,
             role: info.role,
-            department: info.department,
-            grade: info.grade,
-            protectedTime: info.protectedTime,
-            qq: info.qq,
             mail: info.mail,
             state: info.state
           }

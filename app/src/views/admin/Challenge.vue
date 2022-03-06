@@ -2,8 +2,8 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.type">
-          <v-toolbar dense>{{item.type}}</v-toolbar>
+        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.category">
+          <v-toolbar dense>{{item.category}}</v-toolbar>
           <v-list dense>
             <v-list-item
               v-for="conf in item.items"
@@ -18,7 +18,7 @@
                 </v-btn>
               </v-list-item-icon>
             </v-list-item>
-            <v-list-item @click="newChallenge(item.type)" :disabled="loading">
+            <v-list-item @click="newChallenge(item.category)" :disabled="loading">
               <v-layout row>
                 <v-spacer></v-spacer>
                 <v-icon>add</v-icon>
@@ -108,7 +108,7 @@ export default class Challenge extends Vue {
   private get challengeConfigFiltered() {
     return this.challengeType.map(v => ({
       type: v,
-      items: this.challengeConfigs.filter(c => c.type == v)
+      items: this.challengeConfigs.filter(c => c.config.category == v)
     }));
   }
 
@@ -125,19 +125,17 @@ export default class Challenge extends Vue {
               message
               challengeConfigs {
                 challengeId
-                type
-                name
+                category
                 score {
                   dynamic
-                  base_score
+                  baseScore
                 }
                 flag {
                   dynamic
                   value
                 }
                 description
-                external_link
-                hint
+                externalLink
                 state
               }
             }
@@ -216,14 +214,17 @@ export default class Challenge extends Vue {
   newChallenge(type: string) {
     let config: ChallengeConfigWithId = {
       challengeId: "-" + Date.now().toLocaleString(),
-      type: type,
       name: "",
-      score: { dynamic: false, base_score: "0" },
-      flag: { dynamic: false, value: "" },
-      description: "",
-      external_link: [],
-      hint: [],
-      state: "disabled"
+      state: "disabled",
+      config: {
+          category: type,
+          score: { dynamic: false, baseScore: "0" },
+          flag: { dynamic: false, value: "" },
+          description: "",
+          externalLink: [],
+          singleton: true,
+          nodeConfig: []
+        }
     };
     if (this.changed) {
       this.tempConfig = config;

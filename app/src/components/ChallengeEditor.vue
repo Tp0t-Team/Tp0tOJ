@@ -105,30 +105,6 @@
           </v-list>
         </v-card>
       </v-col>
-      <!--  -->
-      <v-col cols="12">
-        <v-card>
-          <v-list dense>
-            <v-list-item>
-              <v-text-field
-                v-model="hint"
-                label="hint"
-                append-icon="add"
-                @click:append="addHint"
-                :disabled="loading || disabled"
-              ></v-text-field>
-            </v-list-item>
-            <v-list-item v-for="(l,index) in hints" :key="l" @click=";">
-              <v-list-item-content>{{l}}</v-list-item-content>
-              <v-list-item-icon>
-                <v-btn icon :disabled="loading || disabled" @click="removeHint(index)">
-                  <v-icon>close</v-icon>
-                </v-btn>
-              </v-list-item-icon>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
     </v-row>
     <v-btn
       fab
@@ -171,10 +147,8 @@ export default class ChallengeEditor extends Vue {
   private flag: string = "";
   private description: string = "";
   private links: string[] = [];
-  private hints: string[] = [];
 
   private link: string = "";
-  private hint: string = "";
 
   private setValue: boolean = false;
 
@@ -182,16 +156,14 @@ export default class ChallengeEditor extends Vue {
     this.reader.addEventListener("load", e => {
       try {
         let config: ChallengeConfig = loadYaml(e.target!.result as string);
-        if (this.challengeType.findIndex(v => v == config.type) < 0)
+        if (this.challengeType.findIndex(v => v == config.category) < 0)
           throw "类型错误";
-        if (config.type != this.type) throw "不可修改类型";
+        if (config.category != this.type) throw "不可修改类型";
         this.setValue = true;
-        this.name = config.name || this.name;
-        this.score = (config.score.base_score as number) || this.score;
+        this.score = (config.score.baseScore as number) || this.score;
         this.flag = config.flag.value || this.flag;
         this.description = config.description || this.description;
-        this.links = config.external_link || this.links;
-        this.hints = config.hint || this.hints;
+        this.links = config.externalLink || this.links;
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
@@ -201,14 +173,13 @@ export default class ChallengeEditor extends Vue {
     });
     if (!this.config) return;
     this.name = this.config.name;
-    this.type = this.config.type;
-    this.score = parseInt(this.config.score.base_score as string);
-    this.flag = this.config.flag.value;
-    this.description = this.config.description;
-    this.links = this.config.external_link;
-    this.hints = this.config.hint;
+    this.type = this.config.config.category;
+    this.score = parseInt(this.config.config.score.baseScore as string);
+    this.flag = this.config.config.flag.value;
+    this.description = this.config.config.description;
+    this.links = this.config.config.externalLink;
     this.state = this.config.state == "enabled";
-    this.dynamicScore = this.config.score.dynamic;
+    this.dynamicScore = this.config.config.score.dynamic;
   }
 
   @Emit("error")
@@ -221,16 +192,17 @@ export default class ChallengeEditor extends Vue {
 
   @Emit("submit")
   EmitSubmit() {
-    return {
-      challengeId: (this.config && this.config.challengeId) || "",
+    return {   
+      challengeId: (this.config && this.config.challengeId) || "",   
       name: this.name,
-      type: this.type,
-      score: { dynamic: this.dynamicScore, base_score: this.score.toString() },
-      flag: { dynamic: false, value: this.flag },
-      description: this.description,
-      external_link: this.links,
-      hint: this.hints,
-      state: this.state ? "enabled" : "disabled"
+      state: this.state ? "enabled" : "disabled",
+      config: {
+        category: this.type,
+        score: { dynamic: this.dynamicScore, baseScore: this.score.toString() },
+        flag: { dynamic: false, value: this.flag },
+        description: this.description,
+        externalLink: this.links
+      }
     } as ChallengeConfigWithId;
   }
 
@@ -249,18 +221,6 @@ export default class ChallengeEditor extends Vue {
   removeLink(index: number) {
     this.links.splice(index, 1);
     this.links = this.links;
-    this.Changed();
-  }
-
-  addHint() {
-    this.hints = [...this.hints, this.hint];
-    this.hint = "";
-    this.Changed();
-  }
-
-  removeHint(index: number) {
-    this.hints.splice(index, 1);
-    this.hints = this.hints;
     this.Changed();
   }
 

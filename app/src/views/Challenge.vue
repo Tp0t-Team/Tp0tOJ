@@ -80,7 +80,7 @@
           @blur="check"
         ></v-text-field>
         <div class="dialog-discription pa-6">
-          <pre>{{formatedHint + currentChallenge.description}}</pre>
+          <pre>{{currentChallenge.description}}</pre>
         </div>
         <div class="url-list">
           <v-chip
@@ -142,14 +142,6 @@ export default class Challenge extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private get formatedHint() {
-    if (!this.currentChallenge) return "";
-    return this.currentChallenge.hint.reduce(
-      (pre: string, cur: string) => `Hint: ${cur}\n${pre}`,
-      ""
-    );
-  }
-
   async mounted() {
     try {
       let res = await this.$apollo.query<ChallengeResult>({
@@ -163,7 +155,6 @@ export default class Challenge extends Vue {
                 type
                 description
                 externalLink
-                hint
                 score
                 blood {
                   userId

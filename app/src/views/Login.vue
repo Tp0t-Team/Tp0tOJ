@@ -7,8 +7,8 @@
         <v-tab-item value="tab-login">
           <v-form v-model="loginValid" class="pa-6" ref="loginForm">
             <v-text-field
-              v-model="username"
-              label="Student Number"
+              v-model="mail"
+              label="E-mail"
               :rules="[rules.required]"
               :disabled="loading"
             ></v-text-field>
@@ -51,39 +51,6 @@
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
-              </v-flex>
-              <v-flex sm6 pl-3 pr-3>
-                <v-text-field
-                  v-model="studentNumber"
-                  label="Student Number"
-                  :rules="[rules.required]"
-                  :disabled="loading"
-                ></v-text-field>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex sm6 pl-3 pr-3>
-                <v-select
-                  v-model="department"
-                  :items="departmentItems"
-                  label="Department"
-                  :rules="[rules.required]"
-                  :disabled="loading"
-                ></v-select>
-              </v-flex>
-              <v-flex sm6 pl-3 pr-3>
-                <v-select
-                  v-model="grade"
-                  :items="gradeItems"
-                  label="Grade"
-                  :rules="[rules.required]"
-                  :disabled="loading"
-                ></v-select>
-              </v-flex>
-            </v-layout>
-            <v-layout row>
-              <v-flex sm6 pl-3 pr-3>
-                <v-text-field v-model="qq" label="QQ" :rules="[rules.required]" :disabled="loading"></v-text-field>
               </v-flex>
               <v-flex sm6 pl-3 pr-3>
                 <v-text-field
@@ -166,10 +133,6 @@ export default class Login extends Vue {
   private password: string = "";
 
   private name: string = "";
-  private studentNumber: string = "";
-  private department: string = "";
-  private grade: string = "";
-  private qq: string = "";
   private mail: string = "";
   private regPassword: string = "";
   private repeat: string = "";
@@ -233,7 +196,7 @@ export default class Login extends Vue {
         `,
         variables: {
           input: {
-            stuNumber: this.username,
+            mail: this.mail,
             password: this.password
           }
         }
@@ -273,11 +236,7 @@ export default class Login extends Vue {
         variables: {
           input: {
             name: this.name,
-            stuNumber: this.studentNumber,
             password: this.regPassword,
-            department: this.department,
-            grade: this.grade,
-            qq: this.qq,
             mail: this.mail
           }
         }

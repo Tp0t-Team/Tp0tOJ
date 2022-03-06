@@ -22,9 +22,9 @@ export interface UserInfo {
 
 export interface ChallengeDesc {
     challengeId: string
-    type: string
-    // name: string
-    score: number
+    category: string
+    name: string
+    score: string
     description: string
     externalLink: string[]
     // hint: string[]
@@ -52,7 +52,6 @@ export interface BulletinItem {
 }
 
 export interface ChallengeConfig {
-    name: string
     category: string
     score: {
         dynamic: boolean
@@ -86,11 +85,10 @@ export interface NodeConfig {
 }
 
 export type ChallengeConfigWithId = {
+    challengeId: string
     state: string
     name: string
-    config: {
-        challengeId: string
-    } & ChallengeConfig
+    config: ChallengeConfig
 }
 
 export interface SubmitInfo {

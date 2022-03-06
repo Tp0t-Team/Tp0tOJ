@@ -36,11 +36,6 @@
                 <div>
                   <v-subheader>
                     <span class="text-center">
-                      <strong>
-                        Rank:
-                        <span v-if="userInfo.rank!=0">{{userInfo.rank}}</span>
-                        <span v-else>∞</span>
-                      </strong>
                       <br />
                       {{userInfo.score}}pt
                     </span>
@@ -55,49 +50,12 @@
                   <v-text-field :loading="loading" readonly label="role" :value="userInfo.role"></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="student number"
-                    :value="userInfo.stuNumber"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="department"
-                    :value="userInfo.department"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
               <v-row>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="state" :value="userInfo.state"></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="protected time"
-                    :value="userInfo.protectedTime"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
-                </v-col>
                 <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
                 </v-col>
               </v-row>
               <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="QQ" :value="userInfo.qq"></v-text-field>
-                </v-col>
                 <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
                 </v-col>
@@ -137,17 +95,10 @@ export default class Profile extends Vue {
     name: "",
     avatar: "",
     role: "",
-    stuNumber: "",
-    department: "",
-    grade: "",
-    protectedTime: "",
-    qq: "",
     mail: "",
-    topRank: "",
     joinTime: "",
     score: "0",
-    state: "",
-    rank: 0
+    state: ""
   };
 
   private infoText: string = "";
@@ -184,17 +135,10 @@ export default class Profile extends Vue {
                 name
                 avatar
                 role
-                stuNumber
-                department
-                grade
-                protectedTime
-                qq
                 mail
-                topRank
                 joinTime
                 score
                 state
-                rank
               }
             }
           }
