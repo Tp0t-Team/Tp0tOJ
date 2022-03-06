@@ -21,6 +21,18 @@ func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64)
 	return true
 }
 
+func FindAllSubmitByChallengeId(challengeId uint64) []entity.Submit {
+	var submits []entity.Submit
+	result := db.Where(map[string]interface{}{"ChallengeId": challengeId}).Find(&submits)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return []entity.Submit{}
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return nil
+	}
+	return submits
+}
+
 func FindSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
 	var submits []entity.Submit
 	result := db.Where(map[string]interface{}{"ChallengeId": challengeId, "Correct": true, "Available": true}).Find(&submits)

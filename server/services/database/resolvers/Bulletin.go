@@ -18,6 +18,7 @@ func GetAllBulletin() []entity.Bulletin {
 	}
 	return allBulletin
 }
+
 func AddBulletin(title string, content string, topping bool) bool {
 	newBulletin := entity.Bulletin{Title: title, Content: content, Topping: topping}
 	result := db.Create(&newBulletin)
@@ -27,6 +28,7 @@ func AddBulletin(title string, content string, topping bool) bool {
 	}
 	return true
 }
+
 func FindBulletinByTitle(title string) (*entity.Bulletin, error) {
 	var bulletin entity.Bulletin
 	result := db.Where(map[string]interface{}{"Title": title}).First(&bulletin)

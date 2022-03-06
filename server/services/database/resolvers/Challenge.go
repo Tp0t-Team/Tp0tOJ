@@ -206,7 +206,12 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			if !ok {
 				return errors.New("delete replica error")
 			}
-			//TODO: set all submits unavailable
+			//set all submits unavailable,TODO: but need some rollback method?
+			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+			for _, submit := range submits {
+				submit.Available = false
+			}
+
 		}
 
 		// if change state "enabled" or change node-config, create replicas & alloc to users (only for singleton),set all submits available
@@ -227,7 +232,13 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 					}
 				}
 			}
-			//TODO: set all submits available
+
+			//set all submits available,TODO: but need some rollback method?
+			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+			for _, submit := range submits {
+				submit.Available = true
+			}
+
 		}
 
 		// if change dockerfile, replica re-create
