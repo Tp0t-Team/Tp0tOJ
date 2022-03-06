@@ -1,4 +1,4 @@
-package utils
+package configure
 
 import (
 	"gopkg.in/yaml.v3"

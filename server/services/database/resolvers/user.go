@@ -1,9 +1,9 @@
 package resolvers
 
 import (
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
-	"k8s.io/apimachinery/pkg/util/json"
 	"log"
 	"server/entity"
 	"server/services/types"

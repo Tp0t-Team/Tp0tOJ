@@ -15,7 +15,7 @@ func init() {
 	prefix, _ := os.Getwd()
 	dbPath := prefix + "/resources/data.db"
 	test, err := os.Lstat(dbPath)
-	if os.IsExist(err) {
+	if os.IsNotExist(err) {
 		_, err := os.Create(dbPath)
 		if err != nil {
 			log.Panicln(err, test)

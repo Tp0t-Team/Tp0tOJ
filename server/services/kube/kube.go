@@ -19,7 +19,7 @@ import (
 	"k8s.io/utils/pointer"
 	"log"
 	"os"
-	"server/utils"
+	"server/utils/configure"
 	"strconv"
 )
 
@@ -57,9 +57,9 @@ func init() {
 	}
 
 	authConfig := types.AuthConfig{
-		Username:      utils.Configure.Kubernetes.Username,
-		Password:      utils.Configure.Kubernetes.Password,
-		ServerAddress: utils.Configure.Kubernetes.RegistryHost,
+		Username:      configure.Configure.Kubernetes.Username,
+		Password:      configure.Configure.Kubernetes.Password,
+		ServerAddress: configure.Configure.Kubernetes.RegistryHost,
 	}
 	marshal, err := json.Marshal(authConfig)
 	if err != nil {
@@ -67,7 +67,7 @@ func init() {
 	}
 	dockerPushAuth = base64.URLEncoding.EncodeToString(marshal)
 
-	registryClient, err = registry.NewInsecure(utils.Configure.Kubernetes.RegistryHost, utils.Configure.Kubernetes.Username, utils.Configure.Kubernetes.Password)
+	registryClient, err = registry.NewInsecure(configure.Configure.Kubernetes.RegistryHost, configure.Configure.Kubernetes.Username, configure.Configure.Kubernetes.Password)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -214,10 +214,10 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 	if _, ok := AutoPortSet[deployment.Spec.Template.Spec.NodeName]; !ok {
 		AutoPortSet[deployment.Spec.Template.Spec.NodeName] = &portAllocInfo{
 			allocated: map[int32]struct{}{},
-			current:   utils.Configure.Kubernetes.PortAllocBegin,
+			current:   configure.Configure.Kubernetes.PortAllocBegin,
 		}
 	}
-	portMaxSize := int(utils.Configure.Kubernetes.PortAllocEnd - utils.Configure.Kubernetes.PortAllocBegin)
+	portMaxSize := int(configure.Configure.Kubernetes.PortAllocEnd - configure.Configure.Kubernetes.PortAllocBegin)
 	host := deployment.Spec.Template.Spec.NodeName
 	for index, _ := range service.Spec.Ports {
 		if service.Spec.Ports[index].NodePort == 0 {
@@ -226,8 +226,8 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 				return false
 			}
 			for {
-				if AutoPortSet[host].current >= utils.Configure.Kubernetes.PortAllocEnd {
-					AutoPortSet[host].current = utils.Configure.Kubernetes.PortAllocBegin
+				if AutoPortSet[host].current >= configure.Configure.Kubernetes.PortAllocEnd {
+					AutoPortSet[host].current = configure.Configure.Kubernetes.PortAllocBegin
 				}
 				if _, ok := AutoPortSet[host].allocated[AutoPortSet[host].current]; !ok {
 					service.Spec.Ports[index].NodePort = AutoPortSet[host].current
@@ -287,7 +287,7 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 		}
 		if host != "" {
 			for _, port := range service.Spec.Ports {
-				if port.NodePort >= utils.Configure.Kubernetes.PortAllocBegin && port.NodePort < utils.Configure.Kubernetes.PortAllocEnd {
+				if port.NodePort >= configure.Configure.Kubernetes.PortAllocBegin && port.NodePort < configure.Configure.Kubernetes.PortAllocEnd {
 					delete(AutoPortSet[host].allocated, port.NodePort)
 				}
 			}

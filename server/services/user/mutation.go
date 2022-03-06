@@ -12,7 +12,7 @@ import (
 	"regexp"
 	"server/services/database/resolvers"
 	"server/services/types"
-	"server/utils"
+	"server/utils/configure"
 	"strconv"
 	"time"
 )
@@ -28,12 +28,12 @@ func init() {
 
 func passwordHash(password string) string {
 	hash1 := sha256.New()
-	_, err := io.WriteString(hash1, utils.Configure.Server.Salt+password)
+	_, err := io.WriteString(hash1, configure.Configure.Server.Salt+password)
 	if err != nil {
 		log.Panicln(err.Error())
 	}
 	hash2 := sha256.New()
-	_, err = io.WriteString(hash2, utils.Configure.Server.Salt+fmt.Sprintf("%x", hash1.Sum(nil)))
+	_, err = io.WriteString(hash2, configure.Configure.Server.Salt+fmt.Sprintf("%x", hash1.Sum(nil)))
 	if err != nil {
 		log.Panicln(err.Error())
 	}
@@ -115,10 +115,10 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 }
 
 func sendMail(address string, subject string, content string) bool {
-	auth := smtp.PlainAuth("", utils.Configure.Email.Username, utils.Configure.Email.Password, utils.Configure.Email.Host)
-	mail := mailyak.New(utils.Configure.Email.Host+":25", auth)
+	auth := smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host)
+	mail := mailyak.New(configure.Configure.Email.Host+":25", auth)
 	mail.To(address)
-	mail.From(utils.Configure.Email.Username)
+	mail.From(configure.Configure.Email.Username)
 	mail.Subject(subject)
 	mail.Plain().Set(content)
 	err := mail.Send()
@@ -144,7 +144,7 @@ func (r *MutationResolver) Forget(input string) *types.ForgetResult {
 	if result == nil {
 		return &types.ForgetResult{Message: "failed"}
 	}
-	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\\n%s/reset?token=%s", utils.Configure.Server.Host, result.Token)) {
+	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\\n%s/reset?token=%s", configure.Configure.Server.Host, result.Token)) {
 		return &types.ForgetResult{Message: "send mail failed"}
 	}
 	return &types.ForgetResult{Message: ""}
