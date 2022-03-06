@@ -124,7 +124,7 @@
 <script lang="ts">
 import { Component, Vue, Watch, Prop, Emit } from "vue-property-decorator";
 import { load as loadYaml } from "js-yaml";
-import { ChallengeConfig, ChallengeConfigWithId } from "@/struct";
+import { ChallengeConfig, ChallengeConfigWithId, NodeConfig } from "@/struct";
 import constValue from "@/constValue";
 
 @Component
@@ -146,6 +146,8 @@ export default class ChallengeEditor extends Vue {
   private score: number = 0;
   private flag: string = "";
   private description: string = "";
+  private singleton: boolean = true;
+  private nodeConfigs: NodeConfig[]|undefined = undefined;
   private links: string[] = [];
 
   private link: string = "";
@@ -167,6 +169,8 @@ export default class ChallengeEditor extends Vue {
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
+        this.singleton = config.singleton;
+        this.nodeConfigs = config.nodeConfig;
       } catch (e) {
         this.EmitError(e.toString());
       }
@@ -180,6 +184,8 @@ export default class ChallengeEditor extends Vue {
     this.links = this.config.config.externalLink;
     this.state = this.config.state == "enabled";
     this.dynamicScore = this.config.config.score.dynamic;
+    this.singleton = this.config.config.singleton;
+    this.nodeConfigs = this.config.config.nodeConfig;
   }
 
   @Emit("error")
@@ -201,7 +207,9 @@ export default class ChallengeEditor extends Vue {
         score: { dynamic: this.dynamicScore, baseScore: this.score.toString() },
         flag: { dynamic: false, value: this.flag },
         description: this.description,
-        externalLink: this.links
+        externalLink: this.links,
+        singleton: this.singleton,
+        nodeConfig: this.nodeConfigs
       }
     } as ChallengeConfigWithId;
   }

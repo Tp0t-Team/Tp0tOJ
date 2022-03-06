@@ -212,6 +212,12 @@ export type UserInfoUpdateResult = { userInfoUpdate: Result }
 // mutation challengeMutate
 export type ChallengeMutateResult = { challengeMutate: Result }
 
+export type ChallengeMutateInput = {
+    challengeId: string
+    name: string
+    state: string
+} & ChallengeConfig
+
 // mutation challengeRemove
 export type ChallengeRemoveResult = { challengeRemove: Result }
 

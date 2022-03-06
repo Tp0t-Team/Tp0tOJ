@@ -78,7 +78,8 @@ import {
   ChallengeConfig,
   ChallengeConfigWithId,
   ChallengeConfigResult,
-  ChallengeMutateResult
+  ChallengeMutateResult,
+  ChallengeMutateInput
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
@@ -125,18 +126,23 @@ export default class Challenge extends Vue {
               message
               challengeConfigs {
                 challengeId
-                category
-                score {
-                  dynamic
-                  baseScore
-                }
-                flag {
-                  dynamic
-                  value
-                }
-                description
-                externalLink
                 state
+                name
+                config {
+                  category
+                  score {
+                    dynamic
+                    baseScore
+                  }
+                  flag {
+                    dynamic
+                    value
+                  }
+                  description
+                  externalLink
+                  singleton
+                  nodeConfig
+                }
               }
             }
           }
@@ -164,13 +170,15 @@ export default class Challenge extends Vue {
 
   async submit(config: ChallengeConfigWithId) {
     this.loading = true;
-    let tempConfig = JSON.parse(JSON.stringify(config));
+    let tempConfig : ChallengeMutateInput = JSON.parse(JSON.stringify(config.config));
     tempConfig.challengeId =
       tempConfig.challengeId[0] == "-" ? "" : tempConfig.challengeId;
+    tempConfig.name = config.name;
+    tempConfig.state = config.state;
     try {
       let res = await this.$apollo.mutate<
         ChallengeMutateResult,
-        { input: ChallengeConfigWithId }
+        { input: ChallengeMutateInput }
       >({
         mutation: gql`
           mutation($input: ChallengeMutateInput!) {
@@ -223,7 +231,7 @@ export default class Challenge extends Vue {
           description: "",
           externalLink: [],
           singleton: true,
-          nodeConfig: []
+          nodeConfig: undefined
         }
     };
     if (this.changed) {

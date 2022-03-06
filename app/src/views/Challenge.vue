@@ -6,7 +6,7 @@
         <v-divider color="primary"></v-divider>
       </div>
       <v-row>
-        <v-col sm="3" v-for="item in challenges.filter((v)=>v.type==type)" :key="item.challengeId">
+        <v-col sm="3" v-for="item in challenges.filter((v)=>v.category==type)" :key="item.challengeId">
           <v-layout justify-center>
             <v-hover :disabled="item.done" v-slot:default="{ hover }">
               <v-card
@@ -152,7 +152,7 @@ export default class Challenge extends Vue {
               challengeInfos {
                 challengeId
                 name
-                type
+                category
                 description
                 externalLink
                 score
