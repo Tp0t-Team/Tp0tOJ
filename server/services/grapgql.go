@@ -6,7 +6,6 @@ import (
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
-	"log"
 	"net/http"
 	"server/services/user"
 	"time"
@@ -40,7 +39,7 @@ func init() {
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{})
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
-	http.HandleFunc("/query", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		graphqlHandle.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "session", session)))
 	})
@@ -55,5 +54,4 @@ func init() {
 		userId := *session.Get("userId").(*uint64)
 		user.WriteUpHandle(w, r, userId)
 	})
-	log.Fatal(http.ListenAndServe(":8888", nil))
 }
