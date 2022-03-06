@@ -106,7 +106,7 @@ func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) bool {
 			return getResult.Error
 		}
 		for _, replicaAlloc := range replicaAllocs {
-			db.Delete(&replicaAlloc)
+			tx.Delete(&replicaAlloc)
 		}
 		return nil
 	})
