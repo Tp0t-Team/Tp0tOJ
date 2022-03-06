@@ -7,11 +7,14 @@ import (
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
 	"net/http"
+	"server/services/admin"
 	"server/services/user"
 	"time"
 )
 
 type Resolver struct {
+	admin.AdminMutationResolver
+	admin.AdminQueryResolver
 	user.MutationResolver
 	user.QueryResolver
 }
@@ -36,7 +39,7 @@ func init() {
 		// want to be crazy safe? Take a look at the "securecookie" example folder.
 	})
 
-	schema := graphql.MustParseSchema(schemaStr, &Resolver{})
+	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {

@@ -10,10 +10,10 @@ import (
 	"strconv"
 )
 
-type MutationResolver struct {
+type AdminMutationResolver struct {
 }
 
-func (r *MutationResolver) BulletinPub(input types.BulletinPubInput, ctx context.Context) *types.BulletinPubResult {
+func (r *AdminMutationResolver) BulletinPub(input types.BulletinPubInput, ctx context.Context) *types.BulletinPubResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -30,7 +30,7 @@ func (r *MutationResolver) BulletinPub(input types.BulletinPubInput, ctx context
 	return &types.BulletinPubResult{Message: ""}
 
 }
-func (r *MutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx context.Context) *types.UserInfoUpdateResult {
+func (r *AdminMutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx context.Context) *types.UserInfoUpdateResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -61,7 +61,7 @@ func (r *MutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx c
 	return &types.UserInfoUpdateResult{Message: "user ID is nil"}
 }
 
-func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx context.Context) *types.ChallengeMutateResult {
+func (r *AdminMutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx context.Context) *types.ChallengeMutateResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -86,7 +86,7 @@ func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx
 	return &types.ChallengeMutateResult{Message: ""}
 }
 
-func (r *MutationResolver) ChallengeRemove(id string, ctx context.Context) *types.ChallengeRemoveResult {
+func (r *AdminMutationResolver) ChallengeRemove(id string, ctx context.Context) *types.ChallengeRemoveResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -100,7 +100,7 @@ func (r *MutationResolver) ChallengeRemove(id string, ctx context.Context) *type
 	return &types.ChallengeRemoveResult{Message: ""}
 }
 
-func (r *MutationResolver) WarmUp() (bool, error) {
+func (r *AdminMutationResolver) WarmUp() (bool, error) {
 	err := utils.Cache.WarmUp()
 	if err != nil {
 		return false, nil

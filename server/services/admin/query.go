@@ -11,10 +11,10 @@ import (
 	"strconv"
 )
 
-type QueryResolver struct {
+type AdminQueryResolver struct {
 }
 
-func (r *QueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInfoResult {
+func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInfoResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -33,7 +33,7 @@ func (r *QueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInfoResu
 	return &types.AllUserInfoResult{Message: "", AllUserInfos: userInfos}
 }
 
-func (r *QueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeConfigsResult {
+func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeConfigsResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -61,7 +61,7 @@ func (r *QueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeCo
 	return &types.ChallengeConfigsResult{Message: "", ChallengeConfigs: challengeConfigs}
 }
 
-func (r *QueryResolver) SubmitHistory(userId string, ctx context.Context) *types.SubmitHistoryResult {
+func (r *AdminQueryResolver) SubmitHistory(userId string, ctx context.Context) *types.SubmitHistoryResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)

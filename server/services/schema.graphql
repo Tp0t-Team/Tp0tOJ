@@ -212,6 +212,7 @@ type RankResultDesc {
 
 type ChallengeInfo {
     challengeId: String
+    name: String
     type: String
 #    name: String
     score: Int
