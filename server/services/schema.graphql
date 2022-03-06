@@ -32,7 +32,7 @@ input RegisterInput {
 
 type RegisterResult {
     # success, xxx already in use, invalid xxx, failed, already login, not empty error
-    message: String
+    message: String!
 }
 
 input LoginInput {
@@ -42,26 +42,26 @@ input LoginInput {
 }
 
 type LoginResult {
-    message: String
-    userId: String
-    role: String
+    message: String!
+    userId: String!
+    role: String!
 }
 
 type LogoutResult {
-    message: String
+    message: String!
 }
 
 type ForgetResult {
-    message: String
+    message: String!
 }
 
 input ResetInput {
-    password: String
-    token: String
+    password: String!
+    token: String!
 }
 
 type ResetResult {
-    message: String
+    message: String!
 }
 
 input SubmitInput {
@@ -70,7 +70,7 @@ input SubmitInput {
 }
 
 type SubmitResult {
-    message: String
+    message: String!
 }
 
 input BulletinPubInput {
@@ -80,7 +80,7 @@ input BulletinPubInput {
 }
 
 type BulletinPubResult {
-    message: String
+    message: String!
 }
 
 input UserInfoUpdateInput {
@@ -144,11 +144,11 @@ input ServicePortInput {
 }
 
 type ChallengeMutateResult {
-    message: String
+    message: String!
 }
 
 type ChallengeRemoveResult {
-    message: String
+    message: String!
 }
 
 
@@ -166,144 +166,144 @@ type Query {
     submitHistory(userId: String!): SubmitHistoryResult
 }
 type UserInfoResult {
-    message: String
-    userInfo: UserInfo
+    message: String!
+    userInfo: UserInfo!
 }
 
 type UserInfo {
-    userId: String # long to String
-    name: String
-    avatar: String
+    userId: String! # long to String
+    name: String!
+    avatar: String!
     #    stuNumber: String
     #    department: String
     #    qq: String
-    mail: String
-    joinTime: String # Timestamp to String
-    score: Int
+    mail: String!
+    joinTime: String! # Timestamp to String
+    score: Int!
     #    topRank: Int
     #    protectedTime: String # Timestamp to String
-    role: String
-    state: String
+    role: String!
+    state: String!
     #    rank: Int
     #    grade: String
 }
 
 type AllUserInfoResult {
-    message: String
-    allUserInfos: [UserInfo]
+    message: String!
+    allUserInfos: [UserInfo]!
 }
 
 type RankResult {
-    message: String
-    rankResultDescs: [RankResultDesc]
+    message: String!
+    rankResultDescs: [RankResultDesc]!
 }
 
 type ChallengeInfosResult {
-    message: String
-    challengeInfos: [ChallengeInfo]
+    message: String!
+    challengeInfos: [ChallengeInfo]!
 }
 
 type RankResultDesc {
-    userId: String
-    name: String
-    avatar: String
-    score: Int
+    userId: String!
+    name: String!
+    avatar: String!
+    score: Int!
 }
 
 type ChallengeInfo {
-    challengeId: String
-    name: String
-    type: String
+    challengeId: String!
+    name: String!
+    type: String!
 #    name: String
-    score: Int
-    description: String
-    externalLink: [String]
+    score: Int!
+    description: String!
+    externalLink: [String]!
 #    hint: [String]
-    blood: [BloodInfo]
-    done: Boolean
-    manual: Boolean
-    allocated: Boolean
+    blood: [BloodInfo]!
+    done: Boolean!
+    manual: Boolean!
+    allocated: Boolean!
 }
 
 type BloodInfo {
-    userId: String
-    name: String
-    avatar: String
+    userId: String!
+    name: String!
+    avatar: String!
 }
 
 type ChallengeConfigsResult {
-    message: String
-    challengeConfigs: [ChallengeConfigAndState]
+    message: String!
+    challengeConfigs: [ChallengeConfigAndState]!
 }
 
 type ChallengeConfigAndState {
-    name: String
-    config: ChallengeConfig
-    state: String
+    name: String!
+    config: ChallengeConfig!
+    state: String!
 }
 
 type ChallengeConfig {
-    challengeId: String
+    challengeId: String!
 #    name: String
-    category: String
-    score: ScoreType
-    flag: FlagType
-    description: String
-    externalLink: [String]
+    category: String!
+    score: ScoreType!
+    flag: FlagType!
+    description: String!
+    externalLink: [String]!
 #    hint: [String]
-    state: String
-    singleton: Boolean
-    nodeConfig: [NodeConfig]
+    state: String!
+    singleton: Boolean!
+    nodeConfig: [NodeConfig]!
 }
 
 type NodeConfig {
-    name: String
-    image: String
-    ports: [ContainerPort]
-    servicePorts: [ServicePort]
+    name: String!
+    image: String!
+    ports: [ContainerPort]!
+    servicePorts: [ServicePort]!
 }
 
 type ContainerPort {
-    port: Int
-    protocol: String
+    port: Int!
+    protocol: String!
 }
 
 type ServicePort {
-    name: String
-    protocol: String
-    external: Int
-    internal: Int
-    pod: Int
+    name: String!
+    protocol: String!
+    external: Int!
+    internal: Int!
+    pod: Int!
 }
 
 type ScoreType {
-    dynamic: Boolean
-    baseScore: String
+    dynamic: Boolean!
+    baseScore: String!
 }
 
 type FlagType {
-    dynamic: Boolean
-    value: String
+    dynamic: Boolean!
+    value: String!
 }
 
 type BulletinResult {
-    message: String
-    bulletins: [Bulletin]
+    message: String!
+    bulletins: [Bulletin]!
 }
 
 type Bulletin {
-    title: String
-    content: String
-    publishTime: String
+    title: String!
+    content: String!
+    publishTime: String!
 }
 
 type SubmitHistoryResult {
-    message: String
-    submitInfos: [SubmitInfo]
+    message: String!
+    submitInfos: [SubmitInfo]!
 }
 
 type SubmitInfo {
-    submitTime: String
-    challengeName: String
-    mark: Int
+    submitTime: String!
+    challengeName: String!
+    mark: Int!
 }
