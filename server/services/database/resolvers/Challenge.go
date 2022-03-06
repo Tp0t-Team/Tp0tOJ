@@ -198,7 +198,9 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		}
 
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
-		// TODO: update flag replicas
+		if (challenge.State == "enabled" || input.State == "enabled") && oldConfig.Flag.Value != input.Flag.Value {
+			return errors.New("can't change flag for enabled challenge")
+		}
 
 		// if change state "disabled", replica delete & set all submits unavailable
 		if challenge.State == "enabled" && input.State == "disabled" {
@@ -210,6 +212,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
 			for _, submit := range submits {
 				submit.Available = false
+				tx.Save(&submit)
 			}
 
 		}
@@ -237,6 +240,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
 			for _, submit := range submits {
 				submit.Available = true
+				tx.Save(&submit)
 			}
 
 		}
