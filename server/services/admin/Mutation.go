@@ -87,9 +87,17 @@ func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx
 }
 
 func (r *MutationResolver) ChallengeRemove(id string) *types.ChallengeRemoveResult {
-	//TODO: impl
-	return &types.ChallengeRemoveResult{Message: "Can't remove any challenge"}
+	ok := resolvers.RemoveChallenge(id)
+	if !ok {
+		return &types.ChallengeRemoveResult{Message: "Remove challenge failed"}
+	}
+	_, err := r.WarmUp()
+	if err != nil {
+		return nil
+	}
+	return &types.ChallengeRemoveResult{Message: ""}
 }
+
 func (r *MutationResolver) WarmUp() (bool, error) {
 	err := utils.Cache.WarmUp()
 	if err != nil {

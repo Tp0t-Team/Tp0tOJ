@@ -107,3 +107,25 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 	return true
 
 }
+
+func DeleteSubmitsByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	err := outsideTX.Transaction(func(tx *gorm.DB) error {
+		var submits []entity.Submit
+		submits = FindAllSubmitByChallengeId(challengeId)
+		if submits == nil {
+			return errors.New("ChallengeId not find during Delete submits")
+		}
+		for _, submit := range submits {
+			tx.Delete(&submit)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}

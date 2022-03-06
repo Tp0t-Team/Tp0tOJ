@@ -305,3 +305,42 @@ func FindEnabledChallenges() []entity.Challenge {
 	}
 	return challenges
 }
+
+func RemoveChallenge(challengeId string) bool {
+	//var challenge entity.Challenge
+	id, err := strconv.ParseUint(challengeId, 10, 64)
+	if err != nil {
+		return false
+	}
+	challenge, err := FindChallengeById(id)
+	if challenge == nil {
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("can't find challenge by challenge id", challengeId)
+		return false
+	}
+
+	err = db.Transaction(func(tx *gorm.DB) error {
+		//Delete Replica and ReplicaAllocs
+		ok := DeleteReplicaByChallengeId(id, tx)
+		if !ok {
+			return errors.New("delete replica by challengeId error")
+		}
+
+		//Delete Submits by challengeId
+		ok = DeleteSubmitsByChallengeId(id, tx)
+		if !ok {
+			return errors.New("delete submits by challengeId error")
+		}
+		//Delete Challenge
+		tx.Delete(&challenge)
+		return nil
+	})
+	if err != nil {
+		log.Println("challenge remove error: ", err)
+		return false
+	}
+	return true
+
+}
