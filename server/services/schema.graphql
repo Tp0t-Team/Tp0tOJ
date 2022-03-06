@@ -190,17 +190,17 @@ type UserInfo {
 
 type AllUserInfoResult {
     message: String!
-    allUserInfos: [UserInfo]!
+    allUserInfos: [UserInfo!]!
 }
 
 type RankResult {
     message: String!
-    rankResultDescs: [RankResultDesc]!
+    rankResultDescs: [RankResultDesc!]!
 }
 
 type ChallengeInfosResult {
     message: String!
-    challengeInfos: [ChallengeInfo]!
+    challengeInfos: [ChallengeInfo!]!
 }
 
 type RankResultDesc {
@@ -217,9 +217,9 @@ type ChallengeInfo {
 #    name: String
     score: Int!
     description: String!
-    externalLink: [String]!
+    externalLink: [String!]!
 #    hint: [String]
-    blood: [BloodInfo]!
+    blood: [BloodInfo!]!
     done: Boolean!
     manual: Boolean!
     allocated: Boolean!
@@ -233,7 +233,7 @@ type BloodInfo {
 
 type ChallengeConfigsResult {
     message: String!
-    challengeConfigs: [ChallengeConfigAndState]!
+    challengeConfigs: [ChallengeConfigAndState!]!
 }
 
 type ChallengeConfigAndState {
@@ -249,18 +249,18 @@ type ChallengeConfig {
     score: ScoreType!
     flag: FlagType!
     description: String!
-    externalLink: [String]!
+    externalLink: [String!]!
 #    hint: [String]
     state: String!
     singleton: Boolean!
-    nodeConfig: [NodeConfig]!
+    nodeConfig: [NodeConfig!]!
 }
 
 type NodeConfig {
     name: String!
     image: String!
-    ports: [ContainerPort]!
-    servicePorts: [ServicePort]!
+    ports: [ContainerPort!]!
+    servicePorts: [ServicePort!]!
 }
 
 type ContainerPort {
@@ -288,7 +288,7 @@ type FlagType {
 
 type BulletinResult {
     message: String!
-    bulletins: [Bulletin]!
+    bulletins: [Bulletin!]!
 }
 
 type Bulletin {
@@ -299,7 +299,7 @@ type Bulletin {
 
 type SubmitHistoryResult {
     message: String!
-    submitInfos: [SubmitInfo]!
+    submitInfos: [SubmitInfo!]!
 }
 
 type SubmitInfo {

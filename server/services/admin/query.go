@@ -28,7 +28,7 @@ func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInf
 	}
 	//TODO: May need some method to cache
 	for _, v := range users {
-		userInfos = append(userInfos, types.UserInfo{UserId: strconv.FormatUint(v.UserId, 10), Name: v.Name, Avatar: v.MakeAvatarUrl(), Mail: v.Mail, JoinTime: v.JoinTime.String(), Score: int(utils.Cache.GetUserScore(v.UserId)), Role: v.Role, State: v.State})
+		userInfos = append(userInfos, types.UserInfo{UserId: strconv.FormatUint(v.UserId, 10), Name: v.Name, Avatar: v.MakeAvatarUrl(), Mail: v.Mail, JoinTime: v.JoinTime.String(), Score: int32(utils.Cache.GetUserScore(v.UserId)), Role: v.Role, State: v.State})
 	}
 	return &types.AllUserInfoResult{Message: "", AllUserInfos: userInfos}
 }

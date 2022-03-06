@@ -292,7 +292,7 @@ type UserInfo struct {
 	Avatar   string
 	Mail     string
 	JoinTime string
-	Score    int
+	Score    int32
 	Role     string
 	State    string
 	//Rank     int

@@ -51,13 +51,13 @@ func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
 	return &types.RankResult{Message: "", RankResultDescs: ret}
 }
 
-func (r *QueryResolver) UserInfo(userId string, ctx context.Context) *types.UserInfoResult {
+func (r *QueryResolver) UserInfo(ctx context.Context, userId struct{ UserId string }) *types.UserInfoResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin == nil || !*isLogin {
 		return &types.UserInfoResult{Message: "forbidden"}
 	}
-	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
+	parsedUserId, err := strconv.ParseUint(userId.UserId, 10, 64)
 	if err != nil {
 		log.Println(err)
 		return &types.UserInfoResult{Message: "Get User Info Error!"}
@@ -80,7 +80,7 @@ func (r *QueryResolver) UserInfo(userId string, ctx context.Context) *types.User
 			Avatar:   user.MakeAvatarUrl(),
 			Mail:     "",
 			JoinTime: user.JoinTime.Format(time.RFC3339),
-			Score:    int(utils.Cache.GetUserScore(user.UserId)),
+			Score:    int32(utils.Cache.GetUserScore(user.UserId)),
 			Role:     user.Role,
 			State:    user.State,
 			//Rank:     0, //
