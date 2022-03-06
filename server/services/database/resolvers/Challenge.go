@@ -279,7 +279,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 
 		challenge.Configuration = string(marshalConfig)
 		challenge.State = input.State
-		db.Save(&challenge)
+		tx.Save(&challenge)
 		return nil
 	})
 	if err != nil {

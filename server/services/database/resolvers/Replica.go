@@ -120,7 +120,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			for _, port := range node.ServicePorts {
 				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), int32(port.External), int32(port.Internal), int32(port.Pod)))
 			}
-			ok := kube.K8sPodAlloc(replicaId, node.Name, node.Image, ports, servicePorts)
+			ok := kube.K8sPodAlloc(replicaId, node.Name, node.Image, ports, servicePorts, replica.Flag)
 			if !ok {
 				createPodSuccess = false
 				break
@@ -137,7 +137,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			return errors.New("create pod failed")
 		}
 
-		db.Save(&replica)
+		tx.Save(&replica)
 		return nil
 	})
 	if err != nil {
@@ -161,7 +161,7 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			return nil
 		}
 		replica.Status = "disabled"
-		db.Save(&replica)
+		tx.Save(&replica)
 
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(replica.Challenge.Configuration), &config)
@@ -204,7 +204,7 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 			if ok := DisableReplica(replica.ReplicaId, tx); !ok {
 				return errors.New("disable replica failed")
 			}
-			db.Delete(&replica)
+			tx.Delete(&replica)
 		}
 		return nil
 	})
