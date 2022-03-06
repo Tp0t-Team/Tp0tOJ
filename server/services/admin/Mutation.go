@@ -86,14 +86,16 @@ func (r *MutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx
 	return &types.ChallengeMutateResult{Message: ""}
 }
 
-func (r *MutationResolver) ChallengeRemove(id string) *types.ChallengeRemoveResult {
-	ok := resolvers.RemoveChallenge(id)
+func (r *MutationResolver) ChallengeRemove(id string, ctx context.Context) *types.ChallengeRemoveResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin").(*bool)
+	isAdmin := session.Get("isAdmin").(*bool)
+	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+		return &types.ChallengeRemoveResult{Message: "forbidden"}
+	}
+	ok := resolvers.DeleteChallenge(id)
 	if !ok {
 		return &types.ChallengeRemoveResult{Message: "Remove challenge failed"}
-	}
-	_, err := r.WarmUp()
-	if err != nil {
-		return nil
 	}
 	return &types.ChallengeRemoveResult{Message: ""}
 }

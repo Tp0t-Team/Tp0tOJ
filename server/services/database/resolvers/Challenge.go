@@ -306,7 +306,7 @@ func FindEnabledChallenges() []entity.Challenge {
 	return challenges
 }
 
-func RemoveChallenge(challengeId string) bool {
+func DeleteChallenge(challengeId string) bool {
 	//var challenge entity.Challenge
 	id, err := strconv.ParseUint(challengeId, 10, 64)
 	if err != nil {
@@ -339,6 +339,11 @@ func RemoveChallenge(challengeId string) bool {
 	})
 	if err != nil {
 		log.Println("challenge remove error: ", err)
+		return false
+	}
+	err = utils.Cache.WarmUp()
+	if err != nil {
+		log.Println("warm up error:\n" + err.Error())
 		return false
 	}
 	return true
