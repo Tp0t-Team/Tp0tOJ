@@ -13,7 +13,8 @@ import (
 type AdminMutationResolver struct {
 }
 
-func (r *AdminMutationResolver) BulletinPub(input types.BulletinPubInput, ctx context.Context) *types.BulletinPubResult {
+func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ Input types.BulletinPubInput }) *types.BulletinPubResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -30,7 +31,8 @@ func (r *AdminMutationResolver) BulletinPub(input types.BulletinPubInput, ctx co
 	return &types.BulletinPubResult{Message: ""}
 
 }
-func (r *AdminMutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, ctx context.Context) *types.UserInfoUpdateResult {
+func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{ Input types.UserInfoUpdateInput }) *types.UserInfoUpdateResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -61,7 +63,8 @@ func (r *AdminMutationResolver) UserInfoUpdate(input types.UserInfoUpdateInput, 
 	return &types.UserInfoUpdateResult{Message: "user ID is nil"}
 }
 
-func (r *AdminMutationResolver) ChallengeMutate(input types.ChallengeMutateInput, ctx context.Context) *types.ChallengeMutateResult {
+func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct{ input types.ChallengeMutateInput }) *types.ChallengeMutateResult {
+	input := args.input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)
@@ -86,7 +89,8 @@ func (r *AdminMutationResolver) ChallengeMutate(input types.ChallengeMutateInput
 	return &types.ChallengeMutateResult{Message: ""}
 }
 
-func (r *AdminMutationResolver) ChallengeRemove(id string, ctx context.Context) *types.ChallengeRemoveResult {
+func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct{ Input string }) *types.ChallengeRemoveResult {
+	id := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)

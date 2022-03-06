@@ -40,7 +40,8 @@ func passwordHash(password string) string {
 	return fmt.Sprintf("%x", hash2.Sum(nil))
 }
 
-func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Context) *types.RegisterResult {
+func (r *MutationResolver) Register(ctx context.Context, args struct{ Input types.RegisterInput }) *types.RegisterResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
@@ -59,7 +60,8 @@ func (r *MutationResolver) Register(input types.RegisterInput, ctx context.Conte
 	return &types.RegisterResult{Message: ""}
 }
 
-func (r *MutationResolver) Login(input types.LoginInput, ctx context.Context) *types.LoginResult {
+func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.LoginInput }) *types.LoginResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
@@ -128,7 +130,8 @@ func sendMail(address string, subject string, content string) bool {
 	return true
 }
 
-func (r *MutationResolver) Forget(input string) *types.ForgetResult {
+func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResult {
+	input := args.Input
 	if input == "" {
 		return &types.ForgetResult{Message: "empty"}
 	}
@@ -150,7 +153,8 @@ func (r *MutationResolver) Forget(input string) *types.ForgetResult {
 	return &types.ForgetResult{Message: ""}
 }
 
-func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) *types.ResetResult {
+func (r *MutationResolver) Reset(ctx context.Context, args struct{ Input types.ResetInput }) *types.ResetResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {
@@ -166,7 +170,8 @@ func (r *MutationResolver) Reset(input types.ResetInput, ctx context.Context) *t
 	return &types.ResetResult{Message: ""}
 }
 
-func (r *MutationResolver) Submit(input types.SubmitInput, ctx context.Context) *types.SubmitResult {
+func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.SubmitInput }) *types.SubmitResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin != nil && *isLogin {

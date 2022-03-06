@@ -51,13 +51,14 @@ func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
 	return &types.RankResult{Message: "", RankResultDescs: ret}
 }
 
-func (r *QueryResolver) UserInfo(ctx context.Context, userId struct{ UserId string }) *types.UserInfoResult {
+func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string }) *types.UserInfoResult {
+	userId := args.UserId
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	if isLogin == nil || !*isLogin {
 		return &types.UserInfoResult{Message: "forbidden"}
 	}
-	parsedUserId, err := strconv.ParseUint(userId.UserId, 10, 64)
+	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
 	if err != nil {
 		log.Println(err)
 		return &types.UserInfoResult{Message: "Get User Info Error!"}

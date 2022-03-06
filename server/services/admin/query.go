@@ -61,7 +61,8 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 	return &types.ChallengeConfigsResult{Message: "", ChallengeConfigs: challengeConfigs}
 }
 
-func (r *AdminQueryResolver) SubmitHistory(userId string, ctx context.Context) *types.SubmitHistoryResult {
+func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ UserId string }) *types.SubmitHistoryResult {
+	userId := args.UserId
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin").(*bool)
 	isAdmin := session.Get("isAdmin").(*bool)

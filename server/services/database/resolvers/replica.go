@@ -114,11 +114,11 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		for _, node := range config.NodeConfig {
 			ports := []corev1.ContainerPort{}
 			for _, port := range node.Ports {
-				ports = append(ports, *kube.NewContainerPortConfig(kube.ParseProtocol(port.Protocol), int32(port.Port)))
+				ports = append(ports, *kube.NewContainerPortConfig(kube.ParseProtocol(port.Protocol), port.Port))
 			}
 			servicePorts := []corev1.ServicePort{}
 			for _, port := range node.ServicePorts {
-				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), int32(port.External), int32(port.Internal), int32(port.Pod)))
+				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), port.External, port.Internal, port.Pod))
 			}
 			ok := kube.K8sPodAlloc(replicaId, node.Name, node.Image, ports, servicePorts, replica.Flag)
 			if !ok {

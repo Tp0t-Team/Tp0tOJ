@@ -231,7 +231,7 @@ func (input *NodeConfigInput) ToNodeConfig() NodeConfig {
 }
 
 type ContainerPortInput struct {
-	Port     int
+	Port     int32
 	Protocol string
 }
 
@@ -249,9 +249,9 @@ func (input *ContainerPortInput) ToContainerPort() ContainerPort {
 type ServicePortInput struct {
 	Name     string
 	Protocol string
-	External int
-	Internal int
-	Pod      int
+	External int32
+	Internal int32
+	Pod      int32
 }
 
 func (input *ServicePortInput) ToServicePort() ServicePort {
@@ -317,7 +317,7 @@ type RankResultDesc struct {
 	UserId string
 	Name   string
 	Avatar string
-	Score  int
+	Score  int32
 }
 
 type ChallengeInfo struct {
@@ -368,16 +368,16 @@ type NodeConfig struct {
 }
 
 type ContainerPort struct {
-	Port     int
+	Port     int32
 	Protocol string
 }
 
 type ServicePort struct {
 	Name     string
 	Protocol string
-	External int
-	Internal int
-	Pod      int
+	External int32
+	Internal int32
+	Pod      int32
 }
 
 type ScoreType struct {
@@ -409,5 +409,5 @@ type SubmitHistoryResult struct {
 type SubmitInfo struct {
 	SubmitTime    string
 	ChallengeName string
-	Mark          int
+	Mark          int32
 }
