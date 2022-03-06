@@ -27,3 +27,6 @@ challenge:
 kubernetes:
   portAllocBegin: 30000
   portAllocEnd: 40000
+  username: "Tp0tOJRegistry"
+  password: "Tp0tyrtsigeR"
+  registryHost: "https://139.9.185.249:5000/"

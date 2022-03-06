@@ -37,7 +37,8 @@ type portAllocInfo struct {
 var AutoPortSet map[string]*portAllocInfo
 
 func init() {
-	const config = "/etc/rancher/k3s/k3s.yaml"
+	//const config = "/etc/rancher/k3s/k3s.yaml"
+	const config = "resources/k3s.yaml"
 	var kubeConfig *rest.Config
 	var err error
 	kubeConfig, err = clientcmd.BuildConfigFromFlags("", config)
