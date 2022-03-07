@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	_ "server/services"
+	_ "server/utils/calculator"
+	_ "server/utils/configure"
+	_ "server/utils/rank"
 )
 
 func main() {

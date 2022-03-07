@@ -38,10 +38,11 @@ var AutoPortSet map[string]*portAllocInfo
 
 func init() {
 	//const config = "/etc/rancher/k3s/k3s.yaml"
-	const config = "resources/k3s.yaml"
+	prefix, _ := os.Getwd()
+	const config = "/resources/k3s.yaml"
 	var kubeConfig *rest.Config
 	var err error
-	kubeConfig, err = clientcmd.BuildConfigFromFlags("", config)
+	kubeConfig, err = clientcmd.BuildConfigFromFlags("", prefix+config)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -52,7 +53,7 @@ func init() {
 	//AutoPortSet = map[string]*portAllocInfo{}
 	autoPortSetLoad()
 
-	dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig("resources/ca.crt", "resources/tls.crt", "resources/tls.key"))
+	dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig(prefix+"/resources/ca.crt", prefix+"/resources/tls.crt", prefix+"/resources/tls.key"))
 	if err != nil {
 		log.Panicln(err)
 	}

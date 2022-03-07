@@ -16,9 +16,9 @@ type AdminQueryResolver struct {
 
 func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInfoResult {
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.AllUserInfoResult{Message: "forbidden"}
 	}
 	var userInfos []types.UserInfo
@@ -35,9 +35,9 @@ func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInf
 
 func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.ChallengeConfigsResult {
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.ChallengeConfigsResult{Message: "forbidden"}
 	}
 	challenges := resolvers.FindAllChallenges()
@@ -66,9 +66,9 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ UserId string }) *types.SubmitHistoryResult {
 	userId := args.UserId
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.SubmitHistoryResult{Message: "forbidden"}
 	}
 

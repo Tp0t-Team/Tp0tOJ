@@ -43,8 +43,8 @@ func passwordHash(password string) string {
 func (r *MutationResolver) Register(ctx context.Context, args struct{ Input types.RegisterInput }) *types.RegisterResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin != nil && *isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin != nil && *isLogin.(*bool) {
 		return &types.RegisterResult{Message: "already login cannot register"}
 	}
 	if !input.CheckPass() {
@@ -63,8 +63,8 @@ func (r *MutationResolver) Register(ctx context.Context, args struct{ Input type
 func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.LoginInput }) *types.LoginResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin != nil && *isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin != nil && *isLogin.(*bool) {
 		return &types.LoginResult{Message: "already login"}
 	}
 	if !input.CheckPass() {
@@ -84,14 +84,14 @@ func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.L
 	state := true
 	session.Set("isLogin", &state)
 	userId := user.UserId
-	session.Set("userId", userId)
+	session.Set("userId", &userId)
 	var adminState bool
 	if user.Role == "admin" {
 		adminState = true
 	} else {
 		adminState = false
 	}
-	session.Set("isAdmin", adminState)
+	session.Set("isAdmin", &adminState)
 	var teamState bool
 	if user.Role == "team" {
 		teamState = true
@@ -99,13 +99,13 @@ func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.L
 		teamState = false
 	}
 	session.Set("isTeam", teamState)
-	return &types.LoginResult{Message: ""}
+	return &types.LoginResult{Message: "", UserId: strconv.FormatUint(user.UserId, 10), Role: user.Role}
 }
 
 func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin == nil || !*isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.LogoutResult{Message: "not login yet"}
 	}
 	session.Delete("isTeam")
@@ -156,8 +156,8 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 func (r *MutationResolver) Reset(ctx context.Context, args struct{ Input types.ResetInput }) *types.ResetResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin != nil && *isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin != nil && *isLogin.(*bool) {
 		return &types.ResetResult{Message: "already login"}
 	}
 	if !input.CheckPass() {
@@ -173,8 +173,8 @@ func (r *MutationResolver) Reset(ctx context.Context, args struct{ Input types.R
 func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.SubmitInput }) *types.SubmitResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin != nil && *isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin != nil && *isLogin.(*bool) {
 		return &types.SubmitResult{Message: "already login"}
 	}
 	if !input.CheckPass() {

@@ -14,6 +14,16 @@ import (
 	"time"
 )
 
+var timeZone *time.Location
+
+func init() {
+	var err error
+	timeZone, err = time.LoadLocation("UTC")
+	if err != nil {
+		log.Panicln(err)
+	}
+}
+
 type QueryResolver struct {
 }
 
@@ -27,7 +37,7 @@ func (r *QueryResolver) AllBulletin() *types.BulletinResult {
 		result.Bulletins = append(result.Bulletins, types.Bulletin{
 			Title:       bulletin.Title,
 			Content:     bulletin.Content,
-			PublishTime: bulletin.PublishTime.Format(time.RFC3339),
+			PublishTime: bulletin.PublishTime.In(timeZone).Format(time.RFC3339),
 		})
 	}
 	return &result
@@ -54,8 +64,8 @@ func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
 func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string }) *types.UserInfoResult {
 	userId := args.UserId
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin == nil || !*isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.UserInfoResult{Message: "forbidden"}
 	}
 	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
@@ -80,7 +90,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 			Name:     user.Name,
 			Avatar:   user.MakeAvatarUrl(),
 			Mail:     "",
-			JoinTime: user.JoinTime.Format(time.RFC3339),
+			JoinTime: user.JoinTime.In(timeZone).Format(time.RFC3339),
 			Score:    int32(utils.Cache.GetUserScore(user.UserId)),
 			Role:     user.Role,
 			State:    user.State,
@@ -94,8 +104,8 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 
 func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfosResult {
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	if isLogin == nil || !*isLogin {
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.ChallengeInfosResult{Message: "forbidden"}
 	}
 	currentUserId := *session.Get("userId").(*uint64)

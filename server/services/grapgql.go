@@ -48,8 +48,8 @@ func init() {
 	})
 	http.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
-		isLogin := session.Get("isLogin").(*bool)
-		if isLogin == nil || !*isLogin {
+		isLogin := session.Get("isLogin")
+		if isLogin == nil || !*isLogin.(*bool) {
 			w.WriteHeader(403)
 			w.Write(nil)
 			return

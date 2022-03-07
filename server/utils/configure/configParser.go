@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Config struct {
@@ -56,7 +57,8 @@ type Kubernetes struct {
 }
 
 func Parse(config *Config) {
-	f, err := ioutil.ReadFile("resources/config.yaml")
+	prefix, _ := os.Getwd()
+	f, err := ioutil.ReadFile(prefix + "/resources/config.yaml")
 	if err != nil {
 		log.Panicln(err.Error())
 	}

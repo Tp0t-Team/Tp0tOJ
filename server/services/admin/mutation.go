@@ -16,9 +16,9 @@ type AdminMutationResolver struct {
 func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ Input types.BulletinPubInput }) *types.BulletinPubResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.BulletinPubResult{Message: "forbidden"}
 	}
 	if input.CheckPass() {
@@ -34,12 +34,12 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{ Input types.UserInfoUpdateInput }) *types.UserInfoUpdateResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	userId := session.Get("userId").(*uint64)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.UserInfoUpdateResult{Message: "forbidden"}
 	}
+	userId := session.Get("userId").(*uint64)
 	if input.CheckPass() {
 		return &types.UserInfoUpdateResult{Message: "user information check failed"}
 	}
@@ -66,9 +66,9 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct{ Input types.ChallengeMutateInput }) *types.ChallengeMutateResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.ChallengeMutateResult{Message: "forbidden"}
 	}
 	if input.CheckPass() {
@@ -92,9 +92,9 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct{ Input string }) *types.ChallengeRemoveResult {
 	id := args.Input
 	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin").(*bool)
-	isAdmin := session.Get("isAdmin").(*bool)
-	if isLogin == nil || !*isLogin || isAdmin == nil || !*isAdmin {
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.ChallengeRemoveResult{Message: "forbidden"}
 	}
 	ok := resolvers.DeleteChallenge(id)
