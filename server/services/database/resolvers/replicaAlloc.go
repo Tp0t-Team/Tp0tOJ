@@ -9,7 +9,7 @@ import (
 
 func FindReplicaAllocByUserId(userId uint64) []entity.ReplicaAlloc {
 	var replicaAllocs []entity.ReplicaAlloc
-	result := db.Where(map[string]interface{}{"UserId": userId}).Find(&replicaAllocs)
+	result := db.Where(map[string]interface{}{"user_id": userId}).Find(&replicaAllocs)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.ReplicaAlloc{}
 	} else if result.Error != nil {
@@ -26,7 +26,7 @@ func FindReplicaAllocByUserIdAndChallengeId(userId uint64, challengeId uint64, o
 	var found []entity.ReplicaAlloc
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var allocs []entity.ReplicaAlloc
-		allocResult := tx.Where(map[string]interface{}{"UserId": userId}).Find(&allocs)
+		allocResult := tx.Where(map[string]interface{}{"user_id": userId}).Find(&allocs)
 		if allocResult.Error != nil {
 			return allocResult.Error
 		}
@@ -52,7 +52,7 @@ func FindReplicaAllocByUserIdAndReplicaId(userId uint64, replicaId uint64, outsi
 	var found []entity.ReplicaAlloc
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var allocs []entity.ReplicaAlloc
-		allocResult := tx.Where(map[string]interface{}{"UserId": userId}).Find(&allocs)
+		allocResult := tx.Where(map[string]interface{}{"user_id": userId}).Find(&allocs)
 		if allocResult.Error != nil {
 			return allocResult.Error
 		}
@@ -101,7 +101,7 @@ func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replicaAllocs []entity.ReplicaAlloc
-		getResult := tx.Where(map[string]interface{}{"ReplicaId": replicaId}).Find(&replicaAllocs)
+		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).Find(&replicaAllocs)
 		if getResult.Error != nil {
 			return getResult.Error
 		}

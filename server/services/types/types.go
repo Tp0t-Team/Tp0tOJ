@@ -1,6 +1,7 @@
 package types
 
 import (
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -138,6 +139,7 @@ type ChallengeMutateInput struct {
 func (input *ChallengeMutateInput) CheckPass() bool {
 	input.Name = strings.TrimSpace(input.Name)
 	input.Description = strings.TrimSpace(input.Description)
+	log.Println(input)
 	if input.NodeConfig != nil {
 		if len(*input.NodeConfig) == 0 {
 			input.Singleton = true
@@ -153,6 +155,7 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 			return false
 		}
 	}
+	log.Println(input)
 	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
 }
 

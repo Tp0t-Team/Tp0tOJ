@@ -13,7 +13,7 @@ import (
 // AddUser support role[admin|member|team] state[banned|disabled|normal]
 func AddUser(name string, password string, mail string, role string, state string) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
-		checkResult := tx.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
+		checkResult := tx.Where(map[string]interface{}{"mail": mail}).First(&entity.User{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
 			newUser := entity.User{Name: name, Password: password, Mail: mail, Role: role, State: state, JoinTime: time.Now()}
 			result := tx.Create(&newUser)
@@ -61,7 +61,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 
 func FindUserByMail(mail string) (*entity.User, error) {
 	var user entity.User
-	result := db.Where(map[string]interface{}{"Mail": mail}).First(&user)
+	result := db.Where(map[string]interface{}{"mail": mail}).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -85,7 +85,7 @@ func FindUser(id uint64) (*entity.User, error) {
 
 func CheckAdminByUserId(userId uint64) bool {
 	var users entity.User
-	result := db.Where(map[string]interface{}{"UserId": userId, "Role": "admin"}).First(&users)
+	result := db.Where(map[string]interface{}{"user_id": userId, "role": "admin"}).First(&users)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false
 	} else if result.Error != nil {
@@ -97,7 +97,7 @@ func CheckAdminByUserId(userId uint64) bool {
 
 func UpdateUserInfo(userId uint64, name string, role string, mail string, state string) bool {
 	var user entity.User
-	result := db.Where(map[string]interface{}{"UserId": userId}).First(&user)
+	result := db.Where(map[string]interface{}{"user_id": userId}).First(&user)
 	if result.Error != nil {
 		log.Println(result.Error)
 		return false
@@ -127,7 +127,7 @@ func FindAllUser() []entity.User {
 }
 
 func CheckMailExistence(mail string) bool {
-	result := db.Where(map[string]interface{}{"Mail": mail}).First(&entity.User{})
+	result := db.Where(map[string]interface{}{"mail": mail}).First(&entity.User{})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false
 	} else if result.Error != nil {

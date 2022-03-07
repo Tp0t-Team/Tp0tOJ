@@ -19,7 +19,7 @@ import (
 
 func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	var replicas []entity.Replica
-	result := db.Where(map[string]interface{}{"ChallengeId": challengeId}).Find(&replicas)
+	result := db.Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Replica{}
 	} else if result.Error != nil {
@@ -36,7 +36,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 	var newReplica entity.Replica
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
-		challengeResult := tx.Where(map[string]interface{}{"ChallengeId": challengeId}).First(&challenge)
+		challengeResult := tx.Where(map[string]interface{}{"challenge_id": challengeId}).First(&challenge)
 		if challengeResult.Error != nil {
 			return challengeResult.Error
 		}
@@ -96,7 +96,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
-		getResult := tx.Where(map[string]interface{}{"ReplicaId": replicaId}).First(&replica)
+		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
 		if getResult.Error != nil {
 			return getResult.Error
 		}
@@ -153,7 +153,7 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
-		getResult := tx.Where(map[string]interface{}{"ReplicaId": replicaId}).First(&replica)
+		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
 		if getResult.Error != nil {
 			return getResult.Error
 		}
@@ -192,7 +192,7 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replicas []entity.Replica
-		getResult := tx.Where(map[string]interface{}{"ChallengeId": challengeId}).Find(&replicas)
+		getResult := tx.Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
 		if getResult.Error != nil {
 			return getResult.Error
 		}

@@ -21,7 +21,7 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.BulletinPubResult{Message: "forbidden"}
 	}
-	if input.CheckPass() {
+	if !input.CheckPass() {
 		return &types.BulletinPubResult{Message: "not empty error"}
 	}
 	ok := resolvers.AddBulletin(input.Title, input.Content, input.Topping)
@@ -40,7 +40,7 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 		return &types.UserInfoUpdateResult{Message: "forbidden"}
 	}
 	userId := session.Get("userId").(*uint64)
-	if input.CheckPass() {
+	if !input.CheckPass() {
 		return &types.UserInfoUpdateResult{Message: "user information check failed"}
 	}
 	if userId != nil {
@@ -71,7 +71,7 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.ChallengeMutateResult{Message: "forbidden"}
 	}
-	if input.CheckPass() {
+	if !input.CheckPass() {
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}
 	}
 	if input.ChallengeId == "" {

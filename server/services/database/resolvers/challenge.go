@@ -13,7 +13,7 @@ import (
 
 func FindChallengeByState(state string) []entity.Challenge {
 	var challenges []entity.Challenge
-	result := db.Where(map[string]interface{}{"State": state}).Find(&challenges)
+	result := db.Where(map[string]interface{}{"state": state}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Challenge{}
 	} else if result.Error != nil {
@@ -25,7 +25,7 @@ func FindChallengeByState(state string) []entity.Challenge {
 
 func FindChallengeById(id uint64) (*entity.Challenge, error) {
 	var challenge entity.Challenge
-	result := db.Where(map[string]interface{}{"ChallengeId": id}).First(&challenge)
+	result := db.Where(map[string]interface{}{"challenge_id": id}).First(&challenge)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -49,7 +49,7 @@ func FindAllChallenges() []entity.Challenge {
 
 func FindChallengeByName(name string) (*entity.Challenge, error) {
 	var challenge entity.Challenge
-	result := db.Where(map[string]interface{}{"Name": name}).First(&challenge)
+	result := db.Where(map[string]interface{}{"name": name}).First(&challenge)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil, nil
 	} else if result.Error != nil {
@@ -152,7 +152,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 			return errors.New("challengeId Parse Error:\n" + err.Error())
 
 		}
-		challengeItem := tx.Where(map[string]interface{}{"ChallengeId": inputChallengeId}).First(&challenge)
+		challengeItem := tx.Where(map[string]interface{}{"challenge_id": inputChallengeId}).First(&challenge)
 		if challengeItem.Error != nil {
 			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
 		}
@@ -296,7 +296,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 
 func FindEnabledChallenges() []entity.Challenge {
 	var challenges []entity.Challenge
-	result := db.Where(map[string]interface{}{"State": "enabled"}).Find(&challenges)
+	result := db.Where(map[string]interface{}{"state": "enabled"}).Find(&challenges)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Challenge{}
 	} else if result.Error != nil {
