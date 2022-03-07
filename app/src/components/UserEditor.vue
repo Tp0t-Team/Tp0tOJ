@@ -4,8 +4,6 @@
       <v-col cols="6">
         <v-text-field v-model="name" :disabled="loading || disabled" outlined label="name"></v-text-field>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="6">
         <v-select
           v-model="role"
@@ -15,6 +13,8 @@
           :items="roleType"
         ></v-select>
       </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="6">
         <v-select
           v-model="state"
@@ -24,8 +24,6 @@
           :items="stateType"
         ></v-select>
       </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="6">
         <v-text-field v-model="mail" :disabled="loading || disabled" outlined label="mail"></v-text-field>
       </v-col>
@@ -59,7 +57,7 @@ import { UserInfo } from "@/struct";
 export default class UserEditor extends Vue {
   private roleType = constValue.roleType;
   private stateType = constValue.stateType;
-  private departmentItems = constValue.departmentItems;
+  // private departmentItems = constValue.departmentItems;
   private gradeItems: string[] = [];
 
   @Prop() user!: UserInfo | null;
@@ -90,7 +88,7 @@ export default class UserEditor extends Vue {
     this.score = parseInt(this.user.score);
     this.mail = this.user.mail;
     this.joinTime = new Date(
-      this.user.joinTime.replace(/\//g, "-") + "+00:00"
+      this.user.joinTime//.replace(/\//g, "-") + "+00:00"
     ).toLocaleString();
   }
 

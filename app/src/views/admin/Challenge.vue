@@ -108,7 +108,7 @@ export default class Challenge extends Vue {
 
   private get challengeConfigFiltered() {
     return this.challengeType.map(v => ({
-      type: v,
+      category: v,
       items: this.challengeConfigs.filter(c => c.config.category == v)
     }));
   }
@@ -141,7 +141,21 @@ export default class Challenge extends Vue {
                   description
                   externalLink
                   singleton
-                  nodeConfig
+                  nodeConfig {
+                    name
+                    image
+                    ports {
+                      port
+                      protocol
+                    }
+                    servicePorts {
+                      name
+                      protocol
+                      external
+                      internal
+                      pod
+                    }
+                  }
                 }
               }
             }
@@ -172,9 +186,10 @@ export default class Challenge extends Vue {
     this.loading = true;
     let tempConfig : ChallengeMutateInput = JSON.parse(JSON.stringify(config.config));
     tempConfig.challengeId =
-      tempConfig.challengeId[0] == "-" ? "" : tempConfig.challengeId;
+      config.challengeId[0] == "-" ? "" : tempConfig.challengeId;
     tempConfig.name = config.name;
     tempConfig.state = config.state;
+    console.log(tempConfig)
     try {
       let res = await this.$apollo.mutate<
         ChallengeMutateResult,

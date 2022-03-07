@@ -26,6 +26,18 @@
         </v-row>
       </v-col>
       <v-col cols="4">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="dynamicFlag"
+            label="DynamicFlag"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+      <v-col cols="12">
         <v-file-input
           v-model="configFile"
           accept=".yaml, .yml"
@@ -141,6 +153,7 @@ export default class ChallengeEditor extends Vue {
 
   private state: boolean = false;
   private dynamicScore: boolean = false;
+  private dynamicFlag: boolean = false;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
@@ -157,11 +170,12 @@ export default class ChallengeEditor extends Vue {
   mounted() {
     this.reader.addEventListener("load", e => {
       try {
-        let config: ChallengeConfig = loadYaml(e.target!.result as string);
+        let config: ChallengeConfig &{name: string} = loadYaml(e.target!.result as string);
         if (this.challengeType.findIndex(v => v == config.category) < 0)
           throw "类型错误";
         if (config.category != this.type) throw "不可修改类型";
         this.setValue = true;
+        this.name = config.name || this.name;
         this.score = (config.score.baseScore as number) || this.score;
         this.flag = config.flag.value || this.flag;
         this.description = config.description || this.description;
@@ -169,6 +183,7 @@ export default class ChallengeEditor extends Vue {
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
+        this.dynamicFlag = config.flag.dynamic || this.dynamicFlag;
         this.singleton = config.singleton;
         this.nodeConfigs = config.nodeConfig;
       } catch (e) {
@@ -184,6 +199,7 @@ export default class ChallengeEditor extends Vue {
     this.links = this.config.config.externalLink;
     this.state = this.config.state == "enabled";
     this.dynamicScore = this.config.config.score.dynamic;
+    this.dynamicFlag = this.config.config.flag.dynamic;
     this.singleton = this.config.config.singleton;
     this.nodeConfigs = this.config.config.nodeConfig;
   }
@@ -205,7 +221,7 @@ export default class ChallengeEditor extends Vue {
       config: {
         category: this.type,
         score: { dynamic: this.dynamicScore, baseScore: this.score.toString() },
-        flag: { dynamic: false, value: this.flag },
+        flag: { dynamic: this.dynamicFlag, value: this.flag },
         description: this.description,
         externalLink: this.links,
         singleton: this.singleton,
