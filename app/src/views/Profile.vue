@@ -54,9 +54,7 @@
                 <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
                 </v-col>
-              </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
+                <v-col cols="6" v-if="$store.state.global.userId==$route.params.user_id">
                   <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
                 </v-col>
               </v-row>
@@ -106,7 +104,7 @@ export default class Profile extends Vue {
 
   private get showJoinTime() {
     return new Date(
-      this.userInfo.joinTime.toString().replace(/\//g, "-") + "+00:00"
+      this.userInfo.joinTime//.toString().replace(/\//g, "-") + "+00:00"
     ).toLocaleString();
   }
 
