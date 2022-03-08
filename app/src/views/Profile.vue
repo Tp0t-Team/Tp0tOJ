@@ -64,6 +64,39 @@
       </v-col>
       <v-spacer></v-spacer>
     </v-row>
+    <v-row v-if="$store.state.global.role=='admin'">
+      <v-spacer></v-spacer>
+      <v-col cols="6">
+        <v-toolbar dense>
+          解题列表
+          <v-spacer></v-spacer>
+          <v-btn icon @click="refresh" :disabled="withoutInit">
+            <v-icon>refresh</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-simple-table dense>
+          <thead>
+            <tr>
+              <th>submit time</th>
+              <th>challenge name</th>
+              <th>mark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in resolves" :key="item.submitTime">
+              <td>{{new Date(item.submitTime).toLocaleString()}}</td>
+              <td>{{item.challengeName}}</td>
+              <td>
+                <v-badge v-if="!!item.mark" class="mark-badge" :color="rankColor[item.mark - 1]">
+                  <template v-slot:badge>{{item.mark}}</template>
+                </v-badge>
+              </td>
+            </tr>
+          </tbody>
+        </v-simple-table>
+      </v-col>
+      <v-spacer></v-spacer>
+    </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
       <!-- <v-spacer></v-spacer> -->
@@ -80,7 +113,7 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { Route } from "vue-router";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { UserInfo, UserInfoResult } from "@/struct";
+import { UserInfo, UserInfoResult, SubmitInfo, SubmitHistoryResult } from "@/struct";
 import gql from "graphql-tag";
 
 @Component({
@@ -103,6 +136,7 @@ export default class Profile extends Vue {
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+  private resolves: SubmitInfo[] = [];
 
   private get showJoinTime() {
     return new Date(
@@ -154,6 +188,39 @@ export default class Profile extends Vue {
       this.loading = false;
     } catch (e) {
       this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
+  
+  async refresh() {
+    try {
+      let res = await this.$apollo.query<
+        SubmitHistoryResult,
+        { input: string }
+      >({
+        query: gql`
+          query($input: String!) {
+            submitHistory(userId: $input) {
+              message
+              submitInfos {
+                submitTime
+                challengeName
+                mark
+              }
+            }
+          }
+        `,
+        variables: {
+          input: this.userInfo.userId
+        },
+        fetchPolicy: "no-cache"
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.submitHistory.message)
+        throw res.data!.submitHistory.message;
+      this.resolves = res.data!.submitHistory.submitInfos;
+    } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
     }

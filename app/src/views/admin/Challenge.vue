@@ -191,7 +191,6 @@ export default class Challenge extends Vue {
       config.challengeId[0] == "-" ? "" : config.challengeId;
     tempConfig.name = config.name;
     tempConfig.state = config.state;
-    console.log(tempConfig)
     try {
       let res = await this.$apollo.mutate<
         ChallengeMutateResult,
