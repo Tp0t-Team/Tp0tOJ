@@ -6,13 +6,13 @@
 
 - [ ] Announcement页面逻辑修改，卡片间距离存在问题，对于多行内容，仅显示1~2行，剩下的使用点击卡片，卡片展开的形式呈现
 
-- [ ] 题目1、2、3血功能未加上
+- [x] 题目1、2、3血功能未加上 @@@@@
 
 - [ ] Challenge美观调整：Challenges卡片过大，需要按比例缩小
 
-- [ ] 分值溢出问题
+- [x] 分值溢出问题
 
-- [ ] Announcement invalued date时间问题
+- [x] Announcement invalued date时间问题
 
 - [ ] 各种依赖包的版本更新和接口修复
 
@@ -20,15 +20,15 @@
 
 - [ ] Challenge功能调整：对于需要启动pod的动态题目，提供开启环境的按钮
 
-- [ ] Admin功能调整：Admin可以查看User的Submit（解题列表），将Submit查看页面由admin的user页，转移到对应User的profile页
+- [x] Admin功能调整：Admin可以查看User的Submit（解题列表），将Submit查看页面由admin的user页，转移到对应User的profile页
 
-- [ ] Disable后该user仍在排行榜上的问题
+- [x] Disable后该user仍在排行榜上的问题
 
 - [ ] 创建题目的时候的逻辑问题：创建题目的时候Disable应该为不可用默认值，修改题目的时候才是可用按钮
 
-- [ ] session过期逻辑：在本地存在cookies但是任意页面返回forbidden的时候，应该弹出提示框重新登陆
+- [ ] session过期逻辑：在本地存在cookies但是任意页面返回forbidden的时候，应该弹出提示框重新登陆 @@
 
-- [ ] 创建题目成功后自动刷新页面
+- [x] 创建题目成功后自动刷新页面
 
 - [x] 被forbiden的账户不能登录，且登录时显示账户被封禁
 
@@ -43,6 +43,8 @@
 - [ ] 缺少目前服务器集群机器状态的页面
 
 - [ ] 附加外部链接格式统一解析（优先级不高）
+
+- [x] session持久化存储，目前F5 cookie会掉
 
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`
