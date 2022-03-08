@@ -2,8 +2,8 @@
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.type">
-          <v-toolbar dense>{{item.type}}</v-toolbar>
+        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.category">
+          <v-toolbar dense>{{item.category}}</v-toolbar>
           <v-list dense>
             <v-list-item
               v-for="conf in item.items"
@@ -18,7 +18,7 @@
                 </v-btn>
               </v-list-item-icon>
             </v-list-item>
-            <v-list-item @click="newChallenge(item.type)" :disabled="loading">
+            <v-list-item @click="newChallenge(item.category)" :disabled="loading">
               <v-layout row>
                 <v-spacer></v-spacer>
                 <v-icon>add</v-icon>
@@ -63,10 +63,12 @@
     </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -78,7 +80,8 @@ import {
   ChallengeConfig,
   ChallengeConfigWithId,
   ChallengeConfigResult,
-  ChallengeMutateResult
+  ChallengeMutateResult,
+  ChallengeMutateInput
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
@@ -107,8 +110,8 @@ export default class Challenge extends Vue {
 
   private get challengeConfigFiltered() {
     return this.challengeType.map(v => ({
-      type: v,
-      items: this.challengeConfigs.filter(c => c.type == v)
+      category: v,
+      items: this.challengeConfigs.filter(c => c.config.category == v)
     }));
   }
 
@@ -125,20 +128,37 @@ export default class Challenge extends Vue {
               message
               challengeConfigs {
                 challengeId
-                type
-                name
-                score {
-                  dynamic
-                  base_score
-                }
-                flag {
-                  dynamic
-                  value
-                }
-                description
-                external_link
-                hint
                 state
+                name
+                config {
+                  category
+                  score {
+                    dynamic
+                    baseScore
+                  }
+                  flag {
+                    dynamic
+                    value
+                  }
+                  description
+                  externalLink
+                  singleton
+                  nodeConfig {
+                    name
+                    image
+                    ports {
+                      port
+                      protocol
+                    }
+                    servicePorts {
+                      name
+                      protocol
+                      external
+                      internal
+                      pod
+                    }
+                  }
+                }
               }
             }
           }
@@ -166,13 +186,16 @@ export default class Challenge extends Vue {
 
   async submit(config: ChallengeConfigWithId) {
     this.loading = true;
-    let tempConfig = JSON.parse(JSON.stringify(config));
+    let tempConfig : ChallengeMutateInput = JSON.parse(JSON.stringify(config.config));
     tempConfig.challengeId =
-      tempConfig.challengeId[0] == "-" ? "" : tempConfig.challengeId;
+      config.challengeId[0] == "-" ? "" : config.challengeId;
+    tempConfig.name = config.name;
+    tempConfig.state = config.state;
+    console.log(tempConfig)
     try {
       let res = await this.$apollo.mutate<
         ChallengeMutateResult,
-        { input: ChallengeConfigWithId }
+        { input: ChallengeMutateInput }
       >({
         mutation: gql`
           mutation($input: ChallengeMutateInput!) {
@@ -216,14 +239,17 @@ export default class Challenge extends Vue {
   newChallenge(type: string) {
     let config: ChallengeConfigWithId = {
       challengeId: "-" + Date.now().toLocaleString(),
-      type: type,
       name: "",
-      score: { dynamic: false, base_score: "0" },
-      flag: { dynamic: false, value: "" },
-      description: "",
-      external_link: [],
-      hint: [],
-      state: "disabled"
+      state: "disabled",
+      config: {
+          category: type,
+          score: { dynamic: false, baseScore: "0" },
+          flag: { dynamic: false, value: "" },
+          description: "",
+          externalLink: [],
+          singleton: true,
+          nodeConfig: undefined
+        }
     };
     if (this.changed) {
       this.tempConfig = config;
