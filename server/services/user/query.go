@@ -69,7 +69,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	if isLogin == nil || !*isLogin.(*bool) {
-		return &types.UserInfoResult{Message: "forbidden"}
+		return &types.UserInfoResult{Message: "forbidden or login timeout"}
 	}
 	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
 	if err != nil {
@@ -109,7 +109,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	if isLogin == nil || !*isLogin.(*bool) {
-		return &types.ChallengeInfosResult{Message: "forbidden"}
+		return &types.ChallengeInfosResult{Message: "forbidden or login timeout"}
 	}
 	currentUserId := *session.Get("userId").(*uint64)
 	challenges := resolvers.FindEnabledChallenges()

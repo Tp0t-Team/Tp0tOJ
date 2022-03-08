@@ -19,7 +19,7 @@ func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInf
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.AllUserInfoResult{Message: "forbidden"}
+		return &types.AllUserInfoResult{Message: "forbidden or login timeout"}
 	}
 	var userInfos []types.UserInfo
 	users := resolvers.FindAllUser()
@@ -38,7 +38,7 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeConfigsResult{Message: "forbidden"}
+		return &types.ChallengeConfigsResult{Message: "forbidden or login timeout"}
 	}
 	challenges := resolvers.FindAllChallenges()
 	if challenges == nil {
@@ -68,7 +68,7 @@ func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ Use
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.SubmitHistoryResult{Message: "forbidden"}
+		return &types.SubmitHistoryResult{Message: "forbidden or login timeout"}
 	}
 
 	id, err := strconv.ParseUint(userId, 10, 64)

@@ -19,7 +19,7 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.BulletinPubResult{Message: "forbidden"}
+		return &types.BulletinPubResult{Message: "forbidden or login timeout"}
 	}
 	if !input.CheckPass() {
 		return &types.BulletinPubResult{Message: "not empty error"}
@@ -37,7 +37,7 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.UserInfoUpdateResult{Message: "forbidden"}
+		return &types.UserInfoUpdateResult{Message: "forbidden or login timeout"}
 	}
 	userId := session.Get("userId").(*uint64)
 	if !input.CheckPass() {
@@ -69,7 +69,7 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeMutateResult{Message: "forbidden"}
+		return &types.ChallengeMutateResult{Message: "forbidden or login timeout"}
 	}
 	if !input.CheckPass() {
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}
@@ -95,7 +95,7 @@ func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeRemoveResult{Message: "forbidden"}
+		return &types.ChallengeRemoveResult{Message: "forbidden or login timeout"}
 	}
 	ok := resolvers.DeleteChallenge(id)
 	if !ok {
