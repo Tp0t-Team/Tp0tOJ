@@ -190,7 +190,7 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 		log.Println(err)
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now(), !*isAdmin)
+	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now(), !*isAdmin.(*bool))
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
