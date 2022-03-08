@@ -51,6 +51,9 @@ func (r *QueryResolver) Rank(ctx context.Context) *types.RankResult {
 		if err != nil || user == nil {
 			return &types.RankResult{Message: "get rank error"}
 		}
+		if user.State == "disabled" {
+			continue
+		}
 		ret = append(ret, types.RankResultDesc{
 			UserId: strconv.FormatUint(item.UserId, 10),
 			Name:   user.Name,
