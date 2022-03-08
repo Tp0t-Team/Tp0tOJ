@@ -71,6 +71,7 @@ func FindSubmitCorrectSorted() []entity.Submit {
 }
 
 func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time) bool {
+	submitCache := false
 	err := db.Transaction(func(tx *gorm.DB) error {
 		alloc, err := FindReplicaAllocByUserIdAndChallengeId(userId, challengeId, tx)
 		if err != nil {
@@ -100,13 +101,20 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		}
 		tx.Create(&newSubmit)
 		if newSubmit.Correct {
-			utils.Cache.Submit(newSubmit.UserId, newSubmit.ChallengeId, submitTime)
+			submitCache = true
 		}
 		return nil
 	})
 	if err != nil {
 		log.Println(err)
 		return false
+	}
+	if submitCache {
+		err := utils.Cache.Submit(userId, challengeId, submitTime)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 	return true
 
