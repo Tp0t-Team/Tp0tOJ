@@ -78,6 +78,9 @@ func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.L
 	if user == nil {
 		return &types.LoginResult{Message: "No such user."}
 	}
+	if user.State == "disabled" {
+		return &types.LoginResult{Message: "You have been disabled!"}
+	}
 	if user.Password != passwordHash(input.Password) {
 		return &types.LoginResult{Message: "failed"}
 	}

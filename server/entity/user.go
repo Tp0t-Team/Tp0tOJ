@@ -26,8 +26,8 @@ func (t User) MakeAvatarUrl() string {
 	_, err := io.WriteString(hash, strings.ToLower(t.Mail))
 	if err != nil {
 		log.Fatalln("Can not calculate MD5 for making AvatarUrl")
-		return "https://www.gravatar.com/avatar/"
+		return "https://cravatar.cn/avatar/"
 	}
-	result := fmt.Sprintf("https://www.gravatar.com/avatar/%x?d=404", hash.Sum(nil))
+	result := fmt.Sprintf("https://cravatar.cn/avatar/%x?d=404", hash.Sum(nil))
 	return result
 }
