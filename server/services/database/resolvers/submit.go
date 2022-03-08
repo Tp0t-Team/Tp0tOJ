@@ -70,7 +70,7 @@ func FindSubmitCorrectSorted() []entity.Submit {
 	return submits
 }
 
-func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time) bool {
+func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time, setBlood bool) bool {
 	submitCache := false
 	err := db.Transaction(func(tx *gorm.DB) error {
 		alloc, err := FindReplicaAllocByUserIdAndChallengeId(userId, challengeId, tx)
@@ -103,16 +103,12 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if newSubmit.Correct {
 			submitCache = true
 		}
-		if alloc.Replica.Flag == flag && alloc.Replica.Challenge.State == "enabled" {
+		if alloc.Replica.Flag == flag && alloc.Replica.Challenge.State == "enabled" && setBlood {
 			var challenge entity.Challenge
 			result := tx.First(&challenge, []uint64{challengeId})
 			if result.Error != nil {
 				return err
 			}
-			//challenge, err := FindChallengeById(challengeId)
-			//if err != nil {
-			//	return err
-			//}
 			if challenge.FirstBloodId == nil {
 				challenge.FirstBloodId = &userId
 			} else if challenge.SecondBloodId == nil {

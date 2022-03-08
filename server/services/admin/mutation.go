@@ -79,7 +79,7 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 		if !ok {
 			return &types.ChallengeMutateResult{Message: "Add Challenge Error!"}
 		}
-		return &types.ChallengeMutateResult{Message: "Challenge format not available"}
+		return &types.ChallengeMutateResult{Message: ""}
 	}
 
 	ok := resolvers.UpdateChallenge(input)

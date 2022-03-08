@@ -177,6 +177,7 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.SubmitResult{Message: "forbidden or login timeout"}
 	}
@@ -189,7 +190,7 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 		log.Println(err)
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now())
+	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now(), !*isAdmin)
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
