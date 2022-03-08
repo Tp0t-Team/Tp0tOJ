@@ -103,6 +103,21 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if newSubmit.Correct {
 			submitCache = true
 		}
+		if alloc.Replica.Flag == flag && alloc.Replica.Challenge.State == "enabled" {
+			challenge, err := FindChallengeById(challengeId)
+			if err != nil {
+				return err
+			}
+			if challenge.FirstBloodId == nil {
+				challenge.FirstBloodId = &userId
+			} else if challenge.SecondBloodId == nil {
+				challenge.SecondBloodId = &userId
+			} else if challenge.ThirdBloodId == nil {
+				challenge.SecondBloodId = &userId
+			}
+			tx.Save(challenge)
+		}
+
 		return nil
 	})
 	if err != nil {

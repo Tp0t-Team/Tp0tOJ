@@ -193,6 +193,15 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	return &types.SubmitResult{Message: ""}
+
 	// TODO: fill blood
+	//challenge, err := resolvers.FindChallengeById(challengeId)
+	//if err != nil {
+	//	return nil
+	//}
+	//if challenge.FirstBloodId == nil {
+	//	challenge.FirstBloodId =
+	//}
+	return &types.SubmitResult{Message: ""}
+
 }

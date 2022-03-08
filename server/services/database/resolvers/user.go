@@ -110,6 +110,7 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 	user.Role = role
 	user.Mail = mail
 	user.State = state
+	//TODO: if we disable user, may need re calculate the blood info
 	result = db.Save(&user)
 	if result.Error != nil {
 		log.Println(result.Error)
