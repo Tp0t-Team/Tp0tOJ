@@ -28,7 +28,7 @@
           :user="currentUser"
           @submit="submit"
         ></user-editor>
-        <v-toolbar dense>
+        <!-- <v-toolbar dense>
           解题列表
           <v-spacer></v-spacer>
           <v-btn icon @click="refresh" :disabled="withoutInit">
@@ -54,7 +54,7 @@
               </td>
             </tr>
           </tbody>
-        </v-simple-table>
+        </v-simple-table> -->
       </v-col>
     </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
@@ -150,38 +150,38 @@ export default class User extends Vue {
     this.resolves = [];
   }
 
-  async refresh() {
-    try {
-      let res = await this.$apollo.query<
-        SubmitHistoryResult,
-        { input: string }
-      >({
-        query: gql`
-          query($input: String!) {
-            submitHistory(userId: $input) {
-              message
-              submitInfos {
-                submitTime
-                challengeName
-                mark
-              }
-            }
-          }
-        `,
-        variables: {
-          input: this.currentUser!.userId
-        },
-        fetchPolicy: "no-cache"
-      });
-      if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.submitHistory.message)
-        throw res.data!.submitHistory.message;
-      this.resolves = res.data!.submitHistory.submitInfos;
-    } catch (e) {
-      this.infoText = e.toString();
-      this.hasInfo = true;
-    }
-  }
+  // async refresh() {
+  //   try {
+  //     let res = await this.$apollo.query<
+  //       SubmitHistoryResult,
+  //       { input: string }
+  //     >({
+  //       query: gql`
+  //         query($input: String!) {
+  //           submitHistory(userId: $input) {
+  //             message
+  //             submitInfos {
+  //               submitTime
+  //               challengeName
+  //               mark
+  //             }
+  //           }
+  //         }
+  //       `,
+  //       variables: {
+  //         input: this.currentUser!.userId
+  //       },
+  //       fetchPolicy: "no-cache"
+  //     });
+  //     if (res.errors) throw res.errors.map(v => v.message).join(",");
+  //     if (res.data!.submitHistory.message)
+  //       throw res.data!.submitHistory.message;
+  //     this.resolves = res.data!.submitHistory.submitInfos;
+  //   } catch (e) {
+  //     this.infoText = e.toString();
+  //     this.hasInfo = true;
+  //   }
+  // }
 
   async submit(info: UserInfo) {
     this.loading = true;
