@@ -24,7 +24,7 @@
     <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
         <span>
-          <strong>Tp0t</strong> &copy; 2019
+          <strong>Tp0t</strong> &copy; 2022
         </span>
       </v-col>
     </v-footer>
