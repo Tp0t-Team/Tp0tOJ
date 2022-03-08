@@ -106,10 +106,12 @@
     </v-card>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -139,7 +141,7 @@ export default class Login extends Vue {
 
   private loginValid: boolean = false;
   private regValid: boolean = false;
-  private departmentItems = constValue.departmentItems;
+  // private departmentItems = constValue.departmentItems;
   private gradeItems: string[] = [];
 
   private showPassword: boolean = false;

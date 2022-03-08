@@ -6,7 +6,7 @@
       </v-col>
       <v-col cols="6" class="content-col">
         <v-divider class="avatar-divider" color="primary"></v-divider>
-        <v-row>
+        <v-row class="avatar">
           <v-spacer></v-spacer>
           <v-avatar color="blue" size="64">
             <!-- <span>{{currentUser && currentUser.name[0] || "?"}}</span> -->
@@ -59,10 +59,12 @@
     </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -222,6 +224,10 @@ export default class User extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.avatar {
+  padding: 12px;
+}
+
 .content-col {
   height: calc(100vh - 120px);
   overflow-y: auto;
