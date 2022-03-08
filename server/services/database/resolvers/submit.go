@@ -11,7 +11,7 @@ import (
 )
 
 func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) bool {
-	result := db.Where(map[string]interface{}{"user_id": userId, "challenge_id": challengeId, "correct": true, "available": true}).Find(&entity.Submit{})
+	result := db.Where(map[string]interface{}{"user_id": userId, "challenge_id": challengeId, "correct": true, "available": true}).First(&entity.Submit{})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false
 	} else if result.Error != nil {
@@ -23,7 +23,7 @@ func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64)
 
 func FindAllSubmitByChallengeId(challengeId uint64) []entity.Submit {
 	var submits []entity.Submit
-	result := db.Where(map[string]interface{}{"challenge_id": challengeId}).Find(&submits)
+	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Submit{}
 	} else if result.Error != nil {
@@ -35,7 +35,7 @@ func FindAllSubmitByChallengeId(challengeId uint64) []entity.Submit {
 
 func FindSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
 	var submits []entity.Submit
-	result := db.Where(map[string]interface{}{"challenge_id": challengeId, "correct": true, "available": true}).Find(&submits)
+	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId, "correct": true, "available": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Submit{}
 	} else if result.Error != nil {
@@ -47,7 +47,7 @@ func FindSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
 
 func FindSubmitCorrectByUserId(userId uint64) []entity.Submit {
 	var submits []entity.Submit
-	result := db.Where(map[string]interface{}{"user_id": userId, "correct": true, "available": true}).Find(&submits)
+	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"user_id": userId, "correct": true, "available": true}).Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Submit{}
 	} else if result.Error != nil {
@@ -59,7 +59,7 @@ func FindSubmitCorrectByUserId(userId uint64) []entity.Submit {
 
 func FindSubmitCorrectSorted() []entity.Submit {
 	var submits []entity.Submit
-	result := db.Where(map[string]interface{}{"correct": true, "qvailable": true}).Order("submit_time").Find(&submits)
+	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"correct": true, "available": true}).Order("submit_time").Find(&submits)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Submit{}
 	} else if result.Error != nil {
@@ -79,7 +79,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			return errors.New("no alloc exists")
 		}
 		var submits []entity.Submit
-		result := tx.Where(map[string]interface{}{"challengeId": challengeId, "correct": true, "available": true}).Find(&submits)
+		result := tx.Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId, "correct": true, "available": true}).Find(&submits)
 		if result.Error != nil {
 			return result.Error
 		}

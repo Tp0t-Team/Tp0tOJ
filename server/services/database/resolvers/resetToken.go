@@ -12,7 +12,7 @@ import (
 
 func FindResetTokenByUserId(userId uint64) *entity.ResetToken {
 	var resetToken entity.ResetToken
-	result := db.Where(map[string]interface{}{"user_id": userId}).First(&resetToken)
+	result := db.Preload("User").Where(map[string]interface{}{"user_id": userId}).First(&resetToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil
 	} else if result.Error != nil {
@@ -24,7 +24,7 @@ func FindResetTokenByUserId(userId uint64) *entity.ResetToken {
 
 func FindResetTokenByToken(token string) *entity.ResetToken {
 	var resetToken entity.ResetToken
-	result := db.Where(map[string]interface{}{"token": token}).First(&resetToken)
+	result := db.Preload("User").Where(map[string]interface{}{"token": token}).First(&resetToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return nil
 	} else if result.Error != nil {
@@ -44,7 +44,7 @@ func makeToken() (string, error) {
 
 func AddResetToken(userId uint64) *entity.ResetToken {
 	var resetToken entity.ResetToken
-	result := db.Where(map[string]interface{}{"user_id": userId}).First(&resetToken)
+	result := db.Preload("User").Where(map[string]interface{}{"user_id": userId}).First(&resetToken)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		token, err := makeToken()
 		if err != nil {
@@ -78,7 +78,7 @@ func ResetPassword(token string, password string) bool {
 	//this error may should be handled by caller
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var resetToken entity.ResetToken
-		result := tx.Where(map[string]interface{}{"token": token}).First(&resetToken)
+		result := tx.Preload("User").Where(map[string]interface{}{"token": token}).First(&resetToken)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return errors.New("invalid")
 		} else if result.Error != nil {

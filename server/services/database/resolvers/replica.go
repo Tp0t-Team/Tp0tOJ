@@ -19,7 +19,7 @@ import (
 
 func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	var replicas []entity.Replica
-	result := db.Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
+	result := db.Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return []entity.Replica{}
 	} else if result.Error != nil {
@@ -96,7 +96,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
-		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+		getResult := tx.Preload("Challenge").Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
 		if getResult.Error != nil {
 			return getResult.Error
 		}
@@ -154,7 +154,7 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
-		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+		getResult := tx.Preload("Challenge").Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
 		if getResult.Error != nil {
 			return getResult.Error
 		}
@@ -193,7 +193,7 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replicas []entity.Replica
-		getResult := tx.Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
+		getResult := tx.Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
 		if getResult.Error != nil {
 			return getResult.Error
 		}

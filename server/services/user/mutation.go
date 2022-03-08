@@ -174,8 +174,8 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
-	if isLogin != nil && *isLogin.(*bool) {
-		return &types.SubmitResult{Message: "already login"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.SubmitResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.SubmitResult{Message: "not empty error"}

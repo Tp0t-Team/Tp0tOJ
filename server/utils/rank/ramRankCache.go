@@ -161,20 +161,24 @@ func (cache *RAMRankCache) WarmUp() error {
 		cache.AddChallenge(challenge.ChallengeId, score)
 	}
 	users := resolvers.FindAllUser()
-	if users == nil {
-		return errors.New("users equals nil")
-	}
-	for _, user := range users {
-		cache.AddUser(user.UserId)
+	//if users == nil {
+	//	return errors.New("users equals nil")
+	//}
+	if users != nil {
+		for _, user := range users {
+			cache.AddUser(user.UserId)
+		}
 	}
 	submits := resolvers.FindSubmitCorrectSorted()
-	if submits == nil {
-		return errors.New("users equals nil")
-	}
-	for _, submit := range submits {
-		err := cache.submitImpl(submit.UserId, submit.ChallengeId, submit.SubmitTime)
-		if err != nil {
-			return err
+	//if submits == nil {
+	//	return errors.New("users equals nil")
+	//}
+	if submits != nil {
+		for _, submit := range submits {
+			err := cache.submitImpl(submit.UserId, submit.ChallengeId, submit.SubmitTime)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	cache.refreshRank()

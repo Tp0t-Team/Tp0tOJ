@@ -46,7 +46,6 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 	}
 	var challengeConfigs []types.ChallengeConfigAndState
 	for _, challenge := range challenges {
-		log.Println(challenge.Configuration)
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)
 		if err != nil {
