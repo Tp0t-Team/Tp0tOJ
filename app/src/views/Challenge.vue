@@ -6,7 +6,7 @@
         <v-divider color="primary"></v-divider>
       </div>
       <v-row>
-        <v-col sm="3" v-for="item in challenges.filter((v)=>v.type==type)" :key="item.challengeId">
+        <v-col sm="3" v-for="item in challenges.filter((v)=>v.category==type)" :key="item.challengeId">
           <v-layout justify-center>
             <v-hover :disabled="item.done" v-slot:default="{ hover }">
               <v-card
@@ -80,7 +80,7 @@
           @blur="check"
         ></v-text-field>
         <div class="dialog-discription pa-6">
-          <pre>{{formatedHint + currentChallenge.description}}</pre>
+          <pre>{{currentChallenge.description}}</pre>
         </div>
         <div class="url-list">
           <v-chip
@@ -101,10 +101,12 @@
     </v-dialog>
     <v-snackbar v-model="hasInfo" top :timeout="3000">
       {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -142,14 +144,6 @@ export default class Challenge extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private get formatedHint() {
-    if (!this.currentChallenge) return "";
-    return this.currentChallenge.hint.reduce(
-      (pre: string, cur: string) => `Hint: ${cur}\n${pre}`,
-      ""
-    );
-  }
-
   async mounted() {
     try {
       let res = await this.$apollo.query<ChallengeResult>({
@@ -160,10 +154,9 @@ export default class Challenge extends Vue {
               challengeInfos {
                 challengeId
                 name
-                type
+                category
                 description
                 externalLink
-                hint
                 score
                 blood {
                   userId
@@ -215,9 +208,9 @@ export default class Challenge extends Vue {
     let coreFlag = this.sumbitFlag.trim();
     this.loading = true;
     try {
-      if (coreFlag.substr(0, 5) != "flag{") throw "error format";
-      if (coreFlag[coreFlag.length - 1] != "}") throw "error format";
-      coreFlag = coreFlag.substring(5, coreFlag.length - 1);
+      // if (coreFlag.substr(0, 5) != "flag{") throw "error format";
+      // if (coreFlag[coreFlag.length - 1] != "}") throw "error format";
+      // coreFlag = coreFlag.substring(5, coreFlag.length - 1);
       let res = await this.$apollo.mutate<SubmitResult, SubmitInput>({
         mutation: gql`
           mutation($input: SubmitInput!) {

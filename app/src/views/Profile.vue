@@ -36,11 +36,6 @@
                 <div>
                   <v-subheader>
                     <span class="text-center">
-                      <strong>
-                        Rank:
-                        <span v-if="userInfo.rank!=0">{{userInfo.rank}}</span>
-                        <span v-else>∞</span>
-                      </strong>
                       <br />
                       {{userInfo.score}}pt
                     </span>
@@ -55,50 +50,11 @@
                   <v-text-field :loading="loading" readonly label="role" :value="userInfo.role"></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="student number"
-                    :value="userInfo.stuNumber"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="department"
-                    :value="userInfo.department"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
               <v-row>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="state" :value="userInfo.state"></v-text-field>
-                </v-col>
-                <v-col cols="6">
-                  <v-text-field
-                    :loading="loading"
-                    readonly
-                    label="protected time"
-                    :value="userInfo.protectedTime"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="grade" :value="userInfo.grade"></v-text-field>
-                </v-col>
                 <v-col cols="6">
                   <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
                 </v-col>
-              </v-row>
-              <v-row v-if="$store.state.global.userId==$route.params.user_id">
-                <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="QQ" :value="userInfo.qq"></v-text-field>
-                </v-col>
-                <v-col cols="6">
+                <v-col cols="6" v-if="$store.state.global.userId==$route.params.user_id">
                   <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
                 </v-col>
               </v-row>
@@ -110,10 +66,12 @@
     </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon @click="hasInfo = false">close</v-icon>
-      </v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+        </v-btn>
+      </template>
     </v-snackbar>
   </v-container>
 </template>
@@ -137,17 +95,10 @@ export default class Profile extends Vue {
     name: "",
     avatar: "",
     role: "",
-    stuNumber: "",
-    department: "",
-    grade: "",
-    protectedTime: "",
-    qq: "",
     mail: "",
-    topRank: "",
     joinTime: "",
     score: "0",
-    state: "",
-    rank: 0
+    state: ""
   };
 
   private infoText: string = "";
@@ -155,7 +106,7 @@ export default class Profile extends Vue {
 
   private get showJoinTime() {
     return new Date(
-      this.userInfo.joinTime.toString().replace(/\//g, "-") + "+00:00"
+      this.userInfo.joinTime//.toString().replace(/\//g, "-") + "+00:00"
     ).toLocaleString();
   }
 
@@ -184,17 +135,10 @@ export default class Profile extends Vue {
                 name
                 avatar
                 role
-                stuNumber
-                department
-                grade
-                protectedTime
-                qq
                 mail
-                topRank
                 joinTime
                 score
                 state
-                rank
               }
             }
           }
@@ -219,6 +163,7 @@ export default class Profile extends Vue {
 
 <style lang="scss" scoped>
 .avatar {
+  padding-top: 12px;
   position: absolute;
   left: 12px;
   width: 100%;
