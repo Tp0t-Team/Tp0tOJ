@@ -37,7 +37,19 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="12">
+      <v-col cols="4">
+        <v-row>
+          <v-spacer></v-spacer>
+          <v-switch
+            v-model="singleton"
+            label="Singleton"
+            :disabled="loading || disabled"
+            @change="Changed"
+          ></v-switch>
+          <v-spacer></v-spacer>
+        </v-row>
+      </v-col>
+      <v-col cols="8">
         <v-file-input
           v-model="configFile"
           accept=".yaml, .yml"

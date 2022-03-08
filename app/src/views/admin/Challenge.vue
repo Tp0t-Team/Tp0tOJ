@@ -186,7 +186,7 @@ export default class Challenge extends Vue {
     this.loading = true;
     let tempConfig : ChallengeMutateInput = JSON.parse(JSON.stringify(config.config));
     tempConfig.challengeId =
-      config.challengeId[0] == "-" ? "" : tempConfig.challengeId;
+      config.challengeId[0] == "-" ? "" : config.challengeId;
     tempConfig.name = config.name;
     tempConfig.state = config.state;
     console.log(tempConfig)

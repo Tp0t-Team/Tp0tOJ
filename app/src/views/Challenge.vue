@@ -206,9 +206,9 @@ export default class Challenge extends Vue {
     let coreFlag = this.sumbitFlag.trim();
     this.loading = true;
     try {
-      if (coreFlag.substr(0, 5) != "flag{") throw "error format";
-      if (coreFlag[coreFlag.length - 1] != "}") throw "error format";
-      coreFlag = coreFlag.substring(5, coreFlag.length - 1);
+      // if (coreFlag.substr(0, 5) != "flag{") throw "error format";
+      // if (coreFlag[coreFlag.length - 1] != "}") throw "error format";
+      // coreFlag = coreFlag.substring(5, coreFlag.length - 1);
       let res = await this.$apollo.mutate<SubmitResult, SubmitInput>({
         mutation: gql`
           mutation($input: SubmitInput!) {
