@@ -119,27 +119,28 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 	}
 	for _, challenge := range challenges {
 		var bloodInfo []types.BloodInfo
-		if challenge.FirstBlood != nil {
-			bloodInfo = append(bloodInfo, types.BloodInfo{
-				UserId: strconv.FormatUint(challenge.FirstBlood.UserId, 10),
-				Name:   challenge.FirstBlood.Name,
-				Avatar: challenge.FirstBlood.MakeAvatarUrl(),
-			})
-		}
-		if challenge.SecondBlood != nil {
-			bloodInfo = append(bloodInfo, types.BloodInfo{
-				UserId: strconv.FormatUint(challenge.SecondBlood.UserId, 10),
-				Name:   challenge.SecondBlood.Name,
-				Avatar: challenge.SecondBlood.MakeAvatarUrl(),
-			})
-		}
-		if challenge.ThirdBlood != nil {
-			bloodInfo = append(bloodInfo, types.BloodInfo{
-				UserId: strconv.FormatUint(challenge.ThirdBlood.UserId, 10),
-				Name:   challenge.ThirdBlood.Name,
-				Avatar: challenge.ThirdBlood.MakeAvatarUrl(),
-			})
-		}
+		// TODO:
+		//if challenge.FirstBlood != nil {
+		//	bloodInfo = append(bloodInfo, types.BloodInfo{
+		//		UserId: strconv.FormatUint(challenge.FirstBlood.UserId, 10),
+		//		Name:   challenge.FirstBlood.Name,
+		//		Avatar: challenge.FirstBlood.MakeAvatarUrl(),
+		//	})
+		//}
+		//if challenge.SecondBlood != nil {
+		//	bloodInfo = append(bloodInfo, types.BloodInfo{
+		//		UserId: strconv.FormatUint(challenge.SecondBlood.UserId, 10),
+		//		Name:   challenge.SecondBlood.Name,
+		//		Avatar: challenge.SecondBlood.MakeAvatarUrl(),
+		//	})
+		//}
+		//if challenge.ThirdBlood != nil {
+		//	bloodInfo = append(bloodInfo, types.BloodInfo{
+		//		UserId: strconv.FormatUint(challenge.ThirdBlood.UserId, 10),
+		//		Name:   challenge.ThirdBlood.Name,
+		//		Avatar: challenge.ThirdBlood.MakeAvatarUrl(),
+		//	})
+		//}
 		correct := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)

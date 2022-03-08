@@ -84,7 +84,7 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 
 	ok := resolvers.UpdateChallenge(input)
 	if !ok {
-		return &types.ChallengeMutateResult{Message: "Add Challenge Error!"}
+		return &types.ChallengeMutateResult{Message: "Update Challenge Error!"}
 	}
 	return &types.ChallengeMutateResult{Message: ""}
 }

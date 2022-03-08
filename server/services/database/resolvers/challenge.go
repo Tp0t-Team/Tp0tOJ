@@ -59,7 +59,7 @@ func FindChallengeByName(name string) (*entity.Challenge, error) {
 	return &challenge, nil
 }
 func AddChallenge(input types.ChallengeMutateInput) bool {
-	var challenge *entity.Challenge = nil
+	//var challenge *entity.Challenge = nil
 	err := db.Transaction(func(tx *gorm.DB) error {
 		// we don't allow the same name between two challenges
 		challenge, err := FindChallengeByName(input.Name)
@@ -71,8 +71,10 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 		}
 
 		nodes := []types.NodeConfig{}
-		for _, node := range *input.NodeConfig {
-			nodes = append(nodes, node.ToNodeConfig())
+		if input.NodeConfig != nil {
+			for _, node := range *input.NodeConfig {
+				nodes = append(nodes, node.ToNodeConfig())
+			}
 		}
 		newChallengeConfig := types.ChallengeConfig{
 			Category: input.Category,
@@ -93,48 +95,58 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 		if err != nil {
 			return err
 		}
-		newChallenge := entity.Challenge{Configuration: string(marshalConfig), State: input.State, Name: input.Name}
+		//newChallenge := entity.Challenge{Configuration: string(marshalConfig), State: input.State, Name: input.Name}
+		newChallenge := entity.Challenge{
+			Configuration: string(marshalConfig),
+			State:         "disabled",
+			Name:          input.Name,
+			FirstBloodId:  nil,
+			SecondBloodId: nil,
+			ThirdBloodId:  nil,
+		}
 		result := tx.Create(&newChallenge)
 		if result.Error != nil {
 			return result.Error
 		}
-		if input.State == "enabled" && input.Singleton {
-			replica := AddReplica(newChallenge.ChallengeId, tx)
-			if replica == nil {
-				return errors.New("create replica failed")
-			}
-			//ok := EnableReplica(replica.ReplicaId, tx)
-			//if !ok {
-			//	return errors.New("enabled replica failed")
-			//}
-			users := FindAllUser()
-			if users == nil {
-				return errors.New("find all users failed")
-			}
-			for _, user := range users {
-				ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
-				if !ok {
-					return errors.New("add replicaAlloc error")
-				}
-			}
-		}
-		if input.State == "enabled" {
-			challenge = &newChallenge
-		}
+
+		//if input.State == "enabled" && input.Singleton {
+		//	replica := AddReplica(newChallenge.ChallengeId, tx)
+		//	if replica == nil {
+		//		return errors.New("create replica failed")
+		//	}
+		//	//ok := EnableReplica(replica.ReplicaId, tx)
+		//	//if !ok {
+		//	//	return errors.New("enabled replica failed")
+		//	//}
+		//	users := FindAllUser()
+		//	if users == nil {
+		//		return errors.New("find all users failed")
+		//	}
+		//	for _, user := range users {
+		//		ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+		//		if !ok {
+		//			return errors.New("add replicaAlloc error")
+		//		}
+		//	}
+		//}
+		//if input.State == "enabled" {
+		//	challenge = &newChallenge
+		//}
+
 		return nil
 	})
 	if err != nil {
 		log.Println(err)
 		return false
 	}
-	if challenge != nil {
-		originScore, err := strconv.ParseUint(input.Score.BaseScore, 10, 64)
-		if err != nil {
-			log.Println(err)
-			return false
-		}
-		utils.Cache.AddChallenge(challenge.ChallengeId, originScore)
-	}
+	//if challenge != nil {
+	//	originScore, err := strconv.ParseUint(input.Score.BaseScore, 10, 64)
+	//	if err != nil {
+	//		log.Println(err)
+	//		return false
+	//	}
+	//	utils.Cache.AddChallenge(challenge.ChallengeId, originScore)
+	//}
 	return true
 }
 
@@ -142,10 +154,6 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we should checkout if the value need to be update
 	needWarmUp := false
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if input.Name != "" {
-			return errors.New("can not update challenge name")
-		}
-
 		var challenge entity.Challenge
 		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 		if err != nil {
@@ -155,6 +163,10 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		challengeItem := tx.Where(map[string]interface{}{"challenge_id": inputChallengeId}).First(&challenge)
 		if challengeItem.Error != nil {
 			return errors.New("find challenge by ChallengeId error:\n" + challengeItem.Error.Error())
+		}
+
+		if input.Name != challenge.Name {
+			return errors.New("can not update challenge name")
 		}
 
 		var oldConfig types.ChallengeConfig
@@ -196,29 +208,117 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		if err != nil {
 			return err
 		}
+		challenge.Configuration = string(marshalConfig)
+		//  if change score or state, warm up all rank
+		if (challenge.State != input.State) || (oldConfig.Score.BaseScore != input.Score.BaseScore) {
+			needWarmUp = true
+		}
 
 		//checkResult := tx.Where(map[string]interface{}{"Name": input.Name}).Find(&entity.Challenge{})
 		if (challenge.State == "enabled" || input.State == "enabled") && oldConfig.Flag.Value != input.Flag.Value {
 			return errors.New("can't change flag for enabled challenge")
 		}
 
+		replicaStart := false
+		replicaStop := false
+		submitRefresh := false
+
 		// if change state "disabled", replica delete & set all submits unavailable
 		if challenge.State == "enabled" && input.State == "disabled" {
-			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-			if !ok {
-				return errors.New("delete replica error")
-			}
-			//set all submits unavailable,TODO: but need some rollback method?
-			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
-			for _, submit := range submits {
-				submit.Available = false
-				tx.Save(&submit)
-			}
+			replicaStop = true
+			submitRefresh = true
+			//ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+			//if !ok {
+			//	return errors.New("delete replica error")
+			//}
+			////set all submits unavailable,TODO: but need some rollback method?
+			//submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+			//for _, submit := range submits {
+			//	submit.Available = false
+			//	tx.Save(&submit)
+			//}
 
 		}
 
 		// if change state "enabled" or change node-config, create replicas & alloc to users (only for singleton),set all submits available
 		if challenge.State == "disabled" && input.State == "enabled" {
+			replicaStart = true
+			submitRefresh = true
+			//if oldConfig.Singleton {
+			//	replica := AddReplica(&challenge, tx)
+			//	if replica == nil {
+			//		return errors.New("add replica error")
+			//	}
+			//	users := FindAllUser()
+			//	if users == nil {
+			//		return errors.New("find users error")
+			//	}
+			//	for _, user := range users {
+			//		ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+			//		if !ok {
+			//			return errors.New("add replica alloc error")
+			//		}
+			//	}
+			//}
+			//
+			////set all submits available,TODO: but need some rollback method?
+			//submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+			//for _, submit := range submits {
+			//	submit.Available = true
+			//	tx.Save(&submit)
+			//}
+
+		}
+
+		// if change dockerfile, replica re-create
+		if nodeRefreshFlag {
+			if challenge.State == "enabled" {
+				replicaStop = true
+				//ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+				//if !ok {
+				//	return errors.New("delete replica error")
+				//}
+			}
+			if input.State == "enabled" {
+				replicaStart = true
+				//if oldConfig.Singleton {
+				//	replica := AddReplica(&challenge, tx)
+				//	if replica == nil {
+				//		return errors.New("add replica error")
+				//	}
+				//	users := FindAllUser()
+				//	if users == nil {
+				//		return errors.New("find users error")
+				//	}
+				//	for _, user := range users {
+				//		ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
+				//		if !ok {
+				//			return errors.New("add replica alloc error")
+				//		}
+				//	}
+				//}
+			}
+		}
+
+		challenge.State = input.State
+		tx.Save(&challenge)
+
+		if replicaStop {
+			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+			if !ok {
+				return errors.New("delete replica error")
+			}
+			//set all submits unavailable,TODO: but need some rollback method?
+			if submitRefresh {
+				submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+				for _, submit := range submits {
+					submit.Available = false
+					tx.Save(&submit)
+				}
+			}
+		}
+		if replicaStart {
+
 			if oldConfig.Singleton {
 				replica := AddReplica(challenge.ChallengeId, tx)
 				if replica == nil {
@@ -236,50 +336,15 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 				}
 			}
 
-			//set all submits available,TODO: but need some rollback method?
-			submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
-			for _, submit := range submits {
-				submit.Available = true
-				tx.Save(&submit)
-			}
-
-		}
-
-		// if change dockerfile, replica re-create
-		if nodeRefreshFlag {
-			if challenge.State == "enabled" {
-				ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-				if !ok {
-					return errors.New("delete replica error")
-				}
-			}
-			if input.State == "enabled" {
-				if oldConfig.Singleton {
-					replica := AddReplica(challenge.ChallengeId, tx)
-					if replica == nil {
-						return errors.New("add replica error")
-					}
-					users := FindAllUser()
-					if users == nil {
-						return errors.New("find users error")
-					}
-					for _, user := range users {
-						ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
-						if !ok {
-							return errors.New("add replica alloc error")
-						}
-					}
+			if submitRefresh {
+				//set all submits available,TODO: but need some rollback method?
+				submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+				for _, submit := range submits {
+					submit.Available = true
+					tx.Save(&submit)
 				}
 			}
 		}
-		//  if change score or state, warm up all rank
-		if (challenge.State != input.State) || (oldConfig.Score.BaseScore != input.Score.BaseScore) {
-			needWarmUp = true
-		}
-
-		challenge.Configuration = string(marshalConfig)
-		challenge.State = input.State
-		tx.Save(&challenge)
 		return nil
 	})
 	if err != nil {

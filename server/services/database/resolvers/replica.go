@@ -108,6 +108,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(replica.Challenge.Configuration), &config)
 		if err != nil {
+			log.Println(replica)
 			return err
 		}
 		createPodSuccess := true

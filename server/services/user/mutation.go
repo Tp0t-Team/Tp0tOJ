@@ -191,4 +191,5 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
 	return &types.SubmitResult{Message: ""}
+	// TODO: fill blood
 }
