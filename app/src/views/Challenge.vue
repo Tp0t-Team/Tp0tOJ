@@ -54,10 +54,10 @@
     <v-dialog
       v-model="showDialog"
       :persistent="loading"
-      width="800px"
+      width="400px"
       v-if="currentChallenge!=null"
     >
-      <v-card width="800px" height="600px">
+      <v-card width="400px" height="300px">
         <v-toolbar dense>
           <v-spacer></v-spacer>
           <v-toolbar-title>
@@ -69,7 +69,7 @@
         <v-text-field
           v-model="sumbitFlag"
           outlined
-          class="ma-4 dialog-flag"
+          class="ma-4 mb-0 dialog-flag"
           label="flag"
           append-icon="send"
           :disabled="loading"
@@ -79,7 +79,7 @@
           @focus="submitError = ''"
           @blur="check"
         ></v-text-field>
-        <div class="dialog-discription pa-6">
+        <div class="dialog-discription pl-6 pr-6">
           <pre>{{currentChallenge.description}}</pre>
         </div>
         <div class="url-list">
@@ -276,12 +276,12 @@ export default class Challenge extends Vue {
 }
 
 .dialog-discription {
-  height: 300px;
+  height: 80px;
   overflow-y: auto;
 }
 
 .url-list {
-  height: 128px;
+  // height: 128px;
   overflow-y: auto;
 }
 </style>
