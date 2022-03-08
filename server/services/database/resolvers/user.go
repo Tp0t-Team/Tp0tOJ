@@ -7,6 +7,7 @@ import (
 	"log"
 	"server/entity"
 	"server/services/types"
+	"server/utils"
 	"time"
 )
 
@@ -44,6 +45,9 @@ func AddUser(name string, password string, mail string, role string, state strin
 					}
 				}
 
+			}
+			if role != "admin" {
+				utils.Cache.AddUser(newUser.UserId)
 			}
 		} else if checkResult.Error != nil {
 			return checkResult.Error

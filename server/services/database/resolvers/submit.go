@@ -7,6 +7,7 @@ import (
 	"log"
 	"server/entity"
 	"server/services/types"
+	"server/utils"
 	"time"
 )
 
@@ -98,6 +99,9 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			Available:   alloc.Replica.Challenge.State == "enabled",
 		}
 		tx.Create(&newSubmit)
+		if newSubmit.Correct {
+			utils.Cache.Submit(newSubmit.UserId, newSubmit.ChallengeId, submitTime)
+		}
 		return nil
 	})
 	if err != nil {

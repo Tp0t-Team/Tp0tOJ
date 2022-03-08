@@ -78,6 +78,10 @@ func (cache *RAMRankCache) Submit(userId uint64, challengeId uint64, stamp time.
 func (cache *RAMRankCache) submitImpl(userId uint64, challengeId uint64, stamp time.Time) error {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
+	if _, ok := cache.userTime[userId]; !ok {
+		return nil
+	}
+
 	oldScore, exist := cache.challengeScore[challengeId]
 	if !exist {
 		return errors.New("unexist challenge")
@@ -166,7 +170,9 @@ func (cache *RAMRankCache) WarmUp() error {
 	//}
 	if users != nil {
 		for _, user := range users {
-			cache.AddUser(user.UserId)
+			if user.Role != "admin" {
+				cache.AddUser(user.UserId)
+			}
 		}
 	}
 	submits := resolvers.FindSubmitCorrectSorted()
