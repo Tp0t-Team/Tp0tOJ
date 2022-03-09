@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"server/entity"
+	"time"
 )
 
 func GetAllBulletin() []entity.Bulletin {
@@ -20,7 +21,7 @@ func GetAllBulletin() []entity.Bulletin {
 }
 
 func AddBulletin(title string, content string, topping bool) bool {
-	newBulletin := entity.Bulletin{Title: title, Content: content, Topping: topping}
+	newBulletin := entity.Bulletin{Title: title, Content: content, Topping: topping, PublishTime: time.Now()}
 	result := db.Create(&newBulletin)
 	if result.Error != nil {
 		log.Println(result.Error)
