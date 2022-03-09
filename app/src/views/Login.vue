@@ -8,7 +8,7 @@
           <v-form v-model="loginValid" class="pa-6" ref="loginForm">
             <v-text-field
               v-model="mail"
-              label="E-mail"
+              label="Mail"
               :rules="[rules.required]"
               :disabled="loading"
             ></v-text-field>
@@ -45,9 +45,10 @@
           <v-form v-model="regValid" class="pa-6" ref="registerForm">
             <v-layout row>
               <v-flex sm6 pl-3 pr-3>
+                <!-- Zero space is used to disable autofill. -->
                 <v-text-field
                   v-model="name"
-                  label="Name"
+                  label="​Name"
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
