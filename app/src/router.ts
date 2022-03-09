@@ -89,6 +89,17 @@ export default new Router({
             }
         },
         {
+            path: '/admin/images',
+            name: 'admin-images',
+            component: () =>
+                import(
+                    /* webpackChunkName: "admin-images" */ '@/views/admin/Images.vue'
+                ),
+            meta: {
+                auth: 'team'
+            }
+        },
+        {
             path: '*',
             name: 'error',
             component: ErrorPage

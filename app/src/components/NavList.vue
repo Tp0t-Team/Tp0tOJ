@@ -77,6 +77,13 @@
             <v-list-item-title>Challenges</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item
+          @click="$router.push({path:'/admin/images',query:{time:Date.now().toLocaleString()}})"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Images</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
       <v-divider></v-divider>
     </div>
