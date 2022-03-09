@@ -8,7 +8,7 @@
 
 - [x] 题目1、2、3血功能未加上 @@@@@
 
-- [ ] Challenge美观调整：Challenges卡片过大，需要按比例缩小
+- [x] Challenge美观调整：Challenges卡片过大，需要按比例缩小
 
 - [x] 分值溢出问题
 
@@ -24,7 +24,7 @@
 
 - [x] Disable后该user仍在排行榜上的问题
 
-- [ ] 创建题目的时候的逻辑问题：创建题目的时候Disable应该为不可用默认值，修改题目的时候才是可用按钮
+- [x] 创建题目的时候的逻辑问题：创建题目的时候Disable应该为不可用默认值，修改题目的时候才是可用按钮
 
 - [ ] session过期逻辑：在本地存在cookies但是任意页面返回forbidden的时候，应该弹出提示框重新登陆 @@
 
@@ -46,13 +46,13 @@
 
 - [x] session持久化存储，目前F5 cookie会掉
 
-- [ ] 由于submit查询转移到了userprofile，所以admin的user管理页面点击头像应该能跳转到user profile
+- [x] 由于submit查询转移到了userprofile，所以admin的user管理页面点击头像应该能跳转到user profile
 
 - [ ] 管理员上传home.html自定义页面
 
-- [ ] admin不参与排行榜
+- [x] admin不参与排行榜
 
-- [ ] challenge展示的时候加上所属类型
+- [x] challenge展示的时候加上所属类型
 
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`

@@ -8,6 +8,7 @@
         <v-divider class="avatar-divider" color="primary"></v-divider>
         <v-row class="avatar">
           <v-spacer></v-spacer>
+          <v-btn fab @click="seeProfile()" :disabled="!currentUser">
           <v-avatar color="blue" size="64">
             <!-- <span>{{currentUser && currentUser.name[0] || "?"}}</span> -->
             <user-avatar
@@ -19,6 +20,7 @@
               :key="currentUser.avatar"
             ></user-avatar>
           </v-avatar>
+          </v-btn>
           <v-spacer></v-spacer>
         </v-row>
         <user-editor
@@ -148,6 +150,11 @@ export default class User extends Vue {
     this.withoutInit = false;
     this.currentUser = user;
     this.resolves = [];
+  }
+
+  seeProfile() {
+    if(!!this.currentUser)
+      this.$router.push(`/profile/${this.currentUser.userId}`)
   }
 
   // async refresh() {

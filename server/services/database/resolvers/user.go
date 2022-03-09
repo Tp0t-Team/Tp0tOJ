@@ -106,6 +106,7 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 		log.Println(result.Error)
 		return false
 	}
+	needWarmUp := user.Role != role && (user.Role == "admin" || role == "admin")
 	user.Name = name
 	user.Role = role
 	user.Mail = mail
@@ -115,6 +116,13 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 	if result.Error != nil {
 		log.Println(result.Error)
 		return false
+	}
+	if needWarmUp {
+		err := utils.Cache.WarmUp()
+		if err != nil {
+			log.Println(err)
+			return false
+		}
 	}
 	return true
 }

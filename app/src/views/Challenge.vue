@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="scrollable">
     <div v-for="type in challengeType" :key="type">
-      <div v-if="challenges.filter((v)=>v.type==type).length!=0">
+      <div v-if="challenges.filter((v)=>v.category==type).length!=0">
         <div class="type-title display-1 ml-4">{{type}}</div>
         <v-divider color="primary"></v-divider>
       </div>

@@ -7,7 +7,7 @@
           <v-switch
             v-model="state"
             label="enabled"
-            :disabled="loading || disabled"
+            :disabled="loading || disabled || config.challengeId[0] == '-'"
             @change="Changed"
           ></v-switch>
           <v-spacer></v-spacer>
@@ -19,7 +19,7 @@
           <v-switch
             v-model="dynamicScore"
             label="DynamicScore"
-            :disabled="loading || disabled"
+            :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
           ></v-switch>
           <v-spacer></v-spacer>
@@ -31,7 +31,7 @@
           <v-switch
             v-model="dynamicFlag"
             label="DynamicFlag"
-            :disabled="loading || disabled"
+            :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
           ></v-switch>
           <v-spacer></v-spacer>
@@ -43,7 +43,7 @@
           <v-switch
             v-model="singleton"
             label="Singleton"
-            :disabled="loading || disabled"
+            :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
           ></v-switch>
           <v-spacer></v-spacer>
