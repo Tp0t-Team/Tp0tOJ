@@ -1,12 +1,13 @@
 <template>
   <v-container class="bulletin-list">
-    <v-card v-for="item in bulletins" :key="item.time">
+    <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
       <span
         class="bulletin-time ma-4"
       >{{new Date(item.publishTime).toLocaleString()}}</span>
       <v-card-title>{{item.title}}</v-card-title>
-      <v-card-text>{{item.content}}</v-card-text>
+        <v-card-text><pre class="pl-4">{{item.content}}</pre></v-card-text>
     </v-card>
+
     <v-btn
       v-if="$store.state.global.role=='admin'||$store.state.global.role=='team'"
       fab
