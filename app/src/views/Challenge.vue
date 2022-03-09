@@ -65,6 +65,17 @@
             <v-chip class="ml-2">{{currentChallenge.score}}pt</v-chip>
           </v-toolbar-title>
           <v-spacer></v-spacer>
+          <v-form>
+            <v-switch
+              label="Replica"
+              :disabled="currentChallenge.manual || replicaLoading"
+              :loading="replicaLoading"
+              :value="allocated"
+              @change="replicaChange"
+              hide-details
+              color="primary"
+              ></v-switch>
+          </v-form>
         </v-toolbar>
         <v-text-field
           v-model="sumbitFlag"
@@ -141,10 +152,17 @@ export default class Challenge extends Vue {
   private currentChallenge: ChallengeDesc | null = null;
   private loading: boolean = false;
 
+  private replicaLoading: boolean = false;
+  private allocated: boolean = false;
+
   private infoText: string = "";
   private hasInfo: boolean = false;
 
   async mounted() {
+    await this.loadData();
+  }
+
+  async loadData() {
     try {
       let res = await this.$apollo.query<ChallengeResult>({
         query: gql`
@@ -187,6 +205,8 @@ export default class Challenge extends Vue {
     this.sumbitFlag = "";
     this.submitError = "";
     this.showDialog = true;
+    this.allocated = this.currentChallenge.allocated;
+    this.replicaLoading = false;
   }
 
   seeBlood(id: string) {
@@ -200,6 +220,26 @@ export default class Challenge extends Vue {
 
   openUrl(url: string) {
     window.open(url);
+  }
+
+  async replicaChange(value: boolean) {
+    this.replicaLoading = true;
+    // TODO: alloc replica or disalloc replica
+    let id = this.currentChallenge!.challengeId;
+    await this.loadData();
+    let c = this.challenges.find(v => v.challengeId == id);
+    this.sumbitFlag = "";
+    this.submitError = "";
+    this.replicaLoading = false;
+    if (!c || c.done) {
+      this.currentChallenge = null;
+      this.showDialog = false;
+      this.allocated = false;
+      return;
+    }
+    this.currentChallenge = c;
+    this.showDialog = true;
+    this.allocated = this.currentChallenge.allocated;
   }
 
   async submit() {
