@@ -52,6 +52,7 @@
 
 - [ ] admin不参与排行榜
 
+- [ ] challenge展示的时候加上所属类型
 
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`
