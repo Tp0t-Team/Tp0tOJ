@@ -2,13 +2,13 @@ package admin
 
 import (
 	"archive/zip"
-	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"server/services/database/resolvers"
+	"server/services/types"
 	"strconv"
 	"strings"
 )
@@ -16,11 +16,11 @@ import (
 const writeUpPath string = "./writeup"
 
 func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
-	if req.Method != "POST" {
-		w.WriteHeader(404)
-		w.Write(nil)
-		return
-	}
+	//if req.Method != "POST" {
+	//	w.WriteHeader(404)
+	//	w.Write(nil)
+	//	return
+	//}
 
 	//TODO: pack writeup folder and download
 	var zipFileName = "WP.zip"
@@ -90,49 +90,43 @@ func DownloadWPByUserId() {
 
 }
 
-type WriteUpInfoResult struct {
-	UserId string
-	Name   string
-	Mail   string
-	Solved int //solved challenge number
-}
+//type WriteUpInfoResult struct {
+//	UserId string
+//	Name   string
+//	Mail   string
+//	Solved int //solved challenge number
+//}
 
-func WriteUpInfos(w http.ResponseWriter, req *http.Request, userId uint64) {
-	if req.Method != "POST" {
-		w.WriteHeader(404)
-		w.Write(nil)
-		return
-	} //TODO: need login and role check
-
+func GetWriteUpInfos() []types.WriteUpInfo {
 	_, err := os.Stat(writeUpPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(writeUpPath, 600)
 			if err != nil {
 				log.Panicln("writeup make dir error", err)
-				return
+				return nil
 			}
 		} else {
 			log.Panicln("writeup dir create filed", err)
-			return
+			return nil
 		}
 	}
 	files, err := filepath.Glob("./writeup")
 	if err != nil {
 		log.Panicln("writeup file", err)
-		return
+		return nil
 	}
-	var writeUpInfos []WriteUpInfoResult
+	var writeUpInfos []types.WriteUpInfo
 	for _, file := range files {
 		userId, err := strconv.ParseUint(file, 10, 64)
 		if err != nil {
 			log.Panicln("writeup parse file error", err)
-			return
+			return nil
 		}
 		user, err := resolvers.FindUser(userId)
 		if err != nil {
 			log.Panicln("writeup can't find user", err)
-			return
+			return nil
 		}
 		var solved int
 		submits := resolvers.FindSubmitCorrectByUserId(userId)
@@ -140,23 +134,12 @@ func WriteUpInfos(w http.ResponseWriter, req *http.Request, userId uint64) {
 			solved = 0
 		}
 		solved = len(submits)
-		writeUpInfos = append(writeUpInfos, WriteUpInfoResult{
+		writeUpInfos = append(writeUpInfos, types.WriteUpInfo{
 			UserId: string(userId),
 			Name:   user.Name,
 			Mail:   user.Mail,
-			Solved: solved,
+			Solved: int32(solved),
 		})
-		infosJson, err := json.Marshal(writeUpInfos)
-		if err != nil {
-			log.Panicln("writeup Marshal error: ", err)
-			return
-		}
-		_, err = w.Write(infosJson)
-		if err != nil {
-			log.Println("writeup infos send error: ", err)
-			return
-		}
-
 	}
-
+	return writeUpInfos
 }

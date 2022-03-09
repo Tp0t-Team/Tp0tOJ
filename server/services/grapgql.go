@@ -57,4 +57,15 @@ func init() {
 		userId := *session.Get("userId").(*uint64)
 		user.WriteUpHandle(w, r, userId)
 	})
+	http.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
+		session := sessionManager.Start(w, r)
+		isLogin := session.Get("isLogin")
+		isAdmin := session.Get("isAdmin")
+		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+			w.WriteHeader(403)
+			w.Write(nil)
+			return
+		}
+		admin.DownloadAllWP(w, r)
+	})
 }

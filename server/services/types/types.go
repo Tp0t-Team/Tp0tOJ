@@ -417,3 +417,15 @@ type SubmitInfo struct {
 	ChallengeName string
 	Mark          int32
 }
+
+type WriteUpInfoResult struct {
+	Message string
+	Infos   []WriteUpInfo
+}
+
+type WriteUpInfo struct {
+	UserId string
+	Name   string
+	Mail   string
+	Solved int32
+}

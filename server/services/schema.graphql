@@ -18,6 +18,7 @@ type Mutation {
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
     challengeRemove(input: String!): ChallengeRemoveResult!
     warmUp: Boolean!
+    WriteUpInfos: WriteUpInfoResult!
 }
 
 input RegisterInput {
@@ -306,4 +307,16 @@ type SubmitInfo {
     submitTime: String!
     challengeName: String!
     mark: Int!
+}
+
+type WriteUpInfoResult {
+    message: String!
+    infos: [WriteUpInfo!]!
+}
+
+type WriteUpInfo {
+    userId: String!
+    name: String!
+    mail: String!
+    solved: Int!
 }
