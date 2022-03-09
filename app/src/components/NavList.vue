@@ -1,4 +1,5 @@
 <template>
+<div class="nav-wrapper">
   <v-list dense>
     <v-list-item @click="$router.push('/')">
       <v-list-item-action>
@@ -100,6 +101,19 @@
       </v-list-item>
     </v-list-item-group>
   </v-list>
+  <v-tooltip top v-if="isLogin">
+    <template v-slot:activator="{ on, attrs }">
+      <v-btn
+        text
+        v-bind="attrs"
+        v-on="on"
+      >
+        <v-icon>upload_file</v-icon>
+      </v-btn>
+    </template>
+    <span>Upload Writeup</span>
+  </v-tooltip>
+</div>
 </template>
 
 <script lang="ts">
@@ -150,4 +164,10 @@ export default class NavList extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.nav-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 </style>

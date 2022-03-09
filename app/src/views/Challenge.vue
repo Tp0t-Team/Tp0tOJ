@@ -58,25 +58,31 @@
       v-if="currentChallenge!=null"
     >
       <v-card width="400px" height="300px">
-        <v-toolbar dense>
+        <v-sheet :elevation="2" class="title pr-4">
+          <div class="title title-score pl-2 pr-2">
+            <span>{{currentChallenge.score}}pt</span>
+          </div>
+          <span class="ml-2">{{currentChallenge.name}}</span>
           <v-spacer></v-spacer>
-          <v-toolbar-title>
-            {{currentChallenge.name}}
-            <v-chip class="ml-2">{{currentChallenge.score}}pt</v-chip>
-          </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-form>
-            <v-switch
-              label="Replica"
-              :disabled="currentChallenge.manual || replicaLoading"
-              :loading="replicaLoading"
-              :value="allocated"
-              @change="replicaChange"
-              hide-details
-              color="primary"
-              ></v-switch>
-          </v-form>
-        </v-toolbar>
+          <v-tooltip right v-if="currentChallenge.manual && !currentChallenge.allocated">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                :disabled="replicaLoading"
+                :loading="replicaLoading"
+                color="accent"
+                @click="replicaChange"
+                icon
+                large
+              >
+                <v-icon>cloud_sync</v-icon>
+              </v-btn>
+            </template>
+            <span>Start This Challenge</span>
+          </v-tooltip>
+          <v-icon v-if="currentChallenge.allocated">cloud_done</v-icon>
+        </v-sheet>
         <v-text-field
           v-model="sumbitFlag"
           outlined
@@ -222,7 +228,7 @@ export default class Challenge extends Vue {
     window.open(url);
   }
 
-  async replicaChange(value: boolean) {
+  async replicaChange() {
     this.replicaLoading = true;
     // TODO: alloc replica or disalloc replica
     let id = this.currentChallenge!.challengeId;
@@ -324,4 +330,17 @@ export default class Challenge extends Vue {
   // height: 128px;
   overflow-y: auto;
 }
+
+.title {
+  height: 48px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-score {
+  background-color: rgb(245,124,0);
+}
+
 </style>
