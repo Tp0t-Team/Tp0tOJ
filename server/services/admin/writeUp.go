@@ -1,28 +1,96 @@
 package admin
 
 import (
+	"archive/zip"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"server/services/database/resolvers"
 	"strconv"
+	"strings"
 )
 
 const writeUpPath string = "./writeup"
 
-type WriteUpInfoResult struct {
-	Name   string
-	Mail   string
-	Solved int //solved challenge number
-}
+func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
+	if req.Method != "POST" {
+		w.WriteHeader(404)
+		w.Write(nil)
+		return
+	}
 
-func DownloadAll() {
+	//TODO: pack writeup folder and download
+	var zipFileName = "WP.zip"
+	var writeUpPath string
+	err := os.RemoveAll(zipFileName)
+	if err != nil {
+		log.Panicln("DownloadAllWP: ", err)
+		return
+	}
+	zipFile, _ := os.Create(zipFileName)
+	defer func(zipFile *os.File) {
+		err := zipFile.Close()
+		if err != nil {
+			log.Panicln("DownloadAllWP: ", err)
+			return
+		}
+	}(zipFile)
+
+	archive := zip.NewWriter(zipFile)
+	defer func(archive *zip.Writer) {
+		err := archive.Close()
+		if err != nil {
+			log.Panicln("DownloadAllWP: ", err)
+			return
+		}
+	}(archive)
+	err = filepath.Walk(writeUpPath, func(path string, info os.FileInfo, _ error) error {
+		if path == writeUpPath {
+			return nil
+		}
+		header, _ := zip.FileInfoHeader(info)
+		header.Name = strings.TrimPrefix(path, writeUpPath+`\`)
+		if info.IsDir() {
+			header.Name += `/`
+		} else {
+			header.Method = zip.Deflate
+		}
+		writer, _ := archive.CreateHeader(header)
+		if !info.IsDir() {
+			file, _ := os.Open(path)
+			defer func(file *os.File) {
+				err := file.Close()
+				if err != nil {
+					log.Panicln("DownloadAllWP: ", err)
+					return
+				}
+			}(file)
+			_, err := io.Copy(writer, file)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Panicln("DownloadAllWP: ", err)
+		return
+	}
+	//TODO: send zip
 
 }
 func DownloadWPByUserId() {
 
+}
+
+type WriteUpInfoResult struct {
+	UserId string
+	Name   string
+	Mail   string
+	Solved int //solved challenge number
 }
 
 func WriteUpInfos(w http.ResponseWriter, req *http.Request, userId uint64) {
@@ -69,6 +137,7 @@ func WriteUpInfos(w http.ResponseWriter, req *http.Request, userId uint64) {
 		}
 		solved = len(submits)
 		writeUpInfos = append(writeUpInfos, WriteUpInfoResult{
+			UserId: string(userId),
 			Name:   user.Name,
 			Mail:   user.Mail,
 			Solved: solved,

@@ -16,7 +16,6 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 		w.Write(nil)
 		return
 	}
-	//TODO: need login and role check
 	err := req.ParseMultipartForm(16 << 20)
 	if err != nil {
 		w.WriteHeader(500)
