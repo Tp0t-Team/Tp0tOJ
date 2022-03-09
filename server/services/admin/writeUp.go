@@ -52,27 +52,31 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 			return nil
 		}
 		header, _ := zip.FileInfoHeader(info)
-		header.Name = strings.TrimPrefix(path, writeUpPath+`\`)
-		if info.IsDir() {
-			header.Name += `/`
-		} else {
+		header.Name = strings.TrimPrefix(path, writeUpPath)
+		if !info.IsDir() {
 			header.Method = zip.Deflate
 		}
-		writer, _ := archive.CreateHeader(header)
-		if !info.IsDir() {
-			file, _ := os.Open(path)
-			defer func(file *os.File) {
-				err := file.Close()
-				if err != nil {
-					log.Panicln("DownloadAllWP: ", err)
-					return
-				}
-			}(file)
-			_, err := io.Copy(writer, file)
-			if err != nil {
-				return err
-			}
+		writer, err := archive.CreateHeader(header)
+		if err != nil {
+			return err
 		}
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				log.Panicln("DownloadAllWP: ", err)
+				return
+			}
+		}(file)
+
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 	if err != nil {
