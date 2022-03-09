@@ -46,6 +46,8 @@
 
 - [x] session持久化存储，目前F5 cookie会掉
 
+- [ ] 由于submit查询转移到了userprofile，所以admin的user管理页面点击头像应该能跳转到user profile
+
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`
 ```
