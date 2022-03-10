@@ -68,4 +68,15 @@ func init() {
 		}
 		admin.DownloadAllWP(w, r)
 	})
+	http.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
+		session := sessionManager.Start(w, r)
+		isLogin := session.Get("isLogin")
+		isAdmin := session.Get("isAdmin")
+		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write(nil)
+			return
+		}
+		admin.UploadImage(w, r)
+	})
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/heroku/docker-registry-client/registry"
+	"io"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -332,17 +333,17 @@ func DockerFileUpload() {
 
 }
 
-func ImgBuild(tarArchive string, imageName string) error {
-	file, err := os.Open(tarArchive)
-	if err != nil {
-		return err
-	}
-	_, err = dockerClient.ImageBuild(context.TODO(), file, types.ImageBuildOptions{
+func ImgBuild(tarArchive io.Reader, imageName string) error {
+	//file, err := os.Open(tarArchive)
+	//if err != nil {
+	//	return err
+	//}
+	_, err := dockerClient.ImageBuild(context.TODO(), tarArchive, types.ImageBuildOptions{
 		Dockerfile: "dockerfile",
 		Tags:       []string{imageName},
 		Remove:     true,
 	})
-	err = file.Close()
+	//err = file.Close()
 	if err != nil {
 		return err
 	}
