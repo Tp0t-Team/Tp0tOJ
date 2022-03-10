@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"server/services/kube"
+	"server/utils/configure"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func UploadImage(w http.ResponseWriter, req *http.Request) {
 	}
 	defer file.Close()
 
-	err = kube.ImgBuild(file, strings.ToLower(name))
+	err = kube.ImgBuild(file, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+name))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)

@@ -57,7 +57,7 @@ func init() {
 	autoPortSetLoad()
 
 	//dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig(prefix+"/resources/ca.crt", prefix+"/resources/tls.crt", prefix+"/resources/tls.key"))
-	dockerClient, err = client.NewClientWithOpts()
+	dockerClient, err = client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -73,7 +73,7 @@ func init() {
 	}
 	dockerPushAuth = base64.URLEncoding.EncodeToString(marshal)
 
-	registryClient, err = registry.NewInsecure(configure.Configure.Kubernetes.RegistryHost, configure.Configure.Kubernetes.Username, configure.Configure.Kubernetes.Password)
+	registryClient, err = registry.NewInsecure("https://"+configure.Configure.Kubernetes.RegistryHost+"/", configure.Configure.Kubernetes.Username, configure.Configure.Kubernetes.Password)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -375,7 +375,7 @@ func ImgBuild(tarArchive io.Reader, imageName string) error {
 	//	return err
 	//}
 	buildState, err := dockerClient.ImageBuild(context.TODO(), tarArchive, types.ImageBuildOptions{
-		Dockerfile: "dockerfile",
+		Dockerfile: "Dockerfile",
 		Tags:       []string{imageName},
 		Remove:     true,
 	})
@@ -430,10 +430,11 @@ func ImgStatus() error { // TODO:
 		return nil
 	}
 	for _, repo := range repositories {
-		manifest, err := registryClient.ManifestV2(repo, "latest")
+		_, err := registryClient.ManifestV2(repo, "latest")
 		if err != nil {
 			return nil
 		}
 		//manifest.Config.Size
 	}
+	return nil
 }
