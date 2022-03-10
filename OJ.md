@@ -54,9 +54,9 @@
 
 - [x] challenge展示的时候加上所属类型
 
-- [ ] 后端start replic stop replic
+- [x] 后端start replic stop replic
 
-- [ ] 单用户全局唯一replic
+- [x] 单用户全局唯一replic
 
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`

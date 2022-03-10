@@ -73,6 +73,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 			ChallengeId: challengeId,
 			Status:      "disabled",
 			Flag:        flag,
+			Singleton:   config.Singleton,
 		}
 		result := tx.Create(&newReplica)
 		if result.Error != nil {
@@ -206,6 +207,51 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 				return errors.New("disable replica failed")
 			}
 			tx.Delete(&replica)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
+func StartReplicaForUser(userId uint64, challengeId uint64) bool {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		challenge, err := FindChallengeById(challengeId)
+		if err != nil {
+			return err
+		}
+		var config types.ChallengeConfig
+		err = json.Unmarshal([]byte(challenge.Configuration), &config)
+		if err != nil {
+			return err
+		}
+		if config.Singleton {
+			return errors.New("cannot start replica for a singleton")
+		}
+		var allocs []entity.ReplicaAlloc
+		tx.Preload("Replica").Where(map[string]interface{}{"user_id": userId}).First(&allocs)
+		for _, alloc := range allocs {
+			if !alloc.Replica.Singleton {
+				replicaId := alloc.ReplicaId
+				tx.Delete(&alloc)
+				if !DisableReplica(alloc.ReplicaId, tx) {
+					return errors.New("delete replica failed")
+				}
+				tx.Delete(&entity.Replica{ReplicaId: replicaId})
+			}
+		}
+		newReplica := AddReplica(challengeId, tx)
+		if newReplica == nil {
+			return errors.New("create replica failed")
+		}
+		if !EnableReplica(newReplica.ReplicaId, tx) {
+			return errors.New("enable replica failed")
+		}
+		if !AddReplicaAlloc(newReplica.ReplicaId, userId, tx) {
+			return errors.New("alloc replica failed")
 		}
 		return nil
 	})

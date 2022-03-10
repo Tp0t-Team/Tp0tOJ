@@ -223,8 +223,11 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 	challengeId, err := strconv.ParseUint(input, 10, 64)
 	if err != nil {
 		log.Println(err)
-		return &types.StartReplicaResult{Message: "Submit Service Error!"}
+		return &types.StartReplicaResult{Message: "start failed"}
 	}
-	// TODO: do start replica (close other not-singleton replica)
+	// do start replica (close other not-singleton replica)
+	if !resolvers.StartReplicaForUser(userId, challengeId) {
+		return &types.StartReplicaResult{Message: "start failed"}
+	}
 	return &types.StartReplicaResult{Message: ""}
 }
