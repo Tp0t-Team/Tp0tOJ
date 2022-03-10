@@ -73,7 +73,7 @@ func init() {
 	}
 	dockerPushAuth = base64.URLEncoding.EncodeToString(marshal)
 
-	registryClient, err = registry.NewInsecure("https://"+configure.Configure.Kubernetes.RegistryHost+"/", configure.Configure.Kubernetes.Username, configure.Configure.Kubernetes.Password)
+	registryClient, err = registry.NewInsecure("https://"+configure.Configure.Kubernetes.RegistryHost, configure.Configure.Kubernetes.Username, configure.Configure.Kubernetes.Password)
 	if err != nil {
 		log.Panicln(err)
 	}
