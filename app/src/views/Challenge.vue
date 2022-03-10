@@ -136,7 +136,8 @@ import {
   ChallengeDesc,
   ChallengeResult,
   SubmitResult,
-  SubmitInput
+  SubmitInput,
+  StartReplicaResult
 } from "@/struct";
 import constValue from "@/constValue";
 
@@ -230,8 +231,29 @@ export default class Challenge extends Vue {
 
   async replicaChange() {
     this.replicaLoading = true;
-    // TODO: alloc replica or disalloc replica
     let id = this.currentChallenge!.challengeId;
+
+    try {
+      let res = await this.$apollo.mutate<StartReplicaResult, { input: string }>({
+        mutation: gql`
+          mutation($input: String!) {
+            startReplica(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          input: id
+        }
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.startReplica.message)
+        throw res.data!.startReplica.message;
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+
     await this.loadData();
     let c = this.challenges.find(v => v.challengeId == id);
     this.sumbitFlag = "";

@@ -429,3 +429,7 @@ type WriteUpInfo struct {
 	Mail   string
 	Solved int32
 }
+
+type StartReplicaResult struct {
+	Message string
+}

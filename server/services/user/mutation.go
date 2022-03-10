@@ -14,6 +14,7 @@ import (
 	"server/services/types"
 	"server/utils/configure"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -205,4 +206,25 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	//}
 	return &types.SubmitResult{Message: ""}
 
+}
+
+func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input string }) *types.StartReplicaResult {
+	input := args.Input
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
+	}
+	input = strings.TrimSpace(input)
+	if input == "" {
+		return &types.StartReplicaResult{Message: "not empty error"}
+	}
+	userId := *session.Get("userId").(*uint64)
+	challengeId, err := strconv.ParseUint(input, 10, 64)
+	if err != nil {
+		log.Println(err)
+		return &types.StartReplicaResult{Message: "Submit Service Error!"}
+	}
+	// TODO: do start replica (close other not-singleton replica)
+	return &types.StartReplicaResult{Message: ""}
 }

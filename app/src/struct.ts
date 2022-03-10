@@ -232,3 +232,5 @@ export interface WriteUpInfo {
 }
 
 export type WriteUpInfoResult = { writeUpInfos: {infos: WriteUpInfo[]} & Result }
+
+export type StartReplicaResult = { startReplica: Result }
