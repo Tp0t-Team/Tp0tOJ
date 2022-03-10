@@ -1,9 +1,11 @@
 package kube
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/heroku/docker-registry-client/registry"
@@ -333,26 +335,71 @@ func DockerFileUpload() {
 
 }
 
+type ErrorLine struct {
+	Error       string      `json:"error"`
+	ErrorDetail ErrorDetail `json:"errorDetail"`
+}
+
+type ErrorDetail struct {
+	Message string `json:"message"`
+}
+
+func loadDockerState(rd io.Reader) error {
+	var lastLine string
+
+	scanner := bufio.NewScanner(rd)
+	for scanner.Scan() {
+		lastLine = scanner.Text()
+		//fmt.Println(scanner.Text())
+	}
+
+	errLine := &ErrorLine{}
+	err := json.Unmarshal([]byte(lastLine), errLine)
+	if err != nil {
+		return err
+	}
+	if errLine.Error != "" {
+		return errors.New(errLine.Error)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func ImgBuild(tarArchive io.Reader, imageName string) error {
 	//file, err := os.Open(tarArchive)
 	//if err != nil {
 	//	return err
 	//}
-	_, err := dockerClient.ImageBuild(context.TODO(), tarArchive, types.ImageBuildOptions{
+	buildState, err := dockerClient.ImageBuild(context.TODO(), tarArchive, types.ImageBuildOptions{
 		Dockerfile: "dockerfile",
 		Tags:       []string{imageName},
 		Remove:     true,
 	})
-	//err = file.Close()
 	if err != nil {
 		return err
 	}
+	err = loadDockerState(buildState.Body)
 	if err != nil {
 		return err
 	}
-	_, err = dockerClient.ImagePush(context.TODO(), imageName, types.ImagePushOptions{
+	err = buildState.Body.Close()
+	if err != nil {
+		return err
+	}
+	pushState, err := dockerClient.ImagePush(context.TODO(), imageName, types.ImagePushOptions{
 		RegistryAuth: dockerPushAuth,
 	})
+	if err != nil {
+		return err
+	}
+	err = loadDockerState(pushState)
+	if err != nil {
+		return err
+	}
+	err = pushState.Close()
 	if err != nil {
 		return err
 	}
@@ -375,6 +422,17 @@ func ImgDelete(imageName string) error {
 	return nil
 }
 
-func ImgStatus() {
-
+func ImgStatus() error { // TODO:
+	repositories, err := registryClient.Repositories()
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	for _, repo := range repositories {
+		manifest, err := registryClient.ManifestV2(repo, "latest")
+		if err != nil {
+			return nil
+		}
+		//manifest.Config.Size
+	}
 }
