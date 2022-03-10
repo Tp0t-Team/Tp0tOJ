@@ -100,6 +100,17 @@ export default new Router({
             }
         },
         {
+            path: '/admin/writeup',
+            name: 'admin-writeup',
+            component: () =>
+                import(
+                    /* webpackChunkName: "admin-writeup" */ '@/views/admin/Writeup.vue'
+                ),
+            meta: {
+                auth: 'team'
+            }
+        },
+        {
             path: '*',
             name: 'error',
             component: ErrorPage

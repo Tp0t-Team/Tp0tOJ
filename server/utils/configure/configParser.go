@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+const WriteUpPath string = "./writeup"
+
 type Config struct {
 	Server     Server     `yaml:"server"`
 	Email      Email      `yaml:"email"`

@@ -94,3 +94,14 @@ func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ Use
 	return &types.SubmitHistoryResult{Message: "", SubmitInfos: submitInfos}
 
 }
+
+func (r *AdminQueryResolver) WriteUpInfos(ctx context.Context) *types.WriteUpInfoResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.WriteUpInfoResult{Message: "forbidden or login timeout"}
+	}
+	ret := GetWriteUpInfos()
+	return &types.WriteUpInfoResult{Message: "", Infos: ret}
+}

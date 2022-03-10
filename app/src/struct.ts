@@ -223,3 +223,12 @@ export type ChallengeRemoveResult = { challengeRemove: Result }
 
 // subscription bulletin
 export type BulletinSubResult = { bulletin: BulletinItem }
+
+export interface WriteUpInfo {
+    userId: String
+    name: String
+    mail: String
+    solved: number
+}
+
+export type WriteUpInfoResult = { writeUpInfos: {infos: WriteUpInfo[]} & Result }

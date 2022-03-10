@@ -3,67 +3,63 @@ package admin
 import (
 	"archive/zip"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"server/services/database/resolvers"
 	"server/services/types"
+	"server/utils/configure"
 	"strconv"
 	"strings"
 )
 
-const writeUpPath string = "./writeup"
-
 func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
-	//if req.Method != "POST" {
-	//	w.WriteHeader(404)
-	//	w.Write(nil)
-	//	return
-	//}
-
 	//TODO: pack writeup folder and download
 	var zipFileName = "WP.zip"
-	var writeUpPath string
 	err := os.RemoveAll(zipFileName)
 	if err != nil {
 		log.Panicln("DownloadAllWP: ", err)
 		return
 	}
 	zipFile, _ := os.Create(zipFileName)
-	defer func(zipFile *os.File) {
-		err := zipFile.Close()
-		if err != nil {
-			log.Panicln("DownloadAllWP: ", err)
-			return
-		}
-	}(zipFile)
+	//defer func(zipFile *os.File) {
+	//	err := zipFile.Close()
+	//	if err != nil {
+	//		log.Panicln("DownloadAllWP: ", err)
+	//		return
+	//	}
+	//}(zipFile)
 
 	archive := zip.NewWriter(zipFile)
-	defer func(archive *zip.Writer) {
-		err := archive.Close()
-		if err != nil {
-			log.Panicln("DownloadAllWP: ", err)
-			return
-		}
-	}(archive)
-	err = filepath.Walk(writeUpPath, func(path string, info os.FileInfo, _ error) error {
-		if path == writeUpPath {
+	//defer func(archive *zip.Writer) {
+	//	err := archive.Close()
+	//	if err != nil {
+	//		log.Panicln("DownloadAllWP: ", err)
+	//		return
+	//	}
+	//}(archive)
+	err = filepath.Walk(configure.WriteUpPath, func(path string, info os.FileInfo, _ error) error {
+		if info.IsDir() {
 			return nil
-		}
-		header, _ := zip.FileInfoHeader(info)
-		header.Name = strings.TrimPrefix(path, writeUpPath)
-		if !info.IsDir() {
-			header.Method = zip.Deflate
-		}
-		writer, err := archive.CreateHeader(header)
-		if err != nil {
-			return err
 		}
 		file, err := os.Open(path)
 		if err != nil {
 			return err
 		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+		header.Method = zip.Deflate
+		header.Name = file.Name()
+		writer, err := archive.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
 		defer func(file *os.File) {
 			err := file.Close()
 			if err != nil {
@@ -83,42 +79,42 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 		log.Panicln("DownloadAllWP: ", err)
 		return
 	}
-	//TODO: send zip
-
+	err = archive.Close()
+	if err != nil {
+		log.Panicln("DownloadAllWP: ", err)
+	}
+	err = zipFile.Close()
+	if err != nil {
+		log.Panicln("DownloadAllWP: ", err)
+	}
+	zipFile, _ = os.Open(zipFileName)
+	defer func(zipFile *os.File) {
+		err := zipFile.Close()
+		if err != nil {
+			log.Panicln("DownloadAllWP: ", err)
+			return
+		}
+	}(zipFile)
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	_, err = io.Copy(w, zipFile)
+	if err != nil {
+		log.Panicln("DownloadAllWP: ", err)
+	}
 }
+
 func DownloadWPByUserId() {
 
 }
 
-//type WriteUpInfoResult struct {
-//	UserId string
-//	Name   string
-//	Mail   string
-//	Solved int //solved challenge number
-//}
-
 func GetWriteUpInfos() []types.WriteUpInfo {
-	_, err := os.Stat(writeUpPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err := os.MkdirAll(writeUpPath, 600)
-			if err != nil {
-				log.Panicln("writeup make dir error", err)
-				return nil
-			}
-		} else {
-			log.Panicln("writeup dir create filed", err)
+	var writeUpInfos []types.WriteUpInfo
+	filepath.Walk(configure.WriteUpPath, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
 			return nil
 		}
-	}
-	files, err := filepath.Glob("./writeup")
-	if err != nil {
-		log.Panicln("writeup file", err)
-		return nil
-	}
-	var writeUpInfos []types.WriteUpInfo
-	for _, file := range files {
-		userId, err := strconv.ParseUint(file, 10, 64)
+		_, file := filepath.Split(path)
+		userId, err := strconv.ParseUint(strings.Split(file, ".")[0], 10, 64)
 		if err != nil {
 			log.Panicln("writeup parse file error", err)
 			return nil
@@ -140,6 +136,7 @@ func GetWriteUpInfos() []types.WriteUpInfo {
 			Mail:   user.Mail,
 			Solved: int32(solved),
 		})
-	}
+		return nil
+	})
 	return writeUpInfos
 }

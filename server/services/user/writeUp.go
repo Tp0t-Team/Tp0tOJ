@@ -6,19 +6,20 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"server/utils/configure"
 	"strconv"
 	"strings"
 )
 
 func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 	if req.Method != "POST" {
-		w.WriteHeader(404)
+		w.WriteHeader(http.StatusNotFound)
 		w.Write(nil)
 		return
 	}
 	err := req.ParseMultipartForm(16 << 20)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		log.Println(err)
 		return
@@ -27,18 +28,18 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 	var fileHandle *multipart.FileHeader
 	file, fileHandle, err = req.FormFile("writeup")
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		log.Println(err)
 		return
 	}
 	defer file.Close()
 	fileNameParts := strings.Split(fileHandle.Filename, ".")
-	extname := fileNameParts[len(fileNameParts)-1]
-	// TODO: add more check
-	outFile, err := os.Open(strconv.FormatUint(userId, 10) + extname)
+	extname := fileHandle.Filename[len(fileNameParts[0]):]
+	// TODO: add more check, remove the old one
+	outFile, err := os.Create(configure.WriteUpPath + "/" + strconv.FormatUint(userId, 10) + extname)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		log.Println(err)
 		return
@@ -46,12 +47,12 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 	defer outFile.Close()
 	_, err = io.Copy(outFile, file)
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)
 		log.Println(err)
 		return
 	}
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Write(nil)
 	return
 }

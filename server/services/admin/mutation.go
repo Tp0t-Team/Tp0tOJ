@@ -111,14 +111,3 @@ func (r *AdminMutationResolver) WarmUp() (bool, error) {
 	}
 	return true, nil
 }
-
-func (r *AdminMutationResolver) WriteUpInfos(ctx context.Context) *types.WriteUpInfoResult {
-	session := ctx.Value("session").(*sessions.Session)
-	isLogin := session.Get("isLogin")
-	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.WriteUpInfoResult{Message: "forbidden or login timeout"}
-	}
-	ret := GetWriteUpInfos()
-	return &types.WriteUpInfoResult{Message: "", Infos: ret}
-}

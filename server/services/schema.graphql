@@ -18,7 +18,6 @@ type Mutation {
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
     challengeRemove(input: String!): ChallengeRemoveResult!
     warmUp: Boolean!
-    WriteUpInfos: WriteUpInfoResult!
 }
 
 input RegisterInput {
@@ -165,6 +164,7 @@ type Query {
     rank: RankResult
     allBulletin : BulletinResult
     submitHistory(userId: String!): SubmitHistoryResult
+    writeUpInfos: WriteUpInfoResult
 }
 type UserInfoResult {
     message: String!

@@ -50,7 +50,7 @@ func init() {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		if isLogin == nil || !*isLogin.(*bool) {
-			w.WriteHeader(403)
+			w.WriteHeader(http.StatusForbidden)
 			w.Write(nil)
 			return
 		}
@@ -62,7 +62,7 @@ func init() {
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
 		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-			w.WriteHeader(403)
+			w.WriteHeader(http.StatusForbidden)
 			w.Write(nil)
 			return
 		}

@@ -107,11 +107,14 @@
         text
         v-bind="attrs"
         v-on="on"
+        @click="writeupClick"
       >
         <v-icon>upload_file</v-icon>
       </v-btn>
     </template>
-    <span>Upload Writeup</span>
+    <span v-if="this.$store.state.global.role=='admin'">Show Writeups</span>
+    <span v-else>Upload Writeup</span>
+    <input type="file" class="file-input" ref="writeup" @change="uploadWriteup">
   </v-tooltip>
 </div>
 </template>
@@ -160,6 +163,36 @@ export default class NavList extends Vue {
       console.log(e.toString());
     }
   }
+
+  writeupClick() {
+    if(this.$store.state.global.role=='admin') {
+      this.$router.push('/admin/writeup');
+      return;
+    }
+    (this.$refs.writeup! as any).click();
+  }
+
+  async uploadWriteup(e: any) {
+    console.log(e)
+    let file : File = e.target.files[0];
+    let formData = new FormData();
+    formData.append("writeup", file, file.name);
+    try{
+      let res = await fetch('/writeup', {
+        method: 'POST',
+        body: formData
+      });
+      if(res.status != 200) {
+        throw res.statusText;
+      }
+    } catch(err) {
+      alert(err); // TODO:
+      e.target.value = "";
+      return
+    }
+    alert("upload writeup success");
+    e.target.value = "";
+  }
 }
 </script>
 
@@ -169,5 +202,9 @@ export default class NavList extends Vue {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.file-input {
+  display: none;
 }
 </style>
