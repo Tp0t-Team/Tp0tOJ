@@ -56,7 +56,8 @@ func init() {
 	//AutoPortSet = map[string]*portAllocInfo{}
 	autoPortSetLoad()
 
-	dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig(prefix+"/resources/ca.crt", prefix+"/resources/tls.crt", prefix+"/resources/tls.key"))
+	//dockerClient, err = client.NewClientWithOpts(client.WithTLSClientConfig(prefix+"/resources/ca.crt", prefix+"/resources/tls.crt", prefix+"/resources/tls.key"))
+	dockerClient, err = client.NewClientWithOpts()
 	if err != nil {
 		log.Panicln(err)
 	}
