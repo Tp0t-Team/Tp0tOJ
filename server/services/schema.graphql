@@ -18,7 +18,8 @@ type Mutation {
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
     challengeRemove(input: String!): ChallengeRemoveResult!
     warmUp: Boolean!
-    startReplica(input: String!): StartReplicaResult
+    startReplica(input: String!): StartReplicaResult!
+    deleteImage(input: String!): DeleteImageResult!
 }
 
 input RegisterInput {
@@ -166,6 +167,8 @@ type Query {
     allBulletin : BulletinResult
     submitHistory(userId: String!): SubmitHistoryResult
     writeUpInfos: WriteUpInfoResult
+    imageInfos: ImageInfoResult
+    clusterInfo: ClusterInfoResult
 }
 type UserInfoResult {
     message: String!
@@ -324,4 +327,40 @@ type WriteUpInfo {
 
 type StartReplicaResult {
     message: String!
+}
+
+type ImageInfoResult {
+    message: String!
+    infos: [ImageInfo!]!
+}
+
+type ImageInfo {
+    name: String!
+    platform: String!
+    size: String!
+    digest: String!
+}
+
+type DeleteImageResult {
+    message: String!
+}
+
+type ClusterNodeInfo {
+    name: String!
+    osType: String!
+    distribution: String!
+    kernel: String!
+    arch: String!
+}
+
+type ClusterReplicaInfo {
+    name: String!
+    node: String!
+    status: String!
+}
+
+type ClusterInfoResult {
+    message: String!
+    nodes: [ClusterNodeInfo!]!
+    replicas: [ClusterReplicaInfo!]!
 }

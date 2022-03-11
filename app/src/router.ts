@@ -100,6 +100,17 @@ export default new Router({
             }
         },
         {
+            path: '/admin/cluster',
+            name: 'admin-cluster',
+            component: () =>
+                import(
+                    /* webpackChunkName: "admin-cluster" */ '@/views/admin/Cluster.vue'
+                ),
+            meta: {
+                auth: 'team'
+            }
+        },
+        {
             path: '/admin/writeup',
             name: 'admin-writeup',
             component: () =>

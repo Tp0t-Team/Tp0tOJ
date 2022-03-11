@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/go-sessions/v3"
 	"log"
 	"server/services/database/resolvers"
+	"server/services/kube"
 	"server/services/types"
 	"server/utils"
 	"strconv"
@@ -110,4 +111,20 @@ func (r *AdminMutationResolver) WarmUp() (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ Input string }) *types.DeleteImageResult {
+	input := args.Input
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteImageResult{Message: "forbidden or login timeout"}
+	}
+	err := kube.ImgDelete(input)
+	if err != nil {
+		log.Println(err)
+		return &types.DeleteImageResult{Message: "delete image error"}
+	}
+	return &types.DeleteImageResult{Message: ""}
 }

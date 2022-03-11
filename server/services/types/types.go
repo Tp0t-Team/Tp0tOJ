@@ -433,3 +433,39 @@ type WriteUpInfo struct {
 type StartReplicaResult struct {
 	Message string
 }
+
+type ImageInfoResult struct {
+	Message string
+	Infos   []ImageInfo
+}
+
+type ImageInfo struct {
+	Name     string
+	Platform string
+	Size     string
+	Digest   string
+}
+
+type DeleteImageResult struct {
+	Message string
+}
+
+type ClusterNodeInfo struct {
+	Name         string
+	OsType       string
+	Distribution string
+	Kernel       string
+	Arch         string
+}
+
+type ClusterReplicaInfo struct {
+	Name   string
+	Node   string
+	Status string
+}
+
+type ClusterInfoResult struct {
+	Message  string
+	Nodes    []ClusterNodeInfo
+	Replicas []ClusterReplicaInfo
+}

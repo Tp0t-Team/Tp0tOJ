@@ -85,6 +85,13 @@
             <v-list-item-title>Images</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item
+          @click="$router.push({path:'/admin/cluster',query:{time:Date.now().toLocaleString()}})"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Cluster</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
       <v-divider></v-divider>
     </div>

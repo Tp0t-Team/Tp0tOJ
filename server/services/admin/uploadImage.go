@@ -25,6 +25,7 @@ func UploadImage(w http.ResponseWriter, req *http.Request) {
 	var file multipart.File
 	//var fileHandle *multipart.FileHeader
 	name := req.FormValue("name")
+	platform := req.FormValue("platform")
 	file, _, err = req.FormFile("image")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -34,7 +35,7 @@ func UploadImage(w http.ResponseWriter, req *http.Request) {
 	}
 	defer file.Close()
 
-	err = kube.ImgBuild(file, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+name))
+	err = kube.ImgBuild(file, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+name), platform)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)

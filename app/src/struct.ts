@@ -225,12 +225,37 @@ export type ChallengeRemoveResult = { challengeRemove: Result }
 export type BulletinSubResult = { bulletin: BulletinItem }
 
 export interface WriteUpInfo {
-    userId: String
-    name: String
-    mail: String
+    userId: string
+    name: string
+    mail: string
     solved: number
 }
 
-export type WriteUpInfoResult = { writeUpInfos: {infos: WriteUpInfo[]} & Result }
+export type WriteUpInfoResult = { writeUpInfos: { infos: WriteUpInfo[] } & Result }
 
 export type StartReplicaResult = { startReplica: Result }
+
+export interface ImageInfo {
+    name: string
+    platform: string
+    size: string
+    digest: string
+}
+
+export type ImageInfoResult = { imageInfos: { infos: ImageInfo[] } & Result }
+
+export interface ClusterNodeInfo {
+    name: string
+    osType: string
+    distribution: string
+    kernel: string
+    arch: string
+}
+
+export interface ClusterReplicaInfo {
+    name: string
+    node: string
+    status: string
+}
+
+export type ClusterInfoResult = { clusterInfo: { nodes: ClusterNodeInfo[], replicas: ClusterReplicaInfo[] } & Result }

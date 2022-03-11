@@ -22,6 +22,7 @@ import (
 	"k8s.io/utils/pointer"
 	"log"
 	"os"
+	gtypes "server/services/types"
 	"server/utils/configure"
 	"strconv"
 )
@@ -369,7 +370,7 @@ func loadDockerState(rd io.Reader) error {
 	return nil
 }
 
-func ImgBuild(tarArchive io.Reader, imageName string) error {
+func ImgBuild(tarArchive io.Reader, imageName string, platform string) error {
 	//file, err := os.Open(tarArchive)
 	//if err != nil {
 	//	return err
@@ -378,6 +379,7 @@ func ImgBuild(tarArchive io.Reader, imageName string) error {
 		Dockerfile: "Dockerfile",
 		Tags:       []string{imageName},
 		Remove:     true,
+		Platform:   platform,
 	})
 	if err != nil {
 		return err
@@ -423,18 +425,38 @@ func ImgDelete(imageName string) error {
 	return nil
 }
 
-func ImgStatus() error { // TODO:
+func ImgStatus() []gtypes.ImageInfo {
 	repositories, err := registryClient.Repositories()
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
+	var ret []gtypes.ImageInfo
 	for _, repo := range repositories {
-		_, err := registryClient.ManifestV2(repo, "latest")
+		manifest, err := registryClient.ManifestV2(repo, "latest")
 		if err != nil {
+			log.Println(err)
 			return nil
 		}
 		//manifest.Config.Size
+		platform := ""
+		if manifest.Config.Platform != nil {
+			platform = manifest.Config.Platform.OS + "/" + manifest.Config.Platform.Architecture
+			if manifest.Config.Platform.Variant != "" {
+				platform += "/" + manifest.Config.Platform.Variant
+			}
+		}
+		digest, err := registryClient.ManifestDigest(repo, "latest")
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		ret = append(ret, gtypes.ImageInfo{
+			Name:     repo,
+			Platform: platform,
+			Size:     strconv.FormatInt(manifest.Config.Size, 10),
+			Digest:   digest.Hex(),
+		})
 	}
-	return nil
+	return ret
 }

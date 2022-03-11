@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/go-sessions/v3"
 	"log"
 	"server/services/database/resolvers"
+	"server/services/kube"
 	"server/services/types"
 	"server/utils"
 	"strconv"
@@ -104,4 +105,29 @@ func (r *AdminQueryResolver) WriteUpInfos(ctx context.Context) *types.WriteUpInf
 	}
 	ret := GetWriteUpInfos()
 	return &types.WriteUpInfoResult{Message: "", Infos: ret}
+}
+
+func (r *AdminQueryResolver) ImageInfos(ctx context.Context) *types.ImageInfoResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ImageInfoResult{Message: "forbidden or login timeout"}
+	}
+	ret := kube.ImgStatus()
+	if ret == nil {
+		ret = []types.ImageInfo{}
+	}
+	return &types.ImageInfoResult{Message: "", Infos: ret}
+}
+
+func (r *AdminQueryResolver) ClusterInfo(ctx context.Context) *types.ClusterInfoResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ClusterInfoResult{Message: "forbidden or login timeout"}
+	}
+	// TODO:
+	return nil
 }

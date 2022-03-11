@@ -1,33 +1,29 @@
 <template>
-  <div class="content-col">
+  <div>
     <v-container fill-width>
-      <v-simple-table class="ma-4">
-        <thead>
-          <tr>
-            <th class="text-left">Images</th>
-            <th class="text-left">Size</th>
-            <th class="text-left">Score</th>
-            <th class="text-left">Operation</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            class="table-item"
-            v-for="(r,index) in pageRank"
-            :key="r.rank"
-            @click="$router.push(`/profile/${r.userId}`)"
-          >
-            <td>{{ pageBase + index + 1 }}</td>
-            <td>{{ r.name }}</td>
-            <td>{{ r.score }}</td>
-            <td>
-              <v-btn>delete</v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
-      <v-row justify="center">
-        <v-pagination v-model="page" :page="page" :length="pageCount"></v-pagination>
+      <v-row>
+        <v-spacer></v-spacer>
+        <v-col cols="8">
+          <v-data-table :headers="headers" :items="images" :loading="loading">
+            <template v-slot:item.digest="{ item }">
+              <pre>{{item.digest}}</pre>
+            </template>
+            <template v-slot:item.delete="{ item }">
+              <v-btn
+                text
+                color="primary"
+                @click="delImage(item.name)"
+                :disabled="loading"
+              >
+                delete
+              </v-btn>
+            </template>
+          </v-data-table>
+          <!-- v-model="selected" -->
+          <!-- item-key="name" -->
+          <!-- show-select -->
+        </v-col>
+        <v-spacer></v-spacer>
       </v-row>
       <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
         {{ infoText }}
@@ -39,14 +35,9 @@
         </template>
       </v-snackbar>
     </v-container>
-      <v-btn v-if="$store.state.global.role=='admin'||$store.state.global.role=='team'"
-      fab
-      absolute
-      right
-      bottom
-      color="light-blue"
-      @click="enterEdit"
-    >
+    <v-btn fab absolute right bottom color="primary" @click="enterEdit">
+      <v-icon>add</v-icon>
+    </v-btn>
     <v-dialog v-model="edit" width="400px">
       <v-card width="400px" class="pa-4">
         <v-form v-model="valid" ref="edit">
@@ -57,7 +48,14 @@
             <v-text-field
               v-model="imageName"
               outlined
-              label="ImageName"
+              label="Image Name"
+            ></v-text-field>
+          </v-row>
+          <v-row class="pl-2">
+            <v-text-field
+              v-model="platform"
+              outlined
+              label="Platform"
             ></v-text-field>
           </v-row>
           <v-row class="pl-2">
@@ -66,123 +64,149 @@
               label="File input"
               v-model="file"
             ></v-file-input>
-            <v-btn
-              @click="upload"
-            >Upload</v-btn>
-          </v-row> 
+            <v-btn @click="upload">Upload</v-btn>
+          </v-row>
         </v-form>
       </v-card>
     </v-dialog>
-    <v-icon>add</v-icon>
-  </v-btn>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { RankDesc, RankResult } from "@/struct";
-
-const UserPerPage = 10;
+import { ImageInfo, ImageInfoResult, Result } from "@/struct";
 
 @Component
 export default class Images extends Vue {
-  private rankColor = ["amber", "light-blue", "green"];
-  private page: number = 1;
+  private headers = [
+    { text: "name", value: "name" },
+    { text: "platform", value: "platform" },
+    { text: "size", value: "size" },
+    { text: "digest", value: "digest" },
+    { text: "", value: "delete" },
+  ];
 
-  private ranks: RankDesc[] = [];
-  private pageCount: number = 1;
+  private selected: boolean[] = [];
+  private images: ImageInfo[] = [];
+
+  private valid: boolean = false;
+  private edit: boolean = false;
+
+  private loading: boolean = false;
+
+  private imageName: string = "";
+  private platform: string = "";
+  private file: File | null = null;
 
   private infoText: string = "";
   private hasInfo: boolean = false;
-
-  private valid: boolean = false;
-  private loading: boolean = false;  
-  private dockerfile:string = "helloworld";
-  private edit:boolean = false;
-
-  private imageName:string = "";
-  private file:File|null =  null;
 
   enterEdit() {
     this.edit = true;
   }
 
-  async upload(){
+  async upload() {
     this.edit = false;
-    console.log(this.file);
     try {
       const formData = new FormData();
-      formData.append('file', this.file!);
-      let res = await fetch( '/image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        body: formData
-      })
-      if (res.status != 200 ){
+      formData.set("name", this.imageName);
+      formData.set("platform", this.platform);
+      formData.append("iamge", this.file!);
+      let res = await fetch("/image", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.status != 200) {
         throw res.statusText;
       }
-      // let await res.text
+      await this.loadData();
+      this.infoText = "success";
+      this.hasInfo = true;
     } catch (e) {
-        console.log(e);
-    }   
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
     return true;
   }
 
-  private get topRank() {
-    return this.ranks.slice(0, 3);
-  }
-  private get pageBase() {
-    return (this.page - 1) * 10 + 3;
-  }
-  private get pageRank() {
-    return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
+  async mounted() {
+    await this.loadData();
   }
 
-  async mounted() {
-    this.page = parseInt(this.$route.params.page);
-    // try {
-    //   let res = await this.$apollo.query<RankResult>({
-    //     query: gql`
-    //       query {
-    //         rank {
-    //           message
-    //           rankResultDescs {
-    //             userId
-    //             name
-    //             avatar
-    //             score
-    //           }
-    //         }
-    //       }
-    //     `,
-    //     fetchPolicy: "no-cache"
-    //   });
-    //   if (res.errors) throw res.errors.map(v => v.message).join(",");
-    //   if (res.data!.rank.message) throw res.data!.rank.message;
-    //   this.ranks = res.data!.rank.rankResultDescs.sort(
-    //     (a, b) => parseInt(b.score) - parseInt(a.score)
-    //   );
-    //   this.pageCount = Math.floor(
-    //     (this.ranks.length + UserPerPage - 1) / UserPerPage
-    //   );
-    // } catch (e) {
-    //   this.infoText = e.toString();
-    //   this.hasInfo = true;
-    // }
+  async loadData() {
+    try {
+      let res = await this.$apollo.query<ImageInfoResult, {}>({
+        query: gql`
+          query {
+            imageInfos {
+              message
+              infos {
+                name
+                platform
+                size
+                digest
+              }
+            }
+          }
+        `,
+        fetchPolicy: "no-cache",
+      });
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.data!.imageInfos.message) throw res.data!.imageInfos.message;
+      this.images = res.data!.imageInfos.infos.map((it) => {
+        it.digest = it.digest.slice(0, 8);
+        console.log(it);
+        let size = BigInt(it.size);
+        if (size > 1024n * 1024n * 1024n) {
+          it.size =
+            (parseInt((size / 1024n / 1024n).toString()) / 1024).toFixed(2) +
+            "GB";
+        } else if (size > 1024n * 1024n) {
+          it.size =
+            (parseInt((size / 1024n).toString()) / 1024).toFixed(2) + "MB";
+        } else if (size > 1024n) {
+          it.size = (parseInt(it.size) / 1024).toFixed(2) + "KB";
+        }
+        return it;
+      });
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
+
+  async delImage(name: string) {
+    this.loading = true;
+    try {
+      let res = await this.$apollo.mutate<
+        { deleteImage: Result },
+        { input: string }
+      >({
+        mutation: gql`
+          mutation ($input: String!) {
+            deleteImage(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          input: name,
+        },
+      });
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.data!.deleteImage.message) throw res.data!.deleteImage.message;
+      this.loading = false;
+      this.infoText = "delete success";
+      this.hasInfo = true;
+    } catch (e) {
+      this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.content-col {
-  height: calc(100vh - 96px);
-  overflow-y: auto;
-}
-
-.table-item {
-  cursor: pointer;
-}
 </style>

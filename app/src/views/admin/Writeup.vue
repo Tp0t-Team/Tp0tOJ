@@ -2,7 +2,7 @@
   <v-container fill-width>
     <v-row>
       <v-spacer></v-spacer>
-      <v-col cols="6">
+      <v-col cols="8">
         <v-data-table :headers="headers" :items="writeups" @click:row="select"></v-data-table>
       </v-col>
       <v-spacer></v-spacer>
