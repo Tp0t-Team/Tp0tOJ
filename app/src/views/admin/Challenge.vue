@@ -194,9 +194,9 @@ export default class Challenge extends Vue {
   challengeConfigsChange() {
     this.enableAble = false;
     this.disableAble = false;
-    for (let id of this.selected) {
+    for (let item of this.selected) {
       for (let config of this.challengeConfigs) {
-        if (config.challengeId == id) {
+        if (config.challengeId == item.challengeId) {
           if (config.state == "disabled") {
             this.enableAble = true;
           }
