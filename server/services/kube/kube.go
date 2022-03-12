@@ -456,11 +456,11 @@ func ImgBuild(tarArchive io.Reader, imageName string, platform string) error {
 }
 
 func ImgDelete(imageName string) error {
-	digest, err := registryClient.ManifestDigest(imageName, "latest")
+	manifest, err := registryClient.ManifestV2(imageName, "latest")
 	if err != nil {
 		return err
 	}
-	err = registryClient.DeleteManifest(imageName, digest)
+	err = registryClient.DeleteManifest(imageName, manifest.Config.Digest)
 	if err != nil {
 		return err
 	}
@@ -488,16 +488,11 @@ func ImgStatus() []gtypes.ImageInfo {
 				platform += "/" + manifest.Config.Platform.Variant
 			}
 		}
-		digest, err := registryClient.ManifestDigest(repo, "latest")
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
 		ret = append(ret, gtypes.ImageInfo{
 			Name:     repo,
 			Platform: platform,
 			Size:     strconv.FormatInt(manifest.Config.Size, 10),
-			Digest:   digest.Hex(),
+			Digest:   manifest.Config.Digest.Hex(),
 		})
 	}
 	return ret
