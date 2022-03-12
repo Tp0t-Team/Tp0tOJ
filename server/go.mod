@@ -6,6 +6,7 @@ require (
 	github.com/docker/docker v20.10.12+incompatible
 	github.com/domodwyer/mailyak/v3 v3.3.3
 	github.com/google/uuid v1.2.0
+	github.com/gorilla/mux v1.8.0
 	github.com/graph-gophers/graphql-go v1.3.0
 	github.com/heroku/docker-registry-client v0.0.0-20211012143308-9463674c8930
 	github.com/kataras/go-sessions/v3 v3.3.0
