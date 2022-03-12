@@ -22,6 +22,7 @@ import (
 	"k8s.io/utils/pointer"
 	"log"
 	"os"
+	"server/services/kube/herokuTrick"
 	gtypes "server/services/types"
 	"server/utils/configure"
 	"strconv"
@@ -456,11 +457,11 @@ func ImgBuild(tarArchive io.Reader, imageName string, platform string) error {
 }
 
 func ImgDelete(imageName string) error {
-	manifest, err := registryClient.ManifestV2(imageName, "latest")
+	digest, err := herokuTrick.ManifestV2Digest(registryClient, imageName, "latest")
 	if err != nil {
 		return err
 	}
-	err = registryClient.DeleteManifest(imageName, manifest.Config.Digest)
+	err = registryClient.DeleteManifest(imageName, digest)
 	if err != nil {
 		return err
 	}
@@ -488,11 +489,16 @@ func ImgStatus() []gtypes.ImageInfo {
 				platform += "/" + manifest.Config.Platform.Variant
 			}
 		}
+		digest, err := herokuTrick.ManifestV2Digest(registryClient, repo, "latest")
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
 		ret = append(ret, gtypes.ImageInfo{
 			Name:     repo,
 			Platform: platform,
 			Size:     strconv.FormatInt(manifest.Config.Size, 10),
-			Digest:   manifest.Config.Digest.Hex(),
+			Digest:   digest.Hex(),
 		})
 	}
 	return ret
