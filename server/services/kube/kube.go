@@ -483,19 +483,25 @@ func ImgStatus() []gtypes.ImageInfo {
 		if len(tags) == 0 {
 			continue
 		}
-		manifest, err := herokuTrick.ManifestV2withV1Info(registryClient, repo, "latest")
+		manifest, err := registryClient.Manifest(repo, "latest")
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		manifestv2, err := registryClient.ManifestV2(repo, "latest")
 		if err != nil {
 			log.Println(err)
 			return nil
 		}
 		//manifest.Config.Size
-		platform := ""
-		if manifest.Config.Platform != nil {
-			platform = manifest.Config.Platform.OS + "/" + manifest.Config.Platform.Architecture
-			if manifest.Config.Platform.Variant != "" {
-				platform += "/" + manifest.Config.Platform.Variant
-			}
-		}
+		platform := manifest.Architecture
+		//platform := ""
+		//if manifest.Config.Platform != nil {
+		//	platform = manifest.Config.Platform.OS + "/" + manifest.Config.Platform.Architecture
+		//	if manifest.Config.Platform.Variant != "" {
+		//		platform += "/" + manifest.Config.Platform.Variant
+		//	}
+		//}
 		digest, err := herokuTrick.ManifestV2Digest(registryClient, repo, "latest")
 		if err != nil {
 			log.Println(err)
@@ -504,7 +510,7 @@ func ImgStatus() []gtypes.ImageInfo {
 		ret = append(ret, gtypes.ImageInfo{
 			Name:     repo,
 			Platform: platform,
-			Size:     strconv.FormatInt(manifest.Config.Size, 10),
+			Size:     strconv.FormatInt(manifestv2.Config.Size, 10),
 			Digest:   digest.Hex(),
 		})
 	}
