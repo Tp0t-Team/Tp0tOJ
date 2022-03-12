@@ -483,7 +483,7 @@ func ImgStatus() []gtypes.ImageInfo {
 		if len(tags) == 0 {
 			continue
 		}
-		manifest, err := registryClient.ManifestV2(repo, "latest")
+		manifest, err := herokuTrick.ManifestV2withV1Info(registryClient, repo, "latest")
 		if err != nil {
 			log.Println(err)
 			return nil

@@ -125,7 +125,7 @@ export default class Images extends Vue {
       const formData = new FormData();
       formData.set("name", this.imageName);
       formData.set("platform", this.platform);
-      formData.append("iamge", this.file!);
+      formData.append("image", this.file!);
       let res = await fetch("/image", {
         method: "POST",
         body: formData,

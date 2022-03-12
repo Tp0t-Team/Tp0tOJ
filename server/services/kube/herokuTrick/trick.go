@@ -5,6 +5,7 @@ import (
 	"github.com/docker/distribution/manifest/schema2"
 	"github.com/heroku/docker-registry-client/registry"
 	"github.com/opencontainers/go-digest"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -12,6 +13,35 @@ func url(r *registry.Registry, pathTemplate string, args ...interface{}) string 
 	pathSuffix := fmt.Sprintf(pathTemplate, args...)
 	url := fmt.Sprintf("%s%s", r.URL, pathSuffix)
 	return url
+}
+
+func ManifestV2withV1Info(r *registry.Registry, repository, reference string) (*schema2.DeserializedManifest, error) {
+	url := url(r, "/v2/%s/manifests/%s", repository, reference)
+	r.Logf("registry.manifest.get url=%s repository=%s reference=%s", url, repository, reference)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	//req.Header.Set("Accept", schema2.MediaTypeManifest)
+	resp, err := r.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	deserialized := &schema2.DeserializedManifest{}
+	err = deserialized.UnmarshalJSON(body)
+	if err != nil {
+		return nil, err
+	}
+	return deserialized, nil
 }
 
 func ManifestV2Digest(r *registry.Registry, repository, reference string) (digest.Digest, error) {
