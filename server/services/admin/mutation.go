@@ -90,21 +90,7 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 	return &types.ChallengeMutateResult{Message: ""}
 }
 
-//func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct{ Input string }) *types.ChallengeRemoveResult {
-//	id := args.Input
-//	session := ctx.Value("session").(*sessions.Session)
-//	isLogin := session.Get("isLogin")
-//	isAdmin := session.Get("isAdmin")
-//	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-//		return &types.ChallengeRemoveResult{Message: "forbidden or login timeout"}
-//	}
-//	ok := resolvers.DeleteChallenge(id)
-//	if !ok {
-//		return &types.ChallengeRemoveResult{Message: "Remove challenge failed"}
-//	}
-//	return &types.ChallengeRemoveResult{Message: ""}
-//}
-
+// ChallengeAction Handle 3 types of action : [ enable | disable | delete ]
 func (r *AdminMutationResolver) ChallengeAction(ctx context.Context, args struct{ Input types.ChallengeActionInput }) *types.ChallengeActionResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
@@ -116,7 +102,35 @@ func (r *AdminMutationResolver) ChallengeAction(ctx context.Context, args struct
 	if !input.CheckPass() {
 		return &types.ChallengeActionResult{Message: "action format error"}
 	}
-	// TODO:
+	// TODO: maybe need some binary flag to mark which challenge occurred error
+	if input.Action == "enable" {
+		var ok = true
+		for _, id := range input.ChallengeIds {
+			ok = ok && resolvers.EnableChallengeById(id)
+		}
+		if !ok {
+			return &types.ChallengeActionResult{Message: "enable challenges occurred some error "}
+		}
+	}
+	if input.Action == "disable" {
+		var ok = true
+		for _, id := range input.ChallengeIds {
+			ok = ok && resolvers.DisableChallengeById(id)
+		}
+		if !ok {
+			return &types.ChallengeActionResult{Message: "disable challenges occurred some error "}
+		}
+	}
+	if input.Action == "delete" {
+		var ok = true
+		for _, id := range input.ChallengeIds {
+			ok = ok && resolvers.DeleteChallenge(id)
+		}
+		if !ok {
+			return &types.ChallengeActionResult{Message: "delete challenges occurred some error "}
+		}
+	}
+
 	return &types.ChallengeActionResult{Message: ""}
 }
 
