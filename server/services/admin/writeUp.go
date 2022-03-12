@@ -128,12 +128,7 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 	//		return
 	//	}
 	//}(archive)
-	err = os.Chdir(configure.WriteUpPath)
-	if err != nil {
-		log.Panicln("DownloadWPByUserId change dir error: ", err)
-		return
-	}
-	filepath.Walk(".", func(path string, info fs.FileInfo, err error) error {
+	filepath.Walk(configure.WriteUpPath, func(path string, info fs.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -152,7 +147,7 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 			return err
 		}
 		header.Method = zip.Deflate
-		header.Name = file.Name()
+		header.Name = fileName
 		writer, err := archive.CreateHeader(header)
 		if err != nil {
 			return err
@@ -182,11 +177,6 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 	err = zipFile.Close()
 	if err != nil {
 		log.Panicln("DownloadWP: ", err)
-	}
-	err = os.Chdir("..")
-	if err != nil {
-		log.Panicln("DownloadWPByUserId change dir error: ", err)
-		return
 	}
 	zipFile, _ = os.Open(zipFileName)
 	defer func(zipFile *os.File) {
