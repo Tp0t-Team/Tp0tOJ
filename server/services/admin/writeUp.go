@@ -2,6 +2,7 @@ package admin
 
 import (
 	"archive/zip"
+	"bytes"
 	"io"
 	"io/fs"
 	"log"
@@ -16,14 +17,15 @@ import (
 )
 
 func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
-	//TODO: pack writeup folder and download
+	//pack writeup folder and download
 	var zipFileName = "WP.zip"
 	err := os.RemoveAll(zipFileName)
 	if err != nil {
 		log.Panicln("DownloadAllWP: ", err)
 		return
 	}
-	zipFile, _ := os.Create(zipFileName)
+	zipFile := bytes.Buffer{}
+	//zipFile, _ := os.Create(zipFileName)
 	//defer func(zipFile *os.File) {
 	//	err := zipFile.Close()
 	//	if err != nil {
@@ -32,7 +34,7 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 	//	}
 	//}(zipFile)
 
-	archive := zip.NewWriter(zipFile)
+	archive := zip.NewWriter(&zipFile)
 	//defer func(archive *zip.Writer) {
 	//	err := archive.Close()
 	//	if err != nil {
@@ -83,21 +85,21 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Panicln("DownloadAllWP: ", err)
 	}
-	err = zipFile.Close()
-	if err != nil {
-		log.Panicln("DownloadAllWP: ", err)
-	}
-	zipFile, _ = os.Open(zipFileName)
-	defer func(zipFile *os.File) {
-		err := zipFile.Close()
-		if err != nil {
-			log.Panicln("DownloadAllWP: ", err)
-			return
-		}
-	}(zipFile)
+	//err = zipFile.Close()
+	//if err != nil {
+	//	log.Panicln("DownloadAllWP: ", err)
+	//}
+	//zipFile, _ = os.Open(zipFileName)
+	//defer func(zipFile *os.File) {
+	//	err := zipFile.Close()
+	//	if err != nil {
+	//		log.Panicln("DownloadAllWP: ", err)
+	//		return
+	//	}
+	//}(zipFile)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	_, err = io.Copy(w, zipFile)
+	_, err = io.Copy(w, &zipFile)
 	if err != nil {
 		log.Panicln("DownloadAllWP: ", err)
 	}
@@ -111,7 +113,8 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 		log.Panicln("DownloadWP: ", err)
 		return
 	}
-	zipFile, _ := os.Create(zipFileName)
+	zipFile := bytes.Buffer{}
+	//zipFile, _ := os.Create(zipFileName)
 	//defer func(zipFile *os.File) {
 	//	err := zipFile.Close()
 	//	if err != nil {
@@ -120,7 +123,7 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 	//	}
 	//}(zipFile)
 
-	archive := zip.NewWriter(zipFile)
+	archive := zip.NewWriter(&zipFile)
 	//defer func(archive *zip.Writer) {
 	//	err := archive.Close()
 	//	if err != nil {
@@ -174,26 +177,26 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 	if err != nil {
 		log.Panicln("DownloadWP: ", err)
 	}
-	err = zipFile.Close()
-	if err != nil {
-		log.Panicln("DownloadWP: ", err)
-	}
-	zipFile, _ = os.Open(zipFileName)
-	defer func(zipFile *os.File) {
-		err := zipFile.Close()
-		if err != nil {
-			log.Panicln("DownloadWP: ", err)
-			return
-		}
-		err = os.RemoveAll(zipFileName)
-		if err != nil {
-			log.Println("remove ", zipFileName, " error: ", err)
-			return
-		}
-	}(zipFile)
+	//err = zipFile.Close()
+	//if err != nil {
+	//	log.Panicln("DownloadWP: ", err)
+	//}
+	//zipFile, _ = os.Open(zipFileName)
+	//defer func(zipFile *os.File) {
+	//	err := zipFile.Close()
+	//	if err != nil {
+	//		log.Panicln("DownloadWP: ", err)
+	//		return
+	//	}
+	//	err = os.RemoveAll(zipFileName)
+	//	if err != nil {
+	//		log.Println("remove ", zipFileName, " error: ", err)
+	//		return
+	//	}
+	//}(zipFile)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/octet-stream")
-	_, err = io.Copy(w, zipFile)
+	_, err = io.Copy(w, &zipFile)
 	if err != nil {
 		log.Panicln("DownloadWP: ", err)
 	}
