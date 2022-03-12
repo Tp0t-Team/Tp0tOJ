@@ -139,6 +139,7 @@ export default class Images extends Vue {
       await this.loadData();
       this.infoText = "success";
       this.hasInfo = true;
+      await this.loadData();
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
@@ -218,6 +219,7 @@ export default class Images extends Vue {
       this.loading = false;
       this.infoText = "delete success";
       this.hasInfo = true;
+      await this.loadData();
     } catch (e) {
       this.loading = false;
       this.infoText = e.toString();

@@ -14,7 +14,9 @@ import (
 	"server/entity"
 	"server/services/kube"
 	"server/services/types"
+	"server/utils/configure"
 	"strconv"
+	"strings"
 )
 
 func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
@@ -122,7 +124,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			for _, port := range node.ServicePorts {
 				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), port.External, port.Internal, port.Pod))
 			}
-			ok := kube.K8sPodAlloc(replicaId, node.Name, node.Image, ports, servicePorts, replica.Flag)
+			ok := kube.K8sPodAlloc(replicaId, node.Name, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+node.Image), ports, servicePorts, replica.Flag)
 			if !ok {
 				createPodSuccess = false
 				break
