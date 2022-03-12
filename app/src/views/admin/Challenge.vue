@@ -419,6 +419,7 @@ export default class Challenge extends Vue {
       if (res.errors) throw res.errors.map((v) => v.message).join(",");
       if (res.data!.challengeAction.message)
         throw res.data!.challengeAction.message;
+      this.selected = [];
       this.loading = false;
       this.changed = false;
       this.currentConfig = null;

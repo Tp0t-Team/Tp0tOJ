@@ -18,6 +18,7 @@
           <v-spacer></v-spacer>
           <v-switch
             v-model="dynamicScore"
+            hide-details
             label="DynamicScore"
             :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
@@ -30,6 +31,7 @@
           <v-spacer></v-spacer>
           <v-switch
             v-model="dynamicFlag"
+            hide-details
             label="DynamicFlag"
             :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
@@ -42,6 +44,7 @@
           <v-spacer></v-spacer>
           <v-switch
             v-model="singleton"
+            hide-details
             label="Singleton"
             :disabled="loading || disabled || config.challengeId[0] != '-'"
             @change="Changed"
@@ -54,6 +57,9 @@
           v-model="configFile"
           accept=".yaml, .yml"
           outlined
+          hide-details
+          prepend-icon=""
+          prepend-inner-icon="attach_file"
           label="load config file"
           :disabled="loading || disabled"
           @change="Changed"
@@ -65,6 +71,7 @@
         <v-text-field
           v-model="name"
           outlined
+          hide-details
           label="name"
           :disabled="loading || disabled"
           @change="Changed"
@@ -76,6 +83,7 @@
           v-model="type"
           :items="typeItems"
           outlined
+          hide-details
           label="type"
           :disabled="loading || disabled"
           @change="Changed"
@@ -87,6 +95,7 @@
         <v-text-field
           v-model="score"
           outlined
+          hide-details
           label="score"
           type="number"
           :disabled="loading || disabled"
@@ -97,6 +106,7 @@
         <v-text-field
           v-model="flag"
           outlined
+          hide-details
           label="flag"
           :disabled="loading || disabled"
           @change="Changed"
@@ -108,6 +118,7 @@
         <v-textarea
           v-model="description"
           outlined
+          hide-details
           label="description"
           :disabled="loading || disabled"
           @change="Changed"

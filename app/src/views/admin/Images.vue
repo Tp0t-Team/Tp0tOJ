@@ -38,35 +38,46 @@
     <v-btn fab absolute right bottom color="primary" @click="enterEdit">
       <v-icon>add</v-icon>
     </v-btn>
-    <v-dialog v-model="edit" width="400px">
-      <v-card width="400px" class="pa-4">
-        <v-form v-model="valid" ref="edit">
-          <v-row class="ma-4">
-            <div>Dockerfile Upload</div>
+    <v-dialog persistent v-model="edit" width="400px">
+      <v-card width="400px">
+        <v-form v-model="valid" ref="edit" class="ma-4">
+          <v-row>
+            <v-col cols="12">
+              <v-file-input
+                accept="application/x-tar"
+                v-model="file"
+                outlined
+                hide-details
+                prepend-icon=""
+                prepend-inner-icon="attach_file"
+                label="File Input"
+              ></v-file-input>
+            </v-col>
           </v-row>
-          <v-row class="pl-2">
-            <v-text-field
-              v-model="imageName"
-              outlined
-              label="Image Name"
-            ></v-text-field>
-          </v-row>
-          <v-row class="pl-2">
-            <v-text-field
-              v-model="platform"
-              outlined
-              label="Platform"
-            ></v-text-field>
-          </v-row>
-          <v-row class="pl-2">
-            <v-file-input
-              accept="application/x-tar"
-              label="File input"
-              v-model="file"
-            ></v-file-input>
-            <v-btn @click="upload">Upload</v-btn>
+          <v-row>
+            <v-col cols="6">
+              <v-text-field
+                v-model="imageName"
+                outlined
+                hide-details
+                label="Image Name"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="platform"
+                outlined
+                hide-details
+                label="Platform"
+              ></v-text-field>
+            </v-col>
           </v-row>
         </v-form>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text :disabled="uploadLoading" @click="edit = false">cancel</v-btn>
+        <v-btn text :loading="uploadLoading" :disabled="uploadLoading" color="primary" @click="upload">Upload</v-btn>
+      </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -94,6 +105,7 @@ export default class Images extends Vue {
   private edit: boolean = false;
 
   private loading: boolean = false;
+  private uploadLoading: boolean = false;
 
   private imageName: string = "";
   private platform: string = "";
@@ -107,7 +119,8 @@ export default class Images extends Vue {
   }
 
   async upload() {
-    this.edit = false;
+    // this.edit = false;
+    this.uploadLoading = true;
     try {
       const formData = new FormData();
       formData.set("name", this.imageName);
@@ -120,6 +133,9 @@ export default class Images extends Vue {
       if (res.status != 200) {
         throw res.statusText;
       }
+      this.imageName = "";
+      this.platform = "";
+      this.file = null;
       await this.loadData();
       this.infoText = "success";
       this.hasInfo = true;
@@ -127,6 +143,8 @@ export default class Images extends Vue {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
+    this.uploadLoading = false;
+    this.edit = false;
     return true;
   }
 
@@ -196,6 +214,7 @@ export default class Images extends Vue {
       });
       if (res.errors) throw res.errors.map((v) => v.message).join(",");
       if (res.data!.deleteImage.message) throw res.data!.deleteImage.message;
+      this.selected = [];
       this.loading = false;
       this.infoText = "delete success";
       this.hasInfo = true;
