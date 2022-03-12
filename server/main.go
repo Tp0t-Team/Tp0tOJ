@@ -20,7 +20,7 @@ func main() {
 	_, err := os.Stat(configure.WriteUpPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(configure.WriteUpPath, 600)
+			err := os.MkdirAll(configure.WriteUpPath, os.FileMode(0755))
 			if err != nil {
 				log.Panicln("writeup make dir error", err)
 			}
