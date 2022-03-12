@@ -3,9 +3,12 @@ package services
 import (
 	"context"
 	_ "embed"
+	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
+	"io/fs"
+	"log"
 	"net/http"
 	"server/services/admin"
 	"server/services/user"
@@ -23,6 +26,26 @@ type Resolver struct {
 var schemaStr string
 
 func init() {
+	muxRouter := mux.NewRouter()
+	if HasFrontEnd {
+		root, err := fs.Sub(staticFolder, "static")
+		if err != nil {
+			log.Panicln(err)
+		}
+		fileServer := http.FileServer(http.FS(root))
+		muxRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			fileServer.ServeHTTP(w, r)
+		})
+		indexFile, err := staticFolder.ReadFile("static/index.html")
+		if err != nil {
+			log.Panicln(err)
+		}
+		muxRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write(indexFile)
+		})
+	}
+
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
@@ -42,11 +65,11 @@ func init() {
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
-	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		graphqlHandle.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "session", session)))
 	})
-	http.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		if isLogin == nil || !*isLogin.(*bool) {
@@ -57,7 +80,7 @@ func init() {
 		userId := *session.Get("userId").(*uint64)
 		user.WriteUpHandle(w, r, userId)
 	})
-	http.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -75,7 +98,7 @@ func init() {
 		}
 		admin.DownloadWPByUserId(w, r, userId)
 	})
-	http.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -86,7 +109,7 @@ func init() {
 		}
 		admin.DownloadAllWP(w, r)
 	})
-	http.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -97,4 +120,5 @@ func init() {
 		}
 		admin.UploadImage(w, r)
 	})
+	http.Handle("/", muxRouter)
 }

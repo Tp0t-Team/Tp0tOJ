@@ -198,7 +198,7 @@ export default class ChallengeEditor extends Vue {
         // if (config.category != this.type) throw "不可修改类型";
         this.setValue = true;
         this.name = config.name || this.name;
-        this.type = config.type || this.type;
+        this.type = config.category || this.type;
         this.score = (config.score.baseScore as number) || this.score;
         this.flag = config.flag.value || this.flag;
         this.description = config.description || this.description;
