@@ -10,24 +10,51 @@
           :items="challengeConfigs"
           @click:row="select"
           show-select
+          :loading="loading"
           item-key="challengeId"
         >
           <template v-slot:body.append="{ headers }">
             <td :colspan="headers.length">
-              <div style="display: flex; flex-direction: row">
-                <div style="flex-basis: 25%">
-                  <v-btn text tile block color="primary" @click="newChallenge">new</v-btn>
+              <div class="action-group">
+                <div class="action-item">
+                  <v-btn
+                    text
+                    tile
+                    block
+                    color="primary"
+                    @click="newChallenge"
+                    :disabled="loading"
+                    >new</v-btn
+                  >
                 </div>
-                <div style="flex-basis: 25%">
-                  <v-btn text tile block :disabled="!enableAble">enable</v-btn>
+                <div class="action-item">
+                  <v-btn
+                    text
+                    tile
+                    block
+                    :disabled="!enableAble || loading"
+                    @click="challengeAction('enable')"
+                    >enable</v-btn
+                  >
                 </div>
-                <div style="flex-basis: 25%">
-                  <v-btn text tile block :disabled="!disableAble"
+                <div class="action-item">
+                  <v-btn
+                    text
+                    tile
+                    block
+                    :disabled="!disableAble || loading"
+                    @click="challengeAction('disable')"
                     >disable</v-btn
                   >
                 </div>
-                <div style="flex-basis: 25%">
-                  <v-btn text tile block color="accent" :disabled="selected.length == 0"
+                <div class="action-item">
+                  <v-btn
+                    text
+                    tile
+                    block
+                    color="accent"
+                    :disabled="selected.length == 0 || loading"
+                    @click="challengeAction('delete')"
                     >delete</v-btn
                   >
                 </div>
@@ -122,6 +149,8 @@ import {
   ChallengeConfigResult,
   ChallengeMutateResult,
   ChallengeMutateInput,
+  ChallengeActionResult,
+  ChallengeActionInput,
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
@@ -140,7 +169,7 @@ export default class Challenge extends Vue {
     // { text: '', value: 'data-table-expand' },
   ];
 
-  private selected: string[] = [];
+  private selected: ChallengeConfigWithId[] = [];
 
   private challengeType = constValue.challengeType;
 
@@ -157,6 +186,28 @@ export default class Challenge extends Vue {
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+  private enableAble: boolean = false;
+  private disableAble: boolean = false;
+
+  @Watch("challengeConfigs")
+  challengeConfigsChange() {
+    this.enableAble = false;
+    this.disableAble = false;
+    for (let id of this.selected) {
+      for (let config of this.challengeConfigs) {
+        if (config.challengeId == id) {
+          if (config.state == "disabled") {
+            this.enableAble = true;
+          }
+          if (config.state == "disabled") {
+            this.disableAble = true;
+          }
+          break;
+        }
+      }
+    }
+  }
 
   // private get challengeConfigFiltered() {
   //   return this.challengeType.map(v => ({
@@ -321,7 +372,9 @@ export default class Challenge extends Vue {
   continueChange() {
     this.showDiscardDialog = false;
     this.changed = false;
-    this.withoutInit = false;
+    if (this.tempConfig == null) {
+      this.withoutInit = true;
+    }
     this.currentConfig = this.tempConfig;
   }
 
@@ -335,6 +388,50 @@ export default class Challenge extends Vue {
     this.infoText = "功能暂未实现";
     this.hasInfo = true;
   }
+
+  async challengeAction(action: string) {
+    if (this.changed) {
+      this.showDiscardDialog = true;
+      this.tempConfig = null;
+      return;
+    }
+    this.loading = true;
+    try {
+      let res = await this.$apollo.mutate<
+        ChallengeActionResult,
+        { input: ChallengeActionInput }
+      >({
+        mutation: gql`
+          mutation ($input: ChallengeActionInput!) {
+            challengeAction(input: $input) {
+              message
+              successful
+            }
+          }
+        `,
+        variables: {
+          input: {
+            action: action,
+            challengeIds: this.selected.map((it) => it.challengeId),
+          },
+        },
+      });
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.data!.challengeAction.message)
+        throw res.data!.challengeAction.message;
+      this.loading = false;
+      this.changed = false;
+      this.currentConfig = null;
+      this.withoutInit = true;
+      this.infoText = `${action} success`;
+      this.hasInfo = true;
+      await this.loadAll();
+    } catch (e) {
+      this.loading = false;
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
 }
 </script>
 
@@ -342,5 +439,14 @@ export default class Challenge extends Vue {
 .content-col {
   height: calc(100vh - 120px);
   overflow-y: auto;
+}
+
+.action-group {
+  display: flex;
+  flex-direction: row;
+}
+
+.action-item {
+  flex-basis: 25%;
 }
 </style>
