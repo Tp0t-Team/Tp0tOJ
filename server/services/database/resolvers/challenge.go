@@ -219,53 +219,8 @@ func EnableChallengeById(challengeId string) bool {
 		log.Println("can't find challenge by challenge id", challengeId)
 		return false
 	}
-	var oldConfig types.ChallengeConfig
-	//we don't allow user to change singleton
-	err = json.Unmarshal([]byte(challenge.Configuration), &oldConfig)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	err = db.Transaction(func(tx *gorm.DB) error {
-		challenge.State = "enable"
-		tx.Save(&challenge)
-		ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-		if !ok {
-			return errors.New("delete replica error")
-		}
-
-		//set all submits unavailable,TODO: but need some rollback method?
-		submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
-		for _, submit := range submits {
-			submit.Available = false
-			tx.Save(&submit)
-		}
-		return nil
-	})
-	if err != nil {
-		log.Println("challenge remove error: ", err)
-		return false
-	}
-	err = utils.Cache.WarmUp()
-	if err != nil {
-		log.Println("warm up error:\n" + err.Error())
-		return false
-	}
-	return true
-}
-
-func DisableChallengeById(challengeId string) bool {
-	id, err := strconv.ParseUint(challengeId, 10, 64)
-	if err != nil {
-		return false
-	}
-	challenge, err := FindChallengeById(id)
-	if challenge == nil {
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println("can't find challenge by challenge id", challengeId)
-		return false
+	if challenge.State == "enabled" {
+		return true
 	}
 	var oldConfig types.ChallengeConfig
 	//we don't allow user to change singleton
@@ -275,8 +230,9 @@ func DisableChallengeById(challengeId string) bool {
 		return false
 	}
 	err = db.Transaction(func(tx *gorm.DB) error {
-		challenge.State = "enable"
+		challenge.State = "enabled"
 		tx.Save(&challenge)
+
 		if oldConfig.Singleton {
 			replica := AddReplica(challenge.ChallengeId, tx)
 			if replica == nil {
@@ -302,7 +258,58 @@ func DisableChallengeById(challengeId string) bool {
 		return nil
 	})
 	if err != nil {
-		log.Println("challenge remove error: ", err)
+		log.Println("challenge enable error: ", err)
+		return false
+	}
+	err = utils.Cache.WarmUp()
+	if err != nil {
+		log.Println("warm up error:\n" + err.Error())
+		return false
+	}
+	return true
+}
+
+func DisableChallengeById(challengeId string) bool {
+	id, err := strconv.ParseUint(challengeId, 10, 64)
+	if err != nil {
+		return false
+	}
+	challenge, err := FindChallengeById(id)
+	if challenge == nil {
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println("can't find challenge by challenge id", challengeId)
+		return false
+	}
+	if challenge.State == "disabled" {
+		return true
+	}
+	var oldConfig types.ChallengeConfig
+	//we don't allow user to change singleton
+	err = json.Unmarshal([]byte(challenge.Configuration), &oldConfig)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	err = db.Transaction(func(tx *gorm.DB) error {
+		challenge.State = "disabled"
+		tx.Save(&challenge)
+
+		ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+		if !ok {
+			return errors.New("delete replica error")
+		}
+		//set all submits unavailable,TODO: but need some rollback method?
+		submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
+		for _, submit := range submits {
+			submit.Available = false
+			tx.Save(&submit)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println("challenge disable error: ", err)
 		return false
 	}
 	err = utils.Cache.WarmUp()
