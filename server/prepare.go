@@ -331,11 +331,13 @@ func CreateDefaultConfig(masterIP string) {
 	}
 	newConfig := utils.Config{
 		Server: utils.Server{
-			Host:  "127.0.0.1",
-			Name:  "Tp0t",
-			Port:  8080,
-			Salt:  strconv.FormatInt(rd.Int63(), 10),
-			Debug: false,
+			Host:     "127.0.0.1",
+			Username: "Tp0t",
+			Password: "admin",
+			Mail:     "admin@example.com",
+			Port:     8080,
+			Salt:     strconv.FormatInt(rd.Int63(), 10),
+			Debug:    false,
 		},
 		Email: utils.Email{
 			Host:     "smtp.example.com",

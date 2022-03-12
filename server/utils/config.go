@@ -9,11 +9,13 @@ type Config struct {
 }
 
 type Server struct {
-	Host  string `yaml:"host"`
-	Name  string `yaml:"name"`
-	Port  int    `yaml:"port"`
-	Salt  string `yaml:"salt"`
-	Debug bool   `yaml:"debug"`
+	Host     string `yaml:"host"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Mail     string `yaml:"mail"`
+	Port     int    `yaml:"port"`
+	Salt     string `yaml:"salt"`
+	Debug    bool   `yaml:"debug"`
 }
 
 type Email struct {

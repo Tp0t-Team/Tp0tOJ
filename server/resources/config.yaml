@@ -1,6 +1,8 @@
 server:
   host: 127.0.0.1
-  name: Tp0t
+  username: Tp0t
+  password: qwertyuiop
+  mail: admin@example.com
   port: 8080
   salt: QWERTY
   debug: false
