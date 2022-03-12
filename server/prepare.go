@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"gopkg.in/yaml.v3"
 	"io"
 	"math/big"
 	rd "math/rand"
@@ -16,16 +17,62 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"time"
 )
 
 type ReleaseInfo struct {
 	TagName string `json:"tag_name"`
 }
+type Config struct {
+	Server     Server     `yaml:"server"`
+	Email      Email      `yaml:"email"`
+	Challenge  Challenge  `yaml:"challenge"`
+	Kubernetes Kubernetes `yaml:"kubernetes"`
+}
+
+type Server struct {
+	Host  string `yaml:"host"`
+	Name  string `yaml:"name"`
+	Port  int    `yaml:"port"`
+	Salt  string `yaml:"salt"`
+	Debug bool   `yaml:"debug"`
+}
+
+type Email struct {
+	Host     string `yaml:"host"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+type Challenge struct {
+	SecondBloodReward float64 `yaml:"secondBloodReward"`
+	ThirdBloodReward  float64 `yaml:"thirdBloodReward"`
+	HalfLife          int     `yaml:"halfLife"`
+	FirstBloodReward  float64 `yaml:"firstBloodReward"`
+}
+
+type Kubernetes struct {
+	PortAllocBegin int32  `yaml:"portAllocBegin"`
+	PortAllocEnd   int32  `yaml:"portAllocEnd"`
+	Username       string `yaml:"username"`
+	Password       string `yaml:"password"`
+	RegistryHost   string `yaml:"registryHost"`
+}
 
 func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
-
+	serverName := flag.String("Name", "Tp0tOJ", "server name but seems useless")
+	serverPort := flag.Int("Port", 8888, "backend server port")
+	salt := flag.String("Salt", "", "Salt to encrypt password, default is some random thing")
+	debug := flag.Bool("Debug", false, "debug mode")
+	emailServerHost := flag.String("MailHost", "smtp.163.com", "mail host, is you don't set this, your user will have no chance to reset or modify password")
+	emailUserName := flag.String("MailUser", "changeme", "mail server's username, is you don't set this, your user will have no chance to reset or modify password")
+	emailPassword := flag.String("MailPass", "changeme", "mail server's password, is you don't set this, your user will have no chance to reset or modify password")
+	firstBloodReward := flag.Float64("1stReward", 0.10, "this is the reward coefficient for FirstBlood winner")
+	secondBloodReward := flag.Float64("2ndReward", 0.08, "this is the reward coefficient for SecondBlood winner")
+	thirdBloodReward := flag.Float64("3thReward", 0.05, "this is the reward coefficient for ThirdBlood winner")
+	halfLife := flag.Uint("HalfLife", 20, "half life is the solved counter for the challenge score to reduce half of basic score")
+	//k8sEnable := flag.Bool("K8S", false, "choose this to generate default k8s config, AND REMEMBER TO MODIFY IT IN `resources` folder")
 	flag.Parse()
 
 	cmd := exec.Command("docker", "info")
@@ -185,7 +232,34 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: make default config.yaml
+	// make default config.yaml
+	err = os.MkdirAll("resources", 0755)
+	if err != nil {
+		return
+	}
+	configFile, err := os.Create("resources/config.yaml")
+	if err != nil {
+		return
+	}
+	if *salt == "" {
+		*salt = strconv.FormatInt(rd.Int63(), 10)
+	}
+
+	newConfig := Config{
+		Server:     Server{Host: "127.0.0.1", Name: *serverName, Port: *serverPort, Salt: *salt, Debug: *debug},
+		Email:      Email{Host: *emailServerHost, Username: *emailUserName, Password: *emailPassword},
+		Challenge:  Challenge{FirstBloodReward: *firstBloodReward, SecondBloodReward: *secondBloodReward, ThirdBloodReward: *thirdBloodReward, HalfLife: int(*halfLife)},
+		Kubernetes: Kubernetes{},
+	}
+	configData, err := yaml.Marshal(newConfig)
+	if err != nil {
+		return
+	}
+	_, err = configFile.Write(configData)
+	if err != nil {
+		return
+	}
+
 	// TODO: copy k3s.yaml
 	// TODO: generate agent node install script
 }
