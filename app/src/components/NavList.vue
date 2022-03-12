@@ -126,7 +126,7 @@
         <v-icon>upload_file</v-icon>
       </v-btn>
     </template>
-    <span v-if="this.$store.state.global.role=='admin'">Show Writeups</span>
+    <span v-if="this.$store.state.global.role=='member'">Show Writeups</span>
     <span v-else>Upload Writeup</span>
     <input type="file" class="file-input" ref="writeup" @change="uploadWriteup">
   </v-tooltip>

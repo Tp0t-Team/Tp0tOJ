@@ -8,8 +8,9 @@
               <v-btn
                 text
                 color="primary"
-                :href="`/wp?userId=${item.name}`"
+                :href="`/wp?userId=${item.userId}`"
                 target="_blank"
+                :download="`wp-${item.userId}.zip`"
               >
                 download
               </v-btn>

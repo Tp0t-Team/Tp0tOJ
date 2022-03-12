@@ -221,7 +221,7 @@ func GetWriteUpInfos() []types.WriteUpInfo {
 		}
 		solved = len(submits)
 		writeUpInfos = append(writeUpInfos, types.WriteUpInfo{
-			UserId: string(userId),
+			UserId: strconv.FormatUint(userId, 10),
 			Name:   user.Name,
 			Mail:   user.Mail,
 			Solved: int32(solved),
