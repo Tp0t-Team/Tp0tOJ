@@ -476,6 +476,13 @@ func ImgStatus() []gtypes.ImageInfo {
 	}
 	var ret []gtypes.ImageInfo
 	for _, repo := range repositories {
+		tags, err := registryClient.Tags(repo)
+		if err != nil {
+			return nil
+		}
+		if len(tags) == 0 {
+			continue
+		}
 		manifest, err := registryClient.ManifestV2(repo, "latest")
 		if err != nil {
 			log.Println(err)
