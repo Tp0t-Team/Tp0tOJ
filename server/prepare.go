@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	_ "embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -17,85 +18,148 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"server/utils"
 	"strconv"
+	"strings"
 	"time"
 )
+
+//go:embed unpack.sh
+var unpackShell string
 
 type ReleaseInfo struct {
 	TagName string `json:"tag_name"`
 }
-type Config struct {
-	Server     Server     `yaml:"server"`
-	Email      Email      `yaml:"email"`
-	Challenge  Challenge  `yaml:"challenge"`
-	Kubernetes Kubernetes `yaml:"kubernetes"`
+
+type K3sRegistryMirrorItem struct {
+	Endpoint []string `yaml:"endpoint"`
+}
+type K3sRegistryTLSConfigItem struct {
+	CAFile   string `yaml:"ca_file"`
+	CertFile string `yaml:"cert_file"`
+	KeyFile  string `yaml:"key_file"`
+}
+type K3sRegistryConfigItem struct {
+	TLS K3sRegistryTLSConfigItem `yaml:"tls"`
+}
+type K3sRegistry struct {
+	Mirrors map[string]K3sRegistryMirrorItem `yaml:"mirrors"`
+	Configs map[string]K3sRegistryConfigItem `yaml:"configs"`
 }
 
-type Server struct {
-	Host  string `yaml:"host"`
-	Name  string `yaml:"name"`
-	Port  int    `yaml:"port"`
-	Salt  string `yaml:"salt"`
-	Debug bool   `yaml:"debug"`
-}
-
-type Email struct {
-	Host     string `yaml:"host"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-}
-type Challenge struct {
-	SecondBloodReward float64 `yaml:"secondBloodReward"`
-	ThirdBloodReward  float64 `yaml:"thirdBloodReward"`
-	HalfLife          int     `yaml:"halfLife"`
-	FirstBloodReward  float64 `yaml:"firstBloodReward"`
-}
-
-type Kubernetes struct {
-	PortAllocBegin int32  `yaml:"portAllocBegin"`
-	PortAllocEnd   int32  `yaml:"portAllocEnd"`
-	Username       string `yaml:"username"`
-	Password       string `yaml:"password"`
-	RegistryHost   string `yaml:"registryHost"`
-}
-
-func main() {
-	masterIP := flag.String("MasterIP", "", "master ip")
-	serverName := flag.String("Name", "Tp0tOJ", "server name but seems useless")
-	serverPort := flag.Int("Port", 8888, "backend server port")
-	salt := flag.String("Salt", "", "Salt to encrypt password, default is some random thing")
-	debug := flag.Bool("Debug", false, "debug mode")
-	emailServerHost := flag.String("MailHost", "smtp.163.com", "mail host, is you don't set this, your user will have no chance to reset or modify password")
-	emailUserName := flag.String("MailUser", "changeme", "mail server's username, is you don't set this, your user will have no chance to reset or modify password")
-	emailPassword := flag.String("MailPass", "changeme", "mail server's password, is you don't set this, your user will have no chance to reset or modify password")
-	firstBloodReward := flag.Float64("1stReward", 0.10, "this is the reward coefficient for FirstBlood winner")
-	secondBloodReward := flag.Float64("2ndReward", 0.08, "this is the reward coefficient for SecondBlood winner")
-	thirdBloodReward := flag.Float64("3thReward", 0.05, "this is the reward coefficient for ThirdBlood winner")
-	halfLife := flag.Uint("HalfLife", 20, "half life is the solved counter for the challenge score to reduce half of basic score")
-	//k8sEnable := flag.Bool("K8S", false, "choose this to generate default k8s config, AND REMEMBER TO MODIFY IT IN `resources` folder")
-	flag.Parse()
-
-	cmd := exec.Command("docker", "info")
-	if err := cmd.Run(); err != nil {
-		fmt.Println("You need an available docker environment first.")
-		os.Exit(1)
+func sudoCopy(src string, dst string) error {
+	copyCmd := exec.Command("bash", "-c", fmt.Sprintf("sudo cp %s %s", src, dst))
+	err := copyCmd.Run()
+	if err != nil {
+		return err
 	}
-	if masterIP == nil || *masterIP == "" {
-		fmt.Println("You need give your MasterIP.")
+	return nil
+}
+
+func InstallK3S(masterIP string) {
+	_, err := os.Stat("resources/k3s.yaml")
+	if err == nil {
+		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	k3sRes, err := http.Get("http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh")
 	if err != nil {
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo sh -s - --node-ip %s --node-name %s", *masterIP, *masterIP))
+	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo sh -s - --node-external-ip %s --node-name %s", masterIP, masterIP))
 	k3sPipe, err := k3sInstall.StdinPipe()
 	if err != nil {
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	_, err = io.Copy(k3sPipe, k3sRes.Body)
 	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = k3sInstall.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = sudoCopy("/etc/rancher/k3s/k3s.yaml", "resources/k3s.yaml")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	chmodCmd := exec.Command("bash", "-c", "sudo chmod 0555 resources/k3s.yaml")
+	err = chmodCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func ConfigK3SRegistry(masterIP string) {
+	_, err := os.Stat("/etc/rancher/k3s/registries.yaml")
+	if err == nil {
 		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	registryHost := fmt.Sprintf("%s:5000", masterIP)
+	registries := K3sRegistry{
+		Mirrors: map[string]K3sRegistryMirrorItem{
+			registryHost: {Endpoint: []string{"https://" + registryHost}},
+		},
+		Configs: map[string]K3sRegistryConfigItem{
+			registryHost: {
+				TLS: K3sRegistryTLSConfigItem{
+					CAFile:   pwd + "/resources/ca.crt",
+					CertFile: pwd + "/resources/tls.crt",
+					KeyFile:  pwd + "/resources/tls.key",
+				},
+			},
+		},
+	}
+	registryFile, err := os.Create("registries-config.yaml")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	registryData, err := yaml.Marshal(registries)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = registryFile.Write(registryData)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = registryFile.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = sudoCopy("registries-config.yaml", "/etc/rancher/k3s/registries.yaml")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func DownloadBinary() {
+	_, err := os.Stat("OJ")
+	if err == nil {
+		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	releaseInfoRes, err := http.Get("https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest")
 	if err != nil {
@@ -144,13 +208,16 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
 
-	err = os.MkdirAll("resources", 0755)
-	if err != nil {
+func CreateCert() {
+	_, err := os.Stat("resources/tls.key")
+	if err == nil {
+		return
+	} else if err != os.ErrNotExist {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 	CACert := &x509.Certificate{
 		SerialNumber:          big.NewInt(rd.Int63()),
 		BasicConstraintsValid: true,
@@ -231,35 +298,184 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
 
-	// make default config.yaml
-	err = os.MkdirAll("resources", 0755)
-	if err != nil {
+func CreateDefaultConfig(masterIP string) {
+	_, err := os.Stat("resources/config.yaml")
+	if err == nil {
 		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	newConfig := utils.Config{
+		Server: utils.Server{
+			Host:  "127.0.0.1",
+			Name:  "Tp0t",
+			Port:  8080,
+			Salt:  strconv.FormatInt(rd.Int63(), 10),
+			Debug: false,
+		},
+		Email: utils.Email{
+			Host:     "smtp.example.com",
+			Username: "exampleUsername",
+			Password: "examplePassword",
+		},
+		Challenge: utils.Challenge{
+			FirstBloodReward:  0.10,
+			SecondBloodReward: 0.08,
+			ThirdBloodReward:  0.05,
+			HalfLife:          20,
+		},
+		Kubernetes: utils.Kubernetes{
+			PortAllocBegin: 30000,
+			PortAllocEnd:   40000,
+			Username:       "", // TODO:
+			Password:       "", // TODO:
+			RegistryHost:   fmt.Sprintf("%s:5000", masterIP),
+		},
 	}
 	configFile, err := os.Create("resources/config.yaml")
 	if err != nil {
-		return
-	}
-	if *salt == "" {
-		*salt = strconv.FormatInt(rd.Int63(), 10)
-	}
-
-	newConfig := Config{
-		Server:     Server{Host: "127.0.0.1", Name: *serverName, Port: *serverPort, Salt: *salt, Debug: *debug},
-		Email:      Email{Host: *emailServerHost, Username: *emailUserName, Password: *emailPassword},
-		Challenge:  Challenge{FirstBloodReward: *firstBloodReward, SecondBloodReward: *secondBloodReward, ThirdBloodReward: *thirdBloodReward, HalfLife: int(*halfLife)},
-		Kubernetes: Kubernetes{},
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	configData, err := yaml.Marshal(newConfig)
 	if err != nil {
-		return
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	_, err = configFile.Write(configData)
 	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = configFile.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func GenerateAgentScript(masterIP string) {
+	_, err := os.Stat("agent-install.sh")
+	if err == nil {
 		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	tokenData := bytes.Buffer{}
+	readCmd := exec.Command("bash", "-c", "sudo cat /var/lib/rancher/k3s/server/node-token")
+	tokenPipe, err := readCmd.StdoutPipe()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = readCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = io.Copy(&tokenData, tokenPipe)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	token := strings.TrimSpace(string(tokenData.Bytes()))
+	k3sCmdSting := fmt.Sprintf("curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1\n", masterIP, token)
+
+	file, err := os.Create("agent-install.sh")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = file.Write([]byte(unpackShell))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = file.Write([]byte(k3sCmdSting))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = file.Write([]byte("sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\nrm registries-config.yaml\nexit 0\n"))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = file.Write([]byte("__CONFIG_BELOW__\n"))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	configFile, err := os.Open("registries-config.yaml")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = io.Copy(file, configFile)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = configFile.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = file.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = os.Chmod("agent-install.sh", 0755)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func main() {
+	masterIP := flag.String("MasterIP", "", "master ip")
+
+	flag.Parse()
+
+	cmd := exec.Command("docker", "info")
+	if err := cmd.Run(); err != nil {
+		fmt.Println("You need an available docker environment first.")
+		os.Exit(1)
+	}
+	if masterIP == nil || *masterIP == "" {
+		fmt.Println("You need give your MasterIP.")
+		os.Exit(1)
+	}
+	if _, err := os.Stat("resources"); err == os.ErrNotExist {
+		err = os.MkdirAll("resources", 0755)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 
-	// TODO: copy k3s.yaml
-	// TODO: generate agent node install script
+	InstallK3S(*masterIP)
+	CreateCert()
+	ConfigK3SRegistry(*masterIP)
+	DownloadBinary()
+	CreateDefaultConfig(*masterIP)
+	GenerateAgentScript(*masterIP)
+
+	// TODO: start docker registry
+
+	if err := os.Remove("registries.yaml"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Congratulations! Environment prepare success.\n" +
+		"You can start the platform use: `./OJ`\n" +
+		"You can easily Add more agent machine by using agent-install.sh\n" +
+		"For example, on the agent machine run:\n" +
+		"    ./agent-install.sh <ip of agent machine>")
 }
