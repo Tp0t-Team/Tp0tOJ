@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/tar"
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
@@ -106,7 +107,27 @@ func ConfigK3SRegistry(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	mkdirCmd := exec.Command("bash", "-c", "sudo mkdir /etc/rancher/k3s/OJRegistry")
+	err = mkdirCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = sudoCopy("resources/ca.crt", " /etc/rancher/k3s/OJRegistry/ca.crt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = sudoCopy("resources/tls.crt", " /etc/rancher/k3s/OJRegistry/tls.crt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = sudoCopy("resources/tls.key", " /etc/rancher/k3s/OJRegistry/tls.key")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -119,9 +140,9 @@ func ConfigK3SRegistry(masterIP string) {
 		Configs: map[string]K3sRegistryConfigItem{
 			registryHost: {
 				TLS: K3sRegistryTLSConfigItem{
-					CAFile:   pwd + "/resources/ca.crt",
-					CertFile: pwd + "/resources/tls.crt",
-					KeyFile:  pwd + "/resources/tls.key",
+					CAFile:   "/etc/rancher/k3s/OJRegistry/ca.crt",
+					CertFile: "/etc/rancher/k3s/OJRegistry/tls.crt",
+					KeyFile:  "/etc/rancher/k3s/OJRegistry/tls.key",
 				},
 			},
 		},
@@ -357,6 +378,35 @@ func CreateDefaultConfig(masterIP string) {
 	}
 }
 
+func TarAddFile(file string, archiveFile string, tarArchive *tar.Writer) error {
+	configInfo, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+	configHeader, err := tar.FileInfoHeader(configInfo, "")
+	if err != nil {
+		return err
+	}
+	configHeader.Name = archiveFile
+	err = tarArchive.WriteHeader(configHeader)
+	if err != nil {
+		return err
+	}
+	configFile, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(tarArchive, configFile)
+	if err != nil {
+		return err
+	}
+	err = configFile.Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GenerateAgentScript(masterIP string) {
 	_, err := os.Stat("agent-install.sh")
 	if err == nil {
@@ -400,27 +450,51 @@ func GenerateAgentScript(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = file.Write([]byte("sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\nrm registries-config.yaml\nexit 0\n"))
+	cmdBlock := "sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\n" +
+		"sudo cp -r OJRegistry /etc/rancher/k3s\n" +
+		"rm registries-config.yaml\n" +
+		"rm -r OJRegistry\n" +
+		"exit 0\n"
+	_, err = file.Write([]byte(cmdBlock))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = file.Write([]byte("__CONFIG_BELOW__\n"))
+	_, err = file.Write([]byte("__ARCHIVE_BELOW__\n"))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	configFile, err := os.Open("registries-config.yaml")
+
+	tarBuffer := bytes.Buffer{}
+	tarArchive := tar.NewWriter(&tarBuffer)
+	err = TarAddFile("registries-config.yaml", "registries-config.yaml", tarArchive)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = io.Copy(file, configFile)
+	err = TarAddFile("resources/ca.crt", "OJRegistry/ca.crt", tarArchive)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	err = configFile.Close()
+	err = TarAddFile("resources/tls.crt", "OJRegistry/tls.crt", tarArchive)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = TarAddFile("resources/tls.key", "OJRegistry/tls.key", tarArchive)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = tarArchive.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	_, err = io.Copy(file, &tarBuffer)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
