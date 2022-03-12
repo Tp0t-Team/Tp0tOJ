@@ -92,6 +92,13 @@
             <v-list-item-title>Cluster</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item
+          @click="$router.push({path:'/admin/writeup',query:{time:Date.now().toLocaleString()}})"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Writeup</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
       <v-divider></v-divider>
     </div>
@@ -108,7 +115,7 @@
       </v-list-item>
     </v-list-item-group>
   </v-list>
-  <v-tooltip top v-if="isLogin">
+  <v-tooltip top v-if="$store.state.global.role=='user'">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
         text
@@ -172,10 +179,6 @@ export default class NavList extends Vue {
   }
 
   writeupClick() {
-    if(this.$store.state.global.role=='admin') {
-      this.$router.push('/admin/writeup');
-      return;
-    }
     (this.$refs.writeup! as any).click();
   }
 

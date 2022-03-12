@@ -3,7 +3,18 @@
     <v-row>
       <v-spacer></v-spacer>
       <v-col cols="8">
-        <v-data-table :headers="headers" :items="writeups" @click:row="select"></v-data-table>
+        <v-data-table :headers="headers" :items="writeups">
+            <template v-slot:item.download="{ item }">
+              <v-btn
+                text
+                color="primary"
+                :href="`/wp?userId=${item.name}`"
+                target="_blank"
+              >
+                download
+              </v-btn>
+            </template>
+        </v-data-table>
       </v-col>
       <v-spacer></v-spacer>
     </v-row>
@@ -42,7 +53,8 @@ export default class Images extends Vue {
   private headers = [
     { text: "name", value: "name" },
     { text: "mail", value: "mail" },
-    { text: "solved", value: "solved" }
+    { text: "solved", value: "solved" },
+    { text: "", value: "download" },
   ];
 
   private writeups: WriteUpInfo[] = [];
