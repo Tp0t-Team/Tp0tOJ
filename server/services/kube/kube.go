@@ -303,8 +303,50 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 	return true
 }
 
-func K8sPodStatus() {
-
+func K8sStatus() ([]gtypes.ClusterNodeInfo, []gtypes.ClusterReplicaInfo) {
+	nodeList, err := clientSet.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, nil
+	}
+	var nodeInfos []gtypes.ClusterNodeInfo
+	for _, node := range nodeList.Items {
+		ready := false
+		for _, cond := range node.Status.Conditions {
+			if cond.Type == corev1.NodeReady {
+				if cond.Status == corev1.ConditionTrue {
+					ready = true
+				}
+				break
+			}
+		}
+		if !ready {
+			continue
+		}
+		nodeInfos = append(nodeInfos, gtypes.ClusterNodeInfo{
+			Name:         node.Name,
+			OsType:       node.Status.NodeInfo.OperatingSystem,
+			Distribution: node.Status.NodeInfo.OSImage,
+			Kernel:       node.Status.NodeInfo.KernelVersion,
+			Arch:         node.Status.NodeInfo.Architecture,
+		})
+	}
+	var deploymentInfos []gtypes.ClusterReplicaInfo
+	deploymentList, err := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, nil
+	}
+	for _, deployment := range deploymentList.Items {
+		status := "not ready"
+		if deployment.Status.ReadyReplicas > 0 {
+			status = "ready"
+		}
+		deploymentInfos = append(deploymentInfos, gtypes.ClusterReplicaInfo{
+			Name:   deployment.Name,
+			Node:   deployment.Spec.Template.Spec.NodeName,
+			Status: status,
+		})
+	}
+	return nodeInfos, deploymentInfos
 }
 
 func K8sServiceGetUrls(replicaId uint64, containerName string) []string {

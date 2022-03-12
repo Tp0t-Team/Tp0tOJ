@@ -128,6 +128,10 @@ func (r *AdminQueryResolver) ClusterInfo(ctx context.Context) *types.ClusterInfo
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.ClusterInfoResult{Message: "forbidden or login timeout"}
 	}
-	// TODO:
-	return nil
+	nodeInfos, replicaInfos := kube.K8sStatus()
+	return &types.ClusterInfoResult{
+		Message:  "",
+		Nodes:    nodeInfos,
+		Replicas: replicaInfos,
+	}
 }

@@ -2,10 +2,10 @@
   <div>
     <v-container fill-width>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="7">
           <v-data-table :headers="nodeHeaders" :items="nodes"></v-data-table>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="5">
           <v-data-table :headers="replicaHeaders" :items="replicas"></v-data-table>
         </v-col>
       </v-row>
@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { ImageInfo, ImageInfoResult, Result } from "@/struct";
+import { ClusterInfoResult, ClusterNodeInfo, ClusterReplicaInfo, ImageInfo, ImageInfoResult, Result } from "@/struct";
 
 @Component
 export default class Cluster extends Vue {
@@ -43,12 +43,48 @@ export default class Cluster extends Vue {
     { text: "status", value: "status" },
   ];
 
-//   private nodes: ImageInfo[] = [];
+  private nodes: ClusterNodeInfo[] = [];
+  private replicas: ClusterReplicaInfo[] = [];
 
   private infoText: string = "";
   private hasInfo: boolean = false;
 
   async mounted() {
+    await this.loadData();
+  }
+
+  async loadData() {
+    try {
+      let res = await this.$apollo.query<ClusterInfoResult, {}>({
+        query: gql`
+          query {
+            clusterInfo {
+              message
+              nodes {
+                name
+                osType
+                distribution
+                kernel
+                arch
+              }
+              replicas {
+                name
+                node
+                status
+              }
+            }
+          }
+        `,
+        fetchPolicy: "no-cache",
+      });
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.data!.clusterInfo.message) throw res.data!.clusterInfo.message;
+      this.nodes = res.data!.clusterInfo.nodes;
+      this.replicas = res.data!.clusterInfo.replicas;
+    } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 }
 </script>
