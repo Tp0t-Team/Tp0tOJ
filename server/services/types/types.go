@@ -469,3 +469,20 @@ type ClusterInfoResult struct {
 	Nodes    []ClusterNodeInfo
 	Replicas []ClusterReplicaInfo
 }
+
+type ChallengeActionInput struct {
+	Action       string
+	ChallengeIds []string
+}
+
+func (input *ChallengeActionInput) CheckPass() bool {
+	if input.Action != "enable" && input.Action != "disable" && input.Action != "delete" {
+		return false
+	}
+	return true
+}
+
+type ChallengeActionResult struct {
+	Message    string
+	Successful []string
+}

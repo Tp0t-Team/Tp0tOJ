@@ -1,8 +1,47 @@
 <template>
   <v-container fluid class="fill-height">
     <v-row class="fill-height">
+      <v-spacer></v-spacer>
       <v-col cols="6" class="content-col">
-        <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.category">
+        <!-- show-expand item-key="challengeId" single-expand -->
+        <v-data-table
+          v-model="selected"
+          :headers="headers"
+          :items="challengeConfigs"
+          @click:row="select"
+          show-select
+          item-key="challengeId"
+        >
+          <template v-slot:body.append="{ headers }">
+            <td :colspan="headers.length">
+              <div style="display: flex; flex-direction: row">
+                <div style="flex-basis: 25%">
+                  <v-btn text tile block color="primary" @click="newChallenge">new</v-btn>
+                </div>
+                <div style="flex-basis: 25%">
+                  <v-btn text tile block :disabled="!enableAble">enable</v-btn>
+                </div>
+                <div style="flex-basis: 25%">
+                  <v-btn text tile block :disabled="!disableAble"
+                    >disable</v-btn
+                  >
+                </div>
+                <div style="flex-basis: 25%">
+                  <v-btn text tile block color="accent" :disabled="selected.length == 0"
+                    >delete</v-btn
+                  >
+                </div>
+              </div>
+            </td>
+          </template>
+          <template v-slot:item.category="{ item }">
+            {{ item.config.category }}
+          </template>
+          <template v-slot:item.baseScore="{ item }">
+            {{ item.config.score.baseScore }}
+          </template>
+        </v-data-table>
+        <!-- <v-card class="ma-4" v-for="item in challengeConfigFiltered" :key="item.category">
           <v-toolbar dense>{{item.category}}</v-toolbar>
           <v-list dense>
             <v-list-item
@@ -26,14 +65,14 @@
               </v-layout>
             </v-list-item>
           </v-list>
-        </v-card>
+        </v-card> -->
       </v-col>
       <v-dialog v-model="showDiscardDialog" width="300px">
         <v-card>
           <v-card-title>Are you sure to discard changes?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text @click="showDiscardDialog=false">cancel</v-btn>
+            <v-btn text @click="showDiscardDialog = false">cancel</v-btn>
             <v-btn text color="primary" @click="continueChange">sure</v-btn>
           </v-card-actions>
         </v-card>
@@ -43,7 +82,7 @@
           <v-card-title>Are you sure to delete this challenge?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text @click="showDeleteDialog=false">cancel</v-btn>
+            <v-btn text @click="showDeleteDialog = false">cancel</v-btn>
             <v-btn text color="primary" @click="deleteConfig">accept</v-btn>
           </v-card-actions>
         </v-card>
@@ -57,9 +96,10 @@
           @error="error"
           @change="Changed"
           @submit="submit"
-          :key="currentConfig && currentConfig.challengeId || ''"
+          :key="(currentConfig && currentConfig.challengeId) || ''"
         ></challenge-editor>
       </v-col>
+      <v-spacer></v-spacer>
     </v-row>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
@@ -81,17 +121,27 @@ import {
   ChallengeConfigWithId,
   ChallengeConfigResult,
   ChallengeMutateResult,
-  ChallengeMutateInput
+  ChallengeMutateInput,
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
 
 @Component({
   components: {
-    ChallengeEditor
-  }
+    ChallengeEditor,
+  },
 })
 export default class Challenge extends Vue {
+  private headers = [
+    { text: "name", value: "name" },
+    { text: "category", value: "category" },
+    { text: "base score", value: "baseScore" },
+    { text: "state", value: "state" },
+    // { text: '', value: 'data-table-expand' },
+  ];
+
+  private selected: string[] = [];
+
   private challengeType = constValue.challengeType;
 
   private showDiscardDialog: boolean = false;
@@ -108,12 +158,12 @@ export default class Challenge extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private get challengeConfigFiltered() {
-    return this.challengeType.map(v => ({
-      category: v,
-      items: this.challengeConfigs.filter(c => c.config.category == v)
-    }));
-  }
+  // private get challengeConfigFiltered() {
+  //   return this.challengeType.map(v => ({
+  //     category: v,
+  //     items: this.challengeConfigs.filter(c => c.config.category == v)
+  //   }));
+  // }
 
   async mounted() {
     await this.loadAll();
@@ -163,9 +213,9 @@ export default class Challenge extends Vue {
             }
           }
         `,
-        fetchPolicy: "no-cache"
+        fetchPolicy: "no-cache",
       });
-      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
       if (res.data!.challengeConfigs.message)
         throw res.data!.challengeConfigs.message;
       this.challengeConfigs = res.data!.challengeConfigs.challengeConfigs;
@@ -186,7 +236,9 @@ export default class Challenge extends Vue {
 
   async submit(config: ChallengeConfigWithId) {
     this.loading = true;
-    let tempConfig : ChallengeMutateInput = JSON.parse(JSON.stringify(config.config));
+    let tempConfig: ChallengeMutateInput = JSON.parse(
+      JSON.stringify(config.config)
+    );
     tempConfig.challengeId =
       config.challengeId[0] == "-" ? "" : config.challengeId;
     tempConfig.name = config.name;
@@ -197,15 +249,15 @@ export default class Challenge extends Vue {
         { input: ChallengeMutateInput }
       >({
         mutation: gql`
-          mutation($input: ChallengeMutateInput!) {
+          mutation ($input: ChallengeMutateInput!) {
             challengeMutate(input: $input) {
               message
             }
           }
         `,
-        variables: { input: tempConfig }
+        variables: { input: tempConfig },
       });
-      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
       if (res.data!.challengeMutate.message)
         throw res.data!.challengeMutate.message;
       this.loading = false;
@@ -222,8 +274,12 @@ export default class Challenge extends Vue {
     }
   }
 
+  select(challenge: ChallengeConfigWithId) {
+    this.editChallenge(challenge.challengeId);
+  }
+
   editChallenge(id: string) {
-    let config = this.challengeConfigs.find(v => v.challengeId == id);
+    let config = this.challengeConfigs.find((v) => v.challengeId == id);
     if (!config) return;
     if (this.changed) {
       this.tempConfig = config;
@@ -235,20 +291,22 @@ export default class Challenge extends Vue {
     }
   }
 
-  newChallenge(type: string) {
+  // newChallenge(type: string) {
+  newChallenge() {
     let config: ChallengeConfigWithId = {
       challengeId: "-" + Date.now().toLocaleString(),
       name: "",
       state: "disabled",
       config: {
-          category: type,
-          score: { dynamic: false, baseScore: "0" },
-          flag: { dynamic: false, value: "" },
-          description: "",
-          externalLink: [],
-          singleton: true,
-          nodeConfig: undefined
-        }
+        // category: type,
+        category: "",
+        score: { dynamic: false, baseScore: "0" },
+        flag: { dynamic: false, value: "" },
+        description: "",
+        externalLink: [],
+        singleton: true,
+        nodeConfig: undefined,
+      },
     };
     if (this.changed) {
       this.tempConfig = config;

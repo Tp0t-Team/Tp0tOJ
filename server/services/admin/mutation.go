@@ -90,19 +90,34 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 	return &types.ChallengeMutateResult{Message: ""}
 }
 
-func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct{ Input string }) *types.ChallengeRemoveResult {
-	id := args.Input
+//func (r *AdminMutationResolver) ChallengeRemove(ctx context.Context, args struct{ Input string }) *types.ChallengeRemoveResult {
+//	id := args.Input
+//	session := ctx.Value("session").(*sessions.Session)
+//	isLogin := session.Get("isLogin")
+//	isAdmin := session.Get("isAdmin")
+//	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+//		return &types.ChallengeRemoveResult{Message: "forbidden or login timeout"}
+//	}
+//	ok := resolvers.DeleteChallenge(id)
+//	if !ok {
+//		return &types.ChallengeRemoveResult{Message: "Remove challenge failed"}
+//	}
+//	return &types.ChallengeRemoveResult{Message: ""}
+//}
+
+func (r *AdminMutationResolver) ChallengeAction(ctx context.Context, args struct{ Input types.ChallengeActionInput }) *types.ChallengeActionResult {
+	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeRemoveResult{Message: "forbidden or login timeout"}
+		return &types.ChallengeActionResult{Message: "forbidden or login timeout"}
 	}
-	ok := resolvers.DeleteChallenge(id)
-	if !ok {
-		return &types.ChallengeRemoveResult{Message: "Remove challenge failed"}
+	if !input.CheckPass() {
+		return &types.ChallengeActionResult{Message: "action format error"}
 	}
-	return &types.ChallengeRemoveResult{Message: ""}
+	// TODO:
+	return &types.ChallengeActionResult{Message: ""}
 }
 
 func (r *AdminMutationResolver) WarmUp() (bool, error) {

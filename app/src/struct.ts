@@ -259,3 +259,10 @@ export interface ClusterReplicaInfo {
 }
 
 export type ClusterInfoResult = { clusterInfo: { nodes: ClusterNodeInfo[], replicas: ClusterReplicaInfo[] } & Result }
+
+export interface ChallengeActionInput {
+    action: string
+    challengeIds: string[]
+}
+
+export type ChallengeActionResult = { challengeAction: { successful: string[] } & Result }

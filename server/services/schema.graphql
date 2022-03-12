@@ -16,7 +16,8 @@ type Mutation {
     bulletinPub(input: BulletinPubInput!) :BulletinPubResult!
     userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
-    challengeRemove(input: String!): ChallengeRemoveResult!
+#    challengeRemove(input: String!): ChallengeRemoveResult!
+    challengeAction(input: ChallengeActionInput!): ChallengeActionResult!
     warmUp: Boolean!
     startReplica(input: String!): StartReplicaResult!
     deleteImage(input: String!): DeleteImageResult!
@@ -363,4 +364,14 @@ type ClusterInfoResult {
     message: String!
     nodes: [ClusterNodeInfo!]!
     replicas: [ClusterReplicaInfo!]!
+}
+
+input ChallengeActionInput {
+    action: String!
+    challengeIds: [String!]!
+}
+
+type ChallengeActionResult {
+    message: String!
+    successful: [String!]!
 }

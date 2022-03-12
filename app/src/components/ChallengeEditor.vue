@@ -1,7 +1,7 @@
 <template>
   <v-form>
     <v-row>
-      <v-col cols="4">
+      <!-- <v-col cols="4">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -12,7 +12,7 @@
           ></v-switch>
           <v-spacer></v-spacer>
         </v-row>
-      </v-col>
+      </v-col> -->
       <v-col cols="4">
         <v-row>
           <v-spacer></v-spacer>
@@ -49,7 +49,7 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="8">
+      <v-col cols="12">
         <v-file-input
           v-model="configFile"
           accept=".yaml, .yml"
@@ -71,7 +71,15 @@
         ></v-text-field>
       </v-col>
       <v-col cols="6">
-        <v-text-field v-model="type" outlined label="type" readonly value="web" :disabled="loading"></v-text-field>
+        <!-- <v-text-field v-model="type" outlined label="type" readonly value="web" :disabled="loading"></v-text-field> -->
+        <v-select
+          v-model="type"
+          :items="typeItems"
+          outlined
+          label="type"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-select>
       </v-col>
     </v-row>
     <v-row>
@@ -155,6 +163,8 @@ import constValue from "@/constValue";
 export default class ChallengeEditor extends Vue {
   private challengeType = constValue.challengeType;
 
+  private typeItems = constValue.challengeType;
+
   @Prop() config!: ChallengeConfigWithId | null;
   @Prop() disabled!: boolean;
   @Prop() loading!: boolean;
@@ -185,9 +195,10 @@ export default class ChallengeEditor extends Vue {
         let config: ChallengeConfig &{name: string} = loadYaml(e.target!.result as string);
         if (this.challengeType.findIndex(v => v == config.category) < 0)
           throw "类型错误";
-        if (config.category != this.type) throw "不可修改类型";
+        // if (config.category != this.type) throw "不可修改类型";
         this.setValue = true;
         this.name = config.name || this.name;
+        this.type = config.type || this.type;
         this.score = (config.score.baseScore as number) || this.score;
         this.flag = config.flag.value || this.flag;
         this.description = config.description || this.description;
