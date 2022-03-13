@@ -58,6 +58,8 @@
 
 - [x] 单用户全局唯一replic
 
+- [ ] 启动脚本 Docker registry 添加允许删除镜像（manifests）配置
+
 ```c
 //maybe :为空则username匹配`https://avatar.sourcegcdn.com/gh/<github name>`
 ```
