@@ -535,7 +535,7 @@ func StartRegistry(masterIP string, registryUsername string, registryPassword st
 	}
 
 	htpasswdCmd := exec.Command("docker", "run", "--rm", "--entrypoint", "htpasswd", "httpd:alpine", "-Bbn", registryUsername, registryPassword)
-	err := htpasswdCmd.Run()
+	err = htpasswdCmd.Run()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
