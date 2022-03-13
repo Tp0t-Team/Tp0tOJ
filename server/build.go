@@ -85,7 +85,19 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
-	serverCmd := exec.Command("go", "build", "-tags", "WithFrontEnd", "main.go", "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH))
+	goModCmd := exec.Command("go", "mod", "download")
+	log.Println("prepare go mod...")
+	err = goModCmd.Run()
+	if err != nil {
+		log.Panicln(err)
+	}
+	goModTidyCmd := exec.Command("go", "mod", "tidy")
+	err = goModTidyCmd.Run()
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	serverCmd := exec.Command("go", "build", "-tags", "WithFrontEnd", "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH), "main.go")
 	log.Println("build server...")
 	err = serverCmd.Run()
 	if err != nil {

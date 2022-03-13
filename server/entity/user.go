@@ -28,6 +28,6 @@ func (t User) MakeAvatarUrl() string {
 		log.Fatalln("Can not calculate MD5 for making AvatarUrl")
 		return "https://cravatar.cn/avatar/"
 	}
-	result := fmt.Sprintf("https://cravatar.cn/avatar/%x?d=404", hash.Sum(nil))
+	result := fmt.Sprintf("https://cravatar.cn/avatar/%02x?d=404", hash.Sum(nil))
 	return result
 }

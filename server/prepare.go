@@ -3,11 +3,13 @@ package main
 import (
 	"archive/tar"
 	"bytes"
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	_ "embed"
+	"encoding/asn1"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -231,7 +233,7 @@ func DownloadBinary() {
 	}
 }
 
-func CreateCert() {
+func CreateCert(masterIP string) {
 	_, err := os.Stat("resources/tls.key")
 	if err == nil {
 		return
@@ -239,6 +241,12 @@ func CreateCert() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	extSubjectAltName := pkix.Extension{}
+	extSubjectAltName.Id = asn1.ObjectIdentifier{2, 5, 29, 17}
+	extSubjectAltName.Critical = false
+	extSubjectAltName.Value = []byte(fmt.Sprintf("IP:%s", masterIP))
+
 	CACert := &x509.Certificate{
 		SerialNumber:          big.NewInt(rd.Int63()),
 		BasicConstraintsValid: true,
@@ -249,6 +257,7 @@ func CreateCert() {
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature,
 		EmailAddresses:        []string{},
+		ExtraExtensions:       []pkix.Extension{extSubjectAltName},
 	}
 	Cert := &x509.Certificate{
 		SerialNumber:          big.NewInt(rd.Int63()),
@@ -260,6 +269,7 @@ func CreateCert() {
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature,
 		EmailAddresses:        []string{},
+		ExtraExtensions:       []pkix.Extension{extSubjectAltName},
 	}
 	Key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -321,7 +331,7 @@ func CreateCert() {
 	}
 }
 
-func CreateDefaultConfig(masterIP string) {
+func CreateDefaultConfig(masterIP string, registryUsername string, registryPassword string) {
 	_, err := os.Stat("resources/config.yaml")
 	if err == nil {
 		return
@@ -353,8 +363,8 @@ func CreateDefaultConfig(masterIP string) {
 		Kubernetes: utils.Kubernetes{
 			PortAllocBegin: 30000,
 			PortAllocEnd:   40000,
-			Username:       "", // TODO:
-			Password:       "", // TODO:
+			Username:       registryUsername,
+			Password:       registryPassword,
 			RegistryHost:   fmt.Sprintf("%s:5000", masterIP),
 		},
 	}
@@ -513,6 +523,131 @@ func GenerateAgentScript(masterIP string) {
 	}
 }
 
+const RegistryConfigPath = "/opt/docker-registry" // TODO:
+
+func StartRegistry(masterIP string, registryUsername string, registryPassword string) {
+	_, err := os.Stat(fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
+	if err == nil {
+		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	htpasswdCmd := exec.Command("docker", "run", "--rm", "--entrypoint", "htpasswd", "httpd:alpine", "-Bbn", registryUsername, registryPassword)
+	err := htpasswdCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	pipe, err := htpasswdCmd.StdoutPipe()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = os.MkdirAll(RegistryConfigPath+"/auth", 0755)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	passwdFile, err := os.Create(RegistryConfigPath + "/auth/htpasswd")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = io.Copy(passwdFile, pipe)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = passwdFile.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = os.MkdirAll(RegistryConfigPath+"/certs", 0755)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	src, err := os.Open("resources/tls.key")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	dst, err := os.Create(RegistryConfigPath + "/certs/tls.key")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = src.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = dst.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	src, err = os.Open("resources/tls.crt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	dst, err = os.Create(RegistryConfigPath + "/certs/tls.crt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = src.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = dst.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	err = os.MkdirAll(RegistryConfigPath+"/data", 0755)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// TODO: start docker here?
+	//docker run -d -p 5000:5000 --restart=always --name registry \
+	//-v $RegistryPath/data:/var/lib/registry \
+	//-v $RegistryPath/auth:/auth \
+	//-e "REGISTRY_AUTH=htpasswd" \
+	//-e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
+	//-e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+	//-v $RegistryPath/certs:/certs \
+	//-e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/tls.crt \
+	//-e REGISTRY_HTTP_TLS_KEY=/certs/tls.key \
+	//registry
+
+	err = sudoCopy("resources/ca.crt", fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
 
@@ -535,14 +670,16 @@ func main() {
 		}
 	}
 
+	registryUsername := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+	registryPassword := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+
 	InstallK3S(*masterIP)
-	CreateCert()
+	CreateCert(*masterIP)
 	ConfigK3SRegistry(*masterIP)
 	DownloadBinary()
-	CreateDefaultConfig(*masterIP)
+	CreateDefaultConfig(*masterIP, registryUsername, registryPassword)
 	GenerateAgentScript(*masterIP)
-
-	// TODO: start docker registry
+	StartRegistry(*masterIP, registryUsername, registryPassword)
 
 	if err := os.Remove("registries.yaml"); err != nil {
 		fmt.Println(err)
