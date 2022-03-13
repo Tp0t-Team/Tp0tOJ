@@ -27,24 +27,6 @@ var schemaStr string
 
 func init() {
 	muxRouter := mux.NewRouter()
-	if HasFrontEnd {
-		root, err := fs.Sub(staticFolder, "static")
-		if err != nil {
-			log.Panicln(err)
-		}
-		fileServer := http.FileServer(http.FS(root))
-		muxRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			fileServer.ServeHTTP(w, r)
-		})
-		indexFile, err := staticFolder.ReadFile("static/index.html")
-		if err != nil {
-			log.Panicln(err)
-		}
-		muxRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			w.Write(indexFile)
-		})
-	}
 
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
@@ -120,5 +102,24 @@ func init() {
 		}
 		admin.UploadImage(w, r)
 	})
+	if HasFrontEnd {
+		root, err := fs.Sub(staticFolder, "static")
+		if err != nil {
+			log.Panicln(err)
+		}
+		fileServer := http.FileServer(http.FS(root))
+		indexFile, err := staticFolder.ReadFile("static/index.html")
+		if err != nil {
+			log.Panicln(err)
+		}
+		muxRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
+				fileServer.ServeHTTP(w, r)
+			} else {
+				w.WriteHeader(http.StatusOK)
+				w.Write(indexFile)
+			}
+		})
+	}
 	http.Handle("/", muxRouter)
 }
