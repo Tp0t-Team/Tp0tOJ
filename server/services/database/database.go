@@ -1,8 +1,11 @@
 package database
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"io"
 	"log"
 	"os"
 	"server/entity"
@@ -11,6 +14,20 @@ import (
 )
 
 var DataBase *gorm.DB
+
+func passwordHash(password string) string {
+	hash1 := sha256.New()
+	_, err := io.WriteString(hash1, configure.Configure.Server.Salt+password)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+	hash2 := sha256.New()
+	_, err = io.WriteString(hash2, configure.Configure.Server.Salt+fmt.Sprintf("%02x", hash1.Sum(nil)))
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+	return fmt.Sprintf("%02x", hash2.Sum(nil))
+}
 
 //any database error log should be handle and log out inside resolvers, should not return to caller
 func init() {
@@ -43,7 +60,7 @@ func init() {
 	if needInit {
 		defaultUser := entity.User{
 			Name:     configure.Configure.Server.Username,
-			Password: configure.Configure.Server.Password,
+			Password: passwordHash(configure.Configure.Server.Password),
 			State:    "normal",
 			Mail:     configure.Configure.Server.Mail,
 			JoinTime: time.Now(),

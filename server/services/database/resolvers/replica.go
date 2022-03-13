@@ -65,7 +65,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 			if err != nil {
 				return err
 			}
-			flag = fmt.Sprintf("%x", md5.Sum(init))
+			flag = fmt.Sprintf("%02x", md5.Sum(init))
 		} else {
 			//strings.Split(config.Flag.Value,"\n")
 			//TODO: for muti-flag typed challenge, may need some extra method to map flags to replica

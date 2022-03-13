@@ -34,11 +34,11 @@ func passwordHash(password string) string {
 		log.Panicln(err.Error())
 	}
 	hash2 := sha256.New()
-	_, err = io.WriteString(hash2, configure.Configure.Server.Salt+fmt.Sprintf("%x", hash1.Sum(nil)))
+	_, err = io.WriteString(hash2, configure.Configure.Server.Salt+fmt.Sprintf("%02x", hash1.Sum(nil)))
 	if err != nil {
 		log.Panicln(err.Error())
 	}
-	return fmt.Sprintf("%x", hash2.Sum(nil))
+	return fmt.Sprintf("%02x", hash2.Sum(nil))
 }
 
 func (r *MutationResolver) Register(ctx context.Context, args struct{ Input types.RegisterInput }) *types.RegisterResult {
