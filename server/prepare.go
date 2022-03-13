@@ -745,7 +745,7 @@ func GenerateStartScript() {
 	}
 
 	tempString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
-		"\tdocker run -d -p 5000:5000 --restart=always --name oj_registry_instance " +
+		"\tdocker run -d --net=host --restart=always --name oj_registry_instance " +
 		"-v %s/data:/var/lib/registry " +
 		"-v %s/auth:/auth " +
 		"-e \"REGISTRY_AUTH=htpasswd\" " +
