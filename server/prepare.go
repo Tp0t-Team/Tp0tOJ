@@ -523,13 +523,19 @@ func GenerateAgentScript(masterIP string) {
 	}
 }
 
-const RegistryConfigPath = "/opt/docker-registry" // TODO:
+const RegistryConfigPath = "resources/docker-registry"
 
-func StartRegistry(masterIP string, registryUsername string, registryPassword string) {
+func PrepareRegistry(masterIP string, registryUsername string, registryPassword string) {
 	_, err := os.Stat(fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
 	if err == nil {
 		return
 	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	err = os.MkdirAll(RegistryConfigPath, 0755)
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -629,19 +635,51 @@ func StartRegistry(masterIP string, registryUsername string, registryPassword st
 		os.Exit(1)
 	}
 
-	// TODO: start docker here?
-	//docker run -d -p 5000:5000 --restart=always --name registry \
-	//-v $RegistryPath/data:/var/lib/registry \
-	//-v $RegistryPath/auth:/auth \
-	//-e "REGISTRY_AUTH=htpasswd" \
-	//-e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" \
-	//-e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
-	//-v $RegistryPath/certs:/certs \
-	//-e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/tls.crt \
-	//-e REGISTRY_HTTP_TLS_KEY=/certs/tls.key \
-	//registry
-
 	err = sudoCopy("resources/ca.crt", fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func GenerateStartScript() {
+	_, err := os.Stat("start.sh")
+	if err == nil {
+		return
+	} else if err != os.ErrNotExist {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	tempString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
+		"\tdocker run -d -p 5000:5000 --restart=always --name oj_registry_instance " +
+		"-v %s/data:/var/lib/registry " +
+		"-v %s/auth:/auth " +
+		"-e \"REGISTRY_AUTH=htpasswd\" " +
+		"-e \"REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm\" " +
+		"-e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd " +
+		"-v %s/certs:/certs " +
+		"-e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/tls.crt " +
+		"-e REGISTRY_HTTP_TLS_KEY=/certs/tls.key " +
+		"registry\n" +
+		"fi\n" +
+		"./OJ"
+	startSH, err := os.Create("start.sh")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = startSH.Write([]byte(fmt.Sprintf(tempString, RegistryConfigPath, RegistryConfigPath, RegistryConfigPath)))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = startSH.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = os.Chmod("start.sh", 0755)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -679,7 +717,8 @@ func main() {
 	DownloadBinary()
 	CreateDefaultConfig(*masterIP, registryUsername, registryPassword)
 	GenerateAgentScript(*masterIP)
-	StartRegistry(*masterIP, registryUsername, registryPassword)
+	PrepareRegistry(*masterIP, registryUsername, registryPassword)
+	GenerateStartScript()
 
 	if err := os.Remove("registries.yaml"); err != nil {
 		fmt.Println(err)
@@ -687,7 +726,7 @@ func main() {
 	}
 
 	fmt.Println("Congratulations! Environment prepare success.\n" +
-		"You can start the platform use: `./OJ`\n" +
+		"You can start the platform use: `./start.sh`\n" +
 		"You can easily Add more agent machine by using agent-install.sh\n" +
 		"For example, on the agent machine run:\n" +
 		"    ./agent-install.sh <ip of agent machine>")
