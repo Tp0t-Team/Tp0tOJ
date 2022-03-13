@@ -11,10 +11,12 @@ import (
 	_ "embed"
 	"encoding/asn1"
 	"encoding/json"
+	"encoding/pem"
 	"flag"
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"io"
+	"log"
 	"math/big"
 	rd "math/rand"
 	"net/http"
@@ -52,6 +54,9 @@ type K3sRegistry struct {
 
 func sudoCopy(src string, dst string) error {
 	copyCmd := exec.Command("bash", "-c", fmt.Sprintf("sudo cp %s %s", src, dst))
+	copyCmd.Stderr = os.Stderr
+	copyCmd.Stdin = os.Stdin
+	copyCmd.Stdout = os.Stdout
 	err := copyCmd.Run()
 	if err != nil {
 		return err
@@ -63,26 +68,50 @@ func InstallK3S(masterIP string) {
 	_, err := os.Stat("resources/k3s.yaml")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	log.Println("download k3s install script...")
 	k3sRes, err := http.Get("http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo sh -s - --node-external-ip %s --node-name %s", masterIP, masterIP))
-	k3sPipe, err := k3sInstall.StdinPipe()
+	k3sInstallSH, err := os.Create("k3s-install.sh")
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(k3sInstallSH, k3sRes.Body)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = io.Copy(k3sPipe, k3sRes.Body)
+	err = k3sInstallSH.Close()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	err = os.Chmod("k3s-install.sh", 0755)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	log.Println("install k3s master...")
+	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo ./k3s-install.sh --node-external-ip %s --node-name %s", masterIP, masterIP))
+	k3sInstall.Stderr = os.Stderr
+	k3sInstall.Stdin = os.Stdin
+	k3sInstall.Stdout = os.Stdout
+	//k3sPipe, err := k3sInstall.StdinPipe()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
+	//_, err = io.Copy(k3sPipe, k3sRes.Body)
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 	err = k3sInstall.Run()
 	if err != nil {
 		fmt.Println(err)
@@ -93,7 +122,10 @@ func InstallK3S(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	chmodCmd := exec.Command("bash", "-c", "sudo chmod 0555 resources/k3s.yaml")
+	chmodCmd := exec.Command("bash", "-c", "sudo chmod 0755 resources/k3s.yaml")
+	chmodCmd.Stderr = os.Stderr
+	chmodCmd.Stdin = os.Stdin
+	chmodCmd.Stdout = os.Stdout
 	err = chmodCmd.Run()
 	if err != nil {
 		fmt.Println(err)
@@ -105,15 +137,14 @@ func ConfigK3SRegistry(masterIP string) {
 	_, err := os.Stat("/etc/rancher/k3s/registries.yaml")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err != nil {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	mkdirCmd := exec.Command("bash", "-c", "sudo mkdir /etc/rancher/k3s/OJRegistry")
+	mkdirCmd.Stderr = os.Stderr
+	mkdirCmd.Stdin = os.Stdin
+	mkdirCmd.Stdout = os.Stdout
 	err = mkdirCmd.Run()
 	if err != nil {
 		fmt.Println(err)
@@ -180,10 +211,11 @@ func DownloadBinary() {
 	_, err := os.Stat("OJ")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	log.Println("get latest release info...")
 	releaseInfoRes, err := http.Get("https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest")
 	if err != nil {
 		fmt.Println(err)
@@ -206,6 +238,7 @@ func DownloadBinary() {
 		os.Exit(1)
 	}
 	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
+	log.Println("donwload latest release...")
 	binaryRes, err := http.Get(fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName))
 	if err != nil {
 		fmt.Println(err)
@@ -237,7 +270,7 @@ func CreateCert(masterIP string) {
 	_, err := os.Stat("resources/tls.key")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -303,7 +336,8 @@ func CreateCert(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = certFile.Write(buf)
+	err = pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: buf})
+	//_, err = certFile.Write(buf)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -319,7 +353,8 @@ func CreateCert(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = keyFile.Write(buf)
+	err = pem.Encode(keyFile, &pem.Block{Type: "PRIVATE KEY", Bytes: buf})
+	//_, err = keyFile.Write(buf)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -335,7 +370,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 	_, err := os.Stat("resources/config.yaml")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -423,27 +458,51 @@ func GenerateAgentScript(masterIP string) {
 	_, err := os.Stat("agent-install.sh")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	tokenData := bytes.Buffer{}
-	readCmd := exec.Command("bash", "-c", "sudo cat /var/lib/rancher/k3s/server/node-token")
-	tokenPipe, err := readCmd.StdoutPipe()
+	err = sudoCopy("/var/lib/rancher/k3s/server/node-token", "node-token")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	tokenData := bytes.Buffer{}
+	readCmd := exec.Command("bash", "-c", "sudo chmod 0777 node-token")
+	readCmd.Stderr = os.Stderr
+	readCmd.Stdin = os.Stdin
+	readCmd.Stdout = os.Stdout
+	//tokenPipe, err := readCmd.StdoutPipe()
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 	err = readCmd.Run()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = io.Copy(&tokenData, tokenPipe)
+	tokenFile, err := os.Open("node-token")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	_, err = io.Copy(&tokenData, tokenFile)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = tokenFile.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	err = os.Remove("node-token")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	token := strings.TrimSpace(string(tokenData.Bytes()))
 	k3sCmdSting := fmt.Sprintf("curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1\n", masterIP, token)
 
@@ -529,7 +588,7 @@ func PrepareRegistry(masterIP string, registryUsername string, registryPassword 
 	_, err := os.Stat(fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -540,13 +599,16 @@ func PrepareRegistry(masterIP string, registryUsername string, registryPassword 
 		os.Exit(1)
 	}
 
+	log.Println("make htpasswd file...")
+	htpasswdCmdOut := bytes.Buffer{}
 	htpasswdCmd := exec.Command("docker", "run", "--rm", "--entrypoint", "htpasswd", "httpd:alpine", "-Bbn", registryUsername, registryPassword)
+	//pipe, err := htpasswdCmd.StdoutPipe()
+	htpasswdCmd.Stdout = &htpasswdCmdOut
+	//if err != nil {
+	//	fmt.Println(err)
+	//	os.Exit(1)
+	//}
 	err = htpasswdCmd.Run()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	pipe, err := htpasswdCmd.StdoutPipe()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -561,7 +623,7 @@ func PrepareRegistry(masterIP string, registryUsername string, registryPassword 
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = io.Copy(passwdFile, pipe)
+	_, err = io.Copy(passwdFile, &htpasswdCmdOut)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -635,6 +697,15 @@ func PrepareRegistry(masterIP string, registryUsername string, registryPassword 
 		os.Exit(1)
 	}
 
+	mkdirCmd := exec.Command("bash", "-c", fmt.Sprintf("sudo mkdir -p /etc/docker/certs.d/%s:5000", masterIP))
+	mkdirCmd.Stderr = os.Stderr
+	mkdirCmd.Stdin = os.Stdin
+	mkdirCmd.Stdout = os.Stdout
+	err = mkdirCmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	err = sudoCopy("resources/ca.crt", fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
 	if err != nil {
 		fmt.Println(err)
@@ -646,7 +717,13 @@ func GenerateStartScript() {
 	_, err := os.Stat("start.sh")
 	if err == nil {
 		return
-	} else if err != os.ErrNotExist {
+	} else if !os.IsNotExist(err) {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -669,7 +746,8 @@ func GenerateStartScript() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = startSH.Write([]byte(fmt.Sprintf(tempString, RegistryConfigPath, RegistryConfigPath, RegistryConfigPath)))
+	path := pwd + "/" + RegistryConfigPath
+	_, err = startSH.Write([]byte(fmt.Sprintf(tempString, path, path, path)))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -711,21 +789,29 @@ func main() {
 	registryUsername := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
 	registryPassword := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
 
+	log.Println(" - install K3S:")
 	InstallK3S(*masterIP)
+	log.Println(" - create cert:")
 	CreateCert(*masterIP)
+	log.Println(" - config registry:")
 	ConfigK3SRegistry(*masterIP)
+	log.Println(" - download binary:")
 	DownloadBinary()
+	log.Println(" - generate default config:")
 	CreateDefaultConfig(*masterIP, registryUsername, registryPassword)
+	log.Println(" - generate agent script:")
 	GenerateAgentScript(*masterIP)
+	log.Println(" - prepare registry:")
 	PrepareRegistry(*masterIP, registryUsername, registryPassword)
+	log.Println(" - generate start script:")
 	GenerateStartScript()
 
-	if err := os.Remove("registries.yaml"); err != nil {
+	if err := os.Remove("registries-config.yaml"); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Congratulations! Environment prepare success.\n" +
+	fmt.Println("\nCongratulations! Environment prepare success.\n" +
 		"You can start the platform use: `./start.sh`\n" +
 		"You can easily Add more agent machine by using agent-install.sh\n" +
 		"For example, on the agent machine run:\n" +
