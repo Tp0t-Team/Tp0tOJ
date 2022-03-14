@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/smtp"
 	"regexp"
+	"server/services"
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils/configure"
@@ -155,6 +156,10 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 	}
 	if user == nil {
 		return &types.ForgetResult{Message: "no such user"}
+	}
+	ok := services.ResetTimer.NewTimer(user.UserId)
+	if !ok {
+		return &types.ForgetResult{Message: "you have recently reset password"}
 	}
 	result := resolvers.AddResetToken(user.UserId)
 	if result == nil {
