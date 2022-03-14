@@ -27,8 +27,6 @@ var schemaStr string
 
 type resetTimer struct {
 	clock map[uint64]*time.Timer
-	//userId int64
-	//*time.Timer
 }
 
 func (t *resetTimer) NewTimer(userId uint64) bool {
@@ -48,7 +46,7 @@ func (t *resetTimer) NewTimer(userId uint64) bool {
 	return true
 }
 
-var ResetTimer resetTimer
+var ResetTimer = resetTimer{clock: map[uint64]*time.Timer{}}
 
 func init() {
 	muxRouter := mux.NewRouter()
