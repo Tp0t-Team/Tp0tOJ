@@ -3,13 +3,14 @@ module server
 go 1.17
 
 require (
+	github.com/badoux/checkmail v1.2.1
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/docker v20.10.13+incompatible
-	github.com/domodwyer/mailyak/v3 v3.3.3
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/graph-gophers/graphql-go v1.3.0
 	github.com/heroku/docker-registry-client v0.0.0-20211012143308-9463674c8930
+	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kataras/go-sessions/v3 v3.3.0
 	github.com/opencontainers/go-digest v1.0.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b

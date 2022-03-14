@@ -35,6 +35,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 				//Alloc all replicas for the singleton and enabled challenge
 				if challenge.State == "enabled" && config.Singleton {
 					replicas := FindReplicaByChallengeId(challenge.ChallengeId)
+					log.Println(replicas, "\n", len(replicas))
 					if replicas == nil || len(replicas) != 1 {
 						return errors.New("found more than one or none replica for singleton challenge")
 					}

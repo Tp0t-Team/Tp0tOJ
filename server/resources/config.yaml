@@ -1,34 +1,23 @@
 server:
   host: 127.0.0.1
   username: Tp0t
-  password: qwertyuiop
-  mail: admin@example.com
+  password: admin
+  mail: tp0t_team@163.com
   port: 8080
-  salt: QWERTY
+  salt: "3916589616287113937"
   debug: false
 email:
- host: smtp.163.com
- username: username
- password: password
-#redis:
-#  database: 0
-#  host: redis
-#  port: 6379
-#  password: password
-#  maxActive: 8
-#  maxWait: -1ms
-#  maxIdle: 10
-#  minIdle: 0
-#  timeout: 1000
+  host: smtp.163.com
+  username: tp0t_team@163.com
+  password: VHTPXZJYRYKGZBHA
 challenge:
-#  flagPrefix: Tp0t
-  firstBloodReward: 0.10
   secondBloodReward: 0.08
   thirdBloodReward: 0.05
   halfLife: 20
+  firstBloodReward: 0.1
 kubernetes:
   portAllocBegin: 30000
   portAllocEnd: 40000
-  username: "Tp0tOJRegistry"
-  password: "Tp0tyrtsigeR"
-  registryHost: "139.9.185.249:5000"
+  username: e3657677
+  password: 5cfe939d
+  registryHost: 110.40.152.78:5000

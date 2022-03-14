@@ -4,7 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/domodwyer/mailyak/v3"
+	"github.com/badoux/checkmail"
+	"github.com/jordan-wright/email"
 	"github.com/kataras/go-sessions/v3"
 	"io"
 	"log"
@@ -121,16 +122,24 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 }
 
 func sendMail(address string, subject string, content string) bool {
-	auth := smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host)
-	mail := mailyak.New(configure.Configure.Email.Host+":25", auth)
-	mail.To(address)
-	mail.From(configure.Configure.Email.Username)
-	mail.Subject(subject)
-	mail.Plain().Set(content)
-	err := mail.Send()
+
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	mail := email.NewEmail()
+	err := checkmail.ValidateFormat(configure.Configure.Email.Username)
 	if err != nil {
+		log.Println("mail check failed ", err)
+	}
+	mail.From = strings.Split(configure.Configure.Email.Username, "@")[0] + fmt.Sprintf("<%s>", configure.Configure.Email.Username)
+	mail.To = []string{address}
+	mail.Subject = subject
+	mail.Text = []byte(content)
+
+	err = mail.Send(fmt.Sprintf("%s:25", configure.Configure.Email.Host), smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host))
+	if err != nil {
+		log.Println(err)
 		return false
 	}
+	log.Println("send successfully ... ")
 	return true
 }
 
