@@ -76,21 +76,6 @@ func (cache *RAMRankCache) Submit(userId uint64, challengeId uint64, stamp time.
 	return nil
 }
 
-//const NormalToAdmin = 1
-//const AdminToNormal = 2
-//const DisableUser = 3
-//
-//func (cache *RAMRankCache) SwitchUserRole(userId uint64, action int) error {
-//	cache.mutex.Lock()
-//	defer cache.mutex.Unlock()
-//	if action == NormalToAdmin {
-//		delete(cache.userTime, userId)
-//		delete(cache.userScore, userId)
-//		//TODO: clean cache or clean map after switchRole
-//	}
-//
-//}
-
 func (cache *RAMRankCache) submitImpl(userId uint64, challengeId uint64, stamp time.Time) error {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
@@ -160,7 +145,10 @@ func (cache *RAMRankCache) refreshRank() {
 }
 
 func (cache *RAMRankCache) WarmUp() error {
-
+	cache.challengeScore = map[uint64]uint64{}
+	cache.challengeSolve = map[uint64][]uint64{}
+	cache.userScore = map[uint64]uint64{}
+	cache.userTime = map[uint64]time.Time{}
 	challenges := resolvers.FindAllChallenges()
 	if challenges == nil {
 		return errors.New("challenges equals nil")
