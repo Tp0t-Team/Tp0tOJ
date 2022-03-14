@@ -13,8 +13,8 @@ require (
 	github.com/kataras/go-sessions/v3 v3.3.0
 	github.com/opencontainers/go-digest v1.0.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	gorm.io/driver/sqlite v1.3.1
-	gorm.io/gorm v1.23.2
+	gorm.io/driver/sqlite v1.2.6
+	gorm.io/gorm v1.22.5
 	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
 	k8s.io/client-go v0.23.4
