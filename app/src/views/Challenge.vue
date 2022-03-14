@@ -5,7 +5,7 @@
         <div class="type-title display-1 ml-4">{{type}}</div>
         <v-divider color="primary"></v-divider>
       </div>
-      <v-row>
+      <v-row v-if="challenges.filter((v)=>v.category==type).length!=0">
         <v-col sm="3" v-for="item in challenges.filter((v)=>v.category==type)" :key="item.challengeId">
           <v-layout justify-center>
             <v-hover :disabled="item.done" v-slot:default="{ hover }">

@@ -190,8 +190,8 @@ export default class Challenge extends Vue {
   private enableAble: boolean = false;
   private disableAble: boolean = false;
 
-  @Watch("challengeConfigs")
-  challengeConfigsChange() {
+  @Watch("selected")
+  selectedChange() {
     this.enableAble = false;
     this.disableAble = false;
     for (let item of this.selected) {
@@ -200,7 +200,7 @@ export default class Challenge extends Vue {
           if (config.state == "disabled") {
             this.enableAble = true;
           }
-          if (config.state == "disabled") {
+          if (config.state == "enabled") {
             this.disableAble = true;
           }
           break;
