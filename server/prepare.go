@@ -413,7 +413,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 		},
 		Kubernetes: utils.Kubernetes{
 			PortAllocBegin: 30000,
-			PortAllocEnd:   40000,
+			PortAllocEnd:   31000,
 			Username:       registryUsername,
 			Password:       registryPassword,
 			RegistryHost:   fmt.Sprintf("%s:5000", masterIP),
@@ -754,9 +754,10 @@ func GenerateStartScript() {
 		"-v %s/certs:/certs " +
 		"-e REGISTRY_HTTP_TLS_CERTIFICATE=/certs/tls.crt " +
 		"-e REGISTRY_HTTP_TLS_KEY=/certs/tls.key " +
+		"-e REGISTRY_STORAGE_DELETE_ENABLED=true " +
 		"registry\n" +
 		"fi\n" +
-		"./OJ"
+		"./OJ\n"
 	startSH, err := os.Create("start.sh")
 	if err != nil {
 		fmt.Println(err)
