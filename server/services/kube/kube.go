@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/heroku/docker-registry-client/registry"
@@ -137,7 +138,7 @@ func ParseProtocol(name string) corev1.Protocol {
 }
 
 func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
-	return &corev1.ContainerPort{Name: strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
+	return &corev1.ContainerPort{Name: fmt.Sprintf("Port%s", strconv.FormatInt(int64(containerPort), 10)), Protocol: protocol, ContainerPort: containerPort}
 }
 
 //NewServicePortConfig
