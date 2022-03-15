@@ -84,19 +84,19 @@ func init() {
 }
 
 type serialType struct {
-	ports   []int32
-	current int32
+	Ports   []int32
+	Current int32
 }
 
 func autoPortSetSave() {
 	temp := map[string]*serialType{}
 	for key, info := range AutoPortSet {
-		temp[key] = &serialType{ports: []int32{}, current: info.current}
+		temp[key] = &serialType{Ports: []int32{}, Current: info.current}
 		for port, _ := range info.allocated {
-			temp[key].ports = append(temp[key].ports, port)
+			temp[key].Ports = append(temp[key].Ports, port)
 		}
 	}
-	marshal, err := json.Marshal(AutoPortSet)
+	marshal, err := json.Marshal(temp)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -121,8 +121,8 @@ func autoPortSetLoad() {
 		log.Panicln(err)
 	}
 	for key, desc := range temp {
-		AutoPortSet[key] = &portAllocInfo{allocated: map[int32]struct{}{}, current: desc.current}
-		for _, port := range desc.ports {
+		AutoPortSet[key] = &portAllocInfo{allocated: map[int32]struct{}{}, current: desc.Current}
+		for _, port := range desc.Ports {
 			AutoPortSet[key].allocated[port] = struct{}{}
 		}
 	}
