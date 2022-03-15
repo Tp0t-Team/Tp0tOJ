@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -26,6 +27,7 @@ import (
 	gtypes "server/services/types"
 	"server/utils/configure"
 	"strconv"
+	"time"
 )
 
 //var kubeConfig *rest.Config
@@ -137,7 +139,7 @@ func ParseProtocol(name string) corev1.Protocol {
 }
 
 func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
-	return &corev1.ContainerPort{Name: strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
+	return &corev1.ContainerPort{Name: "port-" + strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
 }
 
 //NewServicePortConfig
@@ -149,7 +151,7 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 
 //K8sPodAlloc
 func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort, flag string) bool {
-	id := strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
@@ -203,6 +205,30 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 		log.Println(err)
 		return false
 	}
+
+	// wait for pod ok
+	for {
+		state, err2 := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
+		if err2 != nil {
+			return false
+		}
+		finish := false
+		for _, cond := range state.Status.Conditions {
+			if cond.Type == appsv1.DeploymentAvailable && cond.Status == corev1.ConditionTrue {
+				finish = true
+				break
+			}
+			if cond.Type == appsv1.DeploymentReplicaFailure && cond.Status == corev1.ConditionTrue {
+				log.Println("deployment start failed: ", cond.Reason)
+				return false
+			}
+		}
+		if finish {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
 	var list *corev1.PodList
 	list, err = clientSet.CoreV1().Pods(corev1.NamespaceDefault).List(context.TODO(), metav1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(map[string]string{"app": id}).String(),
@@ -264,13 +290,17 @@ func K8sPodList() {
 }
 
 func K8sPodDestroy(replicaId uint64, containerName string) bool {
-	id := strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
 	var deployment *appsv1.Deployment
 	var err error
 	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 	if err != nil {
-		log.Println(err)
-		return false
+		if cased, ok := err.(*kerr.StatusError); ok && cased.Status().Reason == metav1.StatusReasonNotFound {
+			deployment = nil
+		} else {
+			log.Println(err)
+			return false
+		}
 	}
 	host := ""
 	if deployment != nil {
@@ -284,8 +314,12 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 	var service *corev1.Service
 	service, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 	if err != nil {
-		log.Println(err)
-		return false
+		if cased, ok := err.(*kerr.StatusError); ok && cased.Status().Reason == metav1.StatusReasonNotFound {
+			deployment = nil
+		} else {
+			log.Println(err)
+			return false
+		}
 	}
 	if service != nil {
 		err := clientSet.CoreV1().Services(corev1.NamespaceDefault).Delete(context.TODO(), id, metav1.DeleteOptions{})
@@ -351,7 +385,7 @@ func K8sStatus() ([]gtypes.ClusterNodeInfo, []gtypes.ClusterReplicaInfo) {
 }
 
 func K8sServiceGetUrls(replicaId uint64, containerName string) []string {
-	id := strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
 	var deployment *appsv1.Deployment
 	var err error
 	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})

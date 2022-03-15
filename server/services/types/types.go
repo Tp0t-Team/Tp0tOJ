@@ -199,7 +199,7 @@ type NodeConfigInput struct {
 
 func (input *NodeConfigInput) CheckPass() bool {
 	input.Name = strings.ToLower(strings.TrimSpace(input.Name))
-	input.Image = strings.TrimSpace(input.Image)
+	input.Image = strings.ToLower(strings.TrimSpace(input.Image))
 	for _, port := range input.Ports {
 		if !port.CheckPass() {
 			return false
