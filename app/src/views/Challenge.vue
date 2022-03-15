@@ -109,8 +109,8 @@
             :key="link"
           >
             {{link}}
-            <v-btn class="ml-4" icon color="primary" @click="openUrl(link)">
-              <v-icon>navigate_next</v-icon>
+            <v-btn class="ml-4" icon color="primary" @click="copyUrl(link)">
+              <v-icon>content_copy</v-icon>
             </v-btn>
           </v-chip>
         </div>
@@ -227,8 +227,8 @@ export default class Challenge extends Vue {
     else this.submitError = "";
   }
 
-  openUrl(url: string) {
-    window.open(url);
+  copyUrl(url: string) {
+    navigator.clipboard.writeText(url);
   }
 
   async replicaChange() {

@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"server/services/admin"
 	"server/services/user"
 	"time"
@@ -111,14 +112,30 @@ func init() {
 		if err != nil {
 			log.Panicln(err)
 		}
-		muxRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
+		homeFile, err := staticFolder.ReadFile("static/home.html")
+		if err != nil {
+			log.Panicln(err)
+		}
+		if _, err := os.Stat("resources/home.html"); err == nil {
+			homeFile, err = os.ReadFile("resources/home.html")
+			if err != nil {
+				log.Panicln(err)
+			}
+		}
+
+		withGzipped := Gzip(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/home.html" {
+				w.WriteHeader(http.StatusOK)
+				w.Write(homeFile)
+			} else if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
 				fileServer.ServeHTTP(w, r)
 			} else {
 				w.WriteHeader(http.StatusOK)
 				w.Write(indexFile)
 			}
-		})
+		}))
+
+		muxRouter.PathPrefix("/").Handler(withGzipped)
 	}
 	http.Handle("/", muxRouter)
 }

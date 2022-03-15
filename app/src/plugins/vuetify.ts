@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
+import Vuetify from 'vuetify/lib'
 import 'vuetify/dist/vuetify.min.css'
 import { VuetifyPreset } from 'vuetify/types/services/presets'
-import colors from 'vuetify/es5/util/colors'
+import colors from 'vuetify/lib/util/colors'
 
 Vue.use(Vuetify)
 
