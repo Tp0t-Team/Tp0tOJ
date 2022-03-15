@@ -149,8 +149,7 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 	return &corev1.ServicePort{Name: portName, Protocol: protocol, Port: externalPort, TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: internalPort}, NodePort: podPort}
 }
 
-//K8sPodAlloc
-func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portConfigs []corev1.ContainerPort, servicePorts []corev1.ServicePort, flag string) bool {
+func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, servicePorts []corev1.ServicePort, flag string) bool {
 	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -173,13 +172,14 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, portCo
 						{
 							Name:  containerName,
 							Image: imgLabel,
-							Ports: portConfigs,
-							Env: []corev1.EnvVar{
-								{
-									Name:  "FLAG",
-									Value: flag,
-								},
-							},
+							//Ports: portConfigs,
+							//Env: []corev1.EnvVar{
+							//	{
+							//		Name:  "FLAG",
+							//		Value: flag,
+							//	},
+							//},
+							Args: []string{flag}, //entrypoint.sh get flag value by $1 (by azurity)
 						},
 					},
 				},

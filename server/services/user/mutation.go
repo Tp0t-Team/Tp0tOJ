@@ -39,6 +39,7 @@ func (t *resetTimer) NewTimer(userId uint64) bool {
 			delete(t.clock, userId)
 		case <-time.After(10 * time.Minute):
 			log.Println("some thing error at resetTimer, timeout")
+			delete(t.clock, userId)
 		}
 	}()
 	return true
@@ -258,6 +259,10 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 		log.Println(err)
 		return &types.StartReplicaResult{Message: "start failed"}
 	}
+	//ok := ReplicaTimer.NewTimer(userId)
+	//if !ok {
+	//	return &types.StartReplicaResult{Message: "timer start failed"}
+	//}
 	// do start replica (close other not-singleton replica)
 	if !resolvers.StartReplicaForUser(userId, challengeId) {
 		return &types.StartReplicaResult{Message: "start failed"}
