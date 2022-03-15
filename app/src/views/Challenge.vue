@@ -189,6 +189,8 @@ export default class Challenge extends Vue {
                   avatar
                 }
                 done
+                manual
+                allocated
               }
             }
           }
