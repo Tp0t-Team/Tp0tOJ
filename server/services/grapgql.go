@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"server/services/admin"
 	"server/services/user"
 	"time"
@@ -130,6 +131,14 @@ func init() {
 			} else if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
 				fileServer.ServeHTTP(w, r)
 			} else {
+				_, filename := filepath.Split(r.URL.Path)
+				if filepath.Ext(r.URL.Path) == ".js" || filepath.Ext(r.URL.Path) == ".css" {
+					if r.Header.Get("if-none-match") == filename {
+						w.WriteHeader(http.StatusNotModified)
+						return
+					}
+					w.Header().Set("etag", filename)
+				}
 				w.WriteHeader(http.StatusOK)
 				w.Write(indexFile)
 			}
