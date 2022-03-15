@@ -11,14 +11,41 @@ import (
 	"log"
 	"net/smtp"
 	"regexp"
-	"server/services"
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils/configure"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
+
+type resetTimer struct {
+	clock map[uint64]*time.Timer
+	lock  sync.Mutex
+}
+
+func (t *resetTimer) NewTimer(userId uint64) bool {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	if _, ok := t.clock[userId]; ok {
+		return false
+	}
+	t.clock[userId] = time.NewTimer(5 * time.Minute)
+	go func() {
+		select {
+		case <-t.clock[userId].C:
+			t.clock[userId].Stop()
+			delete(t.clock, userId)
+		case <-time.After(10 * time.Minute):
+			log.Println("some thing error at resetTimer, timeout")
+		}
+	}()
+	return true
+
+}
+
+var ResetTimer = resetTimer{clock: map[uint64]*time.Timer{}}
 
 type MutationResolver struct {
 }
@@ -26,6 +53,7 @@ type MutationResolver struct {
 var MailPattern *regexp.Regexp
 
 func init() {
+
 	MailPattern, _ = regexp.Compile("^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$")
 }
 
@@ -157,7 +185,7 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 	if user == nil {
 		return &types.ForgetResult{Message: "no such user"}
 	}
-	ok := services.ResetTimer.NewTimer(user.UserId)
+	ok := ResetTimer.NewTimer(user.UserId)
 	if !ok {
 		return &types.ForgetResult{Message: "you have recently reset password"}
 	}

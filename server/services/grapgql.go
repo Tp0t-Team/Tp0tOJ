@@ -25,29 +25,6 @@ type Resolver struct {
 //go:embed schema.graphql
 var schemaStr string
 
-type resetTimer struct {
-	clock map[uint64]*time.Timer
-}
-
-func (t *resetTimer) NewTimer(userId uint64) bool {
-	if _, ok := t.clock[userId]; ok {
-		return false
-	}
-	t.clock[userId] = time.NewTimer(5 * time.Minute)
-	go func() {
-		select {
-		case <-t.clock[userId].C:
-			t.clock[userId].Stop()
-			delete(t.clock, userId)
-		case <-time.After(10 * time.Minute):
-			log.Println("some thing error at resetTimer, timeout")
-		}
-	}()
-	return true
-}
-
-var ResetTimer = resetTimer{clock: map[uint64]*time.Timer{}}
-
 func init() {
 	muxRouter := mux.NewRouter()
 	sessionManager := sessions.New(sessions.Config{
