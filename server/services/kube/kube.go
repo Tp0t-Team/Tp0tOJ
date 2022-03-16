@@ -453,10 +453,11 @@ func ImgBuild(tarArchive io.Reader, imageName string, platform string) error {
 	//	return err
 	//}
 	buildState, err := dockerClient.ImageBuild(context.TODO(), tarArchive, types.ImageBuildOptions{
-		Dockerfile: "Dockerfile",
-		Tags:       []string{imageName},
-		Remove:     true,
-		Platform:   platform,
+		Dockerfile:  "Dockerfile",
+		Tags:        []string{imageName},
+		Remove:      true,
+		Platform:    platform,
+		NetworkMode: "host",
 	})
 	if err != nil {
 		return err
