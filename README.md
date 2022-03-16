@@ -126,7 +126,7 @@ $$
 
 题目分数曲线示例：
 
-![curve.svg](/Users/lordcasser/Workspace/Tp0tOJ/curve.svg)
+![curve.svg](curve.svg)
 
 基础分数1000，减半人数20，不含奖励分数情况下 动态积分曲线
 
