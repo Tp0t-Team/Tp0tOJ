@@ -17,8 +17,6 @@ import (
 	"server/utils/configure"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 )
 
 func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
@@ -223,62 +221,63 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 	return true
 }
 
-type replicaTimer struct {
-	clock map[uint64]*time.Timer
-	lock  sync.Mutex
-}
+//
+//type replicaTimer struct {
+//	clock map[uint64]*time.Timer
+//	lock  sync.Mutex
+//}
 
-func (t *replicaTimer) NewTimer(userId uint64) bool {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	if _, ok := t.clock[userId]; ok {
-		return false
-	}
-	t.clock[userId] = time.NewTimer(30 * time.Minute)
-	go func() {
-		select {
-		case <-t.clock[userId].C:
-			t.clock[userId].Stop()
-			err := db.Transaction(func(tx *gorm.DB) error {
-				var allocs []entity.ReplicaAlloc
-				tx.Preload("Replica").Where(map[string]interface{}{"user_id": userId}).First(&allocs)
-				for _, alloc := range allocs {
-					if !alloc.Replica.Singleton {
-						replicaId := alloc.ReplicaId
-						tx.Delete(&alloc)
-						if !DisableReplica(alloc.ReplicaId, tx) {
-							return errors.New("delete replica failed")
-						}
-						tx.Delete(&entity.Replica{ReplicaId: replicaId})
-					}
-				}
-				return nil
-			})
-			if err != nil {
-				log.Println(err)
-			}
-			delete(t.clock, userId)
-		case <-time.After(35 * time.Minute):
-			log.Println("some thing error at replicaTimer, timeout")
-			delete(t.clock, userId)
-		}
-	}()
-	return true
-}
+//func (t *replicaTimer) NewTimer(userId uint64) bool {
+//	t.lock.Lock()
+//	defer t.lock.Unlock()
+//	if _, ok := t.clock[userId]; ok {
+//		return false
+//	}
+//	t.clock[userId] = time.NewTimer(30 * time.Minute)
+//	go func() {
+//		select {
+//		case <-t.clock[userId].C:
+//			t.clock[userId].Stop()
+//			err := db.Transaction(func(tx *gorm.DB) error {
+//				var allocs []entity.ReplicaAlloc
+//				tx.Preload("Replica").Where(map[string]interface{}{"user_id": userId}).First(&allocs)
+//				for _, alloc := range allocs {
+//					if !alloc.Replica.Singleton {
+//						replicaId := alloc.ReplicaId
+//						tx.Delete(&alloc)
+//						if !DisableReplica(alloc.ReplicaId, tx) {
+//							return errors.New("delete replica failed")
+//						}
+//						tx.Delete(&entity.Replica{ReplicaId: replicaId})
+//					}
+//				}
+//				return nil
+//			})
+//			if err != nil {
+//				log.Println(err)
+//			}
+//			delete(t.clock, userId)
+//		case <-time.After(35 * time.Minute):
+//			log.Println("some thing error at replicaTimer, timeout")
+//			delete(t.clock, userId)
+//		}
+//	}()
+//	return true
+//}
 
-func (t *replicaTimer) DeleteTimer(userId uint64) bool {
-	t.lock.Lock()
-	defer t.lock.Unlock()
-	// need timer in the queue
-	if _, ok := t.clock[userId]; !ok {
-		return false
-	}
-	t.clock[userId].Stop()
-	delete(t.clock, userId)
-	return true
-}
+//func (t *replicaTimer) DeleteTimer(userId uint64) bool {
+//	t.lock.Lock()
+//	defer t.lock.Unlock()
+//	// need timer in the queue
+//	if _, ok := t.clock[userId]; !ok {
+//		return false
+//	}
+//	t.clock[userId].Stop()
+//	delete(t.clock, userId)
+//	return true
+//}
 
-var ReplicaTimer = replicaTimer{clock: map[uint64]*time.Timer{}}
+//var ReplicaTimer = replicaTimer{clock: map[uint64]*time.Timer{}}
 
 //func DeleteReplicaByUserId(userId uint64) bool {
 //	err := db.Transaction(func(tx *gorm.DB) error {
@@ -304,11 +303,11 @@ var ReplicaTimer = replicaTimer{clock: map[uint64]*time.Timer{}}
 //}
 
 func StartReplicaForUser(userId uint64, challengeId uint64) bool {
-	ok := ReplicaTimer.NewTimer(userId)
-	if !ok {
-		log.Println("new timer failed, cannot start replica")
-		return false
-	}
+	//ok := ReplicaTimer.NewTimer(userId)
+	//if !ok {
+	//	log.Println("new timer failed, cannot start replica")
+	//	return false
+	//}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		challenge, err := FindChallengeById(challengeId)
 		if err != nil {
@@ -344,10 +343,10 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 		if !AddReplicaAlloc(newReplica.ReplicaId, userId, tx) {
 			return errors.New("alloc replica failed")
 		}
-		ok := ReplicaTimer.NewTimer(userId)
-		if !ok {
-			return errors.New("new timer failed, cannot start replica")
-		}
+		//ok := ReplicaTimer.NewTimer(userId)
+		//if !ok {
+		//	return errors.New("new timer failed, cannot start replica")
+		//}
 		return nil
 	})
 	if err != nil {
