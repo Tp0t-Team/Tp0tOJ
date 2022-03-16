@@ -71,10 +71,6 @@ export interface ChallengeConfig {
 export interface NodeConfig {
     name: string
     image: string
-    ports: {
-        port: number
-        protocol: string
-    }[]
     servicePorts: {
         name: string
         protocol: string
