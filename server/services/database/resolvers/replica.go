@@ -118,10 +118,10 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		}
 		createPodSuccess := true
 		for _, node := range config.NodeConfig {
-			ports := []corev1.ContainerPort{}
-			for _, port := range node.Ports {
-				ports = append(ports, *kube.NewContainerPortConfig(kube.ParseProtocol(port.Protocol), port.Port))
-			}
+			//ports := []corev1.ContainerPort{}
+			//for _, port := range node.Ports {
+			//	ports = append(ports, *kube.NewContainerPortConfig(kube.ParseProtocol(port.Protocol), port.Port))
+			//}
 			servicePorts := []corev1.ServicePort{}
 			for _, port := range node.ServicePorts {
 				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), port.External, port.Internal, port.Pod))

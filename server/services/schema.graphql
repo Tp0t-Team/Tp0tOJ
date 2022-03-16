@@ -129,14 +129,14 @@ input FlagTypeInput {
 input NodeConfigInput {
     name: String!
     image: String!
-    ports: [ContainerPortInput!]!
+#    ports: [ContainerPortInput!]!
     servicePorts: [ServicePortInput!]!
 }
 
-input ContainerPortInput {
-    port: Int!
-    protocol: String!
-}
+#input ContainerPortInput {
+#    port: Int!
+#    protocol: String!
+#}
 
 input ServicePortInput {
     name: String!
@@ -265,14 +265,14 @@ type ChallengeConfig {
 type NodeConfig {
     name: String!
     image: String!
-    ports: [ContainerPort!]!
+#    ports: [ContainerPort!]!
     servicePorts: [ServicePort!]!
 }
 
-type ContainerPort {
-    port: Int!
-    protocol: String!
-}
+#type ContainerPort {
+#    port: Int!
+#    protocol: String!
+#}
 
 type ServicePort {
     name: String!

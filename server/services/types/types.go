@@ -191,20 +191,20 @@ func (input *FlagTypeInput) CheckPass() bool {
 }
 
 type NodeConfigInput struct {
-	Name         string
-	Image        string
-	Ports        []ContainerPortInput
+	Name  string
+	Image string
+	//Ports        []ContainerPortInput
 	ServicePorts []ServicePortInput
 }
 
 func (input *NodeConfigInput) CheckPass() bool {
 	input.Name = strings.ToLower(strings.TrimSpace(input.Name))
 	input.Image = strings.ToLower(strings.TrimSpace(input.Image))
-	for _, port := range input.Ports {
-		if !port.CheckPass() {
-			return false
-		}
-	}
+	//for _, port := range input.Ports {
+	//	if !port.CheckPass() {
+	//		return false
+	//	}
+	//}
 	portNameSet := map[string]struct{}{}
 	for _, port := range input.ServicePorts {
 		if !port.CheckPass() {
@@ -219,37 +219,37 @@ func (input *NodeConfigInput) CheckPass() bool {
 }
 
 func (input *NodeConfigInput) ToNodeConfig() NodeConfig {
-	ports := []ContainerPort{}
-	for _, port := range input.Ports {
-		ports = append(ports, port.ToContainerPort())
-	}
+	//ports := []ContainerPort{}
+	//for _, port := range input.Ports {
+	//	ports = append(ports, port.ToContainerPort())
+	//}
 	servicePorts := []ServicePort{}
 	for _, port := range input.ServicePorts {
 		servicePorts = append(servicePorts, port.ToServicePort())
 	}
 	return NodeConfig{
-		Name:         input.Name,
-		Image:        input.Name,
-		Ports:        ports,
+		Name:  input.Name,
+		Image: input.Name,
+		//Ports:        ports,
 		ServicePorts: servicePorts,
 	}
 }
 
-type ContainerPortInput struct {
-	Port     int32
-	Protocol string
-}
+//type ContainerPortInput struct {
+//	Port     int32
+//	Protocol string
+//}
 
-func (input *ContainerPortInput) CheckPass() bool {
-	return input.Port > 0 && input.Port <= 65535 && (input.Protocol == "TCP" || input.Protocol == "UDP")
-}
+//func (input *ContainerPortInput) CheckPass() bool {
+//	return input.Port > 0 && input.Port <= 65535 && (input.Protocol == "TCP" || input.Protocol == "UDP")
+//}
 
-func (input *ContainerPortInput) ToContainerPort() ContainerPort {
-	return ContainerPort{
-		Port:     input.Port,
-		Protocol: input.Protocol,
-	}
-}
+//func (input *ContainerPortInput) ToContainerPort() ContainerPort {
+//	return ContainerPort{
+//		Port:     input.Port,
+//		Protocol: input.Protocol,
+//	}
+//}
 
 type ServicePortInput struct {
 	Name     string
@@ -367,16 +367,16 @@ type ChallengeConfig struct {
 }
 
 type NodeConfig struct {
-	Name         string
-	Image        string
-	Ports        []ContainerPort
+	Name  string
+	Image string
+	//Ports        []ContainerPort
 	ServicePorts []ServicePort
 }
 
-type ContainerPort struct {
-	Port     int32
-	Protocol string
-}
+//type ContainerPort struct {
+//	Port     int32
+//	Protocol string
+//}
 
 type ServicePort struct {
 	Name     string
