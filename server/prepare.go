@@ -396,7 +396,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 			Username: "Tp0t",
 			Password: "admin",
 			Mail:     "admin@example.com",
-			Port:     8080,
+			Port:     0,
 			Salt:     strconv.FormatInt(rd.Int63(), 10),
 			Debug:    false,
 		},

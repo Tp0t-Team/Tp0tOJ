@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	//"github.com/gorilla/sessions"
 	"log"
 	"net/http"
@@ -29,5 +30,19 @@ func main() {
 		}
 	}
 
-	log.Fatal(http.ListenAndServe(":8888", nil))
+	_, crtErr := os.Stat("resources/https.crt")
+	_, keyErr := os.Stat("resources/https.key")
+	if crtErr == nil && keyErr == nil {
+		if configure.Configure.Server.Port == 0 {
+			configure.Configure.Server.Port = 443
+		}
+		portString := fmt.Sprintf(":%d", configure.Configure.Server.Port)
+		log.Fatal(http.ListenAndServeTLS(portString, "resources/https.crt", "resources/https.key", nil))
+	} else {
+		if configure.Configure.Server.Port == 0 {
+			configure.Configure.Server.Port = 80
+		}
+		portString := fmt.Sprintf(":%d", configure.Configure.Server.Port)
+		log.Fatal(http.ListenAndServe(portString, nil))
+	}
 }
