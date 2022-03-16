@@ -24,17 +24,17 @@ type Email struct {
 	Password string `yaml:"password"`
 }
 
-type Redis struct {
-	Password  string `yaml:"password"`
-	MaxActive int    `yaml:"maxActive"`
-	MaxIdle   int    `yaml:"maxIdle"`
-	Database  int    `yaml:"database"`
-	Host      string `yaml:"host"`
-	Port      int    `yaml:"port"`
-	MaxWait   string `yaml:"maxWait"`
-	MinIdle   int    `yaml:"minIdle"`
-	Timeout   int    `yaml:"timeout"`
-}
+//type Redis struct {
+//	Password  string `yaml:"password"`
+//	MaxActive int    `yaml:"maxActive"`
+//	MaxIdle   int    `yaml:"maxIdle"`
+//	Database  int    `yaml:"database"`
+//	Host      string `yaml:"host"`
+//	Port      int    `yaml:"port"`
+//	MaxWait   string `yaml:"maxWait"`
+//	MinIdle   int    `yaml:"minIdle"`
+//	Timeout   int    `yaml:"timeout"`
+//}
 
 type Challenge struct {
 	SecondBloodReward float64 `yaml:"secondBloodReward"`
