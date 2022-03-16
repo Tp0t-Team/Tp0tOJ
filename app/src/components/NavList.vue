@@ -115,7 +115,7 @@
       </v-list-item>
     </v-list-item-group>
   </v-list>
-  <v-tooltip top v-if="$store.state.global.role=='user'">
+  <v-tooltip top v-if="$store.state.global.role=='member'">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
         text
