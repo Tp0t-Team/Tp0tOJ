@@ -46,7 +46,9 @@ sudo systemctl restart docker
 ./prepare -MasterIP xxx.xxx.xxx.xxx
 ```
 
-prepare会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
+执行`prepare` 会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
+
+`home.html`为提供了主页面定制化的功能，在前后端一体化的单文件模式下，如果平台`resources` 目录中存在`home.html` 会将其作为平台主页展示
 
 ```
 .
@@ -66,6 +68,7 @@ prepare会在当前目录下生成配置文件目录`resources`，安装完成�
 │   ├── [https.crt]      #「非自动生成」网站TLS证书
 │   ├── [https.key]      #「非自动生成」网站TLS私钥
 │   ├── k3s.yaml         #自动生成的k3s配置文件，不需要修改
+|   ├── [home.html]      #「非自动生成」如果存在，会加载该网页做为主页面
 │   ├── tls.crt          #镜像仓库公私钥备份
 │   └── tls.key          #镜像仓库公私钥备份
 └── start.sh             #「配置完毕后启动」启动脚本
