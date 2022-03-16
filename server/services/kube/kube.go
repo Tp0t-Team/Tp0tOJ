@@ -138,9 +138,9 @@ func ParseProtocol(name string) corev1.Protocol {
 	}
 }
 
-func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
-	return &corev1.ContainerPort{Name: "port-" + strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
-}
+//func NewContainerPortConfig(protocol corev1.Protocol, containerPort int32) *corev1.ContainerPort {
+//	return &corev1.ContainerPort{Name: "port-" + strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
+//}
 
 //NewServicePortConfig
 //portName is like 'ssh'\'ftp' etc. ,this can be anyone you like, but must be unique for same pod.
