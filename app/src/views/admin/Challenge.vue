@@ -247,10 +247,6 @@ export default class Challenge extends Vue {
                   nodeConfig {
                     name
                     image
-                    ports {
-                      port
-                      protocol
-                    }
                     servicePorts {
                       name
                       protocol
