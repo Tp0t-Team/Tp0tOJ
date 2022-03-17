@@ -315,7 +315,7 @@ func K8sPodDestroy(replicaId uint64, containerName string) bool {
 	service, err = clientSet.CoreV1().Services(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 	if err != nil {
 		if cased, ok := err.(*kerr.StatusError); ok && cased.Status().Reason == metav1.StatusReasonNotFound {
-			deployment = nil
+			service = nil
 		} else {
 			log.Println(err)
 			return false
