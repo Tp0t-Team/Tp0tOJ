@@ -150,7 +150,7 @@ func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPor
 }
 
 func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, servicePorts []corev1.ServicePort, flag string) bool {
-	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + "-" + containerName
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: id,
@@ -290,7 +290,7 @@ func K8sPodList() {
 }
 
 func K8sPodDestroy(replicaId uint64, containerName string) bool {
-	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + "-" + containerName
 	var deployment *appsv1.Deployment
 	var err error
 	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
@@ -385,7 +385,7 @@ func K8sStatus() ([]gtypes.ClusterNodeInfo, []gtypes.ClusterReplicaInfo) {
 }
 
 func K8sServiceGetUrls(replicaId uint64, containerName string) []string {
-	id := "replica-" + strconv.FormatUint(replicaId, 10) + containerName
+	id := "replica-" + strconv.FormatUint(replicaId, 10) + "-" + containerName
 	var deployment *appsv1.Deployment
 	var err error
 	deployment, err = clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
