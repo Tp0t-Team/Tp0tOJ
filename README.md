@@ -235,7 +235,7 @@ flag:
   dynamic: true #是否开启动态积分
 description: "this is a test pwn"
 externalLink: [http://cloud.lordcasser.com/s/DkxtK] #题目附件链接
-singleton: false #false时题目所有用户都是同一个环境/flag，true时每人一个环境
+singleton: false #true时题目所有用户都是同一个环境/flag，false时每人一个环境
 nodeConfig:
   - name: "pwn1" #节点名称，要求[a~z 0~9]且必须有一个字母
     image: "pwn1" #题目使用镜像的名称，需要提前上传好所使用的镜像
