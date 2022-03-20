@@ -36,6 +36,7 @@ var dockerClient *client.Client
 var dockerPushAuth string
 var registryClient *registry.Registry
 
+const podCreatTimeout = 8 //time
 type portAllocInfo struct {
 	allocated map[int32]struct{}
 	current   int32
@@ -207,7 +208,7 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, servic
 	}
 
 	// wait for pod ok
-	for {
+	for i := 0; i < podCreatTimeout; i++ {
 		state, err2 := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 		if err2 != nil {
 			return false
