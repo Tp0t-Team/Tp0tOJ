@@ -331,6 +331,30 @@ func FindEnabledChallenges() []entity.Challenge {
 	}
 	return challenges
 }
+func CheckEnabledChallengesByImage(imageName string) bool {
+	var challenges []entity.Challenge
+	result := db.Where(map[string]interface{}{"state": "enabled"}).Find(&challenges)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return true
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return false
+	}
+	for _, challenge := range challenges {
+		var config types.ChallengeConfig
+		err := json.Unmarshal([]byte(challenge.Configuration), &config)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+		for _, nodeConfig := range config.NodeConfig {
+			if nodeConfig.Image == imageName {
+				return false
+			}
+		}
+	}
+	return true
+}
 
 func DeleteChallenge(challengeId string) bool {
 	//var challenge entity.Challenge

@@ -150,6 +150,11 @@ func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ In
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.DeleteImageResult{Message: "forbidden or login timeout"}
 	}
+	//can not delete image when some challenge is enabled
+	ok := resolvers.CheckEnabledChallengesByImage(input)
+	if !ok {
+		return &types.DeleteImageResult{Message: "some challenge rely this image, delete failed"}
+	}
 	err := kube.ImgDelete(input)
 	if err != nil {
 		log.Println(err)
