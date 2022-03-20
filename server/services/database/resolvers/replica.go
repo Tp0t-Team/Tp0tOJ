@@ -281,7 +281,10 @@ var ReplicaTimer = replicaTimer{clock: map[uint64]*time.Timer{}}
 func DeleteReplicaByUserId(userId uint64) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var allocs []entity.ReplicaAlloc
-		tx.Preload("Replica").Where(map[string]interface{}{"user_id": userId}).First(&allocs)
+		getResult := tx.Preload("Replica").Where(map[string]interface{}{"user_id": userId}).Find(&allocs)
+		if !errors.Is(getResult.Error, gorm.ErrRecordNotFound) && getResult.Error != nil {
+			return getResult.Error
+		}
 		for _, alloc := range allocs {
 			if !alloc.Replica.Singleton {
 				ok := DeleteReplicaAllocByReplicaId(alloc.Replica.ReplicaId, tx)
@@ -305,20 +308,19 @@ func DeleteReplicaByUserId(userId uint64) bool {
 
 func DeleteReplicaById(replicaId uint64) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
-		var allocs []entity.ReplicaAlloc
-		tx.Preload("Replica").Where(map[string]interface{}{"replica_id": replicaId}).First(&allocs)
-		for _, alloc := range allocs {
-			if !alloc.Replica.Singleton {
-				ok := DeleteReplicaAllocByReplicaId(alloc.Replica.ReplicaId, tx)
-				if !ok {
-					return errors.New("deleteReplicaAllocByReplicaId occurred error")
-				}
-				if ok := DisableReplica(alloc.Replica.ReplicaId, tx); !ok {
-					return errors.New("disable replica failed")
-				}
-				tx.Delete(&alloc.Replica)
-			}
+		var replica entity.Replica
+		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+		if getResult.Error != nil {
+			return getResult.Error
 		}
+		ok := DeleteReplicaAllocByReplicaId(replica.ReplicaId, tx)
+		if !ok {
+			return errors.New("deleteReplicaAllocByReplicaId occurred error")
+		}
+		if ok := DisableReplica(replica.ReplicaId, tx); !ok {
+			return errors.New("disable replica failed")
+		}
+		tx.Delete(&replica)
 		return nil
 	})
 	if err != nil {
