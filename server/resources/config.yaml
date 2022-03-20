@@ -1,23 +1,24 @@
-server:
-  host: 127.0.0.1
-  username: Tp0t
-  password: admin
-  mail: tp0t_team@163.com
-  port: 8080
-  salt: "3916589616287113937"
-  debug: false
-email:
-  host: smtp.163.com
-  username: tp0t_team@163.com
-  password: VHTPXZJYRYKGZBHA
-challenge:
-  secondBloodReward: 0.08
-  thirdBloodReward: 0.05
-  halfLife: 20
-  firstBloodReward: 0.1
-kubernetes:
-  portAllocBegin: 30000
-  portAllocEnd: 40000
-  username: e3657677
-  password: 5cfe939d
-  registryHost: 110.40.152.78:5000
+server:                              #平台服务器的配置参数
+  host: 127.0.0.1                    #不用更改
+  username: Tp0t                     #默认admin用户名
+  password: admin                    #默认admin账号密码
+  mail: admin@example.com            #默认admin账号邮箱
+  port: 0                            #0时自动选择80/443，非0指定端口
+  salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
+  debug: false                       #无用参数
+email:                               #邮件服务配置
+  host: smtp.example.com             #邮件服务提供商服务器
+  username: exampleUsername          #邮件发送账号
+  password: examplePassword          #邮件发送账号密码（可能为授权码）
+challenge:                           #题目分数控制参数
+  firstBloodReward: 0.1              #一血分数奖励比例
+  secondBloodReward: 0.08            #二血分数奖励比例
+  thirdBloodReward: 0.05             #三血分数奖励比例
+  halfLife: 20                       #题目分值减半所需解题人数
+kubernetes:                          #k8s集群配置参数
+  portAllocBegin: 30000              #自动分配端口范围起点
+  portAllocEnd: 31000                #自动分配端口终点
+  username: xxxxxxxx                 #「不可修改」镜像仓库用户名
+  password: xxxxxxxx                 #「不可修改」镜像仓库密码
+  registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致）
+  
