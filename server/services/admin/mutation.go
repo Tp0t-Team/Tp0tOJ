@@ -166,7 +166,7 @@ func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ In
 
 func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ Input string }) *types.DeleteReplicaResult {
 	replicaName := args.Input
-	replicaId, err := strconv.ParseUint(strings.Split(replicaName, "-")[1], 64, 10)
+	replicaId, err := strconv.ParseUint(strings.Split(replicaName, "-")[1], 10, 64)
 	if err != nil {
 		log.Println(err)
 		return &types.DeleteReplicaResult{Message: "wrong replica name"}
