@@ -9,6 +9,7 @@ import (
 	"server/services/types"
 	"server/utils"
 	"strconv"
+	"strings"
 )
 
 type AdminMutationResolver struct {
@@ -161,4 +162,21 @@ func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ In
 		return &types.DeleteImageResult{Message: "delete image error"}
 	}
 	return &types.DeleteImageResult{Message: ""}
+}
+
+func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ Input string }) *types.DeleteReplicaResult {
+	replicaName := args.Input
+	replicaId, err := strconv.ParseUint(strings.Split(replicaName, "-")[1], 64, 10)
+	if err != nil {
+		log.Println(err)
+		return &types.DeleteReplicaResult{Message: "wrong replica name"}
+	}
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteReplicaResult{Message: "forbidden or login timeout"}
+	}
+	// TODO:
+	return &types.DeleteReplicaResult{Message: ""}
 }

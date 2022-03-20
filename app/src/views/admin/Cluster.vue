@@ -2,13 +2,50 @@
   <div>
     <v-container fill-width>
       <v-row>
+        <v-spacer></v-spacer>
+        <v-col cols="7">
+          <v-tabs v-model="tab" centered>
+            <v-tabs-slider></v-tabs-slider>
+            <v-tab href="#tab-1"> Nodes </v-tab>
+            <v-tab href="#tab-2"> Replicas </v-tab>
+          </v-tabs>
+          <v-tabs-items v-model="tab">
+            <v-tab-item value="tab-1">
+              <v-data-table
+                :headers="nodeHeaders"
+                :items="nodes"
+              ></v-data-table>
+            </v-tab-item>
+            <v-tab-item value="tab-2">
+              <v-data-table
+                :headers="replicaHeaders"
+                :items="replicas"
+                :loading="loading"
+              >
+                <template v-slot:item.delete="{ item }">
+                  <v-btn
+                    text
+                    color="primary"
+                    @click="delReplica(item.name)"
+                    :disabled="loading"
+                  >
+                    delete
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-col>
+        <v-spacer></v-spacer>
+      </v-row>
+      <!-- <v-row>
         <v-col cols="7">
           <v-data-table :headers="nodeHeaders" :items="nodes"></v-data-table>
         </v-col>
         <v-col cols="5">
           <v-data-table :headers="replicaHeaders" :items="replicas"></v-data-table>
         </v-col>
-      </v-row>
+      </v-row> -->
       <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
         {{ infoText }}
         <!-- <v-spacer></v-spacer> -->
@@ -25,7 +62,14 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { ClusterInfoResult, ClusterNodeInfo, ClusterReplicaInfo, ImageInfo, ImageInfoResult, Result } from "@/struct";
+import {
+  ClusterInfoResult,
+  ClusterNodeInfo,
+  ClusterReplicaInfo,
+  ImageInfo,
+  ImageInfoResult,
+  Result,
+} from "@/struct";
 
 @Component
 export default class Cluster extends Vue {
@@ -41,13 +85,18 @@ export default class Cluster extends Vue {
     { text: "name", value: "name" },
     { text: "node", value: "node" },
     { text: "status", value: "status" },
+    { text: "", value: "delete" },
   ];
+
+  private tab: any = null;
 
   private nodes: ClusterNodeInfo[] = [];
   private replicas: ClusterReplicaInfo[] = [];
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+  private loading: boolean = false;
 
   async mounted() {
     await this.loadData();
@@ -82,6 +131,38 @@ export default class Cluster extends Vue {
       this.nodes = res.data!.clusterInfo.nodes;
       this.replicas = res.data!.clusterInfo.replicas;
     } catch (e) {
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
+  }
+
+  
+  async delReplica(name: string) {
+    this.loading = true;
+    try {
+      let res = await this.$apollo.mutate<
+        { deleteReplica: Result },
+        { input: string }
+      >({
+        mutation: gql`
+          mutation ($input: String!) {
+            deleteReplica(input: $input) {
+              message
+            }
+          }
+        `,
+        variables: {
+          input: name,
+        },
+      });
+      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.data!.deleteReplica.message) throw res.data!.deleteReplica.message;
+      this.loading = false;
+      this.infoText = "delete success";
+      this.hasInfo = true;
+      await this.loadData();
+    } catch (e) {
+      this.loading = false;
       this.infoText = e.toString();
       this.hasInfo = true;
     }

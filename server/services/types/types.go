@@ -450,6 +450,10 @@ type DeleteImageResult struct {
 	Message string
 }
 
+type DeleteReplicaResult struct {
+	Message string
+}
+
 type ClusterNodeInfo struct {
 	Name         string
 	OsType       string

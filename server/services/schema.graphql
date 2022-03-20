@@ -21,6 +21,7 @@ type Mutation {
     warmUp: Boolean!
     startReplica(input: String!): StartReplicaResult!
     deleteImage(input: String!): DeleteImageResult!
+    deleteReplica(input: String!): DeleteReplicaResult!
 }
 
 input RegisterInput {
@@ -343,6 +344,10 @@ type ImageInfo {
 }
 
 type DeleteImageResult {
+    message: String!
+}
+
+type DeleteReplicaResult {
     message: String!
 }
 
