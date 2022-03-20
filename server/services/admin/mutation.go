@@ -177,6 +177,9 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.DeleteReplicaResult{Message: "forbidden or login timeout"}
 	}
-	// TODO:
+	ok := resolvers.DeleteReplicaById(replicaId)
+	if !ok {
+		return &types.DeleteReplicaResult{Message: "delete replica error"}
+	}
 	return &types.DeleteReplicaResult{Message: ""}
 }

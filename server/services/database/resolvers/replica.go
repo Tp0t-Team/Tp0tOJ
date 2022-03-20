@@ -303,6 +303,31 @@ func DeleteReplicaByUserId(userId uint64) bool {
 	return true
 }
 
+func DeleteReplicaById(replicaId uint64) bool {
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var allocs []entity.ReplicaAlloc
+		tx.Preload("Replica").Where(map[string]interface{}{"replica_id": replicaId}).First(&allocs)
+		for _, alloc := range allocs {
+			if !alloc.Replica.Singleton {
+				ok := DeleteReplicaAllocByReplicaId(alloc.Replica.ReplicaId, tx)
+				if !ok {
+					return errors.New("deleteReplicaAllocByReplicaId occurred error")
+				}
+				if ok := DisableReplica(alloc.Replica.ReplicaId, tx); !ok {
+					return errors.New("disable replica failed")
+				}
+				tx.Delete(&alloc.Replica)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
+}
+
 func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 	oldTimer := ReplicaTimer.DeleteTimer(userId)
 	err := db.Transaction(func(tx *gorm.DB) error {
