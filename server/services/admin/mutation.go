@@ -181,5 +181,10 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 	if !ok {
 		return &types.DeleteReplicaResult{Message: "delete replica error"}
 	}
+	ok = kube.K8sPodDestroy(replicaId, replicaName[len(strings.Split(replicaName, "-")[1])+9:])
+	if !ok {
+		log.Println("destroy pod failed - replica: " + replicaName)
+		return &types.DeleteReplicaResult{Message: "delete replica in k8s error"}
+	}
 	return &types.DeleteReplicaResult{Message: ""}
 }
