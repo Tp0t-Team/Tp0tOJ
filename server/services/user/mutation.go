@@ -22,7 +22,7 @@ import (
 
 type resetTimer struct {
 	clock map[uint64]*time.Timer
-	lock  sync.Mutex
+	lock  sync.RWMutex
 }
 
 func (t *resetTimer) NewTimer(userId uint64) bool {
@@ -33,13 +33,21 @@ func (t *resetTimer) NewTimer(userId uint64) bool {
 	}
 	t.clock[userId] = time.NewTimer(5 * time.Minute)
 	go func() {
+		t.lock.RLock()
+		clock := t.clock[userId]
+		t.lock.RUnlock()
 		select {
-		case <-t.clock[userId].C:
-			t.clock[userId].Stop()
-			delete(t.clock, userId)
+		case <-clock.C:
+			clock.Stop()
+			t.lock.Lock()
+			if clock == t.clock[userId] {
+				delete(t.clock, userId)
+			}
+			t.lock.Unlock()
+			break
 		case <-time.After(10 * time.Minute):
 			log.Println("some thing error at resetTimer, timeout")
-			delete(t.clock, userId)
+			break
 		}
 	}()
 	return true
