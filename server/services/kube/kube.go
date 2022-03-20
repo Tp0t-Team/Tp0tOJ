@@ -208,7 +208,8 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, servic
 	}
 
 	// wait for pod ok
-	for i := 0; i < podCreatTimeout; i++ {
+
+	for i := 0; ; i++ {
 		state, err2 := clientSet.AppsV1().Deployments(corev1.NamespaceDefault).Get(context.TODO(), id, metav1.GetOptions{})
 		if err2 != nil {
 			return false
@@ -226,6 +227,9 @@ func K8sPodAlloc(replicaId uint64, containerName string, imgLabel string, servic
 		}
 		if finish {
 			break
+		}
+		if i >= podCreatTimeout {
+			return false
 		}
 		time.Sleep(5 * time.Second)
 	}
