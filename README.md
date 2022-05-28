@@ -120,9 +120,13 @@ kubernetes:                          #k8s集群配置参数
 
 题目分数曲线公式：
 
-![k=\frac{1.8414\cdot(N_{solved}-1)}{HalfLife}](https://latex.codecogs.com/svg.image?k=\frac{1.8414\cdot(N_{solved}-1)}{HalfLife})
+$$k=\frac{1.8414\cdot(N_{solved}-1)}{HalfLife}$$
 
-![RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor](https://latex.codecogs.com/svg.image?RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor)
+$$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
+
+<!-- ![k=\frac{1.8414\cdot(N_{solved}-1)}{HalfLife}](https://latex.codecogs.com/svg.image?k=\frac{1.8414\cdot(N_{solved}-1)}{HalfLife}) -->
+
+<!-- ![RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor](https://latex.codecogs.com/svg.image?RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor) -->
 
 题目分数曲线示例：
 
