@@ -795,7 +795,7 @@ func main() {
 		fmt.Println("You need give your MasterIP.")
 		os.Exit(1)
 	}
-	if _, err := os.Stat("resources"); err == os.ErrNotExist {
+	if _, err := os.Stat("resources"); os.IsNotExist(err) {
 		err = os.MkdirAll("resources", 0755)
 		if err != nil {
 			fmt.Println(err)
