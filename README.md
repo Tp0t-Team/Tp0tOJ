@@ -280,3 +280,9 @@ npm install #必要情况下可以删除package-lock.json
 ```shell
 go run build.go
 ```
+
+构建prepare可执行文件
+
+```shell
+go build prepare.go
+```
