@@ -19,6 +19,8 @@
 
 ### 环境准备
 
+**官方推荐Ubuntu22.04，其他系统请按照开发中的编译指南自行编译**
+
 因为题目image build依赖于docker，所以需要先安装好**和本机网段无冲突的Docker**，我们在测试过程中发现部分云服务提供商默认Docker网段和本机局域网网段冲突，导致build镜像的时候无法正常访问网络
 
 [Install Docker Engine | Docker Documentation](https://docs.docker.com/engine/install/)
