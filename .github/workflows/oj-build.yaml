@@ -51,4 +51,12 @@ jobs:
 
     - name: Build Prepare
       working-directory: ./server
-      run: go build prepare.go
+      run: go build -o prepare_$(go env GOOS)_$(go env GOARCH) prepare.go
+    
+    - name: Archive results
+      uses: actions/upload-artifact@v3
+      with:
+        name: output
+        path: |
+          ./server/OJ_*
+          ./server/prepare_*
