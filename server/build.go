@@ -99,10 +99,14 @@ func main() {
 
 	serverCmd := exec.Command("go", "build", "-tags", "WithFrontEnd", "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH), "main.go")
 	log.Println("build server...")
+	errLog, _ := serverCmd.StderrPipe()
 	err = serverCmd.Run()
 	if err != nil {
+		io.Copy(os.Stdout, errLog)
+		errLog.Close()
 		log.Panicln(err)
 	}
+	errLog.Close()
 
 	err = os.RemoveAll("services/static")
 	if err != nil {
