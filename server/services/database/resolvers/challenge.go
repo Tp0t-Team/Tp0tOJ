@@ -198,10 +198,12 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		log.Println(err)
 		return false
 	}
-	err = utils.Cache.WarmUp()
-	if err != nil {
-		log.Println("warm up error:\n" + err.Error())
-		return false
+	if needWarmUp {
+		err = utils.Cache.WarmUp()
+		if err != nil {
+			log.Println("warm up error:\n" + err.Error())
+			return false
+		}
 	}
 	return true
 }
