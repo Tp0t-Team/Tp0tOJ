@@ -3,6 +3,7 @@ name: Tp0t_OJ
 on:
   release:
     type: [published]
+  workflow_dispatch:
 
 jobs:
   build:
