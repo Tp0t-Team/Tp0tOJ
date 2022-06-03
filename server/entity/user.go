@@ -16,6 +16,7 @@ type User struct {
 	State     string    `gorm:"check: state <> ''"` //normal,disabled
 	Mail      string    `gorm:"check: mail <> ''"`
 	JoinTime  time.Time `gorm:"not null"`
+	Team      Team      `gorm:"references:TeamId;"`
 	Role      string    `gorm:"check: role <> ''"`
 	CreatedAt time.Time `gorm:"autoCreateTime;not null;"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime;not null;"`

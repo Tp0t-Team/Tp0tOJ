@@ -97,6 +97,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 			Score:    int32(utils.Cache.GetUserScore(user.UserId)),
 			Role:     user.Role,
 			State:    user.State,
+			Team
 			//Rank:     0, //
 		}}
 	if *session.Get("isAdmin").(*bool) || parsedUserId == currentUserId {

@@ -300,6 +300,7 @@ type UserInfo struct {
 	Score    int32
 	Role     string
 	State    string
+	Team     string
 	//Rank     int
 }
 
@@ -493,4 +494,12 @@ func (input *ChallengeActionInput) CheckPass() bool {
 type ChallengeActionResult struct {
 	Message    string
 	Successful []string
+}
+
+type QuitTeamResult struct {
+	Message string
+}
+
+type JoinTeamResult struct {
+	Message string
 }

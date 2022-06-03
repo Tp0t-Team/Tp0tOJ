@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"server/services/admin"
 	"server/services/user"
-	"time"
 )
 
 type Resolver struct {
@@ -38,7 +37,8 @@ func init() {
 		// 0 means no expire.
 		// -1 means expire when browser closes
 		// or set a value, like 2 hours:
-		Expires: time.Hour * 1,
+		//Expires: time.Hour * 1,
+		Expires: -1,
 		// if you want to invalid cookies on different subdomains
 		// of the same host, then enable it
 		DisableSubdomainPersistence: false,

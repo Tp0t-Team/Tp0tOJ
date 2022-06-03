@@ -151,7 +151,6 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.LogoutResult{Message: "not login yet"}
 	}
-	session.Delete("isTeam")
 	session.Delete("isAdmin")
 	session.Delete("userId")
 	var state = false
@@ -276,4 +275,31 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 		return &types.StartReplicaResult{Message: "start failed"}
 	}
 	return &types.StartReplicaResult{Message: ""}
+}
+
+func (r *MutationResolver) QuitTeam(ctx context.Context) *types.QuitTeamResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.QuitTeamResult{Message: "forbidden or login timeout"}
+	}
+	userId := *session.Get("userId").(*uint64)
+	//TODO: impl quit in db resolver
+}
+func (r *MutationResolver) CreateTeam(owner uint64, name string, state string) bool {
+
+}
+func (r *MutationResolver) JoinTeam(userId uint64, token string) {
+
+}
+
+func (r *MutationResolver) ResetToken(teamId uint64) bool {
+
+}
+func (r *MutationResolver) RenameTeam(name string, teamId uint64) {
+
+}
+
+func genTeamToken(teamId uint64) string {
+
 }
