@@ -42,18 +42,12 @@
             <tr>
               <th>submit time</th>
               <th>challenge name</th>
-              <th>mark</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in resolves" :key="item.submitTime">
               <td>{{item.submitTime}}</td>
               <td>{{item.challengeName}}</td>
-              <td>
-                <v-badge v-if="!!item.mark" class="mark-badge" :color="rankColor[item.mark - 1]">
-                  <template v-slot:badge>{{item.mark}}</template>
-                </v-badge>
-              </td>
             </tr>
           </tbody>
         </v-simple-table> -->
@@ -170,7 +164,6 @@ export default class User extends Vue {
   //             submitInfos {
   //               submitTime
   //               challengeName
-  //               mark
   //             }
   //           }
   //         }
@@ -245,8 +238,8 @@ export default class User extends Vue {
   bottom: -32px;
 }
 
-.mark-badge {
-  position: relative;
-  top: -4px;
-}
+// .mark-badge {
+//   position: relative;
+//   top: -4px;
+// }
 </style>

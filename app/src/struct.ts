@@ -90,7 +90,7 @@ export type ChallengeConfigWithId = {
 export interface SubmitInfo {
     submitTime: String
     challengeName: String
-    mark: number
+    // mark: number
 }
 
 // query userInfo

@@ -79,18 +79,18 @@
             <tr>
               <th>submit time</th>
               <th>challenge name</th>
-              <th>mark</th>
+              <!-- <th>mark</th> -->
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in resolves" :key="item.submitTime">
               <td>{{new Date(item.submitTime).toLocaleString()}}</td>
               <td>{{item.challengeName}}</td>
-              <td>
+              <!-- <td>
                 <v-badge v-if="!!item.mark" class="mark-badge" :color="rankColor[item.mark - 1]">
                   <template v-slot:badge>{{item.mark}}</template>
                 </v-badge>
-              </td>
+              </td> -->
             </tr>
           </tbody>
         </v-simple-table>
@@ -206,7 +206,6 @@ export default class Profile extends Vue {
               submitInfos {
                 submitTime
                 challengeName
-                mark
               }
             }
           }
