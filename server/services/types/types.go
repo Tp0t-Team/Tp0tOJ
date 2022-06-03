@@ -335,8 +335,12 @@ type ChallengeInfo struct {
 	Blood        []BloodInfo
 	Done         bool
 	Manual       bool
-	Allocated    bool
+	Allocated    int32
 }
+
+const AllocatedUndone int32 = 0
+const AllocatedDoing int32 = 1
+const AllocatedDone int32 = 2
 
 type BloodInfo struct {
 	UserId string

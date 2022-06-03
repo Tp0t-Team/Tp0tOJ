@@ -54,17 +54,17 @@
     <v-dialog
       v-model="showDialog"
       :persistent="loading"
-      width="400px"
+      width="600px"
       v-if="currentChallenge!=null"
     >
-      <v-card width="400px" height="300px">
+      <v-card width="600px" height="400px">
         <v-sheet :elevation="2" class="title pr-4">
           <div class="title title-score pl-2 pr-2">
             <span>{{currentChallenge.score}}pt</span>
           </div>
           <span class="ml-2">{{currentChallenge.name}}</span>
           <v-spacer></v-spacer>
-          <v-tooltip right v-if="currentChallenge.manual && !currentChallenge.allocated">
+          <v-tooltip right v-if="currentChallenge.manual && currentChallenge.allocated == 0">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 v-bind="attrs"
@@ -81,7 +81,8 @@
             </template>
             <span>Start This Challenge</span>
           </v-tooltip>
-          <v-icon v-if="currentChallenge.allocated">cloud_done</v-icon>
+          <v-icon class="doing" v-if="currentChallenge.allocated == 1">sync</v-icon>
+          <v-icon v-if="currentChallenge.allocated == 2">cloud_done</v-icon>
         </v-sheet>
         <v-text-field
           v-model="sumbitFlag"
@@ -89,7 +90,7 @@
           class="ma-4 mb-0 dialog-flag"
           label="flag"
           append-icon="send"
-          :disabled="loading"
+          :disabled="loading || currentChallenge.done"
           :loading="loading"
           @click:append="submit"
           :error-messages="submitError"
@@ -160,7 +161,7 @@ export default class Challenge extends Vue {
   private loading: boolean = false;
 
   private replicaLoading: boolean = false;
-  private allocated: boolean = false;
+  // private allocated: number = 0;
 
   private infoText: string = "";
   private hasInfo: boolean = false;
@@ -209,12 +210,12 @@ export default class Challenge extends Vue {
 
   openDetial(id: string) {
     let c = this.challenges.find(v => v.challengeId == id);
-    if (!c || c.done) return;
+    if (!c/* || c.done*/) return;
     this.currentChallenge = c;
     this.sumbitFlag = "";
     this.submitError = "";
     this.showDialog = true;
-    this.allocated = this.currentChallenge.allocated;
+    // this.allocated = this.currentChallenge.allocated;
     this.replicaLoading = false;
   }
 
@@ -261,15 +262,15 @@ export default class Challenge extends Vue {
     this.sumbitFlag = "";
     this.submitError = "";
     this.replicaLoading = false;
-    if (!c || c.done) {
+    if (!c/* || c.done*/) {
       this.currentChallenge = null;
       this.showDialog = false;
-      this.allocated = false;
+      // this.allocated = 0;
       return;
     }
     this.currentChallenge = c;
     this.showDialog = true;
-    this.allocated = this.currentChallenge.allocated;
+    // this.allocated = this.currentChallenge.allocated;
   }
 
   async submit() {
@@ -365,6 +366,23 @@ export default class Challenge extends Vue {
 
 .title-score {
   background-color: rgb(245,124,0);
+}
+
+@keyframes doing {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+.doing {
+  animation-duration: 2s;
+  animation-name: doing;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
 </style>

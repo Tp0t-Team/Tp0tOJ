@@ -229,7 +229,7 @@ type ChallengeInfo {
     blood: [BloodInfo!]!
     done: Boolean!
     manual: Boolean!
-    allocated: Boolean!
+    allocated: Int!
 }
 
 type BloodInfo {

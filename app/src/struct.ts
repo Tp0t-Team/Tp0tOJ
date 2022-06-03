@@ -35,7 +35,7 @@ export interface ChallengeDesc {
     }[]
     done: boolean
     manual: boolean
-    allocated: boolean
+    allocated: number
 }
 
 export interface RankDesc {

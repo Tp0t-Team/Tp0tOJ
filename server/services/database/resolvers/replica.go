@@ -430,9 +430,16 @@ func DeleteReplicaById(replicaId uint64, cb func(status bool)) bool {
 	return true
 }
 
+var AllocatingTableMtx = sync.RWMutex{}
+var AllocatingTable = map[uint64]map[uint64]bool{}
+
 func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 	oldTimer := ReplicaTimer.DeleteTimer(userId)
 	mtx := sync.RWMutex{}
+	if _, ok := AllocatingTable[userId]; !ok {
+		AllocatingTable[userId] = map[uint64]bool{}
+	}
+	AllocatingTable[userId][challengeId] = true
 	err := db.Transaction(func(tx *gorm.DB) error {
 		challenge, err := FindChallengeById(challengeId)
 		if err != nil {
@@ -469,6 +476,9 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 			ReplicaTimer.RecoverTimer(userId, oldTimer)
 		}
 		log.Println(err)
+		AllocatingTableMtx.Lock()
+		delete(AllocatingTable[userId], challengeId)
+		AllocatingTableMtx.Unlock()
 		return false
 	}
 	go func() {
@@ -481,12 +491,18 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 					ReplicaTimer.RecoverTimer(userId, oldTimer)
 				}
 				log.Println(errors.New("alloc replica failed"))
+				AllocatingTableMtx.Lock()
+				delete(AllocatingTable[userId], challengeId)
+				AllocatingTableMtx.Unlock()
 				return
 			}
 			ok := ReplicaTimer.NewTimer(userId)
 			if !ok {
 				log.Println("new timer failed", userId)
 			}
+			AllocatingTableMtx.Lock()
+			delete(AllocatingTable[userId], challengeId)
+			AllocatingTableMtx.Unlock()
 		})
 		if newReplica == nil {
 			if oldTimer != nil {

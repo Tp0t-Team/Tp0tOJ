@@ -175,6 +175,18 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			}
 		}
 		replicaUrls = append(replicaUrls, config.ExternalLink...)
+		allocState := types.AllocatedUndone
+		if alloc != nil {
+			allocState = types.AllocatedDone
+		} else {
+			resolvers.AllocatingTableMtx.RLock()
+			if _, ok := resolvers.AllocatingTable[currentUserId]; ok {
+				if _, ok := resolvers.AllocatingTable[currentUserId][challenge.ChallengeId]; ok {
+					allocState = types.AllocatedDoing
+				}
+			}
+			resolvers.AllocatingTableMtx.RUnlock()
+		}
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     config.Category,
@@ -185,7 +197,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			Blood:        bloodInfo,
 			Done:         correct,
 			Manual:       !config.Singleton && len(config.NodeConfig) > 0, // TODO: maybe need more conditions
-			Allocated:    alloc != nil,
+			Allocated:    allocState,
 		}
 		result.ChallengeInfos = append(result.ChallengeInfos, item)
 	}
