@@ -72,7 +72,11 @@ func FindSubmitCorrectSorted() []entity.Submit {
 
 func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time, setBlood bool) bool {
 	submitCache := false
+	deleteReplica := new(uint64)
 	err := db.Transaction(func(tx *gorm.DB) error {
+		if CheckSubmitCorrectByUserIdAndChallengeId(userId, challengeId) {
+			return errors.New("already finish this challenge")
+		}
 		alloc, err := FindReplicaAllocByUserIdAndChallengeId(userId, challengeId, tx)
 		if err != nil {
 			return err
@@ -119,6 +123,12 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			tx.Save(challenge)
 		}
 
+		if !alloc.Replica.Singleton {
+			*deleteReplica = alloc.ReplicaId
+		} else {
+			deleteReplica = nil
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -130,6 +140,11 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if err != nil {
 			log.Println(err)
 			return false
+		}
+		if deleteReplica != nil {
+			if !DeleteReplicaById(*deleteReplica, nil) {
+				log.Println("Delete replica failed.")
+			}
 		}
 	}
 	return true
