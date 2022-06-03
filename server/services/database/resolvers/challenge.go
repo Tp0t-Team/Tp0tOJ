@@ -147,12 +147,12 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 
 		//check that user change NodeConfig or not
 		var nodes []types.NodeConfig
-		var nodeRefreshFlag = false
-		if input.NodeConfig != nil {
+		//var nodeRefreshFlag = false
+		if input.NodeConfig != nil && challenge.State != "enabled" {
 			for _, node := range *input.NodeConfig {
 				nodes = append(nodes, node.ToNodeConfig())
 			}
-			nodeRefreshFlag = true
+			//nodeRefreshFlag = true
 		} else {
 			nodes = oldConfig.NodeConfig
 		}
@@ -186,12 +186,12 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		if challenge.State == "enabled" && oldConfig.Flag.Value != input.Flag.Value {
 			return errors.New("can't change flag for enabled challenge")
 		}
-		if nodeRefreshFlag && challenge.State == "enabled" {
-			ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-			if !ok {
-				return errors.New("delete replica error")
-			}
-		}
+		//if nodeRefreshFlag && challenge.State == "enabled" {
+		//	ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+		//	if !ok {
+		//		return errors.New("delete replica error")
+		//	}
+		//}
 		return nil
 	})
 	if err != nil {
@@ -236,20 +236,32 @@ func EnableChallengeById(challengeId string) bool {
 		tx.Save(&challenge)
 
 		if oldConfig.Singleton {
-			replica := AddReplica(challenge.ChallengeId, tx)
+			replicaId := new(uint64)
+			replica := AddReplica(challenge.ChallengeId, tx, func(status bool) {
+				err := db.Transaction(func(tx *gorm.DB) error {
+					users := FindAllUser()
+					if users == nil {
+						return errors.New("find users error")
+					}
+					for _, user := range users {
+						ok := AddReplicaAlloc(*replicaId, user.UserId, tx)
+						if !ok {
+							return errors.New("add replica alloc error")
+						}
+					}
+					return nil
+				})
+				if err != nil {
+					log.Println(err)
+
+					challenge.State = "enabled"
+					db.Save(&challenge)
+				}
+			})
 			if replica == nil {
 				return errors.New("add replica error")
 			}
-			users := FindAllUser()
-			if users == nil {
-				return errors.New("find users error")
-			}
-			for _, user := range users {
-				ok := AddReplicaAlloc(replica.ReplicaId, user.UserId, tx)
-				if !ok {
-					return errors.New("add replica alloc error")
-				}
-			}
+			*replicaId = replica.ReplicaId
 		}
 		//set all submits available,TODO: but need some rollback method?
 		submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
@@ -298,7 +310,7 @@ func DisableChallengeById(challengeId string) bool {
 		challenge.State = "disabled"
 		tx.Save(&challenge)
 
-		ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
+		ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx, nil)
 		if !ok {
 			return errors.New("delete replica error")
 		}
@@ -373,30 +385,24 @@ func DeleteChallenge(challengeId string) bool {
 		return false
 	}
 
-	err = db.Transaction(func(tx *gorm.DB) error {
-		//Delete Replica and ReplicaAllocs
-		ok := DeleteReplicaByChallengeId(id, tx)
+	ok := DeleteReplicaByChallengeId(id, nil, func(status bool) {
+		var err error
+		ok := DeleteSubmitsByChallengeId(id, nil)
 		if !ok {
-			return errors.New("delete replica by challengeId error")
+			err = errors.New("delete submits by challengeId error")
 		}
-
-		//Delete Submits by challengeId
-		ok = DeleteSubmitsByChallengeId(id, tx)
-		if !ok {
-			return errors.New("delete submits by challengeId error")
+		if err != nil {
+			log.Println("challenge remove error: ", err)
+			return
 		}
-		//Delete Challenge
-		tx.Delete(&challenge)
-		return nil
+		err = utils.Cache.WarmUp()
+		if err != nil {
+			log.Println("warm up error:\n" + err.Error())
+			return
+		}
 	})
-	if err != nil {
-		log.Println("challenge remove error: ", err)
-		return false
-	}
-	err = utils.Cache.WarmUp()
-	if err != nil {
-		log.Println("warm up error:\n" + err.Error())
-		return false
+	if !ok {
+		err = errors.New("delete replica by challengeId error")
 	}
 	return true
 

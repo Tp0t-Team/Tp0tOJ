@@ -129,6 +129,11 @@ func (r *AdminQueryResolver) ClusterInfo(ctx context.Context) *types.ClusterInfo
 		return &types.ClusterInfoResult{Message: "forbidden or login timeout"}
 	}
 	nodeInfos, replicaInfos := kube.K8sStatus()
+	for _, infoItem := range replicaInfos {
+		if _, ok := kube.DeletingReplicas[infoItem.Name]; ok {
+			infoItem.Status = "deleting"
+		}
+	}
 	return &types.ClusterInfoResult{
 		Message:  "",
 		Nodes:    nodeInfos,

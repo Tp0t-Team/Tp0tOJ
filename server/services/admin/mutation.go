@@ -177,8 +177,24 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
 		return &types.DeleteReplicaResult{Message: "forbidden or login timeout"}
 	}
-	if resolvers.DeleteReplicaById(replicaId) || kube.K8sPodDestroy(replicaId, replicaName[len(strings.Split(replicaName, "-")[1])+9:]) {
+	kube.DeletingReplicas[replicaName] = nil
+	var deleted = func(status bool) {
+		delete(kube.DeletingReplicas, replicaName)
+	}
+	if resolvers.DeleteReplicaById(replicaId, deleted) {
 		return &types.DeleteReplicaResult{Message: ""}
+	} else {
+		go func() {
+			kube.TaskQ <- kube.Task{
+				Tasks: []interface{}{
+					&kube.DestroyTask{
+						ReplicaId:     replicaId,
+						ContainerName: replicaName[len(strings.Split(replicaName, "-")[1])+9:],
+					},
+				},
+				CB: deleted,
+			}
+		}()
 	}
 	return &types.DeleteReplicaResult{Message: "delete replica error"}
 

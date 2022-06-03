@@ -118,16 +118,16 @@
   <v-tooltip top v-if="$store.state.global.role=='member'">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
-        text
+        tile
         v-bind="attrs"
         v-on="on"
         @click="writeupClick"
+        color="primary"
       >
         <v-icon>upload_file</v-icon>
       </v-btn>
     </template>
-    <span v-if="this.$store.state.global.role=='member'">Show Writeups</span>
-    <span v-else>Upload Writeup</span>
+    <span>Upload Writeup</span>
     <input type="file" class="file-input" ref="writeup" @change="uploadWriteup">
   </v-tooltip>
 </div>

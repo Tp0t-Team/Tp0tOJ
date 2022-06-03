@@ -33,7 +33,7 @@ func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	return replicas
 }
 
-func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
+func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *entity.Replica {
 	if outsideTX == nil {
 		outsideTX = db
 	}
@@ -83,7 +83,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 		if result.Error != nil {
 			return result.Error
 		}
-		if ok := EnableReplica(newReplica.ReplicaId, tx); !ok {
+		if ok := EnableReplica(newReplica.ReplicaId, tx, cb); !ok {
 			return errors.New("enable replica failed")
 		}
 		return nil
@@ -95,9 +95,17 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB) *entity.Replica {
 	return &newReplica
 }
 
-func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
+func EnableReplica(replicaId uint64, outsideTX *gorm.DB, cb func(status bool)) bool {
 	if outsideTX == nil {
 		outsideTX = db
+	}
+	k8sAllocTask := kube.Task{
+		Tasks: []interface{}{},
+		CB:    nil,
+	}
+	k8sDestroyTask := kube.Task{
+		Tasks: []interface{}{},
+		CB:    nil,
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
@@ -105,10 +113,10 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		if getResult.Error != nil {
 			return getResult.Error
 		}
-		if replica.Status == "enabled" {
+		if replica.Status != "disabled" {
 			return nil
 		}
-		replica.Status = "enabled"
+		replica.Status = "enabling"
 
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(replica.Challenge.Configuration), &config)
@@ -116,7 +124,6 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			log.Println(replica)
 			return err
 		}
-		createPodSuccess := true
 		for _, node := range config.NodeConfig {
 			//ports := []corev1.ContainerPort{}
 			//for _, port := range node.Ports {
@@ -126,25 +133,18 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			for _, port := range node.ServicePorts {
 				servicePorts = append(servicePorts, *kube.NewServicePortConfig(port.Name, kube.ParseProtocol(port.Protocol), port.External, port.Internal, port.Pod))
 			}
-			//ok := kube.K8sPodAlloc(replicaId, node.Name, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+node.Image), ports, servicePorts, replica.Flag)
-			ok := kube.K8sPodAlloc(replicaId, node.Name, strings.ToLower(configure.Configure.Kubernetes.RegistryHost+"/"+node.Image), servicePorts, replica.Flag)
-
-			if !ok {
-				createPodSuccess = false
-				break
-			}
+			k8sAllocTask.Tasks = append(k8sAllocTask.Tasks, &kube.AllocTask{
+				ReplicaId:     replicaId,
+				ContainerName: node.Name,
+				ImgLabel:      strings.ToLower(configure.Configure.Kubernetes.RegistryHost + "/" + node.Image),
+				ServicePorts:  servicePorts,
+				Flag:          replica.Flag,
+			})
+			k8sDestroyTask.Tasks = append(k8sDestroyTask.Tasks, &kube.DestroyTask{
+				ReplicaId:     replicaId,
+				ContainerName: node.Name,
+			})
 		}
-		if !createPodSuccess {
-			for _, node := range config.NodeConfig {
-				ok := kube.K8sPodDestroy(replicaId, node.Name)
-				if !ok {
-					// TODO: this a uncorrectable error
-					return errors.New("alloc pod failed & rollback pod failed - replica: " + strconv.FormatUint(replicaId, 10))
-				}
-			}
-			return errors.New("create pod failed")
-		}
-
 		tx.Save(&replica)
 		return nil
 	})
@@ -152,12 +152,68 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		log.Println(err)
 		return false
 	}
+	k8sAllocTask.CB = func(status bool) {
+		if !status {
+			go func() {
+				kube.TaskQ <- k8sDestroyTask
+			}()
+		} else {
+			err := db.Transaction(func(tx *gorm.DB) error {
+				var replica entity.Replica
+				getResult := tx.Preload("Challenge").Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+				if getResult.Error != nil {
+					return getResult.Error
+				}
+				replica.Status = "enabled"
+				tx.Save(replica)
+				return nil
+			})
+			if err != nil {
+				go func() {
+					kube.TaskQ <- k8sAllocTask
+				}()
+			} else {
+				if cb != nil {
+					cb(true)
+				}
+			}
+		}
+	}
+	k8sDestroyTask.CB = func(status bool) {
+		if !status {
+			log.Panicln("alloc pod failed & rollback pod failed - replica: " + strconv.FormatUint(replicaId, 10))
+		} else {
+			err := db.Transaction(func(tx *gorm.DB) error {
+				var replica entity.Replica
+				getResult := tx.Preload("Challenge").Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+				if getResult.Error != nil {
+					return getResult.Error
+				}
+				replica.Status = "disabled"
+				tx.Save(replica)
+				return nil
+			})
+			if err != nil {
+				log.Println(err)
+			}
+			if cb != nil {
+				cb(false)
+			}
+		}
+	}
+	go func() {
+		kube.TaskQ <- k8sAllocTask
+	}()
 	return true
 }
 
-func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
+func DisableReplica(replicaId uint64, outsideTX *gorm.DB, cb func(status bool)) bool {
 	if outsideTX == nil {
 		outsideTX = db
+	}
+	k8sTask := kube.Task{
+		Tasks: []interface{}{},
+		CB:    nil,
 	}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
@@ -165,10 +221,10 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		if getResult.Error != nil {
 			return getResult.Error
 		}
-		if replica.Status == "disabled" {
+		if replica.Status != "enabled" {
 			return nil
 		}
-		replica.Status = "disabled"
+		replica.Status = "disabling"
 		tx.Save(&replica)
 
 		var config types.ChallengeConfig
@@ -177,11 +233,10 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 			return err
 		}
 		for _, node := range config.NodeConfig {
-			ok := kube.K8sPodDestroy(replicaId, node.Name)
-			if !ok {
-				// TODO: this a uncorrectable error
-				return errors.New("destroy pod failed - replica: " + strconv.FormatUint(replicaId, 10))
-			}
+			k8sTask.Tasks = append(k8sTask.Tasks, &kube.DestroyTask{
+				ReplicaId:     replicaId,
+				ContainerName: node.Name,
+			})
 		}
 
 		return nil
@@ -190,14 +245,40 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB) bool {
 		log.Println(err)
 		return false
 	}
+	k8sTask.CB = func(status bool) {
+		if !status {
+			log.Panicln("alloc pod failed & rollback pod failed - replica: " + strconv.FormatUint(replicaId, 10))
+		} else {
+			err := db.Transaction(func(tx *gorm.DB) error {
+				var replica entity.Replica
+				getResult := tx.Preload("Challenge").Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
+				if getResult.Error != nil {
+					return getResult.Error
+				}
+				replica.Status = "disabled"
+				tx.Save(replica)
+				return nil
+			})
+			if err != nil {
+				log.Println(err)
+			}
+			if cb != nil {
+				cb(true)
+			}
+		}
+	}
+	go func() {
+		kube.TaskQ <- k8sTask
+	}()
 	return true
 
 }
 
-func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
+func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) bool {
 	if outsideTX == nil {
 		outsideTX = db
 	}
+	mtx := sync.RWMutex{}
 	err := outsideTX.Transaction(func(tx *gorm.DB) error {
 		var replicas []entity.Replica
 		getResult := tx.Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId}).Find(&replicas)
@@ -209,10 +290,15 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 			if !ok {
 				return errors.New("deleteReplicaAllocByReplicaId occurred error")
 			}
-			if ok := DisableReplica(replica.ReplicaId, tx); !ok {
+			delReplica := replica
+			mtx.RLock()
+			if ok := DisableReplica(replica.ReplicaId, tx, func(status bool) {
+				db.Delete(&delReplica)
+				mtx.RUnlock()
+			}); !ok {
 				return errors.New("disable replica failed")
 			}
-			tx.Delete(&replica)
+			//tx.Delete(&replica)
 		}
 		return nil
 	})
@@ -220,6 +306,13 @@ func DeleteReplicaByChallengeId(challengeId uint64, outsideTX *gorm.DB) bool {
 		log.Println(err)
 		return false
 	}
+	go func() {
+		mtx.Lock()
+		mtx.Unlock()
+		if cb != nil {
+			cb(true)
+		}
+	}()
 	return true
 }
 
@@ -291,10 +384,13 @@ func DeleteReplicaByUserId(userId uint64) bool {
 				if !ok {
 					return errors.New("deleteReplicaAllocByReplicaId occurred error")
 				}
-				if ok := DisableReplica(alloc.Replica.ReplicaId, tx); !ok {
+				delReplica := alloc.Replica
+				if ok := DisableReplica(alloc.Replica.ReplicaId, tx, func(status bool) {
+					db.Delete(&delReplica)
+				}); !ok {
 					return errors.New("disable replica failed")
 				}
-				tx.Delete(&alloc.Replica)
+				//tx.Delete(&alloc.Replica)
 			}
 		}
 		return nil
@@ -306,7 +402,7 @@ func DeleteReplicaByUserId(userId uint64) bool {
 	return true
 }
 
-func DeleteReplicaById(replicaId uint64) bool {
+func DeleteReplicaById(replicaId uint64, cb func(status bool)) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var replica entity.Replica
 		getResult := tx.Where(map[string]interface{}{"replica_id": replicaId}).First(&replica)
@@ -317,10 +413,14 @@ func DeleteReplicaById(replicaId uint64) bool {
 		if !ok {
 			return errors.New("deleteReplicaAllocByReplicaId occurred error")
 		}
-		if ok := DisableReplica(replica.ReplicaId, tx); !ok {
+		delReplica := replica
+		if ok := DisableReplica(replica.ReplicaId, tx, func(status bool) {
+			db.Delete(&delReplica)
+			cb(true)
+		}); !ok {
 			return errors.New("disable replica failed")
 		}
-		tx.Delete(&replica)
+		//tx.Delete(&replica)
 		return nil
 	})
 	if err != nil {
@@ -332,6 +432,7 @@ func DeleteReplicaById(replicaId uint64) bool {
 
 func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 	oldTimer := ReplicaTimer.DeleteTimer(userId)
+	mtx := sync.RWMutex{}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		challenge, err := FindChallengeById(challengeId)
 		if err != nil {
@@ -351,21 +452,15 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 			if !alloc.Replica.Singleton {
 				replicaId := alloc.ReplicaId
 				tx.Delete(&alloc)
-				if !DisableReplica(alloc.ReplicaId, tx) {
+				mtx.RLock()
+				if !DisableReplica(alloc.ReplicaId, tx, func(status bool) {
+					db.Delete(&entity.Replica{ReplicaId: replicaId})
+					mtx.RUnlock()
+				}) {
 					return errors.New("delete replica failed")
 				}
-				tx.Delete(&entity.Replica{ReplicaId: replicaId})
+				//tx.Delete(&entity.Replica{ReplicaId: replicaId})
 			}
-		}
-		newReplica := AddReplica(challengeId, tx)
-		if newReplica == nil {
-			return errors.New("create replica failed")
-		}
-		if !EnableReplica(newReplica.ReplicaId, tx) {
-			return errors.New("enable replica failed")
-		}
-		if !AddReplicaAlloc(newReplica.ReplicaId, userId, tx) {
-			return errors.New("alloc replica failed")
 		}
 		return nil
 	})
@@ -376,9 +471,31 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 		log.Println(err)
 		return false
 	}
-	ok := ReplicaTimer.NewTimer(userId)
-	if !ok {
-		log.Println("new timer failed", userId)
-	}
+	go func() {
+		mtx.Lock()
+		newReplicaId := new(uint64)
+		newReplica := AddReplica(challengeId, nil, func(status bool) {
+			mtx.Lock()
+			if !AddReplicaAlloc(*newReplicaId, userId, db) {
+				if oldTimer != nil {
+					ReplicaTimer.RecoverTimer(userId, oldTimer)
+				}
+				log.Println(errors.New("alloc replica failed"))
+				return
+			}
+			ok := ReplicaTimer.NewTimer(userId)
+			if !ok {
+				log.Println("new timer failed", userId)
+			}
+		})
+		if newReplica == nil {
+			if oldTimer != nil {
+				ReplicaTimer.RecoverTimer(userId, oldTimer)
+			}
+			log.Println(errors.New("create replica failed"))
+		}
+		*newReplicaId = newReplica.ReplicaId
+		mtx.Unlock()
+	}()
 	return true
 }
