@@ -194,7 +194,6 @@ export default class Challenge extends Vue {
   @Watch('showDialog')
   testTimeout(value: boolean) {
     if (!value && this.timeoutTask != null) {
-      console.log('clear time out');
       clearTimeout(this.timeoutTask);
       this.timeoutTask = null;
     }
@@ -260,7 +259,6 @@ export default class Challenge extends Vue {
   }
 
   async refreshAllocateState(id: string) {
-    console.log("query");
     await this.loadData();
     let c = this.challenges.find(v => v.challengeId == id);
     if (!c) {
@@ -269,7 +267,7 @@ export default class Challenge extends Vue {
       return;
     }
     this.currentChallenge = c;
-    if (c.allocated == 1 || true) {
+    if (c.allocated == 1) {
       this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 10 * 1000);
     }
   }
