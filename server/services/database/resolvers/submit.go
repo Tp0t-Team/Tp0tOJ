@@ -94,10 +94,10 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			UserId:      userId,
 			ChallengeId: challengeId,
 			SubmitTime:  submitTime,
-			Mark:        int64(len(submits)),
-			Flag:        flag,
-			Correct:     alloc.Replica.Flag == flag,
-			Available:   alloc.Replica.Challenge.State == "enabled",
+			//Mark:        int64(len(submits)),
+			Flag:      flag,
+			Correct:   alloc.Replica.Flag == flag,
+			Available: alloc.Replica.Challenge.State == "enabled",
 		}
 		tx.Create(&newSubmit)
 		if newSubmit.Correct {

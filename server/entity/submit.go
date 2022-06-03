@@ -3,10 +3,10 @@ package entity
 import "time"
 
 type Submit struct {
-	SubmitId    uint64    `gorm:"primaryKey"`
-	UserId      uint64    `gorm:"not null"`
-	User        User      `gorm:"references:UserId;"`
-	Mark        int64     `gorm:"not null"`
+	SubmitId uint64 `gorm:"primaryKey"`
+	UserId   uint64 `gorm:"not null"`
+	User     User   `gorm:"references:UserId;"`
+	//Mark        int64     `gorm:"not null"`
 	SubmitTime  time.Time `gorm:"not null"`
 	Flag        string    `gorm:"check: flag <> ''"`
 	Correct     bool
