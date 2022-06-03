@@ -416,7 +416,9 @@ func DeleteReplicaById(replicaId uint64, cb func(status bool)) bool {
 		delReplica := replica
 		if ok := DisableReplica(replica.ReplicaId, tx, func(status bool) {
 			db.Delete(&delReplica)
-			cb(true)
+			if cb != nil {
+				cb(true)
+			}
 		}); !ok {
 			return errors.New("disable replica failed")
 		}
