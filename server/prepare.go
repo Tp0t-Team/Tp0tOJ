@@ -64,7 +64,7 @@ func sudoCopy(src string, dst string) error {
 	return nil
 }
 
-func InstallK3S(masterIP string) {
+func InstallK3S(masterIP string, proxyFlag bool) {
 	_, err := os.Stat("resources/k3s.yaml")
 	if err == nil {
 		return
@@ -99,6 +99,9 @@ func InstallK3S(masterIP string) {
 	}
 	log.Println("install k3s master...")
 	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo ./k3s-install.sh --node-external-ip %s --node-name %s", masterIP, masterIP))
+	if proxyFlag {
+		k3sInstall.Env = append(os.Environ(), "INSTALL_K3S_MIRROR=cn")
+	}
 	k3sInstall.Stderr = os.Stderr
 	k3sInstall.Stdin = os.Stdin
 	k3sInstall.Stdout = os.Stdout
@@ -783,7 +786,7 @@ func GenerateStartScript() {
 
 func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
-
+	CN := flag.Bool("CN", false, "use proxy for CN or not")
 	flag.Parse()
 
 	cmd := exec.Command("docker", "info")
@@ -807,7 +810,7 @@ func main() {
 	registryPassword := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
 
 	log.Println(" - install K3S:")
-	InstallK3S(*masterIP)
+	InstallK3S(*masterIP, *CN)
 	log.Println(" - create cert:")
 	CreateCert(*masterIP)
 	log.Println(" - config registry:")
