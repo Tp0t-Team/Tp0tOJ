@@ -13,6 +13,7 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"gopkg.in/yaml.v3"
 	"io"
 	"log"
@@ -34,6 +35,23 @@ var unpackShell string
 
 type ReleaseInfo struct {
 	TagName string `json:"tag_name"`
+}
+
+type TransportProgress struct {
+	Done  uint64
+	Total uint64
+}
+
+func (progress *TransportProgress) Write(p []byte) (int, error) {
+	n := len(p)
+	progress.Done += uint64(n)
+	progress.PrintProgress()
+	return n, nil
+}
+
+func (progress *TransportProgress) PrintProgress() {
+	fmt.Printf("\r%s", strings.Repeat(" ", 35))
+	fmt.Printf("\r%s / %s", humanize.Bytes(progress.Done), humanize.Bytes(progress.Total))
 }
 
 type K3sRegistryMirrorItem struct {
@@ -64,7 +82,7 @@ func sudoCopy(src string, dst string) error {
 	return nil
 }
 
-func InstallK3S(masterIP string, proxyFlag bool) {
+func InstallK3S(masterIP string) {
 	_, err := os.Stat("resources/k3s.yaml")
 	if err == nil {
 		return
@@ -82,7 +100,7 @@ func InstallK3S(masterIP string, proxyFlag bool) {
 	if err != nil {
 		return
 	}
-	_, err = io.Copy(k3sInstallSH, k3sRes.Body)
+	_, err = io.Copy(k3sInstallSH, io.TeeReader(k3sRes.Body, &TransportProgress{Done: 0, Total: uint64(k3sRes.ContentLength)}))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -98,10 +116,7 @@ func InstallK3S(masterIP string, proxyFlag bool) {
 		os.Exit(1)
 	}
 	log.Println("install k3s master...")
-	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo ./k3s-install.sh --node-external-ip %s --node-name %s", masterIP, masterIP))
-	if proxyFlag {
-		k3sInstall.Env = append(os.Environ(), "INSTALL_K3S_MIRROR=cn")
-	}
+	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo INSTALL_K3S_MIRROR=%s ./k3s-install.sh --node-external-ip %s --node-name %s", os.Getenv("INSTALL_K3S_MIRROR"), masterIP, masterIP))
 	k3sInstall.Stderr = os.Stderr
 	k3sInstall.Stdin = os.Stdin
 	k3sInstall.Stdout = os.Stdout
@@ -225,7 +240,7 @@ func DownloadBinary() {
 		os.Exit(1)
 	}
 	releaseInfoData := bytes.Buffer{}
-	_, err = io.Copy(&releaseInfoData, releaseInfoRes.Body)
+	_, err = io.Copy(&releaseInfoData, io.TeeReader(releaseInfoRes.Body, &TransportProgress{Done: 0, Total: uint64(releaseInfoRes.ContentLength)}))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -252,7 +267,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	_, err = io.Copy(binary, binaryRes.Body)
+	_, err = io.Copy(binary, io.TeeReader(binaryRes.Body, &TransportProgress{Done: 0, Total: uint64(binaryRes.ContentLength)}))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -786,7 +801,6 @@ func GenerateStartScript() {
 
 func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
-	CN := flag.Bool("CN", false, "use proxy for CN or not")
 	flag.Parse()
 
 	cmd := exec.Command("docker", "info")
@@ -810,7 +824,7 @@ func main() {
 	registryPassword := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
 
 	log.Println(" - install K3S:")
-	InstallK3S(*masterIP, *CN)
+	InstallK3S(*masterIP)
 	log.Println(" - create cert:")
 	CreateCert(*masterIP)
 	log.Println(" - config registry:")
