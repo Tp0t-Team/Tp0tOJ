@@ -120,7 +120,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			} else if challenge.ThirdBloodId == nil {
 				challenge.ThirdBloodId = &userId
 			}
-			tx.Save(challenge)
+			tx.Save(&challenge)
 		}
 
 		if !alloc.Replica.Singleton {

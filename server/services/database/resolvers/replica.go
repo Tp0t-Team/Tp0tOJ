@@ -165,7 +165,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB, cb func(status bool)) b
 					return getResult.Error
 				}
 				replica.Status = "enabled"
-				tx.Save(replica)
+				tx.Save(&replica)
 				return nil
 			})
 			if err != nil {
@@ -190,7 +190,7 @@ func EnableReplica(replicaId uint64, outsideTX *gorm.DB, cb func(status bool)) b
 					return getResult.Error
 				}
 				replica.Status = "disabled"
-				tx.Save(replica)
+				tx.Save(&replica)
 				return nil
 			})
 			if err != nil {
@@ -256,7 +256,7 @@ func DisableReplica(replicaId uint64, outsideTX *gorm.DB, cb func(status bool)) 
 					return getResult.Error
 				}
 				replica.Status = "disabled"
-				tx.Save(replica)
+				tx.Save(&replica)
 				return nil
 			})
 			if err != nil {
@@ -416,7 +416,9 @@ func DeleteReplicaById(replicaId uint64, cb func(status bool)) bool {
 		delReplica := replica
 		if ok := DisableReplica(replica.ReplicaId, tx, func(status bool) {
 			db.Delete(&delReplica)
-			cb(true)
+			if cb != nil {
+				cb(true)
+			}
 		}); !ok {
 			return errors.New("disable replica failed")
 		}
