@@ -488,6 +488,13 @@ func StartReplicaForUser(userId uint64, challengeId uint64) bool {
 		newReplicaId := new(uint64)
 		newReplica := AddReplica(challengeId, nil, func(status bool) {
 			mtx.Lock()
+			if !status {
+				log.Println("start k8s-replica for user failed.")
+				AllocatingTableMtx.Lock()
+				delete(AllocatingTable[userId], challengeId)
+				AllocatingTableMtx.Unlock()
+				return
+			}
 			if !AddReplicaAlloc(*newReplicaId, userId, db) {
 				if oldTimer != nil {
 					ReplicaTimer.RecoverTimer(userId, oldTimer)
