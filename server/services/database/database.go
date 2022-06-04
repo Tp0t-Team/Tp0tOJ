@@ -3,7 +3,7 @@ package database
 import (
 	"crypto/sha256"
 	"fmt"
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"io"
 	"log"
