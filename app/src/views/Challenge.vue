@@ -255,7 +255,7 @@ export default class Challenge extends Vue {
     this.currentChallenge = c;
     this.showDialog = true;
     // this.allocated = this.currentChallenge.allocated;
-    this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 10 * 1000);
+    this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 3 * 1000);
   }
 
   async refreshAllocateState(id: string) {
@@ -268,7 +268,7 @@ export default class Challenge extends Vue {
     }
     this.currentChallenge = c;
     if (c.allocated == 1) {
-      this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 10 * 1000);
+      this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 3 * 1000);
     }
   }
 

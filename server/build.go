@@ -96,7 +96,7 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
-
+	os.Setenv("CGO_ENABLED", "0")
 	serverCmd := exec.Command("go", "build", "-tags", "WithFrontEnd", "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH), "main.go")
 	log.Println("build server...")
 	err = serverCmd.Run()
