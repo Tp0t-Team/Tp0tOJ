@@ -91,7 +91,10 @@ func InstallK3S(masterIP string) {
 		os.Exit(1)
 	}
 	log.Println("download k3s install script...")
-	k3sRes, err := http.Get("http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh")
+	client := &http.Client{}
+	k3sReq, _ := http.NewRequest("GET", "http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh", nil)
+	k3sReq.Header.Set("Accept-Encoding", "*")
+	k3sRes, err := client.Do(k3sReq)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -105,6 +108,7 @@ func InstallK3S(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	err = k3sInstallSH.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -234,7 +238,10 @@ func DownloadBinary() {
 		os.Exit(1)
 	}
 	log.Println("get latest release info...")
-	releaseInfoRes, err := http.Get("https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest")
+	client := &http.Client{}
+	releaseInfoReq, _ := http.NewRequest("GET", "https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest", nil)
+	releaseInfoReq.Header.Set("Accept-Encoding", "*")
+	releaseInfoRes, err := client.Do(releaseInfoReq)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -245,6 +252,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	releaseInfo := ReleaseInfo{}
 	err = json.Unmarshal(releaseInfoData.Bytes(), &releaseInfo)
 	if err != nil {
@@ -257,7 +265,9 @@ func DownloadBinary() {
 	}
 	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
 	log.Println("donwload latest release...")
-	binaryRes, err := http.Get(fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName))
+	binaryReq, _ := http.NewRequest("GET", fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName), nil)
+	binaryReq.Header.Set("Accept-Encoding", "*")
+	binaryRes, err := client.Do(binaryReq)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -272,6 +282,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	err = binary.Close()
 	if err != nil {
 		fmt.Println(err)
