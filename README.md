@@ -237,7 +237,7 @@ score:
   dynamic: true #是否开启动态积分
 flag: 
   value: flag{test} #对于开启动态flag的题目value字段没用，flag由平台随机生成
-  dynamic: true #是否开启动态积分
+  dynamic: true #是否开启动态flag
 description: "this is a test pwn"
 externalLink: [http://cloud.lordcasser.com/s/DkxtK] #题目附件链接
 singleton: false #true时题目所有用户都是同一个环境/flag，false时每人一个环境
