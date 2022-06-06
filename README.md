@@ -21,7 +21,8 @@
 
 ### 环境准备
 
-**官方推荐Ubuntu22.04，其他系统请按照[编译指南](https://github.com/Tp0t-Team/Tp0tOJ/blob/master/README.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)自行编译**
+**官方推荐Ubuntu20.04 AMD64与 Ubuntu22.04 AMD64**，release中的版本支持linux/amd64，但是未在众多的linux发行版上完成测试，如果有完成其他发行版的测试，请提交issue让我们知道
+其他系统和架构请按照[编译指南](https://github.com/Tp0t-Team/Tp0tOJ/blob/master/README.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)自行编译，目前已经不需要依赖CGO
 
 因为题目image build依赖于docker，所以需要先安装好**和本机网段无冲突的Docker**，我们在测试过程中发现部分云服务提供商默认Docker网段和本机局域网网段冲突，导致build镜像的时候无法正常访问网络
 
