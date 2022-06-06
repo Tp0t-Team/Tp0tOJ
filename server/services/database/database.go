@@ -33,7 +33,7 @@ func passwordHash(password string) string {
 func init() {
 	needInit := false
 	prefix, _ := os.Getwd()
-	dbPath := prefix + "/resources/data.db"
+	dbPath := prefix + "/resources/data.db?_pragma=busy_timeout%3d1000"
 	test, err := os.Lstat(dbPath)
 	if os.IsNotExist(err) {
 		_, err := os.Create(dbPath)
