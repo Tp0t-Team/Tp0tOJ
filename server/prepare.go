@@ -92,12 +92,18 @@ func InstallK3S(masterIP string) {
 	}
 	log.Println("download k3s install script...")
 	client := &http.Client{}
-	k3sReq, _ := http.NewRequest("GET", "http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh", nil)
+	k3sReq, _ := http.NewRequest("GET", "https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh", nil)
 	k3sReq.Header.Set("Accept-Encoding", "*")
 	k3sRes, err := client.Do(k3sReq)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println("china mirror error, fallback to default")
+		k3sReq, _ = http.NewRequest("GET", "https://get.k3s.io/", nil)
+		k3sReq.Header.Set("Accept-Encoding", "*")
+		k3sRes, err = client.Do(k3sReq)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 	k3sInstallSH, err := os.Create("k3s-install.sh")
 	if err != nil {
@@ -230,7 +236,8 @@ func ConfigK3SRegistry(masterIP string) {
 }
 
 func DownloadBinary() {
-	_, err := os.Stat("OJ")
+	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
+	_, err := os.Stat(binaryName)
 	if err == nil {
 		return
 	} else if !os.IsNotExist(err) {
@@ -263,7 +270,6 @@ func DownloadBinary() {
 		fmt.Println("no available release version.")
 		os.Exit(1)
 	}
-	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
 	log.Println("donwload latest release...")
 	binaryReq, _ := http.NewRequest("GET", fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName), nil)
 	binaryReq.Header.Set("Accept-Encoding", "*")

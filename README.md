@@ -53,7 +53,10 @@ sudo systemctl restart docker
 
 ```shell
 ./prepare -MasterIP xxx.xxx.xxx.xxx
+INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
 ```
+
+**中国用户请使用Mirror的参数执行**
 
 执行`prepare` 会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
 
@@ -139,13 +142,11 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 
 基础分数1000，减半人数20，不含奖励分数情况下 动态积分曲线
 
-
-
 ## 平台使用指南
 
 需要使用k8s集群的基本就是PWN题和WEB题
 
-[Pwn_demo1_](https://github.com/Tp0t-Team/Tp0tOJ_demos/tree/main/pwn1)
+[Pwn_demo1](https://github.com/Tp0t-Team/Tp0tOJ_demos/tree/main/pwn1)
 
 ### 镜像编译
 
