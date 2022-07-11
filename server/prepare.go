@@ -778,7 +778,7 @@ func GenerateStartScript() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
+	fileName := fmt.Sprintf("./OJ_%s_%s\n", runtime.GOOS, runtime.GOARCH)
 	tempString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
 		"\tdocker run -d --net=host --restart=always --name oj_registry_instance " +
 		"-v %s/data:/var/lib/registry " +
@@ -792,7 +792,7 @@ func GenerateStartScript() {
 		"-e REGISTRY_STORAGE_DELETE_ENABLED=true " +
 		"registry\n" +
 		"fi\n" +
-		"./OJ\n"
+		fileName
 	startSH, err := os.Create("start.sh")
 	if err != nil {
 		fmt.Println(err)
