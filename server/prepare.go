@@ -270,7 +270,7 @@ func DownloadBinary() {
 		fmt.Println("no available release version.")
 		os.Exit(1)
 	}
-	log.Println("donwload latest release...")
+	log.Println("download latest release...")
 	binaryReq, _ := http.NewRequest("GET", fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName), nil)
 	binaryReq.Header.Set("Accept-Encoding", "*")
 	binaryRes, err := client.Do(binaryReq)
@@ -278,7 +278,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	binary, err := os.Create("OJ")
+	binary, err := os.Create(binaryName)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
