@@ -62,7 +62,8 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *e
 				return err
 			}
 			unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
-			init := make([]byte, 16)
+			//flag value will be count as flag length during dynamic mode
+			init := make([]byte, len(config.Flag.Value))
 			_, err = unsafeRand.Read(init)
 			if err != nil {
 				return err
