@@ -200,6 +200,11 @@ type NodeConfigInput struct {
 func (input *NodeConfigInput) CheckPass() bool {
 	input.Name = strings.ToLower(strings.TrimSpace(input.Name))
 	input.Image = strings.ToLower(strings.TrimSpace(input.Image))
+	matched, err := regexp.MatchString("[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*", input.Image)
+	if !matched || err != nil {
+		log.Println("NodeConfig Check fault", err)
+		return false
+	}
 	//for _, port := range input.Ports {
 	//	if !port.CheckPass() {
 	//		return false
