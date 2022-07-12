@@ -91,10 +91,19 @@ func InstallK3S(masterIP string) {
 		os.Exit(1)
 	}
 	log.Println("download k3s install script...")
-	k3sRes, err := http.Get("http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh")
+	client := &http.Client{}
+	k3sReq, _ := http.NewRequest("GET", "https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh", nil)
+	k3sReq.Header.Set("Accept-Encoding", "*")
+	k3sRes, err := client.Do(k3sReq)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println("china mirror error, fallback to default")
+		k3sReq, _ = http.NewRequest("GET", "https://get.k3s.io/", nil)
+		k3sReq.Header.Set("Accept-Encoding", "*")
+		k3sRes, err = client.Do(k3sReq)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 	k3sInstallSH, err := os.Create("k3s-install.sh")
 	if err != nil {
@@ -105,6 +114,7 @@ func InstallK3S(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	err = k3sInstallSH.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -226,7 +236,8 @@ func ConfigK3SRegistry(masterIP string) {
 }
 
 func DownloadBinary() {
-	_, err := os.Stat("OJ")
+	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
+	_, err := os.Stat(binaryName)
 	if err == nil {
 		return
 	} else if !os.IsNotExist(err) {
@@ -234,7 +245,10 @@ func DownloadBinary() {
 		os.Exit(1)
 	}
 	log.Println("get latest release info...")
-	releaseInfoRes, err := http.Get("https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest")
+	client := &http.Client{}
+	releaseInfoReq, _ := http.NewRequest("GET", "https://api.github.com/repos/Tp0t-Team/Tp0tOJ/releases/latest", nil)
+	releaseInfoReq.Header.Set("Accept-Encoding", "*")
+	releaseInfoRes, err := client.Do(releaseInfoReq)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -245,6 +259,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	releaseInfo := ReleaseInfo{}
 	err = json.Unmarshal(releaseInfoData.Bytes(), &releaseInfo)
 	if err != nil {
@@ -255,9 +270,10 @@ func DownloadBinary() {
 		fmt.Println("no available release version.")
 		os.Exit(1)
 	}
-	binaryName := fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH)
 	log.Println("donwload latest release...")
-	binaryRes, err := http.Get(fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName))
+	binaryReq, _ := http.NewRequest("GET", fmt.Sprintf("https://github.com/Tp0t-Team/Tp0tOJ/releases/download/%s/%s", releaseInfo.TagName, binaryName), nil)
+	binaryReq.Header.Set("Accept-Encoding", "*")
+	binaryRes, err := client.Do(binaryReq)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -272,6 +288,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println()
 	err = binary.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -761,7 +778,7 @@ func GenerateStartScript() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
+	fileName := fmt.Sprintf("./OJ_%s_%s\n", runtime.GOOS, runtime.GOARCH)
 	tempString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
 		"\tdocker run -d --net=host --restart=always --name oj_registry_instance " +
 		"-v %s/data:/var/lib/registry " +
@@ -775,7 +792,7 @@ func GenerateStartScript() {
 		"-e REGISTRY_STORAGE_DELETE_ENABLED=true " +
 		"registry\n" +
 		"fi\n" +
-		"./OJ\n"
+		fileName
 	startSH, err := os.Create("start.sh")
 	if err != nil {
 		fmt.Println(err)

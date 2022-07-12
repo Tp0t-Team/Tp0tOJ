@@ -21,7 +21,8 @@
 
 ### 环境准备
 
-**官方推荐Ubuntu22.04，其他系统请按照[编译指南](https://github.com/Tp0t-Team/Tp0tOJ/blob/master/README.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)自行编译**
+**官方推荐Ubuntu20.04 AMD64与 Ubuntu22.04 AMD64**，release中的版本支持linux/amd64，但是未在众多的linux发行版上完成测试，如果有完成其他发行版的测试，请提交issue让我们知道
+其他系统和架构请按照[编译指南](https://github.com/Tp0t-Team/Tp0tOJ/blob/master/README.md#%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97)自行编译，目前已经不需要依赖CGO
 
 因为题目image build依赖于docker，所以需要先安装好**和本机网段无冲突的Docker**，我们在测试过程中发现部分云服务提供商默认Docker网段和本机局域网网段冲突，导致build镜像的时候无法正常访问网络
 
@@ -52,7 +53,10 @@ sudo systemctl restart docker
 
 ```shell
 ./prepare -MasterIP xxx.xxx.xxx.xxx
+INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
 ```
+
+**中国用户请使用Mirror的参数执行**
 
 执行`prepare` 会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
 
@@ -138,13 +142,11 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 
 基础分数1000，减半人数20，不含奖励分数情况下 动态积分曲线
 
-
-
 ## 平台使用指南
 
 需要使用k8s集群的基本就是PWN题和WEB题
 
-[Pwn_demo1_](https://github.com/Tp0t-Team/Tp0tOJ_demos/tree/main/pwn1)
+[Pwn_demo1](https://github.com/Tp0t-Team/Tp0tOJ_demos/tree/main/pwn1)
 
 ### 镜像编译
 
@@ -236,7 +238,7 @@ score:
   dynamic: true #是否开启动态积分
 flag: 
   value: flag{test} #对于开启动态flag的题目value字段没用，flag由平台随机生成
-  dynamic: true #是否开启动态积分
+  dynamic: true #是否开启动态flag
 description: "this is a test pwn"
 externalLink: [http://cloud.lordcasser.com/s/DkxtK] #题目附件链接
 singleton: false #true时题目所有用户都是同一个环境/flag，false时每人一个环境

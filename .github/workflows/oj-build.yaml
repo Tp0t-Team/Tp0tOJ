@@ -2,7 +2,7 @@ name: Tp0t_OJ
 
 on:
   release:
-    type: [published]
+    types: [published]
   workflow_dispatch:
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
 
     - name: Build Prepare
       working-directory: ./server
-      run: go build -o prepare_$(go env GOOS)_$(go env GOARCH) prepare.go
+      run: CGO_ENABLED=0 go build -o prepare_$(go env GOOS)_$(go env GOARCH) prepare.go
     
     - name: Archive results
       uses: actions/upload-artifact@v3
