@@ -395,6 +395,8 @@ func DeleteChallenge(challengeId string) bool {
 			log.Println("challenge remove error: ", err)
 			return
 		}
+		//Delete Challenge
+		db.Delete(&challenge)
 		err = utils.Cache.WarmUp()
 		if err != nil {
 			log.Println("warm up error:\n" + err.Error())
