@@ -150,7 +150,7 @@ func InstallK3S(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	chmodCmd := exec.Command("bash", "-c", "sudo chmod 0755 resources/k3s.yaml")
+	chmodCmd := exec.Command("bash", "-c", "sudo chmod 766 resources/k3s.yaml")
 	chmodCmd.Stderr = os.Stderr
 	chmodCmd.Stdin = os.Stdin
 	chmodCmd.Stdout = os.Stdout
