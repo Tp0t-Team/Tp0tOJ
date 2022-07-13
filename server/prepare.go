@@ -57,13 +57,18 @@ func (progress *TransportProgress) PrintProgress() {
 type K3sRegistryMirrorItem struct {
 	Endpoint []string `yaml:"endpoint"`
 }
+type K3sRegistryAuthConfigItem struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
 type K3sRegistryTLSConfigItem struct {
 	CAFile   string `yaml:"ca_file"`
 	CertFile string `yaml:"cert_file"`
 	KeyFile  string `yaml:"key_file"`
 }
 type K3sRegistryConfigItem struct {
-	TLS K3sRegistryTLSConfigItem `yaml:"tls"`
+	Auth K3sRegistryAuthConfigItem `yaml:"auth"`
+	TLS  K3sRegistryTLSConfigItem  `yaml:"tls"`
 }
 type K3sRegistry struct {
 	Mirrors map[string]K3sRegistryMirrorItem `yaml:"mirrors"`
@@ -161,7 +166,7 @@ func InstallK3S(masterIP string) {
 	}
 }
 
-func ConfigK3SRegistry(masterIP string) {
+func ConfigK3SRegistry(masterIP string, registryUsername string, registryPassword string) {
 	_, err := os.Stat("/etc/rancher/k3s/registries.yaml")
 	if err == nil {
 		return
@@ -200,6 +205,10 @@ func ConfigK3SRegistry(masterIP string) {
 		},
 		Configs: map[string]K3sRegistryConfigItem{
 			registryHost: {
+				Auth: K3sRegistryAuthConfigItem{
+					Username: registryUsername,
+					Password: registryPassword,
+				},
 				TLS: K3sRegistryTLSConfigItem{
 					CAFile:   "/etc/rancher/k3s/OJRegistry/ca.crt",
 					CertFile: "/etc/rancher/k3s/OJRegistry/tls.crt",
@@ -229,6 +238,12 @@ func ConfigK3SRegistry(masterIP string) {
 		os.Exit(1)
 	}
 	err = sudoCopy("registries-config.yaml", "/etc/rancher/k3s/registries.yaml")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	restartCmd := exec.Command("bash", "-c", "sudo systemctl restart k3s")
+	err = restartCmd.Run()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -837,15 +852,34 @@ func main() {
 		}
 	}
 
-	registryUsername := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
-	registryPassword := fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+	registryUsername := ""
+	registryPassword := ""
+	if _, err := os.Stat("resources/.prepare"); os.IsNotExist(err) {
+		rd.Seed(time.Now().UnixNano())
+		registryUsername = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+		registryPassword = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+		err := os.WriteFile("resources/.prepare", []byte(registryUsername+registryPassword), 0777)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	} else {
+		dataRaw, err := os.ReadFile("resources/.prepare")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		data := string(dataRaw)
+		registryUsername = data[0:8]
+		registryPassword = data[8:16]
+	}
 
 	log.Println(" - install K3S:")
 	InstallK3S(*masterIP)
 	log.Println(" - create cert:")
 	CreateCert(*masterIP)
 	log.Println(" - config registry:")
-	ConfigK3SRegistry(*masterIP)
+	ConfigK3SRegistry(*masterIP, registryUsername, registryPassword)
 	log.Println(" - download binary:")
 	DownloadBinary()
 	log.Println(" - generate default config:")
@@ -858,6 +892,10 @@ func main() {
 	GenerateStartScript()
 
 	if err := os.Remove("registries-config.yaml"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err := os.Remove("resources/.prepare"); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
