@@ -126,7 +126,7 @@ func InstallK3S(masterIP string) {
 		os.Exit(1)
 	}
 	log.Println("install k3s master...")
-	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo INSTALL_K3S_MIRROR=%s ./k3s-install.sh --write-kubeconfig-mode 644 --node-external-ip %s --node-name %s", os.Getenv("INSTALL_K3S_MIRROR"), masterIP, masterIP))
+	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo INSTALL_K3S_MIRROR=%s ./k3s-install.sh --node-external-ip %s --node-name %s", os.Getenv("INSTALL_K3S_MIRROR"), masterIP, masterIP))
 	k3sInstall.Stderr = os.Stderr
 	k3sInstall.Stdin = os.Stdin
 	k3sInstall.Stdout = os.Stdout
