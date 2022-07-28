@@ -1,6 +1,6 @@
 # Tp0t OJ
 
-[![Tp0t_OJ](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml/badge.svg?branch=master)](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml)
+[![Tp0tOJ](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml/badge.svg?branch=master)](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml)
 
 延续老版本的Tp0t OJ，前端继承并优化了视觉效果，后端从JAVA切换为Golang，定位也从一个面向校内的持续性训练平台，转向于一个比CTFd更好用的CTF比赛平台
 
@@ -10,12 +10,15 @@
 
 ### 我们的特性
 
-| 特性                       | Tp0t OJ            | CTFd |
-| ------------------------ |:------------------:|:----:|
-| K8s集群 -> 一键部署题目环境        | :heavy_check_mark: | :x:  |
-| 题目定义与实例分离 -> 原生支持动态Flag  | :heavy_check_mark: | :x:  |
-| 预构建单执行文件 -> 无其他依赖，平台一键启动 | :heavy_check_mark: | :x:  |
-| 提供WriteUp的上传和下载通道        | :heavy_check_mark: | :x:  |
+| 特性  | Tp0t OJ | CTFd | buuoj |
+| --- | --- | --- | --- |
+| K8s集群 -> 一键部署题目环境 | :heavy_check_mark: | :x: | :heavy_check_mark: |
+| 题目定义与实例分离 -> 原生支持动态Flag | :heavy_check_mark: | :x: | :heavy_check_mark: |
+| 预构建单执行文件 -> 无其他依赖，平台一键启动 | :heavy_check_mark: | :x: | :x: |
+| 提供WriteUp的上传和下载通道 | :heavy_check_mark: | :x: | :heavy_check_mark: |
+| 动态积分+一二三血 | :heavy_check_mark: | :x: | :x: |
+| 容器调度，避免算力浪费 | :heavy_check_mark: | :x: | :x: |
+| 合理的动态积分曲线 | :heavy_check_mark: | :x: | :x: |
 
 ## 平台部署指南
 
@@ -49,7 +52,7 @@ sudo systemctl restart docker
 
 ### 部署流程
 
- 根据系统架构在release页面获取 prepare 二进制文件，如果所用系统架构没有对应的release，请参照contribution自行build
+根据系统架构在release页面获取 prepare 二进制文件，如果所用系统架构没有对应的release，请参照contribution自行build
 
 ```shell
 ./prepare -MasterIP xxx.xxx.xxx.xxx
@@ -138,8 +141,6 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 
 题目分数曲线示例：
 
-![curve.svg](curve.svg)
-
 基础分数1000，减半人数20，不含奖励分数情况下 动态积分曲线
 
 ## 平台使用指南
@@ -157,8 +158,9 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 #### Dockerfile示例
 
 > - **注意对于所有需要执行的文件，附加执行权限，否则镜像会build成功，但是用户申请创建实例的时候会失败**
-> 
+>   
 > - 对于singleton的题目（所有选手共用一个容器实例），请严格注意权限管控
+>   
 
 ```dockerfile
 FROM ubuntu:20.04
@@ -253,7 +255,7 @@ nodeConfig:
         pod: 0 # 集群pod对外的端口，也是用户实际访问的端口，0为自动分配
 ```
 
-## 
+##
 
 ## 开发指南
 
@@ -270,8 +272,9 @@ nodeConfig:
 ### 接口相关
 
 - GraphQL的schema文件定义在`server/src/resources/schema`目录下
-
+  
 - 请求成功返回message 为空字符串（没有消息就是好消息）
+  
 
 ### 构建
 
