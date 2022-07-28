@@ -10,7 +10,7 @@
 
 ### 我们的特性
 
-| 特性  | Tp0t OJ | CTFd | buuoj |
+| 特性  | Tp0t OJ | CTFd | dasctf |
 | --- | --- | --- | --- |
 | K8s集群 -> 一键部署题目环境 | :heavy_check_mark: | :x: | :heavy_check_mark: |
 | 题目定义与实例分离 -> 原生支持动态Flag | :heavy_check_mark: | :x: | :heavy_check_mark: |
