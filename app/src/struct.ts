@@ -58,7 +58,8 @@ export interface ChallengeConfig {
         baseScore: string | number
     }
     flag: {
-        dynamic: boolean
+        type: number
+        // dynamic: boolean
         value: string
     }
     description: string

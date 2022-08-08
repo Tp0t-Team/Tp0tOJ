@@ -348,7 +348,7 @@ export default class Challenge extends Vue {
         // category: type,
         category: "",
         score: { dynamic: false, baseScore: "0" },
-        flag: { dynamic: false, value: "" },
+        flag: { type: 0, value: "" },
         description: "",
         externalLink: [],
         singleton: true,

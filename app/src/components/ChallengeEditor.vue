@@ -13,7 +13,7 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col> -->
-      <v-col cols="4">
+      <v-col cols="6">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -26,20 +26,7 @@
           <v-spacer></v-spacer>
         </v-row>
       </v-col>
-      <v-col cols="4">
-        <v-row>
-          <v-spacer></v-spacer>
-          <v-switch
-            v-model="dynamicFlag"
-            hide-details
-            label="DynamicFlag"
-            :disabled="loading || disabled || config.challengeId[0] != '-'"
-            @change="Changed"
-          ></v-switch>
-          <v-spacer></v-spacer>
-        </v-row>
-      </v-col>
-      <v-col cols="4">
+      <v-col cols="6">
         <v-row>
           <v-spacer></v-spacer>
           <v-switch
@@ -103,6 +90,30 @@
         ></v-text-field>
       </v-col>
       <v-col cols="6">
+        <!-- <v-text-field v-model="type" outlined label="type" readonly value="web" :disabled="loading"></v-text-field> -->
+        <v-select
+          v-model="flagType"
+          :items="flagTypeItems"
+          outlined
+          hide-details
+          label="flag type"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" v-if="flagType == 'Multiple'">
+        <v-textarea
+          v-model="flag"
+          outlined
+          hide-details
+          label="flag"
+          :disabled="loading || disabled"
+          @change="Changed"
+        ></v-textarea>
+      </v-col>
+      <v-col cols="12" v-else>
         <v-text-field
           v-model="flag"
           outlined
@@ -175,6 +186,7 @@ export default class ChallengeEditor extends Vue {
   private challengeType = constValue.challengeType;
 
   private typeItems = constValue.challengeType;
+  private flagTypeItems = constValue.flagType;
 
   @Prop() config!: ChallengeConfigWithId | null;
   @Prop() disabled!: boolean;
@@ -186,10 +198,11 @@ export default class ChallengeEditor extends Vue {
 
   private state: boolean = false;
   private dynamicScore: boolean = false;
-  private dynamicFlag: boolean = false;
+  // private dynamicFlag: boolean = false;
   private name: string = "";
   private type: string = "";
   private score: number = 0;
+  private flagType: string = "Dynamic";
   private flag: string = "";
   private description: string = "";
   private singleton: boolean = true;
@@ -217,7 +230,8 @@ export default class ChallengeEditor extends Vue {
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
-        this.dynamicFlag = config.flag.dynamic || this.dynamicFlag;
+        this.flagType = config.flag.type != undefined ? this.flagTypeItems[config.flag.type]: null ?? this.flagType;
+        // this.dynamicFlag = config.flag.dynamic || this.dynamicFlag;
         this.singleton = config.singleton;
         this.nodeConfigs = config.nodeConfig;
       } catch (e) {
@@ -233,7 +247,8 @@ export default class ChallengeEditor extends Vue {
     this.links = this.config.config.externalLink;
     this.state = this.config.state == "enabled";
     this.dynamicScore = this.config.config.score.dynamic;
-    this.dynamicFlag = this.config.config.flag.dynamic;
+    // this.dynamicFlag = this.config.config.flag.dynamic;
+    this.flagType = this.flagTypeItems[this.config.config.flag.type];
     this.singleton = this.config.config.singleton;
     this.nodeConfigs = this.config.config.nodeConfig;
   }
@@ -255,7 +270,7 @@ export default class ChallengeEditor extends Vue {
       config: {
         category: this.type,
         score: { dynamic: this.dynamicScore, baseScore: this.score.toString() },
-        flag: { dynamic: this.dynamicFlag, value: this.flag },
+        flag: { type: this.flagTypeItems.indexOf(this.flagType), value: this.flag },
         description: this.description,
         externalLink: this.links,
         singleton: this.singleton,

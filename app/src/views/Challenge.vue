@@ -363,6 +363,10 @@ export default class Challenge extends Vue {
   overflow-y: auto;
 }
 
+.dialog-discription > pre {
+  white-space: pre-wrap;
+}
+
 .url-list {
   // height: 128px;
   overflow-y: auto;
