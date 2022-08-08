@@ -94,14 +94,14 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if err != nil {
 			return err
 		}
+
 		newSubmit := entity.Submit{
 			UserId:      userId,
 			ChallengeId: challengeId,
 			SubmitTime:  submitTime,
-			//Mark:        int64(len(submits)),
-			Flag:      flag,
-			Correct:   alloc.Replica.Flag == flag,
-			Available: alloc.Replica.Challenge.State == "enabled",
+			Flag:        flag,
+			Correct:     alloc.Replica.Flag == flag,
+			Available:   alloc.Replica.Challenge.State == "enabled",
 		}
 		tx.Create(&newSubmit)
 		if newSubmit.Correct {

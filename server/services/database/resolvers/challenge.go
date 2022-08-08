@@ -83,8 +83,8 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 				BaseScore: input.Score.BaseScore,
 			},
 			Flag: types.FlagType{
-				Dynamic: input.Flag.Dynamic,
-				Value:   input.Flag.Value,
+				Type:  input.Flag.Type,
+				Value: input.Flag.Value,
 			},
 			Description:  input.Description,
 			ExternalLink: input.ExternalLink,
@@ -164,8 +164,8 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 				BaseScore: input.Score.BaseScore,
 			},
 			Flag: types.FlagType{
-				Dynamic: oldConfig.Flag.Dynamic,
-				Value:   input.Flag.Value,
+				Type:  oldConfig.Flag.Type,
+				Value: input.Flag.Value,
 			},
 			Description:  input.Description,
 			ExternalLink: input.ExternalLink,

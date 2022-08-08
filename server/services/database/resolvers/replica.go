@@ -67,7 +67,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *e
 			return err
 		}
 		var flag string
-		if config.Flag.Dynamic {
+		if config.Flag.Type == types.Dynamic {
 			//dynamic flag should be generated in here,and transfer to starting Pod as environment value,
 			//the entrypoint.sh of dockerfile need to clear the FLAG environment value before starting the service
 			seed := make([]byte, 8)
@@ -77,6 +77,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *e
 			}
 			unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
 			//flag value will be count as flag length during dynamic mode
+			//TODO: a better Flag length config
 			init := make([]byte, len(config.Flag.Value))
 			_, err = unsafeRand.Read(init)
 			if err != nil {
@@ -88,6 +89,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *e
 			//strings.Split(config.Flag.Value,"\n")
 			//TODO: for muti-flag typed challenge, may need some extra method to map flags to replica
 			flag = config.Flag.Value
+
 		}
 		newReplica = entity.Replica{
 			ChallengeId: challengeId,

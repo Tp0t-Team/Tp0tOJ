@@ -138,7 +138,11 @@ type ChallengeMutateInput struct {
 
 func (input *ChallengeMutateInput) CheckPass() bool {
 	input.Name = strings.TrimSpace(input.Name)
-	input.Description = strings.TrimSpace(input.Description)
+	lines := strings.Split(input.Description, "\n")
+	for index, line := range lines {
+		lines[index] = strings.Join(strings.Fields(line), " ")
+	}
+	input.Description = strings.Join(lines, "\n")
 	log.Println(input)
 	if input.NodeConfig != nil {
 		if len(*input.NodeConfig) == 0 {
@@ -181,19 +185,19 @@ func (input *ScoreTypeInput) CheckPass() bool {
 }
 
 type FlagTypeInput struct {
-	Dynamic bool
-	Value   string
+	Type  int32
+	Value string
 }
 
 func (input *FlagTypeInput) CheckPass() bool {
+	//TODO: better regexp to limit flag value for [regexp,multiple]
 	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
-	return input.Value != ""
+	return input.Value != "" && 0 <= input.Type && input.Type < Max
 }
 
 type NodeConfigInput struct {
-	Name  string
-	Image string
-	//Ports        []ContainerPortInput
+	Name         string
+	Image        string
 	ServicePorts []ServicePortInput
 }
 
@@ -205,11 +209,6 @@ func (input *NodeConfigInput) CheckPass() bool {
 		log.Println("NodeConfig Check fault", err)
 		return false
 	}
-	//for _, port := range input.Ports {
-	//	if !port.CheckPass() {
-	//		return false
-	//	}
-	//}
 	portNameSet := map[string]struct{}{}
 	for _, port := range input.ServicePorts {
 		if !port.CheckPass() {
@@ -224,10 +223,6 @@ func (input *NodeConfigInput) CheckPass() bool {
 }
 
 func (input *NodeConfigInput) ToNodeConfig() NodeConfig {
-	//ports := []ContainerPort{}
-	//for _, port := range input.Ports {
-	//	ports = append(ports, port.ToContainerPort())
-	//}
 	servicePorts := []ServicePort{}
 	for _, port := range input.ServicePorts {
 		servicePorts = append(servicePorts, port.ToServicePort())
@@ -239,22 +234,6 @@ func (input *NodeConfigInput) ToNodeConfig() NodeConfig {
 		ServicePorts: servicePorts,
 	}
 }
-
-//type ContainerPortInput struct {
-//	Port     int32
-//	Protocol string
-//}
-
-//func (input *ContainerPortInput) CheckPass() bool {
-//	return input.Port > 0 && input.Port <= 65535 && (input.Protocol == "TCP" || input.Protocol == "UDP")
-//}
-
-//func (input *ContainerPortInput) ToContainerPort() ContainerPort {
-//	return ContainerPort{
-//		Port:     input.Port,
-//		Protocol: input.Protocol,
-//	}
-//}
 
 type ServicePortInput struct {
 	Name     string
@@ -376,16 +355,10 @@ type ChallengeConfig struct {
 }
 
 type NodeConfig struct {
-	Name  string
-	Image string
-	//Ports        []ContainerPort
+	Name         string
+	Image        string
 	ServicePorts []ServicePort
 }
-
-//type ContainerPort struct {
-//	Port     int32
-//	Protocol string
-//}
 
 type ServicePort struct {
 	Name     string
@@ -401,9 +374,17 @@ type ScoreType struct {
 }
 
 type FlagType struct {
-	Dynamic bool
-	Value   string
+	Type  int32
+	Value string
 }
+
+const (
+	Dynamic = iota
+	Single
+	Multiple
+	Regexp
+	Max
+)
 
 type BulletinResult struct {
 	Message   string

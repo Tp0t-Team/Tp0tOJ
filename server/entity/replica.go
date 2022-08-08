@@ -9,6 +9,7 @@ type Replica struct {
 	Singleton   bool
 	Status      string    `gorm:"check: status <> ''"`
 	Flag        string    `gorm:"check: flag <> ''"`
+	FlagType    uint64    `gorm:"not null"`
 	CreatedAt   time.Time `gorm:"autoCreateTime;not null;"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime;not null;"`
 }
