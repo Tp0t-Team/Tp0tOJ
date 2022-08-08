@@ -389,10 +389,10 @@ type FlagType struct {
 }
 
 const (
-	Dynamic = iota
-	Single
+	Single = iota
 	Multiple
 	Regexp
+	Dynamic
 	Max
 )
 

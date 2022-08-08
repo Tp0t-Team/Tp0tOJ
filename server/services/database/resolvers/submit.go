@@ -5,9 +5,11 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"log"
+	"regexp"
 	"server/entity"
 	"server/services/types"
 	"server/utils"
+	"strings"
 	"time"
 )
 
@@ -94,13 +96,31 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if err != nil {
 			return err
 		}
-
-		newSubmit := entity.Submit{
+		var newSubmit entity.Submit
+		var correct = false
+		if alloc.Replica.FlagType == types.Multiple {
+			flags := strings.Split(alloc.Replica.Flag, "\n")
+			for _, i := range flags {
+				i = strings.TrimSpace(i)
+				if flag == i {
+					correct = true
+					break
+				}
+			}
+		} else if alloc.Replica.FlagType == types.Regexp {
+			re, _ := regexp.Compile(alloc.Replica.Flag)
+			if re != nil {
+				correct = re.MatchString(flag)
+			}
+		} else {
+			correct = flag == alloc.Replica.Flag
+		}
+		newSubmit = entity.Submit{
 			UserId:      userId,
 			ChallengeId: challengeId,
 			SubmitTime:  submitTime,
 			Flag:        flag,
-			Correct:     alloc.Replica.Flag == flag,
+			Correct:     correct,
 			Available:   alloc.Replica.Challenge.State == "enabled",
 		}
 		tx.Create(&newSubmit)
