@@ -106,6 +106,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		tx.Create(&newSubmit)
 		if newSubmit.Correct {
 			submitCache = true
+			BehaviorComplete(challengeId, userId, flag, submitTime)
 		}
 		if alloc.Replica.Flag == flag && alloc.Replica.Challenge.State == "enabled" && setBlood {
 			var challenge entity.Challenge

@@ -442,13 +442,14 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 	}
 	newConfig := utils.Config{
 		Server: utils.Server{
-			Host:     "127.0.0.1",
-			Username: "Tp0t",
-			Password: "admin",
-			Mail:     "admin@example.com",
-			Port:     0,
-			Salt:     strconv.FormatInt(rd.Int63(), 10),
-			Debug:    false,
+			Host:        "127.0.0.1",
+			Username:    "Tp0t",
+			Password:    "admin",
+			Mail:        "admin@example.com",
+			Port:        0,
+			Salt:        strconv.FormatInt(rd.Int63(), 10),
+			Debug:       false,
+			BehaviorLog: false,
 		},
 		Email: utils.Email{
 			Host:     "smtp.example.com",

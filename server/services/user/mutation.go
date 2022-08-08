@@ -142,6 +142,7 @@ func (r *MutationResolver) Login(ctx context.Context, args struct{ Input types.L
 		teamState = false
 	}
 	session.Set("isTeam", teamState)
+	resolvers.BehaviorLogin(userId, ctx.Value("ip").(string), time.Now())
 	return &types.LoginResult{Message: "", UserId: strconv.FormatUint(user.UserId, 10), Role: user.Role}
 }
 
@@ -242,7 +243,9 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 		log.Println(err)
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, time.Now(), !*isAdmin.(*bool))
+	submitTime := time.Now()
+	resolvers.BehaviorSubmit(challengeId, userId, input.Flag, submitTime)
+	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, submitTime, !*isAdmin.(*bool))
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}

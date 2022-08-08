@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"server/entity"
+	"time"
 )
 
 func FindReplicaAllocByUserId(userId uint64) []entity.ReplicaAlloc {
@@ -102,6 +103,12 @@ func AddReplicaAlloc(replicaId uint64, userId uint64, outsideTX *gorm.DB) bool {
 	if result.Error != nil {
 		log.Println(result.Error)
 		return false
+	}
+	foundedReplica, err := FindReplicaById(replicaId, outsideTX)
+	if err != nil {
+		log.Println(err)
+	} else {
+		BehaviorAllocReplica(foundedReplica.ChallengeId, userId, foundedReplica.Flag, time.Now())
 	}
 	return true
 

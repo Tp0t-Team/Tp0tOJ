@@ -32,6 +32,21 @@ func FindReplicaByChallengeId(challengeId uint64) []entity.Replica {
 	return replicas
 }
 
+func FindReplicaById(id uint64, outsideTX *gorm.DB) (*entity.Replica, error) {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	var replica entity.Replica
+	result := db.Where(map[string]interface{}{"replica_id": id}).First(&replica)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		//log.Println(result.Error)
+		return nil, result.Error
+	}
+	return &replica, nil
+}
+
 func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *entity.Replica {
 	if outsideTX == nil {
 		outsideTX = db

@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"server/services/admin"
 	"server/services/user"
+	"strings"
 	"time"
 )
 
@@ -26,6 +27,14 @@ type Resolver struct {
 
 //go:embed schema.graphql
 var schemaStr string
+
+func getIP(r *http.Request) string {
+	forward := r.Header.Get("X-FORWARDED-FOR")
+	if forward == "" {
+		return r.RemoteAddr
+	}
+	return strings.TrimSpace(strings.Split(forward, ",")[0])
+}
 
 func init() {
 	muxRouter := mux.NewRouter()
@@ -50,7 +59,10 @@ func init() {
 	graphqlHandle := &relay.Handler{Schema: schema}
 	muxRouter.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
-		graphqlHandle.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "session", session)))
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "session", session)
+		ctx = context.WithValue(ctx, "ip", getIP(r))
+		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
 	})
 	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
 		session := sessionManager.Start(w, r)
