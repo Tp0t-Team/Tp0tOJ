@@ -190,8 +190,18 @@ type FlagTypeInput struct {
 }
 
 func (input *FlagTypeInput) CheckPass() bool {
-	//TODO: better regexp to limit flag value for [regexp,multiple]
 	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
+	if input.Type != Multiple {
+		if strings.Contains(input.Value, "\n") {
+			return false
+		}
+	}
+	if input.Type == Regexp {
+		_, err := regexp.Compile(input.Value)
+		if err != nil {
+			return false
+		}
+	}
 	return input.Value != "" && 0 <= input.Type && input.Type < Max
 }
 
@@ -479,4 +489,8 @@ func (input *ChallengeActionInput) CheckPass() bool {
 type ChallengeActionResult struct {
 	Message    string
 	Successful []string
+}
+
+type WatchDescriptionResult struct {
+	Message string
 }

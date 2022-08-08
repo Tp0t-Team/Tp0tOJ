@@ -262,3 +262,5 @@ export interface ChallengeActionInput {
 }
 
 export type ChallengeActionResult = { challengeAction: { successful: string[] } & Result }
+
+export type WatchDescriptionResult = { watchDescription: Result }

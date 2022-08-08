@@ -203,3 +203,19 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 	}
 	return &result
 }
+
+func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ ChallengeId string }) *types.WatchDescriptionResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
+	}
+	currentUserId := *session.Get("userId").(*uint64)
+	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
+	if err != nil {
+		log.Println(err)
+		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
+	}
+	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now())
+	return &types.WatchDescriptionResult{}
+}

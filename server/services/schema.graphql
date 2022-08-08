@@ -171,6 +171,7 @@ type Query {
     writeUpInfos: WriteUpInfoResult
     imageInfos: ImageInfoResult
     clusterInfo: ClusterInfoResult
+    watchDescription(challengeId: String!): WatchDescriptionResult
 }
 type UserInfoResult {
     message: String!
@@ -379,4 +380,8 @@ input ChallengeActionInput {
 type ChallengeActionResult {
     message: String!
     successful: [String!]!
+}
+
+type WatchDescriptionResult {
+    message: String!
 }
