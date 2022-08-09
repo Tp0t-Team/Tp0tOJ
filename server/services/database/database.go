@@ -52,7 +52,7 @@ func init() {
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}
-	err = DataBase.AutoMigrate(&entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}, &entity.User{})
+	err = DataBase.AutoMigrate(&entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}, &entity.User{}, &entity.Behavior{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 		return
