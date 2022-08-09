@@ -16,7 +16,6 @@ type Mutation {
     bulletinPub(input: BulletinPubInput!) :BulletinPubResult!
     userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
-#    challengeRemove(input: String!): ChallengeRemoveResult!
     challengeAction(input: ChallengeActionInput!): ChallengeActionResult!
     warmUp: Boolean!
     startReplica(input: String!): StartReplicaResult!
@@ -26,21 +25,16 @@ type Mutation {
 
 input RegisterInput {
     name: String!
-#    stuNumber: String!
     password: String!
-#    department: String!
-#    grade: String!
-#    qq: String!
     mail: String!
 }
 
 type RegisterResult {
-    # success, xxx already in use, invalid xxx, failed, already login, not empty error
+
     message: String!
 }
 
 input LoginInput {
-#    stuNumber: String!
     mail: String!
     password: String!
 }
@@ -91,10 +85,6 @@ input UserInfoUpdateInput {
     userId: String!
     name: String!
     role: String!
-#    department: String!
-#    grade: String!
-#    protectedTime: String!
-#    qq: String!
     mail: String!
     state: String!
 }
@@ -111,7 +101,6 @@ input ChallengeMutateInput {
     flag: FlagTypeInput!
     description: String!
     externalLink: [String!]!
-    # hint: [String]!
     state: String!
     singleton: Boolean!
     nodeConfig: [NodeConfigInput!]
@@ -123,21 +112,16 @@ input ScoreTypeInput {
 }
 
 input FlagTypeInput {
-    dynamic: Boolean!
+    type: Int!
     value: String!
 }
 
 input NodeConfigInput {
     name: String!
     image: String!
-#    ports: [ContainerPortInput!]!
     servicePorts: [ServicePortInput!]!
 }
 
-#input ContainerPortInput {
-#    port: Int!
-#    protocol: String!
-#}
 
 input ServicePortInput {
     name: String!
@@ -182,18 +166,11 @@ type UserInfo {
     userId: String! # long to String
     name: String!
     avatar: String!
-    #    stuNumber: String
-    #    department: String
-    #    qq: String
     mail: String!
     joinTime: String! # Timestamp to String
     score: Int!
-    #    topRank: Int
-    #    protectedTime: String # Timestamp to String
     role: String!
     state: String!
-    #    rank: Int
-    #    grade: String
 }
 
 type AllUserInfoResult {
@@ -222,11 +199,9 @@ type ChallengeInfo {
     challengeId: String!
     name: String!
     category: String!
-#    name: String
     score: String!
     description: String!
     externalLink: [String!]!
-#    hint: [String]
     blood: [BloodInfo!]!
     done: Boolean!
     manual: Boolean!
@@ -252,14 +227,11 @@ type ChallengeConfigAndState {
 }
 
 type ChallengeConfig {
-#    name: String
     category: String!
     score: ScoreType!
     flag: FlagType!
     description: String!
     externalLink: [String!]!
-#    hint: [String]
-#    state: String!
     singleton: Boolean!
     nodeConfig: [NodeConfig!]!
 }
@@ -267,14 +239,8 @@ type ChallengeConfig {
 type NodeConfig {
     name: String!
     image: String!
-#    ports: [ContainerPort!]!
     servicePorts: [ServicePort!]!
 }
-
-#type ContainerPort {
-#    port: Int!
-#    protocol: String!
-#}
 
 type ServicePort {
     name: String!
@@ -290,7 +256,7 @@ type ScoreType {
 }
 
 type FlagType {
-    dynamic: Boolean!
+    type: Int!
     value: String!
 }
 
