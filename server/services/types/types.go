@@ -190,8 +190,8 @@ type FlagTypeInput struct {
 }
 
 func (input *FlagTypeInput) CheckPass() bool {
-	input.Value = blankRegexp.ReplaceAllString(input.Value, "")
 	if input.Type != Multiple {
+		input.Value = blankRegexp.ReplaceAllString(input.Value, "")
 		if strings.Contains(input.Value, "\n") {
 			return false
 		}
@@ -199,7 +199,7 @@ func (input *FlagTypeInput) CheckPass() bool {
 		flags := []string{}
 		parts := strings.Split(input.Value, "\n")
 		for _, line := range parts {
-			s := strings.TrimSpace(line)
+			s := blankRegexp.ReplaceAllString(line, "")
 			if len(s) == 0 {
 				continue
 			}
