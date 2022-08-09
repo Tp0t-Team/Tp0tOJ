@@ -265,3 +265,31 @@ export interface ChallengeActionInput {
 export type ChallengeActionResult = { challengeAction: { successful: string[] } & Result }
 
 export type WatchDescriptionResult = { watchDescription: Result }
+
+export interface GameEventWithId {
+    eventId: string
+    time: string | Date
+    action: number
+}
+
+export interface AddEventInput {
+    time: string
+    action: number
+}
+
+export type AddEventResult = { addEventAction: Result }
+
+export interface UpdateEventInput {
+    eventId: string
+    time: string
+}
+
+export type UpdateEventResult = { updateEvent: Result }
+
+export interface DeleteEventInput {
+    eventIds: string[]
+}
+
+export type DeleteEventResult = { deleteEvent: Result }
+
+export type AllEventResult = { allEvents: { allEvents: GameEventWithId[] } & Result }

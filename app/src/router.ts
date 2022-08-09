@@ -122,6 +122,17 @@ export default new Router({
             }
         },
         {
+            path: '/admin/event',
+            name: 'admin-event',
+            component: () =>
+                import(
+                    /* webpackChunkName: "admin-event" */ '@/views/admin/Event.vue'
+                ),
+            meta: {
+                auth: 'team'
+            }
+        },
+        {
             path: '*',
             name: 'error',
             component: ErrorPage
