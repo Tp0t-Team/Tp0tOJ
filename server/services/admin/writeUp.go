@@ -9,12 +9,19 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils/configure"
 	"strconv"
 	"strings"
 )
+
+var usernameRE = regexp.MustCompile("([^\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}]|[/\\\\'\"`?*:@<>|])")
+
+func usernameFilter(name string) string {
+	return usernameRE.ReplaceAllString(name, "")
+}
 
 func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 	//pack writeup folder and download
@@ -56,7 +63,16 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 			return err
 		}
 		header.Method = zip.Deflate
-		header.Name = file.Name()
+		parts := strings.Split(file.Name(), ".")
+		id, err := strconv.ParseUint(parts[0], 10, 64)
+		if err != nil {
+			return err
+		}
+		user, err := resolvers.FindUser(id)
+		if err != nil {
+			return err
+		}
+		header.Name = parts[0] + "_" + usernameFilter(user.Name) + "." + strings.Join(parts[1:], ".")
 		writer, err := archive.CreateHeader(header)
 		if err != nil {
 			return err
@@ -107,7 +123,13 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 
 func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string) {
 	//TODO: maybe the archive should not include folder
-	var zipFileName = "WP_" + userId + ".zip"
+	user, err := resolvers.FindUser(userId)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	var username = usernameFilter(user.Name)
+	var zipFileName = "WP_" + userId + "_" + username + ".zip"
 	err := os.RemoveAll(zipFileName)
 	if err != nil {
 		log.Panicln("DownloadWP: ", err)
@@ -136,7 +158,8 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 			return nil
 		}
 		_, fileName := filepath.Split(path)
-		id := strings.Split(fileName, ".")[0]
+		parts := strings.Split(fileName, ".")
+		id := parts[0]
 		if id != userId {
 			return nil
 		}
@@ -150,7 +173,7 @@ func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string)
 			return err
 		}
 		header.Method = zip.Deflate
-		header.Name = fileName
+		header.Name = id + "_" + username + "." + strings.Join(parts[1:], ".")
 		writer, err := archive.CreateHeader(header)
 		if err != nil {
 			return err
