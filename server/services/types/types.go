@@ -195,6 +195,17 @@ func (input *FlagTypeInput) CheckPass() bool {
 		if strings.Contains(input.Value, "\n") {
 			return false
 		}
+	} else {
+		flags := []string{}
+		parts := strings.Split(input.Value, "\n")
+		for _, line := range parts {
+			s := strings.TrimSpace(line)
+			if len(s) == 0 {
+				continue
+			}
+			flags = append(flags, s)
+		}
+		input.Value = strings.Join(flags, "\n")
 	}
 	if input.Type == Regexp {
 		_, err := regexp.Compile(input.Value)

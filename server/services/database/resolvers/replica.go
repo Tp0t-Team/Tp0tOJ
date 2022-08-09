@@ -95,6 +95,7 @@ func AddReplica(challengeId uint64, outsideTX *gorm.DB, cb func(status bool)) *e
 			ChallengeId: challengeId,
 			Status:      "disabled",
 			Flag:        flag,
+			FlagType:    uint64(config.Flag.Type),
 			Singleton:   config.Singleton,
 		}
 		result := tx.Create(&newReplica)
