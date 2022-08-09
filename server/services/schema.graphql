@@ -21,6 +21,9 @@ type Mutation {
     startReplica(input: String!): StartReplicaResult!
     deleteImage(input: String!): DeleteImageResult!
     deleteReplica(input: String!): DeleteReplicaResult!
+    addEventAction(input: AddEventInput!): AddEventResult!
+    updateEvent(input: UpdateEventInput!): UpdateEventResult!
+    deleteEvent(input: DeleteEventInput!): DeleteEventResult!
 }
 
 input RegisterInput {
@@ -156,6 +159,7 @@ type Query {
     imageInfos: ImageInfoResult
     clusterInfo: ClusterInfoResult
     watchDescription(challengeId: String!): WatchDescriptionResult
+    allEvents: AllEventResult
 }
 type UserInfoResult {
     message: String!
@@ -350,4 +354,41 @@ type ChallengeActionResult {
 
 type WatchDescriptionResult {
     message: String!
+}
+
+input AddEventInput {
+    action: Int!
+    time: String!
+}
+
+type AddEventResult {
+    message: String!
+}
+
+input UpdateEventInput {
+    eventId: String!
+    time: String!
+}
+
+type UpdateEventResult {
+    message: String!
+}
+
+input DeleteEventInput {
+    eventIds: [String!]!
+}
+
+type DeleteEventResult {
+    message: String!
+}
+
+type GameEvent {
+    eventId: String!
+    time: string!
+    action: Int!
+}
+
+type AllEventResult {
+    messsage: String!
+    AllEvents: [GameEvent!]!
 }
