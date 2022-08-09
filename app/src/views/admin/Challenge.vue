@@ -104,7 +104,7 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showDeleteDialog" width="300px">
+      <!-- <v-dialog v-model="showDeleteDialog" width="300px">
         <v-card>
           <v-card-title>Are you sure to delete this challenge?</v-card-title>
           <v-card-actions>
@@ -113,7 +113,7 @@
             <v-btn text color="primary" @click="deleteConfig">accept</v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog>
+      </v-dialog> -->
       <v-col cols="6" class="content-col">
         <challenge-editor
           :config="currentConfig"
@@ -174,7 +174,7 @@ export default class Challenge extends Vue {
   private challengeType = constValue.challengeType;
 
   private showDiscardDialog: boolean = false;
-  private showDeleteDialog: boolean = false;
+  // private showDeleteDialog: boolean = false;
   private withoutInit: boolean = true;
   private loading: boolean = false;
   private changed: boolean = false;
@@ -374,10 +374,10 @@ export default class Challenge extends Vue {
     this.currentConfig = this.tempConfig;
   }
 
-  tryDelete(id: string) {
-    this.tempChallengeId = id;
-    this.showDeleteDialog = true;
-  }
+  // tryDelete(id: string) {
+  //   this.tempChallengeId = id;
+  //   this.showDeleteDialog = true;
+  // }
 
   async deleteConfig() {
     // console.log(this.tempChallengeId);
