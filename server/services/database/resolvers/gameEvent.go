@@ -8,13 +8,10 @@ import (
 	"time"
 )
 
-func EventStartGame(actionTime time.Time, outsideTX *gorm.DB) bool {
-	if outsideTX == nil {
-		outsideTX = db
-	}
+func AddEvent(eventAction int, eventTime time.Time) bool {
 	event := entity.GameEvent{
-		Time:   actionTime,
-		Action: entity.ResumeEvent,
+		Time:   eventTime,
+		Action: uint64(eventAction),
 	}
 	result := db.Create(&event)
 	if result.Error != nil {
@@ -24,20 +21,52 @@ func EventStartGame(actionTime time.Time, outsideTX *gorm.DB) bool {
 	return true
 }
 
-func EventStopGame(actionTime time.Time, outsideTX *gorm.DB) bool {
-	if outsideTX == nil {
-		outsideTX = db
+func UpdateEvent(eventId uint64, eventTime time.Time) bool {
+
+	var event entity.GameEvent
+
+	result := db.Where(map[string]interface{}{"event_id": eventId}).First(&event)
+	if result.Error != nil {
+		log.Println(errors.New("Update Event error:\n" + result.Error.Error()))
+		return false
 	}
-	event := entity.GameEvent{
-		Time:   actionTime,
-		Action: entity.PauseEvent,
-	}
-	result := db.Create(&event)
+	event.Time = eventTime
+	result = db.Save(&event)
 	if result.Error != nil {
 		log.Println(result.Error)
 		return false
 	}
 	return true
+}
+func DeleteEvent(eventId uint64) bool {
+
+	var event entity.GameEvent
+
+	result := db.Where(map[string]interface{}{"event_id": eventId}).First(&event)
+	if result.Error != nil {
+		log.Println(errors.New("Update Event error:\n" + result.Error.Error()))
+		return false
+	}
+	result = db.Delete(&event)
+	if result.Error != nil {
+		log.Println(result.Error)
+		return false
+	}
+	return true
+}
+
+func GetAllEvents() []entity.GameEvent {
+
+	var events []entity.GameEvent
+
+	result := db.Where(map[string]interface{}{}).Find(&events)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return []entity.GameEvent{}
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return nil
+	}
+	return events
 }
 
 func IsGameRunning(outsideTX *gorm.DB) bool {

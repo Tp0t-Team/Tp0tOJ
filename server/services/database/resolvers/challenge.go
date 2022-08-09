@@ -127,7 +127,6 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 		if err != nil {
 			return errors.New("challengeId Parse Error:\n" + err.Error())
-
 		}
 		challengeItem := tx.Where(map[string]interface{}{"challenge_id": inputChallengeId}).First(&challenge)
 		if challengeItem.Error != nil {

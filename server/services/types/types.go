@@ -429,7 +429,6 @@ type SubmitHistoryResult struct {
 type SubmitInfo struct {
 	SubmitTime    string
 	ChallengeName string
-	Mark          int32
 }
 
 type WriteUpInfoResult struct {
@@ -512,7 +511,7 @@ type WatchDescriptionResult struct {
 type GameEvent struct {
 	EventId string
 	Time    string
-	Action  string
+	Action  int32
 }
 
 type AddEventInput struct {
@@ -543,7 +542,7 @@ type UpdateEventResult struct {
 }
 
 type DeleteEventInput struct {
-	EventId string
+	EventIds []string
 }
 
 func (input *DeleteEventInput) CheckPass() bool {

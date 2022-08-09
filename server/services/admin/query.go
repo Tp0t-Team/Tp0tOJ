@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/kataras/go-sessions/v3"
 	"log"
+	"server/entity"
 	"server/services/database/resolvers"
 	"server/services/kube"
 	"server/services/types"
@@ -139,4 +140,30 @@ func (r *AdminQueryResolver) ClusterInfo(ctx context.Context) *types.ClusterInfo
 		Nodes:    nodeInfos,
 		Replicas: replicaInfos,
 	}
+}
+
+func (r *AdminMutationResolver) AllEvents(ctx context.Context) *types.AllEventResult {
+
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.AllEventResult{Message: "forbidden or login timeout"}
+	}
+	var events []entity.GameEvent
+	events = resolvers.GetAllEvents()
+	if events == nil {
+		return &types.AllEventResult{Message: "get events error"}
+	}
+	var results []types.GameEvent
+	for _, event := range events {
+		result := types.GameEvent{
+			EventId: strconv.FormatUint(event.EventId, 10),
+			Time:    strconv.FormatInt(event.Time.Unix(), 10),
+			Action:  int32(event.Action),
+		}
+		results = append(results, result)
+	}
+
+	return &types.AllEventResult{Message: "", AllEvents: results}
 }

@@ -208,7 +208,7 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 
 }
 
-// EventAction Handle 2 types of action : [ resume | pause ]
+// AddEventAction Handle 2 types of action : [ resume | pause ]
 func (r *AdminMutationResolver) AddEventAction(ctx context.Context, args struct{ Input types.AddEventInput }) *types.AddEventResult {
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
@@ -223,32 +223,70 @@ func (r *AdminMutationResolver) AddEventAction(ctx context.Context, args struct{
 	timestamp, err := strconv.ParseInt(input.Time, 10, 64)
 	if err != nil {
 		log.Println("time parse error", err)
-		return &types.AddEventResult{Message: "Event Update Error!"}
+		return &types.AddEventResult{Message: "time Parse error"}
 	}
 	tmpTime := time.Unix(timestamp, 0)
-	switch input.Action {
-	case entity.ResumeEvent:
-		ok := resolvers.EventStartGame(tmpTime, nil)
-		if !ok {
-			return &types.AddEventResult{Message: "ResumeEvent Error!"}
-		}
-		break
-	case entity.PauseEvent:
-		ok := resolvers.EventStopGame(tmpTime, nil)
-		if !ok {
-			return &types.AddEventResult{Message: "ResumeEvent Error!"}
-		}
-		break
+	ok := resolvers.AddEvent(entity.ResumeEvent, tmpTime)
+	if !ok {
+		return &types.AddEventResult{Message: "Add Event Error!"}
 	}
 	return &types.AddEventResult{Message: ""}
 }
-func (r *AdminMutationResolver) UpdateEvent(ctx context.Context, args struct{ Input types.UpdateEventInput }) *types.UpdateEventInput {
-	return nil
-}
-func (r *AdminMutationResolver) DeleteEvent(ctx context.Context, args struct{ Input types.DeleteEventInput }) *types.DeleteEventResult {
-	return nil
+
+// UpdateEvent only support update event's time
+func (r *AdminMutationResolver) UpdateEvent(ctx context.Context, args struct{ Input types.UpdateEventInput }) *types.UpdateEventResult {
+	input := args.Input
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.UpdateEventResult{Message: "forbidden or login timeout"}
+	}
+	if !input.CheckPass() {
+		return &types.UpdateEventResult{Message: "event format error"}
+	}
+
+	eventId, err := strconv.ParseUint(input.EventId, 10, 64)
+	if err != nil {
+		log.Println("eventId Parse Error:\n", err)
+		return &types.UpdateEventResult{Message: "eventId Parse error"}
+	}
+
+	timestamp, err := strconv.ParseInt(input.Time, 10, 64)
+	if err != nil {
+		log.Println("time parse error", err)
+		return &types.UpdateEventResult{Message: "time Parse error"}
+	}
+	tmpTime := time.Unix(timestamp, 0)
+
+	ok := resolvers.UpdateEvent(eventId, tmpTime)
+	if !ok {
+		return &types.UpdateEventResult{Message: "Event Update Error!"}
+	}
+	return &types.UpdateEventResult{Message: ""}
 }
 
-func (r *AdminMutationResolver) AllEvents(ctx context.Context) *types.AllEventResult {
-	return nil
+func (r *AdminMutationResolver) DeleteEvent(ctx context.Context, args struct{ Input types.DeleteEventInput }) *types.DeleteEventResult {
+	input := args.Input
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteEventResult{Message: "forbidden or login timeout"}
+	}
+	if !input.CheckPass() {
+		return &types.DeleteEventResult{Message: "event format error"}
+	}
+	for _, eventId := range input.EventIds {
+		id, err := strconv.ParseUint(eventId, 10, 64)
+		if err != nil {
+			log.Println("eventId Parse Error:\n", err)
+			return &types.DeleteEventResult{Message: "eventId Parse error"}
+		}
+		ok := resolvers.DeleteEvent(id)
+		if !ok {
+			return &types.DeleteEventResult{Message: "something error while deleting events"}
+		}
+	}
+	return &types.DeleteEventResult{Message: ""}
 }
