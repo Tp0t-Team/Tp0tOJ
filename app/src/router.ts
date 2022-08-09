@@ -133,6 +133,17 @@ export default new Router({
             }
         },
         {
+            path: '/admin/analyse',
+            name: 'admin-event',
+            component: () =>
+                import(
+                    /* webpackChunkName: "admin-analyse" */ '@/views/admin/Analyse.vue'
+                ),
+            meta: {
+                auth: 'team'
+            }
+        },
+        {
             path: '*',
             name: 'error',
             component: ErrorPage

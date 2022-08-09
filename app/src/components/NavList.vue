@@ -99,6 +99,20 @@
             <v-list-item-title>Writeup</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item
+          @click="$router.push({path:'/admin/event',query:{time:Date.now().toLocaleString()}})"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Event</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          @click="$router.push({path:'/admin/analyse',query:{time:Date.now().toLocaleString()}})"
+        >
+          <v-list-item-content>
+            <v-list-item-title>Analyse</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list-group>
       <v-divider></v-divider>
     </div>
