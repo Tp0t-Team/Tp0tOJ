@@ -14,6 +14,7 @@ import (
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils/configure"
+	"server/utils/kick"
 	"strconv"
 	"strings"
 	"sync"
@@ -234,10 +235,13 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.SubmitResult{Message: "forbidden or login timeout"}
 	}
+	userId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(userId) {
+		return &types.SubmitResult{Message: "forbidden or login timeout"}
+	}
 	if !input.CheckPass() {
 		return &types.SubmitResult{Message: "not empty error"}
 	}
-	userId := *session.Get("userId").(*uint64)
 	challengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
 	if err != nil {
 		log.Println(err)
@@ -260,11 +264,14 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
 	}
+	userId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(userId) {
+		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
+	}
 	input = strings.TrimSpace(input)
 	if input == "" {
 		return &types.StartReplicaResult{Message: "not empty error"}
 	}
-	userId := *session.Get("userId").(*uint64)
 	challengeId, err := strconv.ParseUint(input, 10, 64)
 	if err != nil {
 		log.Println(err)

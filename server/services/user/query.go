@@ -10,6 +10,7 @@ import (
 	"server/services/kube"
 	"server/services/types"
 	"server/utils"
+	"server/utils/kick"
 	"strconv"
 	"time"
 )
@@ -77,6 +78,9 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 		return &types.UserInfoResult{Message: "Get User Info Error!"}
 	}
 	currentUserId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(currentUserId) {
+		return &types.UserInfoResult{Message: "forbidden or login timeout"}
+	}
 	var user *entity.User
 	user, err = resolvers.FindUser(parsedUserId)
 	if err != nil {
@@ -112,6 +116,9 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 		return &types.ChallengeInfosResult{Message: "forbidden or login timeout"}
 	}
 	currentUserId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(currentUserId) {
+		return &types.ChallengeInfosResult{Message: "forbidden or login timeout"}
+	}
 	challenges := resolvers.FindEnabledChallenges()
 	if challenges == nil {
 		return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
@@ -211,6 +218,9 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
 	}
 	currentUserId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(currentUserId) {
+		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
+	}
 	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
 	if err != nil {
 		log.Println(err)

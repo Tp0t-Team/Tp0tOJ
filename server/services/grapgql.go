@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"server/services/admin"
 	"server/services/user"
+	"server/utils/kick"
 	"strings"
 	"time"
 )
@@ -73,6 +74,11 @@ func init() {
 			return
 		}
 		userId := *session.Get("userId").(*uint64)
+		if !kick.KickGuard(userId) {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write(nil)
+			return
+		}
 		user.WriteUpHandle(w, r, userId)
 	})
 	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {

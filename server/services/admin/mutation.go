@@ -8,6 +8,7 @@ import (
 	"server/services/kube"
 	"server/services/types"
 	"server/utils"
+	"server/utils/kick"
 	"strconv"
 	"strings"
 )
@@ -58,6 +59,11 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 		ok := resolvers.UpdateUserInfo(inputUserId, input.Name, input.Role, input.Mail, input.State)
 		if !ok {
 			return &types.UserInfoUpdateResult{Message: "Update Error!"}
+		}
+		if input.State == "disabled" {
+			kick.BanUser(inputUserId)
+		} else {
+			kick.UnbanUser(inputUserId)
 		}
 		return &types.UserInfoUpdateResult{Message: ""}
 
