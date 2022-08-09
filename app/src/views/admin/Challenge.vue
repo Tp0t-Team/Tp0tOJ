@@ -238,7 +238,7 @@ export default class Challenge extends Vue {
                     baseScore
                   }
                   flag {
-                    dynamic
+                    type
                     value
                   }
                   description
