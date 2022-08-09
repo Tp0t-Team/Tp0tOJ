@@ -123,14 +123,19 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 
 func DownloadWPByUserId(w http.ResponseWriter, req *http.Request, userId string) {
 	//TODO: maybe the archive should not include folder
-	user, err := resolvers.FindUser(userId)
+	parsedUserId, err := strconv.ParseUint(userId, 10, 64)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	user, err := resolvers.FindUser(parsedUserId)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	var username = usernameFilter(user.Name)
 	var zipFileName = "WP_" + userId + "_" + username + ".zip"
-	err := os.RemoveAll(zipFileName)
+	err = os.RemoveAll(zipFileName)
 	if err != nil {
 		log.Panicln("DownloadWP: ", err)
 		return
