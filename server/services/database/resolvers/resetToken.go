@@ -84,6 +84,9 @@ func ResetPassword(token string, password string) bool {
 		} else if result.Error != nil {
 			return result.Error
 		}
+		if resetToken.User.State == "disabled" {
+			return errors.New("forbidden user try reset password")
+		}
 		resetToken.User.Password = password
 		tx.Save(&resetToken.User)
 		tx.Delete(&resetToken)

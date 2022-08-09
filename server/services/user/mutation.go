@@ -196,6 +196,9 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 	if user == nil {
 		return &types.ForgetResult{Message: "no such user"}
 	}
+	if user.State == "disabled" {
+		return &types.ForgetResult{Message: "You have been disabled!"}
+	}
 	ok := ResetTimer.NewTimer(user.UserId)
 	if !ok {
 		return &types.ForgetResult{Message: "you have recently reset password"}
