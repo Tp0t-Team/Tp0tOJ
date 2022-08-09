@@ -1,6 +1,7 @@
 package types
 
 import (
+	"golang.org/x/text/unicode/norm"
 	"log"
 	"regexp"
 	"strconv"
@@ -22,7 +23,8 @@ type RegisterInput struct {
 func (input *RegisterInput) CheckPass() bool {
 	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
-	return input.Name != "" && input.Mail != "" && input.Password != ""
+	input.Name = norm.NFC.String(input.Name)
+	return len([]rune(input.Name)) <= 20 && input.Name != "" && input.Mail != "" && input.Password != ""
 }
 
 type RegisterResult struct {
