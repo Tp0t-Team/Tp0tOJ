@@ -4,6 +4,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 	"log"
 	"regexp"
+	"server/entity"
 	"strconv"
 	"strings"
 )
@@ -506,4 +507,55 @@ type ChallengeActionResult struct {
 
 type WatchDescriptionResult struct {
 	Message string
+}
+
+type GameEvent struct {
+	EventId string
+	Time    string
+	Action  string
+}
+
+type AddEventInput struct {
+	Action int32
+	Time   string
+}
+
+func (input *AddEventInput) CheckPass() bool {
+	return input.Action < entity.EventMax
+}
+
+type AddEventResult struct {
+	Message string
+}
+
+type UpdateEventInput struct {
+	EventId string
+	Time    string
+}
+
+func (input *UpdateEventInput) CheckPass() bool {
+	//TODO
+	return true
+}
+
+type UpdateEventResult struct {
+	Message string
+}
+
+type DeleteEventInput struct {
+	EventId string
+}
+
+func (input *DeleteEventInput) CheckPass() bool {
+	//TODO
+	return true
+}
+
+type DeleteEventResult struct {
+	Message string
+}
+
+type AllEventResult struct {
+	Message   string
+	AllEvents []GameEvent
 }

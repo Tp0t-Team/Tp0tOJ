@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/kataras/go-sessions/v3"
 	"log"
+	"server/entity"
 	"server/services/database/resolvers"
 	"server/services/kube"
 	"server/services/types"
@@ -11,6 +12,7 @@ import (
 	"server/utils/kick"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type AdminMutationResolver struct {
@@ -204,4 +206,49 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 	}
 	return &types.DeleteReplicaResult{Message: "delete replica error"}
 
+}
+
+// EventAction Handle 2 types of action : [ resume | pause ]
+func (r *AdminMutationResolver) AddEventAction(ctx context.Context, args struct{ Input types.AddEventInput }) *types.AddEventResult {
+	input := args.Input
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.AddEventResult{Message: "forbidden or login timeout"}
+	}
+	if !input.CheckPass() {
+		return &types.AddEventResult{Message: "event format error"}
+	}
+	timestamp, err := strconv.ParseInt(input.Time, 10, 64)
+	if err != nil {
+		log.Println("time parse error", err)
+		return &types.AddEventResult{Message: "Event Update Error!"}
+	}
+	tmpTime := time.Unix(timestamp, 0)
+	switch input.Action {
+	case entity.ResumeEvent:
+		ok := resolvers.EventStartGame(tmpTime, nil)
+		if !ok {
+			return &types.AddEventResult{Message: "ResumeEvent Error!"}
+		}
+		break
+	case entity.PauseEvent:
+		ok := resolvers.EventStopGame(tmpTime, nil)
+		if !ok {
+			return &types.AddEventResult{Message: "ResumeEvent Error!"}
+		}
+		break
+	}
+	return &types.AddEventResult{Message: ""}
+}
+func (r *AdminMutationResolver) UpdateEvent(ctx context.Context, args struct{ Input types.UpdateEventInput }) *types.UpdateEventInput {
+	return nil
+}
+func (r *AdminMutationResolver) DeleteEvent(ctx context.Context, args struct{ Input types.DeleteEventInput }) *types.DeleteEventResult {
+	return nil
+}
+
+func (r *AdminMutationResolver) AllEvents(ctx context.Context) *types.AllEventResult {
+	return nil
 }

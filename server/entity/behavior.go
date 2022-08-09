@@ -19,4 +19,5 @@ const (
 	ActionComplete
 	ActionLogin
 	ActionWatchDescription
+	BehaviorMAX
 )

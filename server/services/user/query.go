@@ -119,6 +119,9 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 	if !kick.KickGuard(currentUserId) {
 		return &types.ChallengeInfosResult{Message: "forbidden or login timeout"}
 	}
+	if !resolvers.IsGameRunning(nil) {
+		return &types.ChallengeInfosResult{Message: "game is not running now"}
+	}
 	challenges := resolvers.FindEnabledChallenges()
 	if challenges == nil {
 		return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
@@ -220,6 +223,9 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 	currentUserId := *session.Get("userId").(*uint64)
 	if !kick.KickGuard(currentUserId) {
 		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
+	}
+	if !resolvers.IsGameRunning(nil) {
+		return &types.WatchDescriptionResult{Message: "game is not running now"}
 	}
 	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
 	if err != nil {

@@ -13,4 +13,5 @@ type GameEvent struct {
 const (
 	PauseEvent = iota
 	ResumeEvent
+	EventMax
 )
