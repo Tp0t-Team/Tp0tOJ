@@ -191,7 +191,7 @@ export default class Challenge extends Vue {
     this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 10 * 1000);
     this.$apollo.query<ChallengeResult>({
       query: gql`
-        query {
+        query($input: String!) {
           watchDescription(challengeId: $input) {
             message
           }

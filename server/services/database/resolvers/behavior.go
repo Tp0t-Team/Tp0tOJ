@@ -1,15 +1,19 @@
 package resolvers
 
 import (
+	"gorm.io/gorm"
 	"log"
 	"server/entity"
 	"server/utils/configure"
 	"time"
 )
 
-func BehaviorAllocReplica(challenge uint64, user uint64, flag string, actionTime time.Time) {
+func BehaviorAllocReplica(challenge uint64, user uint64, flag string, actionTime time.Time, outsideTX *gorm.DB) {
 	if !configure.Configure.Server.BehaviorLog {
 		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
 	}
 	behavior := entity.Behavior{
 		ActionTime:  actionTime,
@@ -24,9 +28,12 @@ func BehaviorAllocReplica(challenge uint64, user uint64, flag string, actionTime
 	}
 }
 
-func BehaviorSubmit(challenge uint64, user uint64, flag string, actionTime time.Time) {
+func BehaviorSubmit(challenge uint64, user uint64, flag string, actionTime time.Time, outsideTX *gorm.DB) {
 	if !configure.Configure.Server.BehaviorLog {
 		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
 	}
 	behavior := entity.Behavior{
 		ActionTime:  actionTime,
@@ -35,15 +42,18 @@ func BehaviorSubmit(challenge uint64, user uint64, flag string, actionTime time.
 		UserId:      user,
 		Content:     flag,
 	}
-	result := db.Create(&behavior)
+	result := outsideTX.Create(&behavior)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
 }
 
-func BehaviorComplete(challenge uint64, user uint64, flag string, actionTime time.Time) {
+func BehaviorComplete(challenge uint64, user uint64, flag string, actionTime time.Time, outsideTX *gorm.DB) {
 	if !configure.Configure.Server.BehaviorLog {
 		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
 	}
 	behavior := entity.Behavior{
 		ActionTime:  actionTime,
@@ -52,15 +62,18 @@ func BehaviorComplete(challenge uint64, user uint64, flag string, actionTime tim
 		UserId:      user,
 		Content:     flag,
 	}
-	result := db.Create(&behavior)
+	result := outsideTX.Create(&behavior)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
 }
 
-func BehaviorLogin(user uint64, ip string, actionTime time.Time) {
+func BehaviorLogin(user uint64, ip string, actionTime time.Time, outsideTX *gorm.DB) {
 	if !configure.Configure.Server.BehaviorLog {
 		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
 	}
 	behavior := entity.Behavior{
 		ActionTime:  actionTime,
@@ -69,15 +82,18 @@ func BehaviorLogin(user uint64, ip string, actionTime time.Time) {
 		UserId:      user,
 		Content:     ip,
 	}
-	result := db.Create(&behavior)
+	result := outsideTX.Create(&behavior)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
 }
 
-func BehaviorWatchDescription(challenge uint64, user uint64, actionTime time.Time) {
+func BehaviorWatchDescription(challenge uint64, user uint64, actionTime time.Time, outsideTX *gorm.DB) {
 	if !configure.Configure.Server.BehaviorLog {
 		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
 	}
 	behavior := entity.Behavior{
 		ActionTime:  actionTime,
@@ -86,7 +102,7 @@ func BehaviorWatchDescription(challenge uint64, user uint64, actionTime time.Tim
 		UserId:      user,
 		Content:     "",
 	}
-	result := db.Create(&behavior)
+	result := outsideTX.Create(&behavior)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}

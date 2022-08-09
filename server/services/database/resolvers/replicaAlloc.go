@@ -108,7 +108,7 @@ func AddReplicaAlloc(replicaId uint64, userId uint64, outsideTX *gorm.DB) bool {
 	if err != nil {
 		log.Println(err)
 	} else {
-		BehaviorAllocReplica(foundedReplica.ChallengeId, userId, foundedReplica.Flag, time.Now())
+		BehaviorAllocReplica(foundedReplica.ChallengeId, userId, foundedReplica.Flag, time.Now(), outsideTX)
 	}
 	return true
 

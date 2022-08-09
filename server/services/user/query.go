@@ -226,6 +226,6 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 		log.Println(err)
 		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
 	}
-	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now())
+	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
 	return &types.WatchDescriptionResult{}
 }
