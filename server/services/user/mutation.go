@@ -238,7 +238,7 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.SubmitResult{Message: "forbidden or login timeout"}
 	}
-	if !resolvers.IsGameRunning(nil) {
+	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.SubmitResult{Message: "game is not running now"}
 	}
 	userId := *session.Get("userId").(*uint64)
@@ -267,6 +267,7 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 	input := args.Input
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
 	}
@@ -274,7 +275,7 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 	if !kick.KickGuard(userId) {
 		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
 	}
-	if !resolvers.IsGameRunning(nil) {
+	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.StartReplicaResult{Message: "game is not running now"}
 	}
 	input = strings.TrimSpace(input)

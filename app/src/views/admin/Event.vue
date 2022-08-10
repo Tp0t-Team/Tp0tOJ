@@ -227,7 +227,7 @@ export default class Challenge extends Vue {
       this.events = res.data!.allEvents.allEvents.map((it)=> ({
         eventId: it.eventId,
         action: it.action,
-        time: new Date(parseInt(it.time as string)),
+        time: new Date(parseInt(it.time as string)*1000),//解决unix time精度问题
       }));
     } catch (e) {
       this.infoText = e.toString();

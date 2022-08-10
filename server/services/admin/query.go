@@ -156,6 +156,7 @@ func (r *AdminMutationResolver) AllEvents(ctx context.Context) *types.AllEventRe
 		return &types.AllEventResult{Message: "get events error"}
 	}
 	var results []types.GameEvent
+
 	for _, event := range events {
 		result := types.GameEvent{
 			EventId: strconv.FormatUint(event.EventId, 10),

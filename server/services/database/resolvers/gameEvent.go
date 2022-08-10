@@ -13,6 +13,7 @@ func AddEvent(eventAction int, eventTime time.Time) bool {
 		Time:   eventTime,
 		Action: uint64(eventAction),
 	}
+	//log.Println("eventTime: ", eventTime.Unix())
 	result := db.Create(&event)
 	if result.Error != nil {
 		log.Println(result.Error)
