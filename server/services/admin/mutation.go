@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/kataras/go-sessions/v3"
 	"log"
-	"server/entity"
 	"server/services/database/resolvers"
 	"server/services/kube"
 	"server/services/types"
@@ -226,7 +225,7 @@ func (r *AdminMutationResolver) AddEventAction(ctx context.Context, args struct{
 		return &types.AddEventResult{Message: "time Parse error"}
 	}
 	tmpTime := time.Unix(timestamp, 0)
-	ok := resolvers.AddEvent(entity.ResumeEvent, tmpTime)
+	ok := resolvers.AddEvent(int(input.Action), tmpTime)
 	if !ok {
 		return &types.AddEventResult{Message: "Add Event Error!"}
 	}
