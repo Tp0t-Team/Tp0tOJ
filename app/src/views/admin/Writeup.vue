@@ -10,7 +10,7 @@
                 color="primary"
                 :href="`/wp?userId=${item.userId}`"
                 target="_blank"
-                :download="`wp-${item.userId}.zip`"
+                :download="`wp-${item.userId}-${nameFilter(item.name)}.zip`"
               >
                 download
               </v-btn>
@@ -65,6 +65,10 @@ export default class Images extends Vue {
 
   async mounted() {
     await this.loadData();
+  }
+
+  nameFilter(name: string) {
+    return name.replaceAll(/([^\p{L}\p{M}\p{N}\p{P}\p{S}]|[/\\'"`?*:@<>|])/u, '');
   }
 
   async loadData() {
