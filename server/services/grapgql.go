@@ -147,8 +147,6 @@ func init() {
 				w.WriteHeader(http.StatusOK)
 				w.Write(homeFile)
 			} else if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
-				fileServer.ServeHTTP(w, r)
-			} else {
 				_, filename := filepath.Split(r.URL.Path)
 				if filepath.Ext(r.URL.Path) == ".js" || filepath.Ext(r.URL.Path) == ".css" {
 					if r.Header.Get("if-none-match") == filename {
@@ -157,6 +155,8 @@ func init() {
 					}
 					w.Header().Set("etag", filename)
 				}
+				fileServer.ServeHTTP(w, r)
+			} else {
 				w.WriteHeader(http.StatusOK)
 				w.Write(indexFile)
 			}
