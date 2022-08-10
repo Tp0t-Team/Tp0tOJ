@@ -22,8 +22,6 @@
     <v-btn
       fab
       color="primary"
-      :loading="loading"
-      :disabled="disabled"
       absolute
       right
       bottom
@@ -50,7 +48,7 @@ import gql from "graphql-tag";
 import { WriteUpInfo, WriteUpInfoResult } from "@/struct";
 
 @Component
-export default class Images extends Vue {
+export default class Writeup extends Vue {
   private headers = [
     { text: "name", value: "name" },
     { text: "mail", value: "mail" },
@@ -68,7 +66,7 @@ export default class Images extends Vue {
   }
 
   nameFilter(name: string) {
-    return name.replaceAll(/([^\p{L}\p{M}\p{N}\p{P}\p{S}]|[/\\'"`?*:@<>|])/u, '');
+    return name.replaceAll(/([^\p{L}\p{M}\p{N}\p{P}\p{S}]|[/\\'"`?*:@<>|])/ug, '');
   }
 
   async loadData() {
