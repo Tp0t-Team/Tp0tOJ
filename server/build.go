@@ -17,12 +17,12 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
-	//frontendCmd := exec.Command("npm", "run", "build")
-	//log.Println("build frontend...")
-	//err = frontendCmd.Run()
-	//if err != nil {
-	//	log.Panicln(err)
-	//}
+	frontendCmd := exec.Command("npm", "run", "build")
+	log.Println("build frontend...")
+	err = frontendCmd.Run()
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	err = os.Chdir("../server/services")
 	if err != nil {
