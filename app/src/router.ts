@@ -85,7 +85,7 @@ export default new Router({
                     /* webpackChunkName: "admin-challenge" */ '@/views/admin/Challenge.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {
@@ -96,7 +96,7 @@ export default new Router({
                     /* webpackChunkName: "admin-images" */ '@/views/admin/Images.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {
@@ -107,7 +107,7 @@ export default new Router({
                     /* webpackChunkName: "admin-cluster" */ '@/views/admin/Cluster.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {
@@ -118,7 +118,7 @@ export default new Router({
                     /* webpackChunkName: "admin-writeup" */ '@/views/admin/Writeup.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {
@@ -129,7 +129,7 @@ export default new Router({
                     /* webpackChunkName: "admin-event" */ '@/views/admin/Event.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {
@@ -140,7 +140,7 @@ export default new Router({
                     /* webpackChunkName: "admin-analyse" */ '@/views/admin/Analyse.vue'
                 ),
             meta: {
-                auth: 'team'
+                auth: 'admin'
             }
         },
         {

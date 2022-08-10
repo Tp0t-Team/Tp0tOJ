@@ -9,7 +9,7 @@
     </v-card>
 
     <v-btn
-      v-if="$store.state.global.role=='admin'||$store.state.global.role=='team'"
+      v-if="$store.state.global.role=='admin'"
       fab
       absolute
       right
