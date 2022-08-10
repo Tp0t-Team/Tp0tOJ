@@ -3,7 +3,6 @@
     <v-row class="fill-height">
       <v-spacer></v-spacer>
       <v-col cols="6" class="content-col">
-        <!-- show-expand item-key="challengeId" single-expand -->
         <v-data-table
           v-model="selected"
           :headers="headers"
@@ -11,7 +10,7 @@
           @click:row="select"
           show-select
           :loading="loading"
-          item-key="challengeId"
+          item-key="eventId"
         >
           <template v-slot:body.append="{ headers }">
             <td :colspan="headers.length">
@@ -320,7 +319,7 @@ export default class Challenge extends Vue {
     let aimEvent: GameEventWithId = {
         eventId: "-" + Date.now().toLocaleString(),
         time: new Date(Date.now()),
-        action: 0
+        action: 1, // default must be start
     };
 
     if (this.changed) {

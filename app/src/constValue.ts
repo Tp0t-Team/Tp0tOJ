@@ -3,7 +3,7 @@ const constValue = {
   roleType: ["member", "team", "admin"],
   stateType: ["normal", "disabled"],
   flagType: ["Single", "Multiple", "Regexp", "Dynamic"],
-  eventType: ["Start", "Stop"],
+  eventType: ["Stop", "Start"],
 };
 
 export default constValue;
