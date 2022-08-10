@@ -283,7 +283,6 @@ type SubmitHistoryResult {
 type SubmitInfo {
     submitTime: String!
     challengeName: String!
-    mark: Int!
 }
 
 type WriteUpInfoResult {
@@ -384,11 +383,11 @@ type DeleteEventResult {
 
 type GameEvent {
     eventId: String!
-    time: string!
+    time: String!
     action: Int!
 }
 
 type AllEventResult {
-    messsage: String!
-    AllEvents: [GameEvent!]!
+    message: String!
+    allEvents: [GameEvent!]!
 }
