@@ -52,12 +52,21 @@
     <script>
         let sandDanceExplorer = SandDanceExplorer.Explorer_Class;
         const requests = [];
+        let DarkTheme = '';
 
-        const queryProps = new Map(window.location.search.substring(1).split('&').map(it=>it.split('=')));
-        const DarkTheme = queryProps.has('dark') ? 'dark-theme': '';
+        function makeViewOptions() {
+            return {
+                colors: SandDanceExplorer.getColorSettingsFromThemePalette(SandDanceExplorer.themePalettes[DarkTheme]),
+            };
+        }
 
-        vega.scheme(SandDanceExplorer.SandDance.constants.ColorScaleNone, x => sandDanceExplorer.viewer.options.colors.defaultCube);
-        FluentUIReact.loadTheme({ palette: SandDanceExplorer.themePalettes[DarkTheme] });
+        function setTheme() {
+            sandDanceExplorer?.updateViewerOptions(makeViewOptions());
+            vega.scheme(SandDanceExplorer.SandDance.constants.ColorScaleNone, x => sandDanceExplorer.viewer.options.colors.defaultCube);
+            FluentUIReact.loadTheme({ palette: SandDanceExplorer.themePalettes[DarkTheme] });
+            sandDanceExplorer?.viewer?.renderSameLayout(makeViewOptions());
+        }
+        setTheme();
 
         function load(data, insight) {
             return new Promise((resolve) => {
@@ -75,9 +84,7 @@
                     SandDanceExplorer.use(FluentUIReact, React, ReactDOM, vega);
                     const explorerProps = {
                         theme: DarkTheme,
-                        viewerOptions: {
-                            colors: SandDanceExplorer.getColorSettingsFromThemePalette(SandDanceExplorer.themePalettes[DarkTheme]),
-                        },
+                        viewerOptions: makeViewOptions(),
                         logoClickUrl: 'https://microsoft.github.io/SandDance/',
                         mounted: explorer => {
                             sandDanceExplorer = explorer;
@@ -87,11 +94,7 @@
                     ReactDOM.render(React.createElement(SandDanceExplorer.Explorer, explorerProps), document.getElementById('app'));
                 };
 
-                if (sandDanceExplorer) {
-                    innerLoad();
-                } else {
-                    create();
-                }
+                create(); // just rerender
             });
         }
 
@@ -141,7 +144,9 @@
         }
 
         window.addEventListener('message', e => {
-            let payload = e.data;
+            DarkTheme = e.data.theme;
+            setTheme();
+            let payload = e.data.data;
             if (!payload) return;
             if (Array.isArray(payload)) {
                 const data = payload;

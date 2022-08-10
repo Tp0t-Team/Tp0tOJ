@@ -1,6 +1,6 @@
 <template>
   <v-container fluid class="fill-height" style="padding: 0;">
-    <iframe class="sanddance" :src="'/sanddance.html' + ($vuetify.theme.dark ? '?dark' : '')" ref="sanddance"></iframe>
+    <iframe class="sanddance" src="/sanddance.html" ref="sanddance"></iframe>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
       <!-- <v-spacer></v-spacer> -->
@@ -48,8 +48,10 @@ export default class Analyse extends Vue {
     this.loading = false;
   }
 
+  @Watch("$vuetify.theme.dark")
   update() {
-    (this.$refs.sanddance as HTMLIFrameElement).contentWindow?.postMessage(this.data, '*');
+    let theme = this.$vuetify.theme.dark ? 'dark-theme': '';
+    (this.$refs.sanddance as HTMLIFrameElement).contentWindow?.postMessage({ theme: theme, data: this.data }, '*');
   }
 }
 </script>
