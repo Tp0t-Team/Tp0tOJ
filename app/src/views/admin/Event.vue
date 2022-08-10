@@ -7,7 +7,7 @@
         <v-data-table
           v-model="selected"
           :headers="headers"
-          :items="challengeConfigs"
+          :items="events"
           @click:row="select"
           show-select
           :loading="loading"
@@ -41,11 +41,11 @@
               </div>
             </td>
           </template>
-          <template v-slot:item.category="{ item }">
-            {{ item.config.time }}
+          <template v-slot:item.time="{ item }">
+            {{ formatDate(item.time) }}
           </template>
-          <template v-slot:item.baseScore="{ item }">
-            {{ item.config.action }}
+          <template v-slot:item.action="{ item }">
+            {{ actionItems[item.action] }}
           </template>
         </v-data-table>
       </v-col>
@@ -167,6 +167,10 @@ export default class Challenge extends Vue {
   private timeDate: string = "";
   private timeTime: string = "";
   private tab: string = "date";
+
+  formatDate(time: Date) {
+    return dayjs(time).format("YYYY-MM-DD HH:mm (UTCZ)");
+  }
 
   @Watch("currentEvent")
   editLoaded() {
