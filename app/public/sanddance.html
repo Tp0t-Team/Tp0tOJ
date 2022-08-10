@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SandDance</title>
+    <link rel="stylesheet" type="text/css"
+        href="https://unpkg.com/@msrvida/sanddance-explorer@4/dist/css/sanddance-explorer.css" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        #app {
+            display: grid;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: gray;
+            opacity: 0.1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgb(245, 124, 0);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/vega@5.20/build/vega.min.js"></script>
+    <script src="https://unpkg.com/@fluentui/react@8/dist/fluentui-react.js"></script>
+    <script src="https://unpkg.com/@msrvida/sanddance-explorer@4/dist/umd/sanddance-explorer.js"></script>
+    <script>
+        let sandDanceExplorer = SandDanceExplorer.Explorer_Class;
+        const requests = [];
+
+        const queryProps = new Map(window.location.search.substring(1).split('&').map(it=>it.split('=')));
+        const DarkTheme = queryProps.has('dark') ? 'dark-theme': '';
+
+        vega.scheme(SandDanceExplorer.SandDance.constants.ColorScaleNone, x => sandDanceExplorer.viewer.options.colors.defaultCube);
+        FluentUIReact.loadTheme({ palette: SandDanceExplorer.themePalettes[DarkTheme] });
+
+        function load(data, insight) {
+            return new Promise((resolve) => {
+
+                const innerLoad = () => {
+                    let getPartialInsight;
+                    if (insight) {
+                        //TODO make sure that insight columns exist in dataset
+                        getPartialInsight = columns => insight;
+                    }
+                    sandDanceExplorer.load(data, getPartialInsight).then(resolve);
+                };
+
+                const create = () => {
+                    SandDanceExplorer.use(FluentUIReact, React, ReactDOM, vega);
+                    const explorerProps = {
+                        theme: DarkTheme,
+                        viewerOptions: {
+                            colors: SandDanceExplorer.getColorSettingsFromThemePalette(SandDanceExplorer.themePalettes[DarkTheme]),
+                        },
+                        logoClickUrl: 'https://microsoft.github.io/SandDance/',
+                        mounted: explorer => {
+                            sandDanceExplorer = explorer;
+                            innerLoad();
+                        },
+                    };
+                    ReactDOM.render(React.createElement(SandDanceExplorer.Explorer, explorerProps), document.getElementById('app'));
+                };
+
+                if (sandDanceExplorer) {
+                    innerLoad();
+                } else {
+                    create();
+                }
+            });
+        }
+
+        function respondToRequest(requestWithSource) {
+            requests.push(requestWithSource);
+            const copy = { ...requestWithSource };
+            delete copy.source;
+            const request = { ...copy };
+            let response;
+            switch (request.action) {
+                case 'init': {
+                    response = {
+                        request,
+                    };
+                    break;
+                }
+                case 'load': {
+                    const request_load = request;
+                    load(request_load.data, request_load.insight).then(() => {
+                        response = {
+                            request,
+                        };
+                        requestWithSource.source.postMessage(response, '*');
+                    });
+                    //don't keep a copy of the array
+                    delete request_load.data;
+                    break;
+                }
+                case 'getData': {
+                    response = {
+                        request,
+                        data: sandDanceExplorer.state.dataContent.data,
+                    };
+                    break;
+                }
+                case 'getInsight': {
+                    response = {
+                        request,
+                        insight: sandDanceExplorer.viewer.getInsight(),
+                    };
+                    break;
+                }
+            }
+            if (response) {
+                requestWithSource.source.postMessage(response, '*');
+            }
+        }
+
+        window.addEventListener('message', e => {
+            let payload = e.data;
+            if (!payload) return;
+            if (Array.isArray(payload)) {
+                const data = payload;
+                const requestLoadFromArray = {
+                    action: 'load',
+                    data,
+                    insight: null,
+                };
+                payload = requestLoadFromArray;
+            } else {
+                const dataWithInsight = payload;
+                if (Array.isArray(dataWithInsight.data)) {
+                    const requestLoadFromDataWithInsight = {
+                        action: 'load',
+                        ...dataWithInsight,
+                    };
+                    payload = requestLoadFromDataWithInsight;
+                }
+            }
+            const request = payload;
+            if (!request) return;
+            const requestWithSource = { ...request, source: e.source };
+            respondToRequest(requestWithSource);
+        });
+
+        if (window.opener) {
+            const request = {
+                action: 'init',
+                ts: new Date(),
+            };
+            respondToRequest({ ...request, source: window.opener });
+        }
+    </script>
+    <div id="app"></div>
+</body>
+
+</html>

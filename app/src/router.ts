@@ -134,7 +134,7 @@ export default new Router({
         },
         {
             path: '/admin/analyse',
-            name: 'admin-event',
+            name: 'admin-analyse',
             component: () =>
                 import(
                     /* webpackChunkName: "admin-analyse" */ '@/views/admin/Analyse.vue'

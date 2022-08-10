@@ -1,7 +1,6 @@
 <template>
   <v-container fluid class="fill-height" style="padding: 0;">
-    <iframe :class="'sanddance ' + ($vuetify.theme.dark ? 'dark':'')" src="https://microsoft.github.io/SandDance/embed/v3/sanddance-embed.html"
-      ref="sanddance"></iframe>
+    <iframe class="sanddance" :src="'/sanddance.html' + ($vuetify.theme.dark ? '?dark' : '')" ref="sanddance"></iframe>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}
       <!-- <v-spacer></v-spacer> -->
@@ -38,8 +37,7 @@ export default class Analyse extends Vue {
   async loadData() {
     this.loading = true;
     try {
-      // let res = await fetch("/data");
-      let res = await fetch("https://vega.github.io/vega-datasets/data/movies.json");
+      let res = await fetch("/data");
       let data = await res.json();
       this.data = data;
       this.update();
@@ -58,12 +56,8 @@ export default class Analyse extends Vue {
 
 <style lang="scss" scoped>
 .sanddance {
-  background-color: white;
   width: 100%;
   height: 100%;
   border: 0;
-}
-.sanddance.dark {
-  filter: invert(100%);
 }
 </style>
