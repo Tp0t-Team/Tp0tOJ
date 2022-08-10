@@ -63,16 +63,17 @@ func DownloadAllWP(w http.ResponseWriter, req *http.Request) {
 			return err
 		}
 		header.Method = zip.Deflate
-		parts := strings.Split(file.Name(), ".")
+		parts := strings.Split(info.Name(), ".")
 		id, err := strconv.ParseUint(parts[0], 10, 64)
 		if err != nil {
-			return err
+			log.Println("non-writeup file in writeup folder: ", info.Name())
+			return nil
 		}
 		user, err := resolvers.FindUser(id)
 		if err != nil {
 			return err
 		}
-		header.Name = parts[0] + "_" + usernameFilter(user.Name) + "." + strings.Join(parts[1:], ".")
+		header.Name = "writeup/" + parts[0] + "_" + usernameFilter(user.Name) + "." + strings.Join(parts[1:], ".")
 		writer, err := archive.CreateHeader(header)
 		if err != nil {
 			return err
