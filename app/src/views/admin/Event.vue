@@ -70,12 +70,19 @@
                 label="action"
                 :disabled="loading"
                 @change="Changed"
-                ></v-select>
+              ></v-select>
             </v-col>
             <v-col cols="6">
               <v-menu top :close-on-content-click="false">
                 <template v-slot:activator="{ on, attrs }">
-                  <v-text-field :value="time.toLocaleString()" outlined readonly label="time" v-bind="attrs" v-on="on"></v-text-field>
+                  <v-text-field
+                    :value="time.toLocaleString()"
+                    outlined
+                    readonly
+                    label="time"
+                    v-bind="attrs"
+                    v-on="on"
+                  ></v-text-field>
                 </template>
                 <v-card width="300px">
                   <v-tabs v-model="tab">
@@ -85,10 +92,17 @@
                   </v-tabs>
                   <v-tabs-items v-model="tab">
                     <v-tab-item key="date">
-                      <v-date-picker full-width v-model="timeDate"></v-date-picker>
+                      <v-date-picker
+                        full-width
+                        v-model="timeDate"
+                      ></v-date-picker>
                     </v-tab-item>
                     <v-tab-item key="time">
-                      <v-time-picker full-width format="ampm" v-model="timeTime"></v-time-picker>
+                      <v-time-picker
+                        full-width
+                        format="ampm"
+                        v-model="timeTime"
+                      ></v-time-picker>
                     </v-tab-item>
                   </v-tabs-items>
                 </v-card>
@@ -128,14 +142,14 @@ import dayjs from "dayjs";
 import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import {
-    GameEventWithId,
-    AddEventInput,
-    AddEventResult,
-    UpdateEventInput,
-    UpdateEventResult,
-    DeleteEventInput,
-    DeleteEventResult,
-    AllEventResult
+  GameEventWithId,
+  AddEventInput,
+  AddEventResult,
+  UpdateEventInput,
+  UpdateEventResult,
+  DeleteEventInput,
+  DeleteEventResult,
+  AllEventResult
 } from "@/struct";
 import constValue from "@/constValue";
 
@@ -143,7 +157,7 @@ import constValue from "@/constValue";
 export default class Challenge extends Vue {
   private headers = [
     { text: "time", value: "time" },
-    { text: "action", value: "action" },
+    { text: "action", value: "action" }
   ];
 
   private selected: GameEventWithId[] = [];
@@ -218,15 +232,14 @@ export default class Challenge extends Vue {
             }
           }
         `,
-        fetchPolicy: "no-cache",
+        fetchPolicy: "no-cache"
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
-      if (res.data!.allEvents.message)
-        throw res.data!.allEvents.message;
-      this.events = res.data!.allEvents.allEvents.map((it)=> ({
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.allEvents.message) throw res.data!.allEvents.message;
+      this.events = res.data!.allEvents.allEvents.map(it => ({
         eventId: it.eventId,
         action: it.action,
-        time: new Date(parseInt(it.time as string)*1000),//解决unix time精度问题
+        time: new Date(parseInt(it.time as string) * 1000) //解决unix time精度问题
       }));
     } catch (e) {
       this.infoText = e.toString();
@@ -248,46 +261,57 @@ export default class Challenge extends Vue {
     let aimEvent: GameEventWithId = {
       eventId: this.currentEvent!.eventId,
       action: this.actionItems.indexOf(this.action),
-      time: dayjs(this.time).unix().toString()
+      time: dayjs(this.time)
+        .unix()
+        .toString()
     };
     if (aimEvent.eventId[0] == "-") {
       aimEvent.eventId = "";
     }
     try {
       if (aimEvent.eventId == "") {
-        let res = await this.$apollo.mutate<AddEventResult, {input: AddEventInput}>({
+        let res = await this.$apollo.mutate<
+          AddEventResult,
+          { input: AddEventInput }
+        >({
           mutation: gql`
-            mutation ($input: AddEventInput!) {
+            mutation($input: AddEventInput!) {
               addEventAction(input: $input) {
                 message
               }
             }
           `,
-          variables: {input: {
-            time: aimEvent.time as string,
-            action: aimEvent.action
-          }},
+          variables: {
+            input: {
+              time: aimEvent.time as string,
+              action: aimEvent.action
+            }
+          }
         });
-        if (res.errors) throw res.errors.map((v) => v.message).join(",");
+        if (res.errors) throw res.errors.map(v => v.message).join(",");
         if (res.data!.addEventAction.message)
           throw res.data!.addEventAction.message;
       } else {
-        let res = await this.$apollo.mutate<UpdateEventResult, {input: UpdateEventInput}>({
+        let res = await this.$apollo.mutate<
+          UpdateEventResult,
+          { input: UpdateEventInput }
+        >({
           mutation: gql`
-            mutation ($input: UpdateEventInput!) {
+            mutation($input: UpdateEventInput!) {
               updateEvent(input: $input) {
                 message
               }
             }
           `,
-          variables: {input: {
-            eventId: aimEvent.eventId,
-            time: aimEvent.time as string
-          }},
+          variables: {
+            input: {
+              eventId: aimEvent.eventId,
+              time: aimEvent.time as string
+            }
+          }
         });
-        if (res.errors) throw res.errors.map((v) => v.message).join(",");
-        if (res.data!.updateEvent.message)
-          throw res.data!.updateEvent.message;
+        if (res.errors) throw res.errors.map(v => v.message).join(",");
+        if (res.data!.updateEvent.message) throw res.data!.updateEvent.message;
       }
       this.loading = false;
       this.changed = false;
@@ -306,20 +330,20 @@ export default class Challenge extends Vue {
   select(event: GameEventWithId) {
     let aimEvent = JSON.parse(JSON.stringify(event));
     if (this.changed) {
-        this.tempEvent = aimEvent;
-        this.showDiscardDialog = true;
+      this.tempEvent = aimEvent;
+      this.showDiscardDialog = true;
     } else {
-        this.changed = false;
-        this.withoutValue = false;
-        this.currentEvent = aimEvent;
+      this.changed = false;
+      this.withoutValue = false;
+      this.currentEvent = aimEvent;
     }
   }
 
   newEvent() {
     let aimEvent: GameEventWithId = {
-        eventId: "-" + Date.now().toLocaleString(),
-        time: new Date(Date.now()),
-        action: 1, // default must be start
+      eventId: "-" + Date.now().toLocaleString(),
+      time: new Date(Date.now()),
+      action: 1 // default must be start
     };
 
     if (this.changed) {
@@ -349,7 +373,7 @@ export default class Challenge extends Vue {
         { input: DeleteEventInput }
       >({
         mutation: gql`
-          mutation ($input: DeleteEventInput!) {
+          mutation($input: DeleteEventInput!) {
             deleteEvent(input: $input) {
               message
             }
@@ -357,19 +381,18 @@ export default class Challenge extends Vue {
         `,
         variables: {
           input: {
-            eventIds: this.selected.map((it) => it.eventId),
-          },
-        },
+            eventIds: this.selected.map(it => it.eventId)
+          }
+        }
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
-      if (res.data!.deleteEvent.message)
-        throw res.data!.deleteEvent.message;
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.deleteEvent.message) throw res.data!.deleteEvent.message;
       this.selected = [];
       this.loading = false;
       this.changed = false;
       this.currentEvent = null;
       this.withoutValue = true;
-      this.infoText = 'delete success';
+      this.infoText = "delete success";
       this.hasInfo = true;
       await this.loadAll();
     } catch (e) {

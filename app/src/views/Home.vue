@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
 import HomeFrame from "@/components/HomeFrame.vue";
 
 @Component({
@@ -14,5 +14,4 @@ import HomeFrame from "@/components/HomeFrame.vue";
 export default class Home extends Vue {}
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

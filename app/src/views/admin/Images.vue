@@ -6,7 +6,7 @@
         <v-col cols="8">
           <v-data-table :headers="headers" :items="images" :loading="loading">
             <template v-slot:item.digest="{ item }">
-              <pre>{{item.digest}}</pre>
+              <pre>{{ item.digest }}</pre>
             </template>
             <template v-slot:item.delete="{ item }">
               <v-btn
@@ -73,11 +73,20 @@
             </v-col>
           </v-row>
         </v-form>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn text :disabled="uploadLoading" @click="edit = false">cancel</v-btn>
-        <v-btn text :loading="uploadLoading" :disabled="uploadLoading" color="primary" @click="upload">Upload</v-btn>
-      </v-card-actions>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn text :disabled="uploadLoading" @click="edit = false"
+            >cancel</v-btn
+          >
+          <v-btn
+            text
+            :loading="uploadLoading"
+            :disabled="uploadLoading"
+            color="primary"
+            @click="upload"
+            >Upload</v-btn
+          >
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </div>
@@ -95,7 +104,7 @@ export default class Images extends Vue {
     { text: "platform", value: "platform" },
     { text: "size", value: "size" },
     { text: "digest", value: "digest" },
-    { text: "", value: "delete" },
+    { text: "", value: "delete" }
   ];
 
   private selected: boolean[] = [];
@@ -128,7 +137,7 @@ export default class Images extends Vue {
       formData.append("image", this.file!);
       let res = await fetch("/image", {
         method: "POST",
-        body: formData,
+        body: formData
       });
       if (res.status != 200) {
         throw res.statusText;
@@ -169,11 +178,11 @@ export default class Images extends Vue {
             }
           }
         `,
-        fetchPolicy: "no-cache",
+        fetchPolicy: "no-cache"
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.imageInfos.message) throw res.data!.imageInfos.message;
-      this.images = res.data!.imageInfos.infos.map((it) => {
+      this.images = res.data!.imageInfos.infos.map(it => {
         it.digest = it.digest.slice(0, 8);
         console.log(it);
         let size = BigInt(it.size);
@@ -203,17 +212,17 @@ export default class Images extends Vue {
         { input: string }
       >({
         mutation: gql`
-          mutation ($input: String!) {
+          mutation($input: String!) {
             deleteImage(input: $input) {
               message
             }
           }
         `,
         variables: {
-          input: name,
-        },
+          input: name
+        }
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.deleteImage.message) throw res.data!.deleteImage.message;
       this.selected = [];
       this.loading = false;
@@ -229,5 +238,4 @@ export default class Images extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

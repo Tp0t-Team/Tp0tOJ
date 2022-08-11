@@ -2,31 +2,35 @@
   <v-container fluid>
     <v-row>
       <v-col cols="6" class="content-col">
-        <v-data-table :headers="headers" :items="users" @click:row="select"></v-data-table>
+        <v-data-table
+          :headers="headers"
+          :items="users"
+          @click:row="select"
+        ></v-data-table>
       </v-col>
       <v-col cols="6" class="content-col">
         <v-divider class="avatar-divider" color="primary"></v-divider>
         <v-row class="avatar">
           <v-spacer></v-spacer>
           <v-btn fab @click="seeProfile()" :disabled="!currentUser">
-          <v-avatar color="blue" size="64">
-            <!-- <span>{{currentUser && currentUser.name[0] || "?"}}</span> -->
-            <user-avatar
-              class="white--text"
-              v-if="!!currentUser"
-              :url="currentUser.avatar"
-              :size="64"
-              :name="currentUser.name"
-              :key="currentUser.avatar"
-            ></user-avatar>
-          </v-avatar>
+            <v-avatar color="blue" size="64">
+              <!-- <span>{{currentUser && currentUser.name[0] || "?"}}</span> -->
+              <user-avatar
+                class="white--text"
+                v-if="!!currentUser"
+                :url="currentUser.avatar"
+                :size="64"
+                :name="currentUser.name"
+                :key="currentUser.avatar"
+              ></user-avatar>
+            </v-avatar>
           </v-btn>
           <v-spacer></v-spacer>
         </v-row>
         <user-editor
           :disabled="withoutInit"
           :loading="loading"
-          :key="currentUser && currentUser.mail || ''"
+          :key="(currentUser && currentUser.mail) || ''"
           :user="currentUser"
           @submit="submit"
         ></user-editor>
@@ -75,8 +79,7 @@ import {
   AllUserInfoResult,
   SubmitInfo,
   UserInfoUpdateInput,
-  UserInfoUpdateResult,
-  SubmitHistoryResult
+  UserInfoUpdateResult
 } from "@/struct";
 
 @Component({
@@ -147,8 +150,8 @@ export default class User extends Vue {
   }
 
   seeProfile() {
-    if(!!this.currentUser)
-      this.$router.push(`/profile/${this.currentUser.userId}`)
+    if (this.currentUser)
+      this.$router.push(`/profile/${this.currentUser.userId}`);
   }
 
   // async refresh() {

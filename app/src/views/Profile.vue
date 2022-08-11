@@ -7,7 +7,7 @@
         <template v-slot:activator="{ on }">
           <v-avatar
             class="hoverable"
-            :color="loading?'grey':'blue'"
+            :color="loading ? 'grey' : 'blue'"
             size="64"
             @click="editAvatar"
             v-on="on"
@@ -37,25 +37,48 @@
                   <v-subheader>
                     <span class="text-center">
                       <br />
-                      {{userInfo.score}}pt
+                      {{ userInfo.score }}pt
                     </span>
                   </v-subheader>
                 </div>
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="name" :value="userInfo.name"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="name"
+                    :value="userInfo.name"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="role" :value="userInfo.role"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="role"
+                    :value="userInfo.role"
+                  ></v-text-field>
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="6">
-                  <v-text-field :loading="loading" readonly label="join time" :value="showJoinTime"></v-text-field>
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="join time"
+                    :value="showJoinTime"
+                  ></v-text-field>
                 </v-col>
-                <v-col cols="6" v-if="$store.state.global.userId==$route.params.user_id">
-                  <v-text-field :loading="loading" readonly label="mail" :value="userInfo.mail"></v-text-field>
+                <v-col
+                  cols="6"
+                  v-if="$store.state.global.userId == $route.params.user_id"
+                >
+                  <v-text-field
+                    :loading="loading"
+                    readonly
+                    label="mail"
+                    :value="userInfo.mail"
+                  ></v-text-field>
                 </v-col>
               </v-row>
             </v-form>
@@ -64,7 +87,7 @@
       </v-col>
       <v-spacer></v-spacer>
     </v-row>
-    <v-row v-if="$store.state.global.role=='admin'">
+    <v-row v-if="$store.state.global.role == 'admin'">
       <v-spacer></v-spacer>
       <v-col cols="6">
         <v-toolbar dense>
@@ -84,8 +107,8 @@
           </thead>
           <tbody>
             <tr v-for="item in resolves" :key="item.submitTime">
-              <td>{{new Date(item.submitTime).toLocaleString()}}</td>
-              <td>{{item.challengeName}}</td>
+              <td>{{ new Date(item.submitTime).toLocaleString() }}</td>
+              <td>{{ item.challengeName }}</td>
               <!-- <td>
                 <v-badge v-if="!!item.mark" class="mark-badge" :color="rankColor[item.mark - 1]">
                   <template v-slot:badge>{{item.mark}}</template>
@@ -113,7 +136,12 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import { Route } from "vue-router";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { UserInfo, UserInfoResult, SubmitInfo, SubmitHistoryResult } from "@/struct";
+import {
+  UserInfo,
+  UserInfoResult,
+  SubmitInfo,
+  SubmitHistoryResult
+} from "@/struct";
 import gql from "graphql-tag";
 
 @Component({
@@ -140,7 +168,7 @@ export default class Profile extends Vue {
 
   private get showJoinTime() {
     return new Date(
-      this.userInfo.joinTime//.toString().replace(/\//g, "-") + "+00:00"
+      this.userInfo.joinTime //.toString().replace(/\//g, "-") + "+00:00"
     ).toLocaleString();
   }
 
@@ -192,7 +220,7 @@ export default class Profile extends Vue {
       this.hasInfo = true;
     }
   }
-  
+
   async refresh() {
     try {
       let res = await this.$apollo.query<

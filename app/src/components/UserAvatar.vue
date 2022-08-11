@@ -1,6 +1,6 @@
 <template>
   <img v-if="hasImage" :src="`${url}&s=${size}`" @error="setText" />
-  <span v-else>{{name[0]}}</span>
+  <span v-else>{{ name[0] }}</span>
 </template>
 
 <script lang="ts">
@@ -19,5 +19,4 @@ export default class UserAvatar extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

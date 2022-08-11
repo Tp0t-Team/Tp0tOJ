@@ -144,28 +144,28 @@
 import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import {
-  ChallengeConfig,
+  // ChallengeConfig,
   ChallengeConfigWithId,
   ChallengeConfigResult,
   ChallengeMutateResult,
   ChallengeMutateInput,
   ChallengeActionResult,
-  ChallengeActionInput,
+  ChallengeActionInput
 } from "@/struct";
 import constValue from "@/constValue";
 import ChallengeEditor from "@/components/ChallengeEditor.vue";
 
 @Component({
   components: {
-    ChallengeEditor,
-  },
+    ChallengeEditor
+  }
 })
 export default class Challenge extends Vue {
   private headers = [
     { text: "name", value: "name" },
     { text: "category", value: "category" },
     { text: "base score", value: "baseScore" },
-    { text: "state", value: "state" },
+    { text: "state", value: "state" }
     // { text: '', value: 'data-table-expand' },
   ];
 
@@ -260,9 +260,9 @@ export default class Challenge extends Vue {
             }
           }
         `,
-        fetchPolicy: "no-cache",
+        fetchPolicy: "no-cache"
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challengeConfigs.message)
         throw res.data!.challengeConfigs.message;
       this.challengeConfigs = res.data!.challengeConfigs.challengeConfigs;
@@ -296,15 +296,15 @@ export default class Challenge extends Vue {
         { input: ChallengeMutateInput }
       >({
         mutation: gql`
-          mutation ($input: ChallengeMutateInput!) {
+          mutation($input: ChallengeMutateInput!) {
             challengeMutate(input: $input) {
               message
             }
           }
         `,
-        variables: { input: tempConfig },
+        variables: { input: tempConfig }
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challengeMutate.message)
         throw res.data!.challengeMutate.message;
       this.loading = false;
@@ -326,7 +326,7 @@ export default class Challenge extends Vue {
   }
 
   editChallenge(id: string) {
-    let config = this.challengeConfigs.find((v) => v.challengeId == id);
+    let config = this.challengeConfigs.find(v => v.challengeId == id);
     if (!config) return;
     if (this.changed) {
       this.tempConfig = config;
@@ -352,8 +352,8 @@ export default class Challenge extends Vue {
         description: "",
         externalLink: [],
         singleton: true,
-        nodeConfig: undefined,
-      },
+        nodeConfig: undefined
+      }
     };
     if (this.changed) {
       this.tempConfig = config;
@@ -398,7 +398,7 @@ export default class Challenge extends Vue {
         { input: ChallengeActionInput }
       >({
         mutation: gql`
-          mutation ($input: ChallengeActionInput!) {
+          mutation($input: ChallengeActionInput!) {
             challengeAction(input: $input) {
               message
               successful
@@ -408,11 +408,11 @@ export default class Challenge extends Vue {
         variables: {
           input: {
             action: action,
-            challengeIds: this.selected.map((it) => it.challengeId),
-          },
-        },
+            challengeIds: this.selected.map(it => it.challengeId)
+          }
+        }
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.challengeAction.message)
         throw res.data!.challengeAction.message;
       this.selected = [];

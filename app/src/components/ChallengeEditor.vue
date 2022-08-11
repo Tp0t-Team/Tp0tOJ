@@ -148,8 +148,8 @@
                 :disabled="loading || disabled"
               ></v-text-field>
             </v-list-item>
-            <v-list-item v-for="(l,index) in links" :key="l" @click=";">
-              <v-list-item-content>{{l}}</v-list-item-content>
+            <v-list-item v-for="(l, index) in links" :key="l" @click="() => {}">
+              <v-list-item-content>{{ l }}</v-list-item-content>
               <v-list-item-icon>
                 <v-btn icon :disabled="loading" @click="removeLink(index)">
                   <v-icon>close</v-icon>
@@ -206,7 +206,7 @@ export default class ChallengeEditor extends Vue {
   private flag: string = "";
   private description: string = "";
   private singleton: boolean = true;
-  private nodeConfigs: NodeConfig[]|undefined = undefined;
+  private nodeConfigs: NodeConfig[] | undefined = undefined;
   private links: string[] = [];
 
   private link: string = "";
@@ -216,7 +216,9 @@ export default class ChallengeEditor extends Vue {
   mounted() {
     this.reader.addEventListener("load", e => {
       try {
-        let config: ChallengeConfig &{name: string} = loadYaml(e.target!.result as string);
+        let config: ChallengeConfig & { name: string } = loadYaml(
+          e.target!.result as string
+        );
         if (this.challengeType.findIndex(v => v == config.category) < 0)
           throw "类型错误";
         // if (config.category != this.type) throw "不可修改类型";
@@ -230,7 +232,10 @@ export default class ChallengeEditor extends Vue {
         this.setValue = false;
         this.state = false;
         this.dynamicScore = config.score.dynamic || this.dynamicScore;
-        this.flagType = config.flag.type != undefined ? this.flagTypeItems[config.flag.type]: null ?? this.flagType;
+        this.flagType =
+          config.flag.type != undefined
+            ? this.flagTypeItems[config.flag.type]
+            : null ?? this.flagType;
         // this.dynamicFlag = config.flag.dynamic || this.dynamicFlag;
         this.singleton = config.singleton;
         this.nodeConfigs = config.nodeConfig;
@@ -263,14 +268,17 @@ export default class ChallengeEditor extends Vue {
 
   @Emit("submit")
   EmitSubmit() {
-    return {   
-      challengeId: (this.config && this.config.challengeId) || "",   
+    return {
+      challengeId: (this.config && this.config.challengeId) || "",
       name: this.name,
       state: this.state ? "enabled" : "disabled",
       config: {
         category: this.type,
         score: { dynamic: this.dynamicScore, baseScore: this.score.toString() },
-        flag: { type: this.flagTypeItems.indexOf(this.flagType), value: this.flag },
+        flag: {
+          type: this.flagTypeItems.indexOf(this.flagType),
+          value: this.flag
+        },
         description: this.description,
         externalLink: this.links,
         singleton: this.singleton,
@@ -293,7 +301,6 @@ export default class ChallengeEditor extends Vue {
 
   removeLink(index: number) {
     this.links.splice(index, 1);
-    this.links = this.links;
     this.Changed();
   }
 

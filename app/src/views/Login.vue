@@ -29,7 +29,8 @@
               text
               @click="$router.push('/forget')"
               class="forget"
-            >forget</v-btn>
+              >forget</v-btn
+            >
             <v-btn
               color="primary"
               absolute
@@ -38,7 +39,8 @@
               @click="login"
               :disabled="loading"
               :loading="loading"
-            >login</v-btn>
+              >login</v-btn
+            >
           </v-form>
         </v-tab-item>
         <v-tab-item value="tab-register">
@@ -48,7 +50,7 @@
                 <!-- Zero space is used to disable autofill. -->
                 <v-text-field
                   v-model="name"
-                  label="​Name"
+                  :label="'\u200bName'"
                   :rules="[rules.required]"
                   :disabled="loading"
                 ></v-text-field>
@@ -57,7 +59,7 @@
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required,rules.email]"
+                  :rules="[rules.required, rules.email]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -70,7 +72,7 @@
                   :append-icon="showPassword ? 'visibility' : 'visibility_off'"
                   :type="showPassword ? 'text' : 'password'"
                   @click:append="showPassword = !showPassword"
-                  :rules="[rules.required,rules.passLen(8),rules.password]"
+                  :rules="[rules.required, rules.passLen(8), rules.password]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -99,7 +101,8 @@
                 @click="register"
                 :disabled="loading"
                 :loading="loading"
-              >register</v-btn>
+                >register</v-btn
+              >
             </v-layout>
           </v-form>
         </v-tab-item>
@@ -126,7 +129,7 @@ import {
   RegisterInput,
   RegisterResult
 } from "@/struct";
-import constValue from "@/constValue";
+// import constValue from "@/constValue";
 
 @Component
 export default class Login extends Vue {

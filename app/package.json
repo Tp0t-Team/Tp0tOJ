@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare": "cd .. && husky install app/.husky",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
@@ -35,6 +36,7 @@
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-vue": "^8.3.0",
     "graphql-tag": "^2.9.0",
+    "husky": "^8.0.1",
     "lint-staged": "^12.3.1",
     "prettier": "^1.18.2",
     "sass": "^1.52.2",
@@ -42,9 +44,6 @@
     "typescript": "^3.4.3",
     "vue-template-compiler": "^2.6.10",
     "vuetify-loader": "^1.7.3"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
   },
   "lint-staged": {
     "*.{js,vue,ts}": [

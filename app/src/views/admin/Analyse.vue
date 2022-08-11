@@ -10,7 +10,16 @@
         </v-btn>
       </template>
     </v-snackbar>
-    <v-btn fab absolute right bottom color="primary" :loading="loading" :disable="loading" @click="loadData">
+    <v-btn
+      fab
+      absolute
+      right
+      bottom
+      color="primary"
+      :loading="loading"
+      :disable="loading"
+      @click="loadData"
+    >
       <v-icon>refresh</v-icon>
     </v-btn>
   </v-container>
@@ -21,16 +30,15 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 
 @Component({})
 export default class Analyse extends Vue {
-
   private infoText: string = "";
   private hasInfo: boolean = false;
   private loading: boolean = false;
   private data: any = {};
 
   async mounted() {
-    (this.$refs.sanddance as HTMLIFrameElement).addEventListener('load', () => {
+    (this.$refs.sanddance as HTMLIFrameElement).addEventListener("load", () => {
       this.update();
-    })
+    });
     await this.loadData();
   }
 
@@ -50,8 +58,11 @@ export default class Analyse extends Vue {
 
   @Watch("$vuetify.theme.dark")
   update() {
-    let theme = this.$vuetify.theme.dark ? 'dark-theme': '';
-    (this.$refs.sanddance as HTMLIFrameElement).contentWindow?.postMessage({ theme: theme, data: this.data }, '*');
+    let theme = this.$vuetify.theme.dark ? "dark-theme" : "";
+    (this.$refs.sanddance as HTMLIFrameElement).contentWindow?.postMessage(
+      { theme: theme, data: this.data },
+      "*"
+    );
   }
 }
 </script>

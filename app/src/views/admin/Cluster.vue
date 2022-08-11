@@ -66,9 +66,7 @@ import {
   ClusterInfoResult,
   ClusterNodeInfo,
   ClusterReplicaInfo,
-  ImageInfo,
-  ImageInfoResult,
-  Result,
+  Result
 } from "@/struct";
 
 @Component
@@ -78,14 +76,14 @@ export default class Cluster extends Vue {
     { text: "os type", value: "osType" },
     { text: "distribution", value: "distribution" },
     { text: "kernel version", value: "kernel" },
-    { text: "arch", value: "arch" },
+    { text: "arch", value: "arch" }
   ];
 
   private replicaHeaders = [
     { text: "name", value: "name" },
     { text: "node", value: "node" },
     { text: "status", value: "status" },
-    { text: "", value: "delete" },
+    { text: "", value: "delete" }
   ];
 
   private tab: any = null;
@@ -124,9 +122,9 @@ export default class Cluster extends Vue {
             }
           }
         `,
-        fetchPolicy: "no-cache",
+        fetchPolicy: "no-cache"
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.clusterInfo.message) throw res.data!.clusterInfo.message;
       this.nodes = res.data!.clusterInfo.nodes;
       this.replicas = res.data!.clusterInfo.replicas;
@@ -136,7 +134,6 @@ export default class Cluster extends Vue {
     }
   }
 
-  
   async delReplica(name: string) {
     this.loading = true;
     try {
@@ -145,18 +142,19 @@ export default class Cluster extends Vue {
         { input: string }
       >({
         mutation: gql`
-          mutation ($input: String!) {
+          mutation($input: String!) {
             deleteReplica(input: $input) {
               message
             }
           }
         `,
         variables: {
-          input: name,
-        },
+          input: name
+        }
       });
-      if (res.errors) throw res.errors.map((v) => v.message).join(",");
-      if (res.data!.deleteReplica.message) throw res.data!.deleteReplica.message;
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.deleteReplica.message)
+        throw res.data!.deleteReplica.message;
       this.loading = false;
       this.infoText = "delete success";
       this.hasInfo = true;
@@ -170,5 +168,4 @@ export default class Cluster extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

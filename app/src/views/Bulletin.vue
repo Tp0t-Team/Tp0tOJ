@@ -1,15 +1,17 @@
 <template>
   <v-container class="bulletin-list">
     <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
-      <span
-        class="bulletin-time ma-4"
-      >{{new Date(item.publishTime).toLocaleString()}}</span>
-      <v-card-title>{{item.title}}</v-card-title>
-        <v-card-text><pre class="pl-4">{{item.content}}</pre></v-card-text>
+      <span class="bulletin-time ma-4">{{
+        new Date(item.publishTime).toLocaleString()
+      }}</span>
+      <v-card-title>{{ item.title }}</v-card-title>
+      <v-card-text
+        ><pre class="pl-4">{{ item.content }}</pre></v-card-text
+      >
     </v-card>
 
     <v-btn
-      v-if="$store.state.global.role=='admin'"
+      v-if="$store.state.global.role == 'admin'"
       fab
       absolute
       right
@@ -22,7 +24,12 @@
     <v-dialog :persistent="loading" v-model="edit" width="400px">
       <v-card width="400px" class="pa-4">
         <v-form v-model="valid" ref="edit">
-          <v-text-field :disabled="loading" v-model="title" label="Title" :rules="[rules.required]"></v-text-field>
+          <v-text-field
+            :disabled="loading"
+            v-model="title"
+            label="Title"
+            :rules="[rules.required]"
+          ></v-text-field>
           <v-textarea
             :disabled="loading"
             v-model="description"
@@ -38,7 +45,8 @@
               color="primary"
               text
               @click="publish"
-            >publish</v-btn>
+              >publish</v-btn
+            >
           </v-row>
         </v-form>
       </v-card>
@@ -62,8 +70,8 @@ import {
   BulletinPubInput,
   BulletinPubResult,
   AllBulletinResult,
-  BulletinItem,
-  BulletinSubResult
+  BulletinItem
+  // BulletinSubResult
 } from "@/struct";
 
 @Component

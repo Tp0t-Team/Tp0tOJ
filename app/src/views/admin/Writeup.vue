@@ -4,17 +4,17 @@
       <v-spacer></v-spacer>
       <v-col cols="8">
         <v-data-table :headers="headers" :items="writeups">
-            <template v-slot:item.download="{ item }">
-              <v-btn
-                text
-                color="primary"
-                :href="`/wp?userId=${item.userId}`"
-                target="_blank"
-                :download="`wp-${item.userId}-${nameFilter(item.name)}.zip`"
-              >
-                download
-              </v-btn>
-            </template>
+          <template v-slot:item.download="{ item }">
+            <v-btn
+              text
+              color="primary"
+              :href="`/wp?userId=${item.userId}`"
+              target="_blank"
+              :download="`wp-${item.userId}-${nameFilter(item.name)}.zip`"
+            >
+              download
+            </v-btn>
+          </template>
         </v-data-table>
       </v-col>
       <v-spacer></v-spacer>
@@ -53,7 +53,7 @@ export default class Writeup extends Vue {
     { text: "name", value: "name" },
     { text: "mail", value: "mail" },
     { text: "solved", value: "solved" },
-    { text: "", value: "download" },
+    { text: "", value: "download" }
   ];
 
   private writeups: WriteUpInfo[] = [];
@@ -66,7 +66,10 @@ export default class Writeup extends Vue {
   }
 
   nameFilter(name: string) {
-    return name.replaceAll(/([^\p{L}\p{M}\p{N}\p{P}\p{S}]|[/\\'"`?*:@<>|])/ug, '');
+    return name.replaceAll(
+      /([^\p{L}\p{M}\p{N}\p{P}\p{S}]|[/\\'"`?*:@<>|])/gu,
+      ""
+    );
   }
 
   async loadData() {
@@ -98,5 +101,4 @@ export default class Writeup extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

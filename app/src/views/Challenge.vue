@@ -1,34 +1,65 @@
 <template>
   <v-container fluid class="scrollable">
     <div v-for="type in challengeType" :key="type">
-      <div v-if="challenges.filter((v) => v.category == type).length != 0">
+      <div v-if="challenges.filter(v => v.category == type).length != 0">
         <div class="type-title display-1 ml-4">{{ type }}</div>
         <v-divider color="primary"></v-divider>
       </div>
-      <v-row v-if="challenges.filter((v) => v.category == type).length != 0">
-        <v-col sm="3" v-for="item in challenges.filter((v) => v.category == type)" :key="item.challengeId">
+      <v-row v-if="challenges.filter(v => v.category == type).length != 0">
+        <v-col
+          sm="3"
+          v-for="item in challenges.filter(v => v.category == type)"
+          :key="item.challengeId"
+        >
           <v-layout justify-center>
             <v-hover :disabled="item.done" v-slot:default="{ hover }">
-              <v-card :elevation="hover ? 12 : 2" width="20vw" height="220px" class="ma-4"
-                @click="openDetial(item.challengeId)">
+              <v-card
+                :elevation="hover ? 12 : 2"
+                width="20vw"
+                height="220px"
+                class="ma-4"
+                @click="openDetial(item.challengeId)"
+              >
                 <v-badge left overlap class="score" z-index="2">
                   <template v-slot:badge>{{ item.score }}</template>
-                  <v-card-title class="subtitle-1 text-truncate">{{ item.name }}</v-card-title>
+                  <v-card-title class="subtitle-1 text-truncate">{{
+                    item.name
+                  }}</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
-                <v-card-text class="description">{{ item.description }}</v-card-text>
-                <v-overlay absolute :value="item.done" color="green" z-index="0">
+                <v-card-text class="description">{{
+                  item.description
+                }}</v-card-text>
+                <v-overlay
+                  absolute
+                  :value="item.done"
+                  color="green"
+                  z-index="0"
+                >
                   <v-icon>done</v-icon>
                 </v-overlay>
                 <v-card-actions>
                   <v-row>
-                    <v-col cols="4" v-for="blood in item.blood" :key="item.challengeId + blood.userId">
+                    <v-col
+                      cols="4"
+                      v-for="blood in item.blood"
+                      :key="item.challengeId + blood.userId"
+                    >
                       <v-layout row>
                         <v-spacer></v-spacer>
-                        <v-btn color="blue" fab @click.stop="seeBlood(blood.userId)">
+                        <v-btn
+                          color="blue"
+                          fab
+                          @click.stop="seeBlood(blood.userId)"
+                        >
                           <!-- <v-avatar size="56">{{blood.name[0]}}</v-avatar> -->
                           <v-avatar size="56">
-                            <user-avatar class="white--text" :url="blood.avatar" :size="56" :name="blood.name">
+                            <user-avatar
+                              class="white--text"
+                              :url="blood.avatar"
+                              :size="56"
+                              :name="blood.name"
+                            >
                             </user-avatar>
                           </v-avatar>
                         </v-btn>
@@ -43,7 +74,12 @@
         </v-col>
       </v-row>
     </div>
-    <v-dialog v-model="showDialog" :persistent="loading" width="600px" v-if="currentChallenge != null">
+    <v-dialog
+      v-model="showDialog"
+      :persistent="loading"
+      width="600px"
+      v-if="currentChallenge != null"
+    >
       <v-card width="600px" height="400px">
         <v-sheet :elevation="2" class="title pr-4">
           <div class="title title-score pl-2 pr-2">
@@ -51,26 +87,56 @@
           </div>
           <span class="ml-2">{{ currentChallenge.name }}</span>
           <v-spacer></v-spacer>
-          <v-tooltip right v-if="currentChallenge.manual && currentChallenge.allocated == 0">
+          <v-tooltip
+            right
+            v-if="currentChallenge.manual && currentChallenge.allocated == 0"
+          >
             <template v-slot:activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on" :disabled="replicaLoading" :loading="replicaLoading" color="accent"
-                @click="replicaChange" icon large>
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                :disabled="replicaLoading"
+                :loading="replicaLoading"
+                color="accent"
+                @click="replicaChange"
+                icon
+                large
+              >
                 <v-icon>cloud_sync</v-icon>
               </v-btn>
             </template>
             <span>Start This Challenge</span>
           </v-tooltip>
-          <v-icon class="doing" v-if="currentChallenge.allocated == 1">sync</v-icon>
+          <v-icon class="doing" v-if="currentChallenge.allocated == 1"
+            >sync</v-icon
+          >
           <v-icon v-if="currentChallenge.allocated == 2">cloud_done</v-icon>
         </v-sheet>
-        <v-text-field v-model="sumbitFlag" outlined class="ma-4 mb-0 dialog-flag" label="flag" append-icon="send"
-          :disabled="loading || currentChallenge.done" :loading="loading" @click:append="submit"
-          :error-messages="submitError" @focus="submitError = ''" @blur="check"></v-text-field>
+        <v-text-field
+          v-model="sumbitFlag"
+          outlined
+          class="ma-4 mb-0 dialog-flag"
+          label="flag"
+          append-icon="send"
+          :disabled="loading || currentChallenge.done"
+          :loading="loading"
+          @click:append="submit"
+          :error-messages="submitError"
+          @focus="submitError = ''"
+          @blur="check"
+        ></v-text-field>
         <div class="dialog-discription pl-6 pr-6">
           <pre>{{ currentChallenge.description }}</pre>
         </div>
         <div class="url-list">
-          <v-chip color="primary" label outlined class="ma-4" v-for="link in currentChallenge.externalLink" :key="link">
+          <v-chip
+            color="primary"
+            label
+            outlined
+            class="ma-4"
+            v-for="link in currentChallenge.externalLink"
+            :key="link"
+          >
             {{ link }}
             <v-btn class="ml-4" icon color="primary" @click="copyUrl(link)">
               <v-icon>content_copy</v-icon>
@@ -92,7 +158,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Watch } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
 import {
@@ -181,14 +247,16 @@ export default class Challenge extends Vue {
 
   openDetial(id: string) {
     let c = this.challenges.find(v => v.challengeId == id);
-    if (!c/* || c.done*/) return;
+    if (!c /* || c.done*/) return;
     this.currentChallenge = c;
     this.sumbitFlag = "";
     this.submitError = "";
     this.showDialog = true;
     // this.allocated = this.currentChallenge.allocated;
     this.replicaLoading = false;
-    this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 10 * 1000);
+    this.timeoutTask = setTimeout(() => {
+      this.refreshAllocateState(id);
+    }, 10 * 1000);
     this.$apollo.query<ChallengeResult>({
       query: gql`
         query($input: String!) {
@@ -204,7 +272,7 @@ export default class Challenge extends Vue {
     });
   }
 
-  @Watch('showDialog')
+  @Watch("showDialog")
   testTimeout(value: boolean) {
     if (!value && this.timeoutTask != null) {
       clearTimeout(this.timeoutTask);
@@ -234,7 +302,10 @@ export default class Challenge extends Vue {
     let id = this.currentChallenge!.challengeId;
 
     try {
-      let res = await this.$apollo.mutate<StartReplicaResult, { input: string }>({
+      let res = await this.$apollo.mutate<
+        StartReplicaResult,
+        { input: string }
+      >({
         mutation: gql`
           mutation($input: String!) {
             startReplica(input: $input) {
@@ -247,8 +318,7 @@ export default class Challenge extends Vue {
         }
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
-      if (res.data!.startReplica.message)
-        throw res.data!.startReplica.message;
+      if (res.data!.startReplica.message) throw res.data!.startReplica.message;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
@@ -259,7 +329,7 @@ export default class Challenge extends Vue {
     this.sumbitFlag = "";
     this.submitError = "";
     this.replicaLoading = false;
-    if (!c/* || c.done*/) {
+    if (!c /* || c.done*/) {
       this.currentChallenge = null;
       this.showDialog = false;
       // this.allocated = 0;
@@ -268,7 +338,9 @@ export default class Challenge extends Vue {
     this.currentChallenge = c;
     this.showDialog = true;
     // this.allocated = this.currentChallenge.allocated;
-    this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 3 * 1000);
+    this.timeoutTask = setTimeout(() => {
+      this.refreshAllocateState(id);
+    }, 3 * 1000);
   }
 
   async refreshAllocateState(id: string) {
@@ -281,13 +353,15 @@ export default class Challenge extends Vue {
     }
     this.currentChallenge = c;
     if (c.allocated == 1) {
-      this.timeoutTask = setTimeout(() => { this.refreshAllocateState(id); }, 3 * 1000);
+      this.timeoutTask = setTimeout(() => {
+        this.refreshAllocateState(id);
+      }, 3 * 1000);
     }
   }
 
   async submit() {
     this.check();
-    if (!!this.submitError) return;
+    if (this.submitError) return;
     let coreFlag = this.sumbitFlag.trim();
     this.loading = true;
     try {
