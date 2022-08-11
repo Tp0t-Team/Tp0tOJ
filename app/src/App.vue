@@ -6,7 +6,7 @@
 
     <v-app-bar app clipped-left class="higher pr-2">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Tp0t OJ</v-toolbar-title>
+      <v-toolbar-title>{{ title }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="WarmUp" v-if="$store.state.global.role === 'admin'">
         <v-icon color="primary">whatshot</v-icon>
@@ -19,7 +19,12 @@
 
     <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
-        <span> <strong>Tp0t</strong> &copy; 2022 </span>
+        <span>
+          Powered by
+          <a href="https://github.com/Tp0t-Team/Tp0tOJ" target="_blank"
+            ><strong>Tp0t OJ</strong></a
+          >, under AGPL license
+        </span>
       </v-col>
     </v-footer>
   </v-app>
@@ -29,6 +34,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
+import constValue from "./constValue";
 
 @Component({
   components: {
@@ -37,8 +43,10 @@ import NavList from "@/components/NavList.vue";
 })
 export default class App extends Vue {
   private drawer: boolean | null = null;
+  private title = constValue.navTitle;
 
   mounted() {
+    document.title = this.title;
     let userId = sessionStorage.getItem("user_id") || null;
     let role = sessionStorage.getItem("role") || null;
     if (!userId || !role) {
