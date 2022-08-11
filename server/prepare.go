@@ -571,7 +571,7 @@ func GenerateAgentScript(masterIP string) {
 	}
 
 	token := strings.TrimSpace(string(tokenData.Bytes()))
-	k3sCmdSting := fmt.Sprintf("curl -sfL http://rancher-mirror.cnrancher.com/k3s/k3s-install.sh | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1\n", masterIP, token)
+	k3sCmdSting := fmt.Sprintf("curl -sfL $([ \"$INSTALL_K3S_MIRROR\" = \"cn\" ] && echo \"https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh\" || echo \"https://get.k3s.io\") | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1\n", masterIP, token)
 
 	file, err := os.Create("agent-install.sh")
 	if err != nil {
