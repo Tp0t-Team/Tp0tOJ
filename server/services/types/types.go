@@ -167,7 +167,7 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 }
 
 func checkChallengeCategory(str string) bool {
-	return str == "WEB" || str == "RE" || str == "PWN" || str == "MISC" || str == "CRYPTO" // TODO:
+	return str == "WEB" || str == "RE" || str == "PWN" || str == "MISC" || str == "CRYPTO" || str == "HARDWARE" || str == "RW"
 }
 
 func checkChallengeState(str string) bool {
