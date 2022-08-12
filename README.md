@@ -123,7 +123,6 @@ server:                              #平台服务器的配置参数
   port: 0                            #0时自动选择80/443，非0指定端口
   salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
   behaviorLog: false                 #用于记录选手关键行为，默认不开启
-  debug: false                       #无用参数
 email:                               #邮件服务配置
   host: smtp.example.com             #邮件服务提供商服务器
   username: exampleUsername          #邮件发送账号
