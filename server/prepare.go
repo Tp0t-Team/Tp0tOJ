@@ -582,17 +582,23 @@ func GenerateAgentScript(masterIP string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	cmdBlock := "sudo mkdir /etc/rancher; sudo mkdir /etc/rancher/k3s\n" +
+		"sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\n" +
+		"sudo cp -r OJRegistry /etc/rancher/k3s\n" +
+		"rm registries-config.yaml\n" +
+		"rm -r OJRegistry\n"
+	_, err = file.Write([]byte(cmdBlock))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	_, err = file.Write([]byte(k3sCmdSting))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	cmdBlock := "sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\n" +
-		"sudo cp -r OJRegistry /etc/rancher/k3s\n" +
-		"rm registries-config.yaml\n" +
-		"rm -r OJRegistry\n" +
-		"exit 0\n"
-	_, err = file.Write([]byte(cmdBlock))
+	endBlock := "exit 0\n"
+	_, err = file.Write([]byte(endBlock))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
