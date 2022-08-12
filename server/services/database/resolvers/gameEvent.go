@@ -75,12 +75,16 @@ func IsGameRunning(outsideTX *gorm.DB) bool {
 	}
 	currentTime := time.Now()
 	var currentEvent entity.GameEvent
-	result := outsideTX.Where(outsideTX.Where(map[string]interface{}{"action": entity.PauseEvent}).Or(map[string]interface{}{"action": entity.ResumeEvent}))
+	var events []entity.GameEvent
+	result := outsideTX.Where(map[string]interface{}{"action": entity.PauseEvent}).Or(map[string]interface{}{"action": entity.ResumeEvent}).Find(&events)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return true
 	} else if result.Error != nil {
 		log.Println(result.Error)
 		return false
+	}
+	if len(events) == 0 {
+		return true
 	}
 	result = result.Where("time <= ?", currentTime).Order("time desc").First(&currentEvent)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {

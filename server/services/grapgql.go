@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"server/services/admin"
+	"server/services/sse"
 	"server/services/user"
 	"server/utils/kick"
 	"strings"
@@ -121,6 +122,7 @@ func init() {
 		}
 		admin.UploadImage(w, r)
 	})
+	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP)
 	if HasFrontEnd {
 		root, err := fs.Sub(staticFolder, "static")
 		if err != nil {

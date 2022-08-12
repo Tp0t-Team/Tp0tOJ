@@ -16,6 +16,24 @@
     <v-content>
       <router-view :key="$route.query.time" />
     </v-content>
+    <v-snackbar
+      v-model="hasSSEInfo"
+      right
+      top
+      multi-line
+      color="success"
+      :timeout="-1"
+    >
+      <strong>{{ sseInfoTitle }}</strong
+      ><br />
+      {{ sseInfoText }}
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasSSEInfo = false">close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
 
     <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
@@ -45,6 +63,12 @@ export default class App extends Vue {
   private drawer: boolean | null = null;
   private title = constValue.navTitle;
 
+  private sseInfoText: string = "";
+  private sseInfoTitle: string = "";
+  private hasSSEInfo: boolean = false;
+  private sseSource: EventSource = new EventSource("/sse?stream=message");
+  private timer: number | null = null;
+
   mounted() {
     document.title = this.title;
     let userId = sessionStorage.getItem("user_id") || null;
@@ -54,6 +78,19 @@ export default class App extends Vue {
       role = null;
     }
     this.$store.commit("global/setUserIdAndRole", { userId, role });
+    this.sseSource.addEventListener("message", e => {
+      let parsed = JSON.parse(e.data);
+      this.sseInfoTitle = parsed.title;
+      this.sseInfoText = parsed.info;
+      this.hasSSEInfo = true;
+      if (this.timer !== null) {
+        clearTimeout(this.timer);
+        this.timer = null;
+      }
+      this.timer = setTimeout(() => {
+        this.hasSSEInfo = false;
+      }, 10 * 1000) as any;
+    });
   }
 
   async WarmUp() {
