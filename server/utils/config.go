@@ -15,7 +15,6 @@ type Server struct {
 	Mail        string `yaml:"mail"`
 	Port        int    `yaml:"port"`
 	Salt        string `yaml:"salt"`
-	Debug       bool   `yaml:"debug"`
 	BehaviorLog bool   `yaml:"behaviorLog"`
 }
 
