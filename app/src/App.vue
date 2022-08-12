@@ -23,10 +23,11 @@
       multi-line
       color="success"
       :timeout="-1"
+      class="sse-info"
     >
       <strong>{{ sseInfoTitle }}</strong
       ><br />
-      {{ sseInfoText }}
+      <span>{{ sseInfoText }}</span>
       <!-- <v-spacer></v-spacer> -->
       <template v-slot:action="{ attrs }">
         <v-btn icon>
@@ -118,5 +119,10 @@ html {
 
 .higher {
   z-index: 3;
+}
+
+.sse-info * {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>

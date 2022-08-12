@@ -3,10 +3,12 @@ package resolvers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"log"
 	"regexp"
 	"server/entity"
+	"server/services/sse"
 	"server/services/types"
 	"server/utils"
 	"strings"
@@ -72,9 +74,14 @@ func FindSubmitCorrectSorted() []entity.Submit {
 	return submits
 }
 
+var BloodName = []string{"first", "second", "third"}
+
 func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time, setBlood bool) bool {
 	submitCache := false
 	deleteReplica := new(uint64)
+	// blood infos
+	bloodIndex := -1
+	challengeName := ""
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if CheckSubmitCorrectByUserIdAndChallengeId(userId, challengeId) {
 			return errors.New("already finish this challenge")
@@ -136,12 +143,16 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			}
 			if challenge.FirstBloodId == nil {
 				challenge.FirstBloodId = &userId
+				bloodIndex = 0
 			} else if challenge.SecondBloodId == nil {
 				challenge.SecondBloodId = &userId
+				bloodIndex = 1
 			} else if challenge.ThirdBloodId == nil {
 				challenge.ThirdBloodId = &userId
+				bloodIndex = 2
 			}
 			tx.Save(&challenge)
+			challengeName = challenge.Name
 		}
 
 		if !alloc.Replica.Singleton {
@@ -155,6 +166,17 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 	if err != nil {
 		log.Println(err)
 		return false
+	}
+	if bloodIndex >= 0 {
+		user, err := FindUser(userId)
+		if err != nil {
+			log.Println(err)
+		} else {
+			sse.PublishMessage(sse.Message{
+				Title: fmt.Sprintf("%s %s blood", challengeName, BloodName[bloodIndex]),
+				Info:  fmt.Sprintf("Congratulations! %s get the %s blood of %s", user.Name, BloodName[bloodIndex], challengeName),
+			})
+		}
 	}
 	if submitCache {
 		err := utils.Cache.Submit(userId, challengeId, submitTime)

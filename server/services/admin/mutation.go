@@ -6,6 +6,7 @@ import (
 	"log"
 	"server/services/database/resolvers"
 	"server/services/kube"
+	"server/services/sse"
 	"server/services/types"
 	"server/utils"
 	"server/utils/kick"
@@ -32,6 +33,10 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 	if !ok {
 		return &types.BulletinPubResult{Message: "resolvers addition Error!"}
 	}
+	sse.PublishMessage(sse.Message{
+		Title: input.Title,
+		Info:  input.Content,
+	})
 	return &types.BulletinPubResult{Message: ""}
 
 }
