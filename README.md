@@ -97,6 +97,7 @@ INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
 
 ```shell
 ./agent-install.sh xxx.xxx.xxx.xxx #从节点服务器公网IP
+INSTALL_K3S_MIRROR=cn ./agent-install.sh xxx.xxx.xxx.xxx #对于中国用户
 ```
 如果需要卸载k3s，参考官网
 
@@ -159,6 +160,15 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 基础分数1000，减半人数20，不含奖励分数情况下 动态积分曲线
 
 ## 平台使用指南
+
+题目flag支持
+
+- 单flag
+- 多flag
+- 正则flag
+- 动态随机flag
+
+配置参考[config_demos](https://github.com/Tp0t-Team/Tp0tOJ_demos)
 
 需要使用k8s集群的基本就是PWN题和WEB题
 

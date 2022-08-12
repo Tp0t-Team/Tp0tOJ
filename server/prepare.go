@@ -839,8 +839,14 @@ func GenerateStartScript() {
 
 func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
+	genAgentScript := flag.Bool("agent", false, "only generate agent script")
 	flag.Parse()
-
+	if *genAgentScript {
+		log.Println("generate agent script...")
+		GenerateAgentScript(*masterIP)
+		log.Println("[*]done")
+		return
+	}
 	cmd := exec.Command("docker", "info")
 	if err := cmd.Run(); err != nil {
 		fmt.Println("You need an available docker environment first.")
