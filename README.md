@@ -98,17 +98,31 @@ INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
 ```shell
 ./agent-install.sh xxx.xxx.xxx.xxx #从节点服务器公网IP
 ```
+如果需要卸载k3s，参考官网
+
+To uninstall K3s from a server node, run:
+
+```bash
+/usr/local/bin/k3s-uninstall.sh
+```
+
+To uninstall K3s from an agent node, run:
+
+```bash
+/usr/local/bin/k3s-agent-uninstall.sh
+```
 
 #### 平台配置说明
 
 ```yaml
 server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #不用更改
+  host: 127.0.0.1                    #设置为外网IP，用于重置密码功能
   username: Tp0t                     #默认admin用户名
   password: admin                    #默认admin账号密码
   mail: admin@example.com            #默认admin账号邮箱
   port: 0                            #0时自动选择80/443，非0指定端口
   salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
+  behaviorLog: false                 #用于记录选手关键行为，默认不开启
   debug: false                       #无用参数
 email:                               #邮件服务配置
   host: smtp.example.com             #邮件服务提供商服务器
