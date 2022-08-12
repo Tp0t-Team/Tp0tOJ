@@ -258,26 +258,28 @@ tar -cvf ../example.tar ./*
 yaml文件用于上一键导入题目信息以及配置题目所属的K8S节点，需要使用节点部署的题只能通过导入config的形式添加
 
 ```yaml
-name: pwn1 #challenge页面显示的题目名称
-category: PWN #题目类型
+name: dynamic_flag              # challenge name
+category: PWN                   # support [MISC|RE|PWN|WEB|CRYPTO|HARDWARE|RW]
 score:
-  baseScore: 1000 #基本分数，动态积分和奖励根据基本分数的一定比例计算
-  dynamic: true #是否开启动态积分
+  baseScore: 1000               # base score
+  dynamic: true                 # if the score change with solved number
 flag: 
-  value: flag{test} #对于开启动态flag的题目value字段没用，flag由平台随机生成
-  dynamic: true #是否开启动态flag
-description: "this is a test pwn"
-externalLink: [http://cloud.lordcasser.com/s/DkxtK] #题目附件链接
-singleton: false #true时题目所有用户都是同一个环境/flag，false时每人一个环境
+  value: xxxxxxxxxx             # means that random dynamic flag length is 10
+  type: 3                       # 0-Single 1-Multiple 2-Regexp 3-Dynamic
+description: "description" 
+externalLink: ["http://link"]
+singleton: false                # false means this challenge will give every ctfer a container
+
+# below is no need for singleton challenge
 nodeConfig:
-  - name: "pwn1" #节点名称，要求[a~z 0~9]且必须有一个字母
-    image: "pwn1" #题目使用镜像的名称，需要提前上传好所使用的镜像
-    servicePorts:
-      - name: http #不用更改
-        protocol: TCP #不用更改
-        external: 8888 #指定docker对外暴露的端口
-        internal: 8888 #指定docker容器内端口
-        pod: 0 # 集群pod对外的端口，也是用户实际访问的端口，0为自动分配
+  - name: "pwn1"                # give this name same as your uploaded image
+    image: "pwn1"               # give this name same as your uploaded image
+    servicePorts:               # default & DON'T CHANGE IT
+      - name: http              # default & DON'T CHANGE IT
+        protocol: TCP           # default & DON'T CHANGE IT
+        external: 8888          # default & DON'T CHANGE IT
+        internal: 8888          # default & DON'T CHANGE IT
+        pod: 0                  # default & DON'T CHANGE IT
 ```
 
 ##
