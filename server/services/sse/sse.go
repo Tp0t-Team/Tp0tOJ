@@ -9,7 +9,8 @@ import (
 var SSE = sse.New()
 
 func init() {
-	SSE.CreateStream("message")
+	stream := SSE.CreateStream("message")
+	stream.AutoReplay = false
 }
 
 type Message struct {

@@ -115,6 +115,11 @@ export default class Bulletin extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.allBulletin.message) throw res.data!.allBulletin.message;
+      res.data!.allBulletin.bulletins.sort(
+        (a, b) =>
+          Number(a.publishTime < b.publishTime) -
+          Number(a.publishTime > b.publishTime)
+      );
       this.bulletins = res.data!.allBulletin.bulletins;
       // const observer = this.$apollo.subscribe<BulletinSubResult, {}>({
       //   query: gql`
