@@ -1,10 +1,12 @@
 package resolvers
 
 import (
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"log"
 	"server/entity"
+	"server/services/types"
 	"time"
 )
 
@@ -134,4 +136,70 @@ func DeleteReplicaAllocByReplicaId(replicaId uint64, outsideTX *gorm.DB) bool {
 		return false
 	}
 	return true
+}
+
+func AllocSingleton(challengeId uint64, userId uint64) error {
+	reason := ""
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var user *entity.User
+		user, err := FindUserInTX(userId, tx)
+		if err != nil {
+			log.Println(err)
+			reason = "Get User Info Error!"
+			return errors.New("")
+		}
+		if user == nil {
+			reason = "No such user."
+			return errors.New("")
+		}
+		var challenge *entity.Challenge
+		challenge, err = FindChallengeByIdInTX(challengeId, tx)
+		if err != nil {
+			log.Println(err)
+			reason = "no such challenge"
+			return errors.New("")
+		}
+		//Alloc replicas for the watching singleton and enabled challenge
+		var config types.ChallengeConfig
+		err = json.Unmarshal([]byte(challenge.Configuration), &config)
+		if err != nil {
+			log.Println(err)
+			reason = "alloc static replica error"
+			return errors.New("")
+		}
+		if challenge.State == "enabled" && config.Singleton {
+			replicas := FindReplicaByChallengeIdInTX(challenge.ChallengeId, tx)
+			log.Println("enable replica ", challenge.Name)
+			if replicas == nil || len(replicas) != 1 {
+				log.Println("found more than one or none replica for singleton challenge")
+				reason = "alloc static replica error"
+				return errors.New("")
+			}
+			replicaAlloc, err := FindReplicaAllocByUserIdAndChallengeId(user.UserId, challenge.ChallengeId, tx)
+			if err != nil {
+				log.Println(err)
+				reason = "alloc static replica error"
+				return errors.New("")
+			}
+			if replicaAlloc != nil {
+				return nil
+			}
+			ok := AddReplicaAlloc(replicas[0].ReplicaId, user.UserId, nil)
+			if !ok {
+				log.Println("add replicaAlloc error")
+				reason = "alloc static replica error"
+				return errors.New("")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		if reason != "" {
+			return errors.New(reason)
+		} else {
+			log.Println(err)
+			return errors.New("alloc static replica failed")
+		}
+	}
+	return nil
 }

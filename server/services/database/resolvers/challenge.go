@@ -35,6 +35,21 @@ func FindChallengeById(id uint64) (*entity.Challenge, error) {
 	return &challenge, nil
 }
 
+func FindChallengeByIdInTX(id uint64, outsideTX *gorm.DB) (*entity.Challenge, error) {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	var challenge entity.Challenge
+	result := outsideTX.Where(map[string]interface{}{"challenge_id": id}).First(&challenge)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		//log.Println(result.Error)
+		return nil, result.Error
+	}
+	return &challenge, nil
+}
+
 func FindAllChallenges() []entity.Challenge {
 	var challenges []entity.Challenge
 	result := db.Where(map[string]interface{}{}).Find(&challenges)

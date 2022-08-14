@@ -60,6 +60,21 @@ func FindUser(id uint64) (*entity.User, error) {
 	return &user, nil
 }
 
+func FindUserInTX(id uint64, outsideTX *gorm.DB) (*entity.User, error) {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	var user entity.User
+	result := outsideTX.Find(&user, []uint64{id})
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return nil, nil
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func CheckAdminByUserId(userId uint64) bool {
 	var users entity.User
 	result := db.Where(map[string]interface{}{"user_id": userId, "role": "admin"}).First(&users)

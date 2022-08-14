@@ -229,55 +229,16 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.WatchDescriptionResult{Message: "game is not running now"}
 	}
-	var user *entity.User
-	user, err := resolvers.FindUser(currentUserId)
-	if err != nil {
-		log.Println(err)
-		return &types.WatchDescriptionResult{Message: "Get User Info Error!"}
-	}
-	if user == nil {
-		return &types.WatchDescriptionResult{Message: "No such user."}
-	}
 	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
 	if err != nil {
 		log.Println(err)
 		return &types.WatchDescriptionResult{Message: "forbidden or login timeout"}
 	}
-	var challenge *entity.Challenge
-	challenge, err = resolvers.FindChallengeById(parsedChallengeId)
+	err = resolvers.AllocSingleton(parsedChallengeId, currentUserId)
 	if err != nil {
-		return nil
+		resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
+		return &types.WatchDescriptionResult{Message: err.Error()}
 	}
-	//Alloc replicas for the watching singleton and enabled challenge
-	var config types.ChallengeConfig
-	err = json.Unmarshal([]byte(challenge.Configuration), &config)
-	if err != nil {
-		log.Println(err)
-		return &types.WatchDescriptionResult{Message: "alloc static replica error"}
-	}
-	if challenge.State == "enabled" && config.Singleton {
-		replicas := resolvers.FindReplicaByChallengeId(challenge.ChallengeId)
-		log.Println("enable replica ", challenge.Name)
-		if replicas == nil || len(replicas) != 1 {
-			log.Println("found more than one or none replica for singleton challenge")
-			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
-		}
-		replicaAlloc, err := resolvers.FindReplicaAllocByUserIdAndChallengeId(user.UserId, challenge.ChallengeId, nil)
-		if err != nil {
-			log.Println(err)
-			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
-		}
-		if replicaAlloc != nil {
-			resolvers.BehaviorWatchDescription(challenge.ChallengeId, user.UserId, time.Now(), nil)
-			return &types.WatchDescriptionResult{Message: ""}
-		}
-
-		ok := resolvers.AddReplicaAlloc(replicas[0].ReplicaId, user.UserId, nil)
-		if !ok {
-			log.Println("add replicaAlloc error")
-			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
-		}
-	}
-	resolvers.BehaviorWatchDescription(challenge.ChallengeId, user.UserId, time.Now(), nil)
+	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
 	return &types.WatchDescriptionResult{Message: ""}
 }
