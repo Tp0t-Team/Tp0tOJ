@@ -229,7 +229,15 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.WatchDescriptionResult{Message: "game is not running now"}
 	}
-
+	var user *entity.User
+	user, err := resolvers.FindUser(currentUserId)
+	if err != nil {
+		log.Println(err)
+		return &types.WatchDescriptionResult{Message: "Get User Info Error!"}
+	}
+	if user == nil {
+		return &types.WatchDescriptionResult{Message: "No such user."}
+	}
 	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
 	if err != nil {
 		log.Println(err)
@@ -254,15 +262,14 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 			log.Println("found more than one or none replica for singleton challenge")
 			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
 		}
-
-		var user *entity.User
-		user, err = resolvers.FindUser(currentUserId)
+		replicaAlloc, err := resolvers.FindReplicaAllocByUserIdAndChallengeId(user.UserId, challenge.ChallengeId, nil)
 		if err != nil {
 			log.Println(err)
-			return &types.WatchDescriptionResult{Message: "Get User Info Error!"}
+			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
 		}
-		if user == nil {
-			return &types.WatchDescriptionResult{Message: "No such user."}
+		if replicaAlloc != nil {
+			resolvers.BehaviorWatchDescription(challenge.ChallengeId, user.UserId, time.Now(), nil)
+			return &types.WatchDescriptionResult{Message: ""}
 		}
 
 		ok := resolvers.AddReplicaAlloc(replicas[0].ReplicaId, user.UserId, nil)
@@ -271,6 +278,6 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 			return &types.WatchDescriptionResult{Message: "alloc static replica error"}
 		}
 	}
-	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
+	resolvers.BehaviorWatchDescription(challenge.ChallengeId, user.UserId, time.Now(), nil)
 	return &types.WatchDescriptionResult{Message: ""}
 }
