@@ -10,7 +10,8 @@ import (
 )
 
 func InitDB(dsn string) {
-	DataBase, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	var err error
+	DataBase, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}
