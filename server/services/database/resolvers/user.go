@@ -1,12 +1,10 @@
 package resolvers
 
 import (
-	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"log"
 	"server/entity"
-	"server/services/types"
 	"server/utils"
 	"time"
 )
@@ -20,32 +18,6 @@ func AddUser(name string, password string, mail string, role string, state strin
 			result := tx.Create(&newUser)
 			if result.Error != nil {
 				return result.Error
-			}
-			challenges := FindAllChallenges()
-			if challenges == nil {
-				return errors.New("error occurred getting challenges")
-			}
-			for _, challenge := range challenges {
-				var config types.ChallengeConfig
-				err := json.Unmarshal([]byte(challenge.Configuration), &config)
-				if err != nil {
-					log.Println(err)
-					return errors.New("challenge Config Error")
-				}
-				//Alloc all replicas for the singleton and enabled challenge
-				if challenge.State == "enabled" && config.Singleton {
-					replicas := FindReplicaByChallengeId(challenge.ChallengeId)
-					log.Println(replicas, "\n", len(replicas))
-					if replicas == nil || len(replicas) != 1 {
-						return errors.New("found more than one or none replica for singleton challenge")
-					}
-					log.Println(newUser.UserId)
-					ok := AddReplicaAlloc(replicas[0].ReplicaId, newUser.UserId, tx)
-					if !ok {
-						return errors.New("add replicaAlloc error")
-					}
-				}
-
 			}
 			if role != "admin" {
 				utils.Cache.AddUser(newUser.UserId)
