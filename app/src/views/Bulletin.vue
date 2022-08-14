@@ -1,19 +1,21 @@
 <template>
-  <v-container class="bulletin-list">
-    <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
-      <span class="bulletin-time ma-4">{{
-        new Date(item.publishTime).toLocaleString()
-      }}</span>
-      <v-card-title>{{ item.title }}</v-card-title>
-      <v-card-text
-        ><pre class="pl-4">{{ item.content }}</pre></v-card-text
-      >
-    </v-card>
+  <v-container class="bulletin-list" pa-0>
+    <div class="scroll-content">
+      <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
+        <span class="bulletin-time ma-4">{{
+          new Date(item.publishTime).toLocaleString()
+        }}</span>
+        <v-card-title>{{ item.title }}</v-card-title>
+        <v-card-text
+          ><pre class="pl-4">{{ item.content }}</pre></v-card-text
+        >
+      </v-card>
+    </div>
 
     <v-btn
       v-if="$store.state.global.role == 'admin'"
       fab
-      fixed
+      absolute
       right
       bottom
       color="light-blue"
@@ -189,6 +191,10 @@ export default class Bulletin extends Vue {
 <style lang="scss" scoped>
 .bulletin-list {
   max-width: 80%;
+}
+.scroll-content {
+  height: calc(100vh - 96px);
+  overflow-y: auto;
 }
 
 .bulletin-time {
