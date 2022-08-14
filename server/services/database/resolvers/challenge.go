@@ -191,6 +191,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		//		return errors.New("delete replica error")
 		//	}
 		//}
+		db.Save(&challenge)
 		return nil
 	})
 	if err != nil {

@@ -146,7 +146,7 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 		lines[index] = strings.Join(strings.Fields(line), " ")
 	}
 	input.Description = strings.Join(lines, "\n")
-	log.Println(input)
+	//log.Println(input)
 	if input.NodeConfig != nil {
 		if len(*input.NodeConfig) == 0 {
 			input.Singleton = true
@@ -162,7 +162,7 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 			return false
 		}
 	}
-	log.Println(input)
+	//log.Println(input)
 	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
 }
 
