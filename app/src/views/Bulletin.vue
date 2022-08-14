@@ -13,7 +13,7 @@
     <v-btn
       v-if="$store.state.global.role == 'admin'"
       fab
-      absolute
+      fixed
       right
       bottom
       color="light-blue"
