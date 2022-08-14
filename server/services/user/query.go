@@ -167,7 +167,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			})
 		}
 
-		correct := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId)
+		correct := resolvers.CheckSubmitCorrectByUserIdAndChallengeId(currentUserId, challenge.ChallengeId, nil)
 		var config types.ChallengeConfig
 		err := json.Unmarshal([]byte(challenge.Configuration), &config)
 		if err != nil {

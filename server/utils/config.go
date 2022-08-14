@@ -6,7 +6,7 @@ type Config struct {
 	//Redis      Redis      `yaml:"redis"`
 	Challenge  Challenge  `yaml:"challenge"`
 	Kubernetes Kubernetes `yaml:"kubernetes"`
-	Database   Database `yaml:"database"`
+	Database   Database   `yaml:"database"`
 }
 
 type Server struct {
