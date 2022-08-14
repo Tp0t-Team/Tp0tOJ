@@ -21,4 +21,6 @@ kubernetes:                          #k8s集群配置参数
   username: xxxxxxxx                 #「不可修改」镜像仓库用户名
   password: xxxxxxxx                 #「不可修改」镜像仓库密码
   registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致）
+database:
+  dsn: "host=localhost user=postgres password=admin dbname=oj port=5432 sslmode=disable TimeZone=Asia/Shanghai" # postgre dsn
   

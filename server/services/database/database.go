@@ -3,7 +3,8 @@ package database
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/glebarez/sqlite"
+	// "github.com/glebarez/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"io"
 	"log"
@@ -30,7 +31,7 @@ func passwordHash(password string) string {
 }
 
 //any database error log should be handle and log out inside resolvers, should not return to caller
-func init() {
+func Init(dsn string) {
 	needInit := false
 	prefix, _ := os.Getwd()
 	dbPath := prefix + "/resources/data.db?_pragma=busy_timeout%3d1000"
@@ -48,7 +49,8 @@ func init() {
 			return
 		}
 	}
-	DataBase, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	// DataBase, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	DataBase, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}

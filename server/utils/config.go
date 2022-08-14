@@ -6,6 +6,7 @@ type Config struct {
 	//Redis      Redis      `yaml:"redis"`
 	Challenge  Challenge  `yaml:"challenge"`
 	Kubernetes Kubernetes `yaml:"kubernetes"`
+	Database   Database `yaml:"database"`
 }
 
 type Server struct {
@@ -35,6 +36,10 @@ type Email struct {
 //	MinIdle   int    `yaml:"minIdle"`
 //	Timeout   int    `yaml:"timeout"`
 //}
+
+type Database struct {
+	Dsn string `yaml:"dsn"`
+}
 
 type Challenge struct {
 	SecondBloodReward float64 `yaml:"secondBloodReward"`

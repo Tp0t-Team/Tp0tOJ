@@ -10,6 +10,7 @@ import (
 	"server/utils"
 	"server/utils/calculator"
 	"server/utils/configure"
+	"server/services/database"
 	_ "server/utils/configure"
 	_ "server/utils/rank"
 )
@@ -33,6 +34,9 @@ func main() {
 			log.Panicln("writeup dir create filed", err)
 		}
 	}
+
+	// setup database connection
+	database.Init(configure.Configure.Database.Dsn)
 
 	_, crtErr := os.Stat("resources/https.crt")
 	_, keyErr := os.Stat("resources/https.key")
