@@ -241,32 +241,34 @@ func EnableChallengeById(challengeId string) bool {
 
 		if oldConfig.Singleton {
 			replicaId := new(uint64)
-			replica := AddReplica(challenge.ChallengeId, tx, func(status bool) {
-				err := db.Transaction(func(tx *gorm.DB) error {
-					users := FindAllUser()
-					if users == nil {
-						return errors.New("find users error")
-					}
-					for _, user := range users {
-						ok := AddReplicaAlloc(*replicaId, user.UserId, tx)
-						if !ok {
-							return errors.New("add replica alloc error")
-						}
-					}
-					return nil
-				})
-				if err != nil {
-					log.Println(err)
-
-					challenge.State = "enabled"
-					db.Save(&challenge)
-				}
-			})
+			replica := AddReplica(challenge.ChallengeId, tx, nil)
+			//replica := AddReplica(challenge.ChallengeId, tx, func(status bool) {
+			//err := db.Transaction(func(tx *gorm.DB) error {
+			//	users := FindAllUser()
+			//	if users == nil {
+			//		return errors.New("find users error")
+			//	}
+			//	for _, user := range users {
+			//		ok := AddReplicaAlloc(*replicaId, user.UserId, tx)
+			//		if !ok {
+			//			return errors.New("add replica alloc error")
+			//		}
+			//	}
+			//	return nil
+			//})
+			//if err != nil {
+			//	log.Println(err)
+			//
+			//	challenge.State = "enabled"
+			//	db.Save(&challenge)
+			//}
+			//})
 			if replica == nil {
 				return errors.New("add replica error")
 			}
 			*replicaId = replica.ReplicaId
 		}
+
 		//set all submits available,TODO: but need some rollback method?
 		submits := FindAllSubmitByChallengeId(challenge.ChallengeId)
 		for _, submit := range submits {
