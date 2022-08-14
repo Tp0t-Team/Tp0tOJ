@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"io/fs"
@@ -13,6 +14,23 @@ import (
 )
 
 func main() {
+	postgres := flag.Bool("postgres", false, "")
+	sqlite := flag.Bool("sqlite", false, "")
+	flag.Parse()
+
+	tags := []string{"WithFrontEnd"}
+
+	if *postgres == *sqlite {
+		log.Panicln("you must choose one and only one database type.")
+	}
+
+	if *postgres {
+		tags = append(tags, "DatabasePostgres")
+	}
+	if *sqlite {
+		tags = append(tags, "DatabaseSqlite")
+	}
+
 	err := os.Chdir("../app")
 	if err != nil {
 		log.Panicln(err)
@@ -97,7 +115,7 @@ func main() {
 		log.Panicln(err)
 	}
 	os.Setenv("CGO_ENABLED", "0")
-	serverCmd := exec.Command("go", "build", "-tags", "WithFrontEnd", "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH), "main.go")
+	serverCmd := exec.Command("go", "build", "-tags", strings.Join(tags, ","), "-o", fmt.Sprintf("OJ_%s_%s", runtime.GOOS, runtime.GOARCH), "main.go")
 	log.Println("build server...")
 	err = serverCmd.Run()
 	if err != nil {

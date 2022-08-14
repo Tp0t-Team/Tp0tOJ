@@ -7,18 +7,28 @@ import (
 	"net/http"
 	"os"
 	_ "server/services"
+	"server/services/database"
+	"server/services/database/resolvers"
 	"server/utils"
 	"server/utils/calculator"
 	"server/utils/configure"
-	"server/services/database"
 	_ "server/utils/configure"
 	_ "server/utils/rank"
 )
 
 func main() {
-	// TODO: provide --prepare flags to check environment and install k3s server and other requirement
+	// setup database connection
+	database.InitDB(configure.Configure.Database.Dsn)
+	resolvers.InitDB(database.DataBase)
 
-	_, err := os.Stat(configure.WriteUpPath)
+	// TODO: provide --prepare flags to check environment and install k3s server and other requirement
+	utils.Cache.SetCalculator(&calculator.BasicScoreCalculator{})
+	err := utils.Cache.WarmUp()
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	_, err = os.Stat(configure.WriteUpPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err := os.MkdirAll(configure.WriteUpPath, os.FileMode(0755))
@@ -28,15 +38,6 @@ func main() {
 		} else {
 			log.Panicln("writeup dir create filed", err)
 		}
-	}
-
-	// setup database connection
-	database.Init(configure.Configure.Database.Dsn)
-
-	utils.Cache.SetCalculator(&calculator.BasicScoreCalculator{})
-	err = utils.Cache.WarmUp()
-	if err != nil {
-		log.Panicln(err)
 	}
 
 	_, crtErr := os.Stat("resources/https.crt")

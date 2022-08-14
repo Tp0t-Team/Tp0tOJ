@@ -33,7 +33,7 @@
                       :class="rankColor[index] + ' white--text'"
                       >{{ index + 1 }}</v-avatar
                     >
-                    {{ r.name }}
+                    {{ r.name.toUpperCase() }}
                   </v-chip>
                 </v-card-title>
                 <v-card-text>{{ r.score }}pt</v-card-text>

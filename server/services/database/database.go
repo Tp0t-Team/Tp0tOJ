@@ -3,8 +3,6 @@ package database
 import (
 	"crypto/sha256"
 	"fmt"
-	// "github.com/glebarez/sqlite"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"io"
 	"log"
@@ -31,13 +29,14 @@ func passwordHash(password string) string {
 }
 
 //any database error log should be handle and log out inside resolvers, should not return to caller
-func Init(dsn string) {
+
+func createDefaultUser() {
 	needInit := false
 	prefix, _ := os.Getwd()
-	dbPath := prefix + "/resources/data.db?_pragma=busy_timeout%3d1000"
-	test, err := os.Lstat(dbPath)
+	lockPath := prefix + "/resources/dbInit.lock"
+	test, err := os.Lstat(lockPath)
 	if os.IsNotExist(err) {
-		_, err := os.Create(dbPath)
+		_, err := os.Create(lockPath)
 		needInit = true
 		if err != nil {
 			log.Panicln(err, test)
@@ -48,16 +47,6 @@ func Init(dsn string) {
 			log.Panicln(err, test)
 			return
 		}
-	}
-	// DataBase, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-	DataBase, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Panicln("DB connect error", err.Error())
-	}
-	err = DataBase.AutoMigrate(&entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}, &entity.User{}, &entity.Behavior{}, &entity.GameEvent{})
-	if err != nil {
-		log.Panicln("DB connect error", err.Error())
-		return
 	}
 	if needInit {
 		defaultUser := entity.User{
