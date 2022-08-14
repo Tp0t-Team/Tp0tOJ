@@ -15,8 +15,11 @@ import (
 	"time"
 )
 
-func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64) bool {
-	result := db.Where(map[string]interface{}{"user_id": userId, "challenge_id": challengeId, "correct": true, "available": true}).First(&entity.Submit{})
+func CheckSubmitCorrectByUserIdAndChallengeId(userId uint64, challengeId uint64, outsideTX *gorm.DB) bool {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	result := outsideTX.Where(map[string]interface{}{"user_id": userId, "challenge_id": challengeId, "correct": true, "available": true}).First(&entity.Submit{})
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return false
 	} else if result.Error != nil {
@@ -83,7 +86,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 	bloodIndex := -1
 	challengeName := ""
 	err := db.Transaction(func(tx *gorm.DB) error {
-		if CheckSubmitCorrectByUserIdAndChallengeId(userId, challengeId) {
+		if CheckSubmitCorrectByUserIdAndChallengeId(userId, challengeId, tx) {
 			return errors.New("already finish this challenge")
 		}
 		alloc, err := FindReplicaAllocByUserIdAndChallengeId(userId, challengeId, tx)
