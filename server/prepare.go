@@ -87,7 +87,7 @@ func sudoCopy(src string, dst string) error {
 	return nil
 }
 
-func InstallK3S(masterIP string) {
+func InstallK3S(masterIP string, k3sExec string) {
 	_, err := os.Stat("resources/k3s.yaml")
 	if err == nil {
 		return
@@ -131,7 +131,7 @@ func InstallK3S(masterIP string) {
 		os.Exit(1)
 	}
 	log.Println("install k3s master...")
-	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo INSTALL_K3S_MIRROR=%s ./k3s-install.sh --node-external-ip %s --node-name %s", os.Getenv("INSTALL_K3S_MIRROR"), masterIP, masterIP))
+	k3sInstall := exec.Command("bash", "-c", fmt.Sprintf("sudo INSTALL_K3S_MIRROR=%s ./k3s-install.sh --node-external-ip %s --node-name %s %s", os.Getenv("INSTALL_K3S_MIRROR"), masterIP, masterIP, k3sExec))
 	k3sInstall.Stderr = os.Stderr
 	k3sInstall.Stdin = os.Stdin
 	k3sInstall.Stdout = os.Stdout
@@ -520,7 +520,7 @@ func TarAddFile(file string, archiveFile string, tarArchive *tar.Writer) error {
 	return nil
 }
 
-func GenerateAgentScript(masterIP string) {
+func GenerateAgentScript(masterIP string, k3sExec string) {
 	_, err := os.Stat("agent-install.sh")
 	if err == nil {
 		return
@@ -570,7 +570,7 @@ func GenerateAgentScript(masterIP string) {
 	}
 
 	token := strings.TrimSpace(string(tokenData.Bytes()))
-	k3sCmdSting := fmt.Sprintf("curl -sfL $([ \"$INSTALL_K3S_MIRROR\" = \"cn\" ] && echo \"https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh\" || echo \"https://get.k3s.io\") | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1\n", masterIP, token)
+	k3sCmdSting := fmt.Sprintf("curl -sfL $([ \"$INSTALL_K3S_MIRROR\" = \"cn\" ] && echo \"https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh\" || echo \"https://get.k3s.io\") | K3S_URL=https://%s:6443/ K3S_TOKEN=%s sh -s - --node-external-ip $1 --node-name $1 %s\n", masterIP, token, k3sExec)
 
 	file, err := os.Create("agent-install.sh")
 	if err != nil {
@@ -838,12 +838,18 @@ func GenerateStartScript() {
 }
 
 func main() {
+	k3sExec := "--disable=traefik"
+
 	masterIP := flag.String("MasterIP", "", "master ip")
 	genAgentScript := flag.Bool("agent", false, "only generate agent script")
+	enableTraefik := flag.Bool("enable-traefik", false, "do not disable traefik")
 	flag.Parse()
+	if *enableTraefik {
+		k3sExec = ""
+	}
 	if *genAgentScript {
 		log.Println("generate agent script...")
-		GenerateAgentScript(*masterIP)
+		GenerateAgentScript(*masterIP, k3sExec)
 		log.Println("[*]done")
 		return
 	}
@@ -887,7 +893,7 @@ func main() {
 	}
 
 	log.Println(" - install K3S:")
-	InstallK3S(*masterIP)
+	InstallK3S(*masterIP, k3sExec)
 	log.Println(" - create cert:")
 	CreateCert(*masterIP)
 	log.Println(" - config registry:")
@@ -897,7 +903,7 @@ func main() {
 	log.Println(" - generate default config:")
 	CreateDefaultConfig(*masterIP, registryUsername, registryPassword)
 	log.Println(" - generate agent script:")
-	GenerateAgentScript(*masterIP)
+	GenerateAgentScript(*masterIP, k3sExec)
 	log.Println(" - prepare registry:")
 	PrepareRegistry(*masterIP, registryUsername, registryPassword)
 	log.Println(" - generate start script:")
