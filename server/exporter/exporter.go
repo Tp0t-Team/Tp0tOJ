@@ -242,7 +242,7 @@ func main() {
 	database.InitDB(configure.Configure.Database.Dsn)
 
 	var bulletins []entity.Bulletin
-	result := database.DataBase.Find(bulletins)
+	result := database.DataBase.Find(&bulletins)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -261,7 +261,7 @@ func main() {
 	}
 
 	var challenges []entity.Challenge
-	result = database.DataBase.Find(challenges)
+	result = database.DataBase.Find(&challenges)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -280,7 +280,7 @@ func main() {
 	}
 
 	var replicas []entity.Replica
-	result = database.DataBase.Find(replicas)
+	result = database.DataBase.Find(&replicas)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -299,7 +299,7 @@ func main() {
 	}
 
 	var allocs []entity.ReplicaAlloc
-	result = database.DataBase.Find(allocs)
+	result = database.DataBase.Find(&allocs)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -318,7 +318,7 @@ func main() {
 	}
 
 	var tokens []entity.ResetToken
-	result = database.DataBase.Find(tokens)
+	result = database.DataBase.Find(&tokens)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -337,7 +337,7 @@ func main() {
 	}
 
 	var submits []entity.Submit
-	result = database.DataBase.Find(submits)
+	result = database.DataBase.Find(&submits)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -356,7 +356,7 @@ func main() {
 	}
 
 	var users []entity.User
-	result = database.DataBase.Find(users)
+	result = database.DataBase.Find(&users)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -375,7 +375,7 @@ func main() {
 	}
 
 	var behaviors []entity.Behavior
-	result = database.DataBase.Find(behaviors)
+	result = database.DataBase.Find(&behaviors)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
@@ -394,7 +394,7 @@ func main() {
 	}
 
 	var events []entity.GameEvent
-	result = database.DataBase.Find(events)
+	result = database.DataBase.Find(&events)
 	if result.Error != nil {
 		log.Println(result.Error)
 	} else {
