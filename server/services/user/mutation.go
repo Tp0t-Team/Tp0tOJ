@@ -207,7 +207,7 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 	if result == nil {
 		return &types.ForgetResult{Message: "failed"}
 	}
-	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\n http://%s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), result.Token)) {
+	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\n %s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), result.Token)) {
 		return &types.ForgetResult{Message: "send mail failed"}
 	}
 	return &types.ForgetResult{Message: ""}
