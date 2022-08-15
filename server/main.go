@@ -20,7 +20,7 @@ func Redirect(w http.ResponseWriter, req *http.Request) {
 	url := *req.URL
 	url.Scheme = "https"
 	target := url.String()
-	log.Println(target)
+	//log.Println(target)
 	http.Redirect(w, req, target,
 		// see comments below and consider the codes 308, 302, or 301
 		http.StatusTemporaryRedirect)
@@ -56,13 +56,16 @@ func main() {
 		if configure.Configure.Server.Port == 0 {
 			configure.Configure.Server.Port = 443
 		}
+		if configure.Configure.Server.Port == 443 {
+			go func() {
+				err := http.ListenAndServe(":80", http.HandlerFunc(Redirect))
+				if err != nil {
+					log.Println(err)
+				}
+			}()
+		}
 		portString := fmt.Sprintf(":%d", configure.Configure.Server.Port)
-		go func() {
-			err := http.ListenAndServe(portString, http.HandlerFunc(Redirect))
-			if err != nil {
-				log.Println(err)
-			}
-		}()
+
 		log.Fatal(http.ListenAndServeTLS(portString, "resources/https.crt", "resources/https.key", nil))
 	} else {
 		if configure.Configure.Server.Port == 0 {
