@@ -54,7 +54,7 @@
                     block
                     color="accent"
                     :disabled="selected.length == 0 || loading"
-                    @click="challengeAction('delete')"
+                    @click="showDeleteDialog = true"
                     >delete</v-btn
                   >
                 </div>
@@ -104,16 +104,16 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <!-- <v-dialog v-model="showDeleteDialog" width="300px">
+      <v-dialog v-model="showDeleteDialog" width="300px">
         <v-card>
-          <v-card-title>Are you sure to delete this challenge?</v-card-title>
+          <v-card-title>Are you sure to delete these challenges?</v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn text @click="showDeleteDialog = false">cancel</v-btn>
-            <v-btn text color="primary" @click="deleteConfig">accept</v-btn>
+            <v-btn text color="primary" @click="deleteConfirm">accept</v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog> -->
+      </v-dialog>
       <v-col cols="6" class="content-col">
         <challenge-editor
           :config="currentConfig"
@@ -174,7 +174,7 @@ export default class Challenge extends Vue {
   private challengeType = constValue.challengeType;
 
   private showDiscardDialog: boolean = false;
-  // private showDeleteDialog: boolean = false;
+  private showDeleteDialog: boolean = false;
   private withoutInit: boolean = true;
   private loading: boolean = false;
   private changed: boolean = false;
@@ -428,6 +428,10 @@ export default class Challenge extends Vue {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
+  }
+
+  async deleteConfirm() {
+    await this.challengeAction("delete");
   }
 }
 </script>
