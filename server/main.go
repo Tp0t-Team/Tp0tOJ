@@ -16,6 +16,15 @@ import (
 	_ "server/utils/rank"
 )
 
+func Redirect(w http.ResponseWriter, req *http.Request) {
+	url := *req.URL
+	url.Scheme = "https"
+	target := url.String()
+	http.Redirect(w, req, target,
+		// see comments below and consider the codes 308, 302, or 301
+		http.StatusTemporaryRedirect)
+}
+
 func main() {
 	// setup database connection
 	database.InitDB(configure.Configure.Database.Dsn)
@@ -47,6 +56,9 @@ func main() {
 			configure.Configure.Server.Port = 443
 		}
 		portString := fmt.Sprintf(":%d", configure.Configure.Server.Port)
+		go func() {
+			http.ListenAndServe(portString, http.HandlerFunc(Redirect))
+		}()
 		log.Fatal(http.ListenAndServeTLS(portString, "resources/https.crt", "resources/https.key", nil))
 	} else {
 		if configure.Configure.Server.Port == 0 {
