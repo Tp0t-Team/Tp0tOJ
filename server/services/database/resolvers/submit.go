@@ -175,9 +175,15 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		if err != nil {
 			log.Println(err)
 		} else {
+			title := fmt.Sprintf("%s %s blood", challengeName, BloodName[bloodIndex])
+			info := fmt.Sprintf("Congratulations! %s get the %s blood of %s", user.Name, BloodName[bloodIndex], challengeName)
+			ok := AddBulletin(title, info, false)
+			if !ok {
+				log.Println("blood info bulletin create failed")
+			}
 			sse.PublishMessage(sse.Message{
-				Title: fmt.Sprintf("%s %s blood", challengeName, BloodName[bloodIndex]),
-				Info:  fmt.Sprintf("Congratulations! %s get the %s blood of %s", user.Name, BloodName[bloodIndex], challengeName),
+				Title: title,
+				Info:  info,
 			})
 		}
 	}
