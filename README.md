@@ -176,7 +176,7 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 
 ### 镜像编译
 
-在镜像编译页面上传镜像，需要上传包含Dock而file的tar包，**注意tar包没有额外目录层级，需要直接能获取到Dockerfile**
+在镜像编译页面上传镜像，需要上传包含Dockerfile的tar包，**注意tar包没有额外目录层级，需要直接能获取到Dockerfile**
 
 对于PWN题，推荐使用`xinetd`作为守护进程
 
