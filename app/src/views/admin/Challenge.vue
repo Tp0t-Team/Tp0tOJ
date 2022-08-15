@@ -432,6 +432,7 @@ export default class Challenge extends Vue {
 
   async deleteConfirm() {
     await this.challengeAction("delete");
+    this.showDeleteDialog = false;
   }
 }
 </script>

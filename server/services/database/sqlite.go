@@ -25,7 +25,7 @@ func InitDB(dsn string) {
 			return
 		}
 	}
-	DataBase, err = gorm.Open(sqlite.Open(dbPath+"?_pragma=busy_timeout%3d1000"), &gorm.Config{})
+	DataBase, err = gorm.Open(sqlite.Open("file://"+dbPath+"?cache=shared&_pragma=journal_mode(WAL)&_pragma=busy_timeout(10000)"), &gorm.Config{})
 	if err != nil {
 		log.Panicln("DB connect error", err.Error())
 	}
