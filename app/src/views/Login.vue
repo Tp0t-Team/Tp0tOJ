@@ -72,7 +72,11 @@
                   :append-icon="showPassword ? 'visibility' : 'visibility_off'"
                   :type="showPassword ? 'text' : 'password'"
                   @click:append="showPassword = !showPassword"
-                  :rules="[rules.required, rules.passLen(8), rules.password]"
+                  :rules="[
+                    rules.required,
+                    rules.passLen(8, 18),
+                    rules.password
+                  ]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -156,8 +160,9 @@ export default class Login extends Vue {
       !!(value || "").match(
         /^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$/
       ) || "非法的邮箱地址",
-    passLen: (len: number) => (v: string) =>
-      (v || "").length >= len || `非法的密码长度，需要 ${len} 位`,
+    passLen: (minlen: number, maxlen: number) => (v: string) =>
+      ((v || "").length >= minlen && (v || "").length <= maxlen) ||
+      `非法的密码长度，需要 ${minlen}~${maxlen} 位`,
     password: (value: string) =>
       (!!(value || "").match(/[A-Z]/) &&
         !!(value || "").match(/[a-z]/) &&

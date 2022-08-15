@@ -25,7 +25,7 @@ func (input *RegisterInput) CheckPass() bool {
 	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
 	input.Name = norm.NFC.String(input.Name)
-	return len([]rune(input.Name)) <= 20 && input.Name != "" && input.Mail != "" && input.Password != ""
+	return len([]rune(input.Name)) <= 20 && input.Name != "" && len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Mail != "" && input.Password != ""
 }
 
 type RegisterResult struct {
@@ -40,7 +40,7 @@ type LoginInput struct {
 
 func (input *LoginInput) CheckPass() bool {
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
-	return input.Mail != "" && input.Password != ""
+	return len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Mail != "" && input.Password != ""
 }
 
 type LoginResult struct {
