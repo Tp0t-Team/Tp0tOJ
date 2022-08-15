@@ -2,11 +2,11 @@ package database
 
 import (
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"io"
 	"log"
-	"os"
 	"server/entity"
 	"server/utils/configure"
 	"time"
@@ -30,25 +30,21 @@ func passwordHash(password string) string {
 
 //any database error log should be handle and log out inside resolvers, should not return to caller
 
-func createDefaultUser() {
-	needInit := false
-	prefix, _ := os.Getwd()
-	lockPath := prefix + "/resources/dbInit.lock"
-	test, err := os.Lstat(lockPath)
-	if os.IsNotExist(err) {
-		_, err := os.Create(lockPath)
-		needInit = true
-		if err != nil {
-			log.Panicln(err, test)
-			return
-		}
-	} else if err != nil {
-		if err != nil {
-			log.Panicln(err, test)
-			return
-		}
+func createTables() {
+	err := DataBase.AutoMigrate(&entity.Bulletin{}, &entity.Challenge{}, &entity.Replica{}, &entity.ReplicaAlloc{}, &entity.ResetToken{}, &entity.Submit{}, &entity.User{}, &entity.Behavior{}, &entity.GameEvent{})
+	if err != nil {
+		log.Panicln("DB connect error", err.Error())
+		return
 	}
-	if needInit {
+}
+
+func createDefaultUser() {
+	var users []entity.User
+	result := DataBase.Find(&users)
+	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		log.Panicln(result.Error)
+	}
+	if len(users) == 0 {
 		defaultUser := entity.User{
 			Name:     configure.Configure.Server.Username,
 			Password: passwordHash(configure.Configure.Server.Password),
