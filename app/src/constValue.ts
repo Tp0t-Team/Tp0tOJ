@@ -4,7 +4,8 @@ const constValue = {
   stateType: ["normal", "disabled"],
   flagType: ["Single", "Multiple", "Regexp", "Dynamic"],
   eventType: ["Stop", "Start"],
-  navTitle: "Tp0t OJ"
+  navTitle: "Tp0t OJ",
+  CountMax: (30 * 1000) / 500
 };
 
 export default constValue;

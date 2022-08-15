@@ -79,6 +79,10 @@
           </v-btn>
         </template>
       </v-snackbar>
+      <div
+        class="progress-bar"
+        :style="`width:${(renewCounter * 100) / CountMax}%;`"
+      ></div>
     </v-container>
   </div>
 </template>
@@ -88,6 +92,7 @@ import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
 import { RankDesc, RankResult } from "@/struct";
+import constValue from "../constValue";
 
 const UserPerPage = 10;
 
@@ -97,6 +102,11 @@ const UserPerPage = 10;
   }
 })
 export default class Rank extends Vue {
+  private monitorMode = false;
+  private renewCounter = 0;
+  private CountMax = constValue.CountMax;
+  private sseSource: EventSource | undefined;
+
   private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
 
@@ -117,7 +127,26 @@ export default class Rank extends Vue {
   }
 
   async mounted() {
+    this.monitorMode = this.$route.path.split("/")[1] == "monitor";
     this.page = parseInt(this.$route.params.page);
+    await this.loadData();
+    if (this.monitorMode) {
+      this.sseSource = new EventSource("/sse?stream=message");
+      this.sseSource.addEventListener("message", async () => {
+        await this.loadData();
+      });
+      setInterval(this.renew, 500);
+    }
+  }
+
+  async renew() {
+    this.renewCounter = (this.renewCounter % this.CountMax) + 1;
+    if (this.renewCounter == this.CountMax) {
+      await this.loadData();
+    }
+  }
+
+  async loadData() {
     try {
       let res = await this.$apollo.query<RankResult>({
         query: gql`
@@ -141,7 +170,7 @@ export default class Rank extends Vue {
         (a, b) => parseInt(b.score) - parseInt(a.score)
       );
       this.pageCount = Math.floor(
-        (this.ranks.length + UserPerPage - 1) / UserPerPage
+        (this.ranks.length - 3 + UserPerPage - 1) / UserPerPage
       );
     } catch (e) {
       this.infoText = e.toString();
@@ -159,5 +188,15 @@ export default class Rank extends Vue {
 
 .table-item {
   cursor: pointer;
+}
+
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 50%;
+  background-color: rgb(245, 124, 0);
+  transition: 0.5s width linear;
 }
 </style>

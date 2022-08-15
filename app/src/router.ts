@@ -137,6 +137,11 @@ export default new Router({
       }
     },
     {
+      path: "/monitor/:page",
+      name: "rank",
+      component: () => import(/* webpackChunkName: "rank" */ "@/views/Rank.vue")
+    },
+    {
       path: "*",
       name: "error",
       component: ErrorPage

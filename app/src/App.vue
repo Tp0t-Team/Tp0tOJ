@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
 import constValue from "./constValue";
@@ -69,6 +69,13 @@ export default class App extends Vue {
   private hasSSEInfo: boolean = false;
   private sseSource: EventSource = new EventSource("/sse?stream=message");
   private timer: number | null = null;
+
+  @Watch("$route.path")
+  async isMonitor() {
+    if (this.$route.path.split("/")[1] == "monitor") {
+      this.drawer = false;
+    }
+  }
 
   mounted() {
     document.title = this.title;
