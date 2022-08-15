@@ -11,7 +11,18 @@ import (
 	"server/services/types"
 	"server/utils"
 	"strconv"
+	"time"
 )
+
+var timeZone *time.Location
+
+func init() {
+	var err error
+	timeZone, err = time.LoadLocation("UTC")
+	if err != nil {
+		log.Panicln(err)
+	}
+}
 
 type AdminQueryResolver struct {
 }
@@ -90,7 +101,7 @@ func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ Use
 			log.Println(err)
 			return &types.SubmitHistoryResult{Message: "Submit History Error!"}
 		}
-		submitInfo := types.SubmitInfo{SubmitTime: submit.SubmitTime.String(), ChallengeName: submit.Challenge.Name}
+		submitInfo := types.SubmitInfo{SubmitTime: submit.SubmitTime.In(timeZone).Format(time.RFC3339), ChallengeName: submit.Challenge.Name}
 		submitInfos = append(submitInfos, submitInfo)
 	}
 	return &types.SubmitHistoryResult{Message: "", SubmitInfos: submitInfos}
