@@ -144,6 +144,16 @@ func (cache *RAMRankCache) refreshRank() {
 	cache.rank = rankSaved
 }
 
+func (cache *RAMRankCache) GetCurrentScores() map[uint64]uint64 {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+	ret := map[uint64]uint64{}
+	for id, score := range cache.challengeScore {
+		ret[id] = score
+	}
+	return ret
+}
+
 func (cache *RAMRankCache) WarmUp() error {
 	cache.challengeScore = map[uint64]uint64{}
 	cache.challengeSolve = map[uint64][]uint64{}

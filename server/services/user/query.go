@@ -131,6 +131,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 		Message:        "",
 		ChallengeInfos: []types.ChallengeInfo{},
 	}
+	scoreSet := utils.Cache.GetCurrentScores()
 	for _, challenge := range challenges {
 		var bloodInfo []types.BloodInfo
 		if challenge.FirstBloodId != nil {
@@ -198,11 +199,15 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			}
 			resolvers.AllocatingTableMtx.RUnlock()
 		}
+		realScore := config.Score.BaseScore
+		if score, ok := scoreSet[challenge.ChallengeId]; ok {
+			realScore = strconv.FormatUint(score, 10)
+		}
 		item := types.ChallengeInfo{
 			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:     config.Category,
 			Name:         challenge.Name,
-			Score:        config.Score.BaseScore,
+			Score:        realScore,
 			Description:  config.Description,
 			ExternalLink: replicaUrls,
 			Blood:        bloodInfo,

@@ -11,6 +11,7 @@ type RankCache interface {
 	AddUser(userId uint64)
 	AddChallenge(challengeId uint64, originScore uint64)
 	Submit(userId uint64, challengeId uint64, stamp time.Time) error
+	GetCurrentScores() map[uint64]uint64
 	WarmUp() error
 }
 
