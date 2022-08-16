@@ -2,23 +2,21 @@ package services
 
 import (
 	"context"
-	"crypto/rand"
 	_ "embed"
-	"encoding/binary"
-	"github.com/gorilla/csrf"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
 	"io/fs"
 	"log"
-	unsafeRand "math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 	"server/services/admin"
 	"server/services/sse"
 	"server/services/user"
+	"server/utils/configure"
 	"server/utils/kick"
 	"strings"
 	"time"
@@ -33,7 +31,8 @@ type Resolver struct {
 
 //go:embed schema.graphql
 var schemaStr string
-var CSRFMiddleware func(http.Handler) http.Handler
+
+//var CSRFMiddleware func(http.Handler) http.Handler
 
 func getIP(r *http.Request) string {
 	forward := r.Header.Get("X-FORWARDED-FOR")
@@ -43,24 +42,32 @@ func getIP(r *http.Request) string {
 	return strings.TrimSpace(strings.Split(forward, ",")[0])
 }
 
+func getOrigin() string {
+	return fmt.Sprintf("%s:%d", configure.Configure.Server.Host, configure.Configure.Server.Port)
+}
+
+func originCheck(r *http.Request) bool {
+	return r.Header.Get("Origin") == getOrigin()
+}
+
 func init() {
 	muxRouter := mux.NewRouter()
-	seed := make([]byte, 8)
-	_, err := rand.Read(seed)
-	if err != nil {
-		log.Panicln("can not generate rand", err)
-		return
-	}
+	//seed := make([]byte, 8)
+	//_, err := rand.Read(seed)
+	//if err != nil {
+	//	log.Panicln("can not generate rand", err)
+	//	return
+	//}
 
 	//Protect CSRF
-	unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
-	token := make([]byte, 32)
-	_, err = unsafeRand.Read(token)
-	if err != nil {
-		log.Panicln("can not generate rand", err)
-		return
-	}
-	CSRFMiddleware = csrf.Protect(token)
+	//unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
+	//token := make([]byte, 32)
+	//_, err = unsafeRand.Read(token)
+	//if err != nil {
+	//	log.Panicln("can not generate rand", err)
+	//	return
+	//}
+	//CSRFMiddleware = csrf.Protect(token)
 
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
@@ -82,13 +89,26 @@ func init() {
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
 	muxRouter.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if r.Method != http.MethodPost ||
+			strings.Split(r.Header.Get("Content-Type"), ";")[0] != "application/json" {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		session := sessionManager.Start(w, r)
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "session", session)
 		ctx = context.WithValue(ctx, "ip", getIP(r))
 		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
-	})
+	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
+		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		if isLogin == nil || !*isLogin.(*bool) {
@@ -103,8 +123,12 @@ func init() {
 			return
 		}
 		user.WriteUpHandle(w, r, userId)
-	})
+	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
+		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -121,8 +145,12 @@ func init() {
 			return
 		}
 		admin.DownloadWPByUserId(w, r, userId)
-	})
+	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
+		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -132,8 +160,12 @@ func init() {
 			return
 		}
 		admin.DownloadAllWP(w, r)
-	})
+	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
+		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -143,8 +175,8 @@ func init() {
 			return
 		}
 		admin.UploadImage(w, r)
-	})
-	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP)
+	}).Methods(http.MethodPost)
+	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP).Methods(http.MethodGet)
 	if HasFrontEnd {
 		root, err := fs.Sub(staticFolder, "static")
 		if err != nil {
@@ -185,9 +217,15 @@ func init() {
 				w.Write(indexFile)
 			}
 		}))
-
-		muxRouter.PathPrefix("/").Handler(withGzipped)
+		muxRouter.PathPrefix("/").Handler(withGzipped).Methods(http.MethodGet)
 	}
-	muxRouter.Use(CSRFMiddleware)
+
+	muxRouter.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Access-Control-Allow-Origin", getOrigin())
+		writer.Header().Set("Access-Control-Max-Age", "86400")
+	}).Methods(http.MethodOptions)
+
+	muxRouter.Use(mux.CORSMethodMiddleware(muxRouter))
+	//muxRouter.Use(CSRFMiddleware)
 	http.Handle("/", muxRouter)
 }
