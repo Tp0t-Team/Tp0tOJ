@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"server/services/database/resolvers"
 	"server/services/types"
+	"server/utils"
 	"server/utils/configure"
 	"server/utils/kick"
 	"strconv"
@@ -97,6 +98,11 @@ func (r *MutationResolver) Register(ctx context.Context, args struct{ Input type
 	ok := resolvers.AddUser(input.Name, passwordHash(input.Password), input.Mail, "member", "normal")
 	if !ok {
 		return &types.RegisterResult{Message: "Register Error!"}
+	}
+	// warmup when add user
+	err := utils.Cache.WarmUp()
+	if err != nil {
+		log.Println(err)
 	}
 	return &types.RegisterResult{Message: ""}
 }
