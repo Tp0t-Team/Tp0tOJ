@@ -50,6 +50,20 @@ func originCheck(r *http.Request) bool {
 	return r.Header.Get("Origin") == getOrigin()
 }
 
+func FrameControlMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+		handler.ServeHTTP(w, req)
+	})
+}
+
+func CSPMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; frame-src 'self'; img-src *; script-src 'self'; frame-ancestors 'self'")
+		handler.ServeHTTP(w, req)
+	})
+}
+
 func init() {
 	muxRouter := mux.NewRouter()
 	//seed := make([]byte, 8)
@@ -225,7 +239,7 @@ func init() {
 		writer.Header().Set("Access-Control-Max-Age", "86400")
 	}).Methods(http.MethodOptions)
 
-	muxRouter.Use(mux.CORSMethodMiddleware(muxRouter))
+	muxRouter.Use(mux.CORSMethodMiddleware(muxRouter), FrameControlMiddleware, CSPMiddleware)
 	//muxRouter.Use(CSRFMiddleware)
 	http.Handle("/", muxRouter)
 }
