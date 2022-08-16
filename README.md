@@ -117,7 +117,8 @@ To uninstall K3s from an agent node, run:
 
 ```yaml
 server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #设置为外网IP，用于重置密码功能
+  host: 127.0.0.1                    #设置为Host，用于重置密码功能
+                                     #例如：平台地址：ctf.lordcasser.com开启SSL, host: https://ctf.lordcasser.com
   username: Tp0t                     #默认admin用户名
   password: admin                    #默认admin账号密码
   mail: admin@example.com            #默认admin账号邮箱
@@ -281,6 +282,18 @@ nodeConfig:
         internal: 8888          # default & DON'T CHANGE IT
         pod: 0                  # default & DON'T CHANGE IT
 ```
+
+### 数据库导出或备份
+
+提供exporter工具，使用以下命令编译
+
+```bash
+go build -tags DatabasePostgres -o expost server/exporter
+```
+
+切换到平台启动目录使用（也就是perpare运行初始化的目录）
+
+通过 `-dir` 指定导出到的目录 
 
 ##
 

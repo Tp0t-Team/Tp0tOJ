@@ -6,9 +6,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"server/services/database/resolvers"
 	"server/utils/configure"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
@@ -33,6 +35,7 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 		log.Println(err)
 		return
 	}
+
 	defer file.Close()
 	fileNameParts := strings.Split(fileHandle.Filename, ".")
 	extname := fileHandle.Filename[len(fileNameParts[0]):]
@@ -52,6 +55,7 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 		log.Println(err)
 		return
 	}
+	resolvers.BehaviorUploadWP(userId, time.Now(), nil)
 	w.WriteHeader(http.StatusOK)
 	w.Write(nil)
 	return
