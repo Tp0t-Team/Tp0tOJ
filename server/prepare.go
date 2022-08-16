@@ -444,7 +444,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 		Server: utils.Server{
 			Host:        fmt.Sprintf("%s", masterIP),
 			Username:    "Tp0t",
-			Password:    "admin",
+			Password:    "admin123",
 			Mail:        "admin@example.com",
 			Port:        0,
 			Salt:        strconv.FormatInt(rd.Int63(), 10),
