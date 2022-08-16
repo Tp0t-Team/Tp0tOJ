@@ -84,19 +84,42 @@ type ReplicaJSON struct {
 	Singleton   bool
 	Status      string `json:"status"`
 	Flag        string `json:"flag"`
-	FlagType    int
+	FlagType    string
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 }
 
+const (
+	Single = iota
+	Multiple
+	Regexp
+	Dynamic
+)
+
 func newReplicaJSON(input entity.Replica) ReplicaJSON {
+	var flagType string
+	switch input.FlagType {
+	case Single:
+		flagType = "Single"
+		break
+	case Multiple:
+		flagType = "Multiple"
+		break
+	case Regexp:
+		flagType = "Regexp"
+		break
+	case Dynamic:
+		flagType = "Dynamic"
+		break
+	}
+
 	return ReplicaJSON{
 		ReplicaId:   strconv.FormatUint(input.ReplicaId, 10),
 		ChallengeId: strconv.FormatUint(input.ChallengeId, 10),
 		Singleton:   input.Singleton,
 		Status:      input.Status,
 		Flag:        input.Flag,
-		FlagType:    int(input.FlagType),
+		FlagType:    flagType,
 		CreatedAt:   input.CreatedAt.In(timeZone).Format(time.RFC3339),
 		UpdatedAt:   input.UpdatedAt.In(timeZone).Format(time.RFC3339),
 	}
@@ -191,19 +214,46 @@ type BehaviorJSON struct {
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 	ActionTime  string `json:"actionTime"`
-	Action      int    `json:"action"`
+	Action      string `json:"action"`
 	ChallengeId string `json:"challengeId"`
 	UserId      string `json:"userId"`
 	Content     string `json:"content"`
 }
 
+const (
+	ActionAllocReplica = iota
+	ActionSubmit
+	ActionComplete
+	ActionLogin
+	ActionWatchDescription
+)
+
 func newBehaviorJSON(input entity.Behavior) BehaviorJSON {
+	var action string
+	switch input.Action {
+	case ActionAllocReplica:
+		action = "AllocReplica"
+		break
+	case ActionSubmit:
+		action = "Submit"
+		break
+	case ActionComplete:
+		action = "Complete"
+		break
+	case ActionLogin:
+		action = "Login"
+		break
+	case ActionWatchDescription:
+		action = "WatchDescription"
+		break
+	}
+
 	return BehaviorJSON{
 		Id:          strconv.FormatUint(input.Id, 10),
 		CreatedAt:   input.CreatedAt.In(timeZone).Format(time.RFC3339),
 		UpdatedAt:   input.UpdatedAt.In(timeZone).Format(time.RFC3339),
 		ActionTime:  input.ActionTime.In(timeZone).Format(time.RFC3339),
-		Action:      int(input.Action),
+		Action:      action,
 		ChallengeId: strconv.FormatUint(input.ChallengeId, 10),
 		UserId:      strconv.FormatUint(input.UserId, 10),
 		Content:     input.Content,
@@ -215,16 +265,31 @@ type GameEventJSON struct {
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
 	Time      string `json:"time"`
-	Action    int    `json:"action"`
+	Action    string `json:"action"`
 }
 
+const (
+	PauseEvent = iota
+	ResumeEvent
+)
+
 func newGameEventJSON(input entity.GameEvent) GameEventJSON {
+
+	var action string
+	switch input.Action {
+	case PauseEvent:
+		action = "PauseGame"
+		break
+	case ResumeEvent:
+		action = "ResumeGame"
+		break
+	}
 	return GameEventJSON{
 		EventId:   strconv.FormatUint(input.EventId, 10),
 		CreatedAt: input.CreatedAt.In(timeZone).Format(time.RFC3339),
 		UpdatedAt: input.UpdatedAt.In(timeZone).Format(time.RFC3339),
 		Time:      input.Time.In(timeZone).Format(time.RFC3339),
-		Action:    int(input.Action),
+		Action:    action,
 	}
 }
 
