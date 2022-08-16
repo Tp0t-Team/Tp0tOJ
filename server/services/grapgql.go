@@ -125,7 +125,6 @@ func init() {
 			return
 		}
 		session := sessionManager.Start(w, r)
-		session.Set("token", token)
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "session", session)
 		ctx = context.WithValue(ctx, "ip", getIP(r))
