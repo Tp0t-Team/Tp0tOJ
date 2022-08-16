@@ -16,5 +16,8 @@ module.exports = {
   },
   parserOptions: {
     parser: "@typescript-eslint/parser"
+  },
+  globals: {
+    globalThis: "writable"
   }
 };

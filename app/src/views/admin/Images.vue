@@ -137,6 +137,9 @@ export default class Images extends Vue {
       formData.append("image", this.file!);
       let res = await fetch("/image", {
         method: "POST",
+        headers: {
+          "X-CSRF-Token": (globalThis as any).CsrfToken as string
+        },
         body: formData
       });
       if (res.status != 200) {

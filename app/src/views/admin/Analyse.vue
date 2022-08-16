@@ -45,7 +45,11 @@ export default class Analyse extends Vue {
   async loadData() {
     this.loading = true;
     try {
-      let res = await fetch("/data");
+      let res = await fetch("/data", {
+        headers: {
+          "X-CSRF-Token": (globalThis as any).CsrfToken as string
+        }
+      });
       let data = await res.json();
       this.data = data;
       this.update();

@@ -261,6 +261,9 @@ export default class NavList extends Vue {
     try {
       let res = await fetch("/writeup", {
         method: "POST",
+        headers: {
+          "X-CSRF-Token": (globalThis as any).CsrfToken as string
+        },
         body: formData
       });
       if (res.status != 200) {

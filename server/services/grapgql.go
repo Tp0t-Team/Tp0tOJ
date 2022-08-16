@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"crypto/rand"
 	_ "embed"
+	"encoding/binary"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
@@ -10,6 +12,7 @@ import (
 	"github.com/kataras/go-sessions/v3"
 	"io/fs"
 	"log"
+	unsafeRand "math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -19,6 +22,7 @@ import (
 	"server/utils/configure"
 	"server/utils/kick"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -119,6 +123,7 @@ func init() {
 		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
+		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -139,6 +144,7 @@ func init() {
 		user.WriteUpHandle(w, r, userId)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
+		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -161,6 +167,7 @@ func init() {
 		admin.DownloadWPByUserId(w, r, userId)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
+		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -176,6 +183,7 @@ func init() {
 		admin.DownloadAllWP(w, r)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
+		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -197,7 +205,11 @@ func init() {
 			log.Panicln(err)
 		}
 		fileServer := http.FileServer(http.FS(root))
-		indexFile, err := staticFolder.ReadFile("static/index.html")
+		rawIndexFile, err := staticFolder.ReadFile("static/index.html")
+		if err != nil {
+			log.Panicln(err)
+		}
+		indexFileTmpl, err := template.ParseGlob(string(rawIndexFile))
 		if err != nil {
 			log.Panicln(err)
 		}
@@ -212,11 +224,42 @@ func init() {
 			}
 		}
 
+		renderIndex := func(w http.ResponseWriter, r *http.Request) {
+			session := sessionManager.Start(w, r)
+			if session.Get("token") == nil {
+				seed := make([]byte, 8)
+				_, err := rand.Read(seed)
+				if err != nil {
+					log.Println("can not generate rand", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
+				token := make([]byte, 32)
+				_, err = unsafeRand.Read(token)
+				if err != nil {
+					log.Println("can not generate rand", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				session.Set("token", fmt.Sprintf("%02x", token))
+			}
+			w.WriteHeader(http.StatusOK)
+			err := indexFileTmpl.Execute(w, session.Get("token").(string))
+			if err != nil {
+				log.Println(err)
+			}
+		}
+
 		withGzipped := Gzip(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/home.html" {
 				w.WriteHeader(http.StatusOK)
 				w.Write(homeFile)
 			} else if _, err := fs.Stat(root, r.URL.Path[1:]); err == nil {
+				if r.URL.Path[1:] == "index.html" {
+					renderIndex(w, r)
+					return
+				}
 				_, filename := filepath.Split(r.URL.Path)
 				if filepath.Ext(r.URL.Path) == ".js" || filepath.Ext(r.URL.Path) == ".css" {
 					if r.Header.Get("if-none-match") == filename {
@@ -227,8 +270,9 @@ func init() {
 				}
 				fileServer.ServeHTTP(w, r)
 			} else {
-				w.WriteHeader(http.StatusOK)
-				w.Write(indexFile)
+				//w.WriteHeader(http.StatusOK)
+				//w.Write(indexFile)
+				renderIndex(w, r)
 			}
 		}))
 		muxRouter.PathPrefix("/").Handler(withGzipped).Methods(http.MethodGet)
