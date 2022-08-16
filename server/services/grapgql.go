@@ -103,6 +103,14 @@ func init() {
 		// want to be crazy safe? Take a look at the "securecookie" example folder.
 	})
 
+	csrfTokenCheck := func(w http.ResponseWriter, r *http.Request) bool {
+		session := sessionManager.Start(w, r)
+		if session.Get("token") == nil {
+			return false
+		}
+		return session.Get("token").(string) == r.Header.Get("X-CSRF-Token")
+	}
+
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
@@ -123,8 +131,11 @@ func init() {
 		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
-		// TODO: check the token
 		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if !csrfTokenCheck(w, r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
@@ -144,7 +155,6 @@ func init() {
 		user.WriteUpHandle(w, r, userId)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
-		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -167,7 +177,6 @@ func init() {
 		admin.DownloadWPByUserId(w, r, userId)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
-		// TODO: check the token
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -183,8 +192,11 @@ func init() {
 		admin.DownloadAllWP(w, r)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
-		// TODO: check the token
 		if !originCheck(r) {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if !csrfTokenCheck(w, r) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
