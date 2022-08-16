@@ -1,6 +1,6 @@
 <template>
-  <v-container fluid class="fill-height">
-    <v-row class="fill-height">
+  <v-container fluid fill-height>
+    <v-row fill-height>
       <v-spacer></v-spacer>
       <v-col cols="6" class="content-col">
         <v-data-table

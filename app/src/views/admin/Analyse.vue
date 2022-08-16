@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height" style="padding: 0;">
+  <v-container fluid fill-height style="padding: 0;">
     <iframe class="sanddance" src="/sanddance.html" ref="sanddance"></iframe>
     <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
       {{ infoText }}

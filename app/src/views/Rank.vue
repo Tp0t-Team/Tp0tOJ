@@ -1,6 +1,6 @@
 <template>
   <div class="content-col">
-    <v-container fill-width>
+    <v-container>
       <v-row>
         <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
           <v-hover v-slot:default="{ hover }">

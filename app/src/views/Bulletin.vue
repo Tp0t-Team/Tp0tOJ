@@ -1,6 +1,6 @@
 <template>
-  <v-container class="bulletin-list" pa-0>
-    <div class="scroll-content">
+  <v-container fluid fill-height class="scrollable">
+    <div class="content">
       <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
         <span class="bulletin-time ma-4">{{
           new Date(item.publishTime).toLocaleString()
@@ -189,12 +189,12 @@ export default class Bulletin extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.bulletin-list {
-  max-width: 80%;
-}
-.scroll-content {
-  height: calc(100vh - 96px);
+.scrollable {
   overflow-y: auto;
+}
+.content {
+  margin: 0 auto;
+  max-width: 80%;
 }
 
 .bulletin-time {

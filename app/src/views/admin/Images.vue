@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fill-width>
+    <v-container fluid fill-height class="scrollable">
       <v-row>
         <v-spacer></v-spacer>
         <v-col cols="8">
@@ -238,4 +238,8 @@ export default class Images extends Vue {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.scrollable {
+  overflow-y: auto;
+}
+</style>
