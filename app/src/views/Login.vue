@@ -133,7 +133,7 @@ import {
   RegisterInput,
   RegisterResult
 } from "@/struct";
-// import constValue from "@/constValue";
+import { commonChecker } from "@/utils";
 
 @Component
 export default class Login extends Vue {
@@ -160,14 +160,8 @@ export default class Login extends Vue {
       !!(value || "").match(
         /^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$/
       ) || "非法的邮箱地址",
-    passLen: (minlen: number, maxlen: number) => (v: string) =>
-      ((v || "").length >= minlen && (v || "").length <= maxlen) ||
-      `非法的密码长度，需要 ${minlen}~${maxlen} 位`,
-    password: (value: string) =>
-      (!!(value || "").match(/[A-Z]/) &&
-        !!(value || "").match(/[a-z]/) &&
-        !!(value || "").match(/\d/)) ||
-      "密码必须由大小写字母数字和特殊符号组成" //TODO: 正则好像不对
+    passLen: commonChecker.passLen,
+    password: commonChecker.password
   };
 
   private loading: boolean = false;

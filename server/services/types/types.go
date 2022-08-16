@@ -63,7 +63,7 @@ type ResetInput struct {
 }
 
 func (input *ResetInput) CheckPass() bool {
-	return input.Password != "" && input.Token != ""
+	return len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Token != ""
 }
 
 type ResetResult struct {

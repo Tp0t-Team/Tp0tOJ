@@ -8,7 +8,7 @@
           :append-icon="showPassword ? 'visibility' : 'visibility_off'"
           :type="showPassword ? 'text' : 'password'"
           @click:append="showPassword = !showPassword"
-          :rules="[rules.required]"
+          :rules="[rules.required, rules.passLen(8, 18), rules.password]"
           :disabled="loading"
         ></v-text-field>
         <v-text-field
@@ -52,6 +52,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import { ResetResult, ResetInput } from "../struct";
+import { commonChecker } from "@/utils";
 
 @Component
 export default class Reset extends Vue {
@@ -69,7 +70,9 @@ export default class Reset extends Vue {
   private hasInfo: boolean = false;
 
   private rules = {
-    required: (value: string) => !!value || "请填写"
+    required: (value: string) => !!value || "请填写",
+    passLen: commonChecker.passLen,
+    password: commonChecker.password
   };
 
   check() {
