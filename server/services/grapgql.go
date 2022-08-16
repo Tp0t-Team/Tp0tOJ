@@ -125,6 +125,7 @@ func init() {
 			return
 		}
 		session := sessionManager.Start(w, r)
+		session.Set("token", token)
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "session", session)
 		ctx = context.WithValue(ctx, "ip", getIP(r))
@@ -221,7 +222,10 @@ func init() {
 		if err != nil {
 			log.Panicln(err)
 		}
-		indexFileTmpl, err := template.ParseGlob(string(rawIndexFile))
+
+		indexFileTmpl, err := template.New("csrf").Parse(string(rawIndexFile))
+
+		//indexFileTmpl, err := template.ParseGlob()
 		if err != nil {
 			log.Panicln(err)
 		}
