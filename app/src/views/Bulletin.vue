@@ -1,68 +1,70 @@
 <template>
-  <v-container fluid fill-height class="scrollable">
-    <div class="content">
-      <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
-        <span class="bulletin-time ma-4">{{
-          new Date(item.publishTime).toLocaleString()
-        }}</span>
-        <v-card-title>{{ item.title }}</v-card-title>
-        <v-card-text
-          ><pre class="pl-4">{{ item.content }}</pre></v-card-text
-        >
-      </v-card>
-    </div>
+  <div class="content-col">
+    <v-container fluid>
+      <div class="content">
+        <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
+          <span class="bulletin-time ma-4">{{
+            new Date(item.publishTime).toLocaleString()
+          }}</span>
+          <v-card-title>{{ item.title }}</v-card-title>
+          <v-card-text
+            ><pre class="pl-4">{{ item.content }}</pre></v-card-text
+          >
+        </v-card>
+      </div>
 
-    <v-btn
-      v-if="$store.state.global.role == 'admin'"
-      fab
-      absolute
-      right
-      bottom
-      color="light-blue"
-      @click="enterEdit"
-    >
-      <v-icon>add</v-icon>
-    </v-btn>
-    <v-dialog :persistent="loading" v-model="edit" width="400px">
-      <v-card width="400px" class="pa-4">
-        <v-form v-model="valid" ref="edit">
-          <v-text-field
-            :disabled="loading"
-            v-model="title"
-            label="Title"
-            :rules="[rules.required]"
-          ></v-text-field>
-          <v-textarea
-            :disabled="loading"
-            v-model="description"
-            outlined
-            label="Description"
-            :rules="[rules.required]"
-          ></v-textarea>
-          <v-row>
-            <v-spacer></v-spacer>
-            <v-btn
+      <v-btn
+        v-if="$store.state.global.role == 'admin'"
+        fab
+        absolute
+        right
+        bottom
+        color="light-blue"
+        @click="enterEdit"
+      >
+        <v-icon>add</v-icon>
+      </v-btn>
+      <v-dialog :persistent="loading" v-model="edit" width="400px">
+        <v-card width="400px" class="pa-4">
+          <v-form v-model="valid" ref="edit">
+            <v-text-field
               :disabled="loading"
-              :loading="loading"
-              color="primary"
-              text
-              @click="publish"
-              >publish</v-btn
-            >
-          </v-row>
-        </v-form>
-      </v-card>
-    </v-dialog>
-    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
-      {{ infoText }}
-      <!-- <v-spacer></v-spacer> -->
-      <template v-slot:action="{ attrs }">
-        <v-btn icon>
-          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </v-container>
+              v-model="title"
+              label="Title"
+              :rules="[rules.required]"
+            ></v-text-field>
+            <v-textarea
+              :disabled="loading"
+              v-model="description"
+              outlined
+              label="Description"
+              :rules="[rules.required]"
+            ></v-textarea>
+            <v-row>
+              <v-spacer></v-spacer>
+              <v-btn
+                :disabled="loading"
+                :loading="loading"
+                color="primary"
+                text
+                @click="publish"
+                >publish</v-btn
+              >
+            </v-row>
+          </v-form>
+        </v-card>
+      </v-dialog>
+      <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+        {{ infoText }}
+        <!-- <v-spacer></v-spacer> -->
+        <template v-slot:action="{ attrs }">
+          <v-btn icon>
+            <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -189,9 +191,11 @@ export default class Bulletin extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.scrollable {
+.content-col {
+  height: calc(100vh - 96px);
   overflow-y: auto;
 }
+
 .content {
   margin: 0 auto;
   max-width: 80%;

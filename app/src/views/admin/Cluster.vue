@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-container fluid fill-height class="scrollable">
+  <div class="content-col">
+    <v-container fluid>
       <v-row>
         <v-spacer></v-spacer>
         <v-col cols="7">
@@ -169,7 +169,8 @@ export default class Cluster extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.scrollable {
+.content-col {
+  height: calc(100vh - 96px);
   overflow-y: auto;
 }
 </style>

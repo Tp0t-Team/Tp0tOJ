@@ -1,45 +1,47 @@
 <template>
-  <v-container fluid fill-height class="scrollable">
-    <v-row>
-      <v-spacer></v-spacer>
-      <v-col cols="8">
-        <v-data-table :headers="headers" :items="writeups">
-          <template v-slot:item.download="{ item }">
-            <v-btn
-              text
-              color="primary"
-              :href="`/wp?userId=${item.userId}`"
-              target="_blank"
-              :download="`wp-${item.userId}-${nameFilter(item.name)}.zip`"
-            >
-              download
-            </v-btn>
-          </template>
-        </v-data-table>
-      </v-col>
-      <v-spacer></v-spacer>
-    </v-row>
-    <v-btn
-      fab
-      color="primary"
-      absolute
-      right
-      bottom
-      href="/allwp"
-      target="_blank"
-    >
-      <v-icon>download</v-icon>
-    </v-btn>
-    <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
-      {{ infoText }}
-      <!-- <v-spacer></v-spacer> -->
-      <template v-slot:action="{ attrs }">
-        <v-btn icon>
-          <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </v-container>
+  <div class="content-col">
+    <v-container fluid>
+      <v-row>
+        <v-spacer></v-spacer>
+        <v-col cols="8">
+          <v-data-table :headers="headers" :items="writeups">
+            <template v-slot:item.download="{ item }">
+              <v-btn
+                text
+                color="primary"
+                :href="`/wp?userId=${item.userId}`"
+                target="_blank"
+                :download="`wp-${item.userId}-${nameFilter(item.name)}.zip`"
+              >
+                download
+              </v-btn>
+            </template>
+          </v-data-table>
+        </v-col>
+        <v-spacer></v-spacer>
+      </v-row>
+      <v-btn
+        fab
+        color="primary"
+        absolute
+        right
+        bottom
+        href="/allwp"
+        target="_blank"
+      >
+        <v-icon>download</v-icon>
+      </v-btn>
+      <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
+        {{ infoText }}
+        <!-- <v-spacer></v-spacer> -->
+        <template v-slot:action="{ attrs }">
+          <v-btn icon>
+            <v-icon v-bind="attrs" @click="hasInfo = false">close</v-icon>
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">
@@ -102,7 +104,8 @@ export default class Writeup extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.scrollable {
+.content-col {
+  height: calc(100vh - 96px);
   overflow-y: auto;
 }
 </style>
