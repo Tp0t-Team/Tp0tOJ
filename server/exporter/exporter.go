@@ -226,6 +226,7 @@ const (
 	ActionComplete
 	ActionLogin
 	ActionWatchDescription
+	ActionUploadWP
 )
 
 func newBehaviorJSON(input entity.Behavior) BehaviorJSON {
@@ -244,6 +245,9 @@ func newBehaviorJSON(input entity.Behavior) BehaviorJSON {
 		action = "Login"
 		break
 	case ActionWatchDescription:
+		action = "WatchDescription"
+		break
+	case ActionUploadWP:
 		action = "WatchDescription"
 		break
 	}
