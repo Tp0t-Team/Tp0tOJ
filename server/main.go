@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	//"github.com/gorilla/sessions"
 	"log"
 	"net/http"
 	"os"
@@ -44,9 +43,11 @@ func main() {
 			err := os.MkdirAll(configure.WriteUpPath, os.FileMode(0755))
 			if err != nil {
 				log.Panicln("writeup make dir error", err)
+				return
 			}
 		} else {
 			log.Panicln("writeup dir create filed", err)
+			return
 		}
 	}
 

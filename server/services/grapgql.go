@@ -2,13 +2,17 @@ package services
 
 import (
 	"context"
+	"crypto/rand"
 	_ "embed"
+	"encoding/binary"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
 	"io/fs"
 	"log"
+	unsafeRand "math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,6 +33,7 @@ type Resolver struct {
 
 //go:embed schema.graphql
 var schemaStr string
+var CSRFMiddleware func(http.Handler) http.Handler
 
 func getIP(r *http.Request) string {
 	forward := r.Header.Get("X-FORWARDED-FOR")
@@ -40,6 +45,23 @@ func getIP(r *http.Request) string {
 
 func init() {
 	muxRouter := mux.NewRouter()
+	seed := make([]byte, 8)
+	_, err := rand.Read(seed)
+	if err != nil {
+		log.Panicln("can not generate rand", err)
+		return
+	}
+
+	//Protect CSRF
+	unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
+	token := make([]byte, 32)
+	_, err = unsafeRand.Read(token)
+	if err != nil {
+		log.Panicln("can not generate rand", err)
+		return
+	}
+	CSRFMiddleware = csrf.Protect(token)
+
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
@@ -166,5 +188,6 @@ func init() {
 
 		muxRouter.PathPrefix("/").Handler(withGzipped)
 	}
+	muxRouter.Use(CSRFMiddleware)
 	http.Handle("/", muxRouter)
 }
