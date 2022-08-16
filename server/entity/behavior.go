@@ -19,5 +19,6 @@ const (
 	ActionComplete
 	ActionLogin
 	ActionWatchDescription
+	ActionUploadWP
 	BehaviorMAX
 )

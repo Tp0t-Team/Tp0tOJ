@@ -107,3 +107,23 @@ func BehaviorWatchDescription(challenge uint64, user uint64, actionTime time.Tim
 		log.Println(result.Error)
 	}
 }
+
+func BehaviorUploadWP(user uint64, actionTime time.Time, outsideTX *gorm.DB) {
+	if !configure.Configure.Server.BehaviorLog {
+		return
+	}
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	behavior := entity.Behavior{
+		ActionTime:  actionTime,
+		Action:      entity.ActionUploadWP,
+		ChallengeId: 0,
+		UserId:      user,
+		Content:     "", //maybe origin filename
+	}
+	result := outsideTX.Create(&behavior)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+}
