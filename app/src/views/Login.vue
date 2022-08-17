@@ -9,7 +9,7 @@
             <v-text-field
               v-model="mail"
               label="Mail"
-              :rules="[rules.required, rules.email, rules.mailLen]"
+              :rules="[rules.required, rules.email, rules.mailLen(50)]"
               :disabled="loading"
             ></v-text-field>
             <v-text-field
@@ -59,7 +59,7 @@
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required, rules.email, rules.mailLen]"
+                  :rules="[rules.required, rules.email, rules.mailLen(50)]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
