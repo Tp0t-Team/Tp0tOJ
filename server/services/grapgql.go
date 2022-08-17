@@ -63,7 +63,19 @@ func FrameControlMiddleware(handler http.Handler) http.Handler {
 
 func CSPMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; frame-src 'self'; img-src *; frame-ancestors 'self'; style-src * 'unsafe-inline'; font-src *")
+		cspList := []string{
+			"default-src 'self'",
+			"frame-src 'self'",
+			"img-src *",
+			"frame-ancestors 'self'",
+			"style-src * 'unsafe-inline'",
+			"font-src *",
+		}
+		if req.URL.Path == "/home.html" || req.URL.Path == "/sanddance.html" {
+			// these pages limit script-src by themselves
+			cspList = append(cspList, "script-src *")
+		}
+		w.Header().Set("Content-Security-Policy", strings.Join(cspList, "; "))
 		handler.ServeHTTP(w, req)
 	})
 }

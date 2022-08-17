@@ -8,6 +8,10 @@ import "@/main.scss";
 
 Vue.config.productionTip = false;
 
+(globalThis as any).CsrfToken = document.querySelector<HTMLMetaElement>(
+  'meta[name="csrf-token"]'
+)!.content;
+
 router.beforeEach((to, from, next) => {
   const validator =
     typeof to.meta!.auth != "string" ||
