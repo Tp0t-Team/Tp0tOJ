@@ -128,7 +128,7 @@ export default class Rank extends Vue {
 
   async mounted() {
     this.monitorMode = this.$route.path.split("/")[1] == "monitor";
-    this.page = parseInt(this.$route.params.page);
+    this.page = Math.max(parseInt(this.$route.params.page), 1);
     await this.loadData();
     if (this.monitorMode) {
       this.sseSource = new EventSource("/sse?stream=message");

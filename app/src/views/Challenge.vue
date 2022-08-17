@@ -18,7 +18,7 @@
                 width="20vw"
                 height="220px"
                 class="ma-4"
-                @click="openDetial(item.challengeId)"
+                @click="openDetail(item.challengeId)"
               >
                 <v-badge left overlap class="score" z-index="2">
                   <template v-slot:badge>{{ item.score }}</template>
@@ -245,7 +245,7 @@ export default class Challenge extends Vue {
     }
   }
 
-  openDetial(id: string) {
+  openDetail(id: string) {
     let c = this.challenges.find(v => v.challengeId == id);
     if (!c /* || c.done*/) return;
     this.currentChallenge = c;

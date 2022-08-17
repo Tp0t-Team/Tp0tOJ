@@ -10,6 +10,7 @@ import (
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 	"github.com/kataras/go-sessions/v3"
+	"golang.org/x/time/rate"
 	"io/fs"
 	"log"
 	unsafeRand "math/rand"
@@ -104,6 +105,16 @@ func init() {
 		}
 		return session.Get("token").(string) == r.Header.Get("X-CSRF-Token")
 	}
+	ratelimit := func(w http.ResponseWriter, r *http.Request) bool {
+		session := sessionManager.Start(w, r)
+		if session.Get("rate-limiter") == nil {
+			session.Set("rate-limiter", rate.NewLimiter(rate.Limit(5), 10))
+		}
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		err := session.Get("rate-limiter").(*rate.Limiter).Wait(timeoutCtx)
+		return err == nil
+	}
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
@@ -115,6 +126,10 @@ func init() {
 		if r.Method != http.MethodPost ||
 			strings.Split(r.Header.Get("Content-Type"), ";")[0] != "application/json" {
 			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if !ratelimit(w, r) {
+			w.WriteHeader(http.StatusTooManyRequests)
 			return
 		}
 		session := sessionManager.Start(w, r)
@@ -133,6 +148,10 @@ func init() {
 		}
 		if !csrfTokenCheck(w, r) {
 			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		if !ratelimit(w, r) {
+			w.WriteHeader(http.StatusTooManyRequests)
 			return
 		}
 		session := sessionManager.Start(w, r)
