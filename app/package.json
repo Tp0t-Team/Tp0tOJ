@@ -2,6 +2,9 @@
   "name": "tp0t-oj",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "npm": ">=8.3.0"
+  },
   "scripts": {
     "prepare": "cd .. && husky install app/.husky",
     "serve": "vue-cli-service serve",
@@ -44,6 +47,9 @@
     "typescript": "^3.4.3",
     "vue-template-compiler": "^2.6.10",
     "vuetify-loader": "^1.7.3"
+  },
+  "overrides": {
+    "ts-invariant": "^0.6.0"
   },
   "lint-staged": {
     "*.{js,vue,ts}": [
