@@ -187,7 +187,6 @@ export default class Images extends Vue {
       if (res.data!.imageInfos.message) throw res.data!.imageInfos.message;
       this.images = res.data!.imageInfos.infos.map(it => {
         it.digest = it.digest.slice(0, 8);
-        console.log(it);
         let size = BigInt(it.size);
         if (size > 1024n * 1024n * 1024n) {
           it.size =
@@ -199,7 +198,12 @@ export default class Images extends Vue {
         } else if (size > 1024n) {
           it.size = (parseInt(it.size) / 1024).toFixed(2) + "KB";
         }
-        return it;
+        return {
+          name: it.name,
+          platform: it.platform,
+          size: it.size,
+          digest: it.digest
+        } as ImageInfo;
       });
     } catch (e) {
       this.infoText = e.toString();
