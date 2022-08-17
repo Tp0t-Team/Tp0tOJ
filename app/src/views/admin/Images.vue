@@ -186,23 +186,23 @@ export default class Images extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.imageInfos.message) throw res.data!.imageInfos.message;
       this.images = res.data!.imageInfos.infos.map(it => {
-        it.digest = it.digest.slice(0, 8);
         let size = BigInt(it.size);
+        let formatedSize = "";
         if (size > 1024n * 1024n * 1024n) {
-          it.size =
+          formatedSize =
             (parseInt((size / 1024n / 1024n).toString()) / 1024).toFixed(2) +
             "GB";
         } else if (size > 1024n * 1024n) {
-          it.size =
+          formatedSize =
             (parseInt((size / 1024n).toString()) / 1024).toFixed(2) + "MB";
         } else if (size > 1024n) {
-          it.size = (parseInt(it.size) / 1024).toFixed(2) + "KB";
+          formatedSize = (parseInt(it.size) / 1024).toFixed(2) + "KB";
         }
         return {
           name: it.name,
           platform: it.platform,
-          size: it.size,
-          digest: it.digest
+          size: formatedSize,
+          digest: it.digest.slice(0, 8)
         } as ImageInfo;
       });
     } catch (e) {
