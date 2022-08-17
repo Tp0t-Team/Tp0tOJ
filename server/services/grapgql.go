@@ -82,23 +82,6 @@ func CSPMiddleware(handler http.Handler) http.Handler {
 
 func init() {
 	muxRouter := mux.NewRouter()
-	//seed := make([]byte, 8)
-	//_, err := rand.Read(seed)
-	//if err != nil {
-	//	log.Panicln("can not generate rand", err)
-	//	return
-	//}
-
-	//Protect CSRF
-	//unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
-	//token := make([]byte, 32)
-	//_, err = unsafeRand.Read(token)
-	//if err != nil {
-	//	log.Panicln("can not generate rand", err)
-	//	return
-	//}
-	//CSRFMiddleware = csrf.Protect(token)
-
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
@@ -114,7 +97,6 @@ func init() {
 		DisableSubdomainPersistence: false,
 		// want to be crazy safe? Take a look at the "securecookie" example folder.
 	})
-
 	csrfTokenCheck := func(w http.ResponseWriter, r *http.Request) bool {
 		session := sessionManager.Start(w, r)
 		if session.Get("token") == nil {
@@ -122,7 +104,6 @@ func init() {
 		}
 		return session.Get("token").(string) == r.Header.Get("X-CSRF-Token")
 	}
-
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
@@ -140,6 +121,7 @@ func init() {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "session", session)
 		ctx = context.WithValue(ctx, "ip", getIP(r))
+		sessionManager.ShiftExpiration(w, r)
 		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/writeup", func(w http.ResponseWriter, r *http.Request) {
@@ -158,6 +140,7 @@ func init() {
 			w.Write(nil)
 			return
 		}
+		sessionManager.ShiftExpiration(w, r)
 		userId := *session.Get("userId").(*uint64)
 		if !kick.KickGuard(userId) {
 			w.WriteHeader(http.StatusForbidden)
@@ -179,6 +162,7 @@ func init() {
 			w.Write(nil)
 			return
 		}
+		sessionManager.ShiftExpiration(w, r)
 		params := r.URL.Query()
 		userId := params.Get("userId")
 		if userId == "" {
@@ -201,6 +185,7 @@ func init() {
 			w.Write(nil)
 			return
 		}
+		sessionManager.ShiftExpiration(w, r)
 		admin.DownloadAllWP(w, r)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/image", func(w http.ResponseWriter, r *http.Request) {
@@ -220,6 +205,7 @@ func init() {
 			w.Write(nil)
 			return
 		}
+		sessionManager.ShiftExpiration(w, r)
 		admin.UploadImage(w, r)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP).Methods(http.MethodGet)
@@ -279,6 +265,7 @@ func init() {
 		}
 
 		withGzipped := Gzip(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sessionManager.ShiftExpiration(w, r)
 			if r.URL.Path == "/home.html" {
 				w.WriteHeader(http.StatusOK)
 				w.Write(homeFile)
