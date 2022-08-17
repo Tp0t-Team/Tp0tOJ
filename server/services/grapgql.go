@@ -121,6 +121,8 @@ func init() {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, "session", session)
 		ctx = context.WithValue(ctx, "ip", getIP(r))
+		// limit the Body in 1KB
+		r.Body = http.MaxBytesReader(w, r.Body, 1024)
 		sessionManager.ShiftExpiration(w, r)
 		graphqlHandle.ServeHTTP(w, r.WithContext(ctx))
 	}).Methods(http.MethodPost)

@@ -15,6 +15,10 @@ func init() {
 	blankRegexp, _ = regexp.Compile("\\s")
 }
 
+func lengthLimit(data string, min int, max int) bool {
+	return len([]rune(data)) >= min && len([]rune(data)) <= max
+}
+
 type RegisterInput struct {
 	Name     string
 	Password string
@@ -25,7 +29,7 @@ func (input *RegisterInput) CheckPass() bool {
 	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
 	input.Name = norm.NFC.String(input.Name)
-	return len([]rune(input.Name)) <= 20 && input.Name != "" && len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Mail != "" && input.Password != ""
+	return lengthLimit(input.Name, 1, 20) && lengthLimit(input.Password, 8, 18) && lengthLimit(input.Mail, 1, 50)
 }
 
 type RegisterResult struct {
@@ -40,7 +44,7 @@ type LoginInput struct {
 
 func (input *LoginInput) CheckPass() bool {
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
-	return len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Mail != "" && input.Password != ""
+	return lengthLimit(input.Password, 8, 18) && lengthLimit(input.Mail, 1, 50)
 }
 
 type LoginResult struct {
@@ -63,7 +67,7 @@ type ResetInput struct {
 }
 
 func (input *ResetInput) CheckPass() bool {
-	return len([]rune(input.Password)) >= 8 && len([]rune(input.Password)) <= 18 && input.Token != ""
+	return lengthLimit(input.Password, 8, 18) && lengthLimit(input.Token, 1, 60)
 }
 
 type ResetResult struct {
@@ -111,7 +115,7 @@ type UserInfoUpdateInput struct {
 func (input *UserInfoUpdateInput) CheckPass() bool {
 	input.Name = blankRegexp.ReplaceAllString(input.Name, "")
 	input.Mail = blankRegexp.ReplaceAllString(input.Mail, "")
-	return input.Name != "" && input.Mail != "" && checkRole(input.Role) && checkUserState(input.State)
+	return lengthLimit(input.Name, 1, 20) && lengthLimit(input.Mail, 1, 50) && checkRole(input.Role) && checkUserState(input.State)
 }
 
 func checkRole(str string) bool {

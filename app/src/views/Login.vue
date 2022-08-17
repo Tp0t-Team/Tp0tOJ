@@ -9,7 +9,7 @@
             <v-text-field
               v-model="mail"
               label="Mail"
-              :rules="[rules.required]"
+              :rules="[rules.required, rules.email, rules.mailLen]"
               :disabled="loading"
             ></v-text-field>
             <v-text-field
@@ -59,7 +59,7 @@
                 <v-text-field
                   v-model="mail"
                   label="Mail"
-                  :rules="[rules.required, rules.email]"
+                  :rules="[rules.required, rules.email, rules.mailLen]"
                   :disabled="loading"
                 ></v-text-field>
               </v-flex>
@@ -161,6 +161,7 @@ export default class Login extends Vue {
         /^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$/
       ) || "非法的邮箱地址",
     passLen: commonChecker.passLen,
+    mailLen: commonChecker.mailLen,
     password: commonChecker.password
   };
 
