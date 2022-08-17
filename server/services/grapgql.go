@@ -63,7 +63,7 @@ func FrameControlMiddleware(handler http.Handler) http.Handler {
 
 func CSPMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; frame-src 'self'; img-src *; script-src 'self'; frame-ancestors 'self'; style-src *; font-src *")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; frame-src 'self'; img-src *; frame-ancestors 'self'; style-src * 'unsafe-inline'; font-src *")
 		handler.ServeHTTP(w, req)
 	})
 }
