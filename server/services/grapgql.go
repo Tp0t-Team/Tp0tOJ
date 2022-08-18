@@ -171,10 +171,10 @@ func init() {
 		user.WriteUpHandle(w, r, userId)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/wp", func(w http.ResponseWriter, r *http.Request) {
-		if !originCheck(r) {
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+		//if !originCheck(r) {
+		//	w.WriteHeader(http.StatusForbidden)
+		//	return
+		//}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
@@ -194,10 +194,10 @@ func init() {
 		admin.DownloadWPByUserId(w, r, userId)
 	}).Methods(http.MethodGet)
 	muxRouter.HandleFunc("/allwp", func(w http.ResponseWriter, r *http.Request) {
-		if !originCheck(r) {
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+		//if !originCheck(r) {
+		//	w.WriteHeader(http.StatusForbidden)
+		//	return
+		//}
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
