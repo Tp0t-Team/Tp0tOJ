@@ -1,7 +1,6 @@
 # Tp0t OJ
 
 [![Tp0tOJ](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml/badge.svg?branch=master)](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTp0t-Team%2FTp0tOJ.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FTp0t-Team%2FTp0tOJ?ref=badge_shield)
 
 延续老版本的Tp0t OJ，前端继承并优化了视觉效果，后端从JAVA切换为Golang，定位也从一个面向校内的持续性训练平台，转向于一个比CTFd更好用的CTF比赛平台
 
@@ -336,7 +335,3 @@ go run build.go
 ```shell
 go build prepare.go
 ```
-
-
-## License
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTp0t-Team%2FTp0tOJ.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FTp0t-Team%2FTp0tOJ?ref=badge_large)
