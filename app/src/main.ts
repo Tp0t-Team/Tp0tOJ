@@ -15,8 +15,8 @@ Vue.config.productionTip = false;
 router.beforeEach((to, from, next) => {
   const validator =
     typeof to.meta!.auth != "string" ||
-    (to.meta!.auth == "member" && !!sessionStorage.getItem("user_id")) ||
-    (to.meta!.auth == "admin" && sessionStorage.getItem("role") == "admin");
+    (to.meta!.auth == "member" && !!localStorage.getItem("user_id")) ||
+    (to.meta!.auth == "admin" && localStorage.getItem("role") == "admin");
   const result = validator
     ? {}
     : {
