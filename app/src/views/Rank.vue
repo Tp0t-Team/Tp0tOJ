@@ -55,7 +55,10 @@
             class="table-item"
             v-for="(r, index) in pageRank"
             :key="r.rank"
-            @click="$router.push(`/profile/${r.userId}`)"
+            @click="
+              if ($store.state.global.role == 'admin')
+                $router.push(`/profile/${r.userId}`);
+            "
           >
             <td>{{ pageBase + index + 1 }}</td>
             <td>{{ r.name }}</td>
