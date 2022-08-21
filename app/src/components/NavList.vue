@@ -238,8 +238,6 @@ export default class NavList extends Vue {
         `
       });
       this.$store.commit("global/resetUserIdAndRole");
-      sessionStorage.removeItem("user_id");
-      sessionStorage.removeItem("role");
       this.$router.push("/");
       // must logout success
       if (res.errors) throw res.errors.map(v => v.message).join(",");
@@ -266,6 +264,11 @@ export default class NavList extends Vue {
         },
         body: formData
       });
+      if (res.status == 401) {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       if (res.status != 200) {
         throw res.statusText;
       }

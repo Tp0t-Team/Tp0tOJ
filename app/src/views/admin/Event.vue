@@ -242,6 +242,11 @@ export default class Challenge extends Vue {
         time: new Date(parseInt(it.time as string) * 1000) //解决unix time精度问题
       }));
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -322,6 +327,11 @@ export default class Challenge extends Vue {
       this.hasInfo = true;
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -397,6 +407,11 @@ export default class Challenge extends Vue {
       await this.loadAll();
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

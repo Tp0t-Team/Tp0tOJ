@@ -129,6 +129,11 @@ export default class Cluster extends Vue {
       this.nodes = res.data!.clusterInfo.nodes;
       this.replicas = res.data!.clusterInfo.replicas;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -161,6 +166,11 @@ export default class Cluster extends Vue {
       await this.loadData();
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

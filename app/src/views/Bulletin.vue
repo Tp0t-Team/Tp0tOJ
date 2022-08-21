@@ -183,6 +183,11 @@ export default class Bulletin extends Vue {
       await this.loadAll();
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

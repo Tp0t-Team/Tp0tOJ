@@ -50,6 +50,12 @@ export default class Analyse extends Vue {
           "X-CSRF-Token": (globalThis as any).CsrfToken as string
         }
       });
+      if (res.status == 401) {
+        this.loading = false;
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       let data = await res.json();
       this.data = data;
       this.update();

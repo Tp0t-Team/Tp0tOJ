@@ -218,6 +218,11 @@ export default class Profile extends Vue {
       this.loading = false;
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -255,6 +260,11 @@ export default class Profile extends Vue {
       );
       this.resolves = res.data!.submitHistory.submitInfos;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

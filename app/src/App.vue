@@ -79,8 +79,8 @@ export default class App extends Vue {
 
   mounted() {
     document.title = this.title;
-    let userId = sessionStorage.getItem("user_id") || null;
-    let role = sessionStorage.getItem("role") || null;
+    let userId = localStorage.getItem("user_id") || null;
+    let role = localStorage.getItem("role") || null;
     if (!userId || !role) {
       userId = null;
       role = null;
@@ -113,6 +113,10 @@ export default class App extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (!res.data!) throw "error";
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?");
+      }
       console.log(e);
     }
   }

@@ -19,6 +19,8 @@ const GlobalStateStore: Module<GlobalState, {}> = {
     resetUserIdAndRole(state) {
       state.userId = null;
       state.role = null;
+      localStorage.removeItem("user_id");
+      localStorage.removeItem("role");
     }
   },
   actions: {}

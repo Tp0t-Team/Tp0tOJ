@@ -240,6 +240,11 @@ export default class Challenge extends Vue {
         throw res.data!.challengeInfos.message;
       this.challenges = res.data!.challengeInfos.challengeInfos;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -320,6 +325,11 @@ export default class Challenge extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.startReplica.message) throw res.data!.startReplica.message;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -392,6 +402,11 @@ export default class Challenge extends Vue {
       });
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

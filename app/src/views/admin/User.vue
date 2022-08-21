@@ -138,6 +138,11 @@ export default class User extends Vue {
       if (res.data!.allUserInfos.message) throw res.data!.allUserInfos.message;
       this.users = res.data!.allUserInfos.allUserInfos;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -219,6 +224,11 @@ export default class User extends Vue {
       this.hasInfo = true;
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

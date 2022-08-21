@@ -96,6 +96,11 @@ export default class Writeup extends Vue {
       if (res.data!.writeUpInfos.message) throw res.data!.writeUpInfos.message;
       this.writeups = res.data!.writeUpInfos.infos;
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

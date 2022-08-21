@@ -142,6 +142,12 @@ export default class Images extends Vue {
         },
         body: formData
       });
+      if (res.status == 401) {
+        this.uploadLoading = false;
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       if (res.status != 200) {
         throw res.statusText;
       }
@@ -206,6 +212,11 @@ export default class Images extends Vue {
         } as ImageInfo;
       });
     } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }
@@ -238,6 +249,11 @@ export default class Images extends Vue {
       await this.loadData();
     } catch (e) {
       this.loading = false;
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
       this.infoText = e.toString();
       this.hasInfo = true;
     }

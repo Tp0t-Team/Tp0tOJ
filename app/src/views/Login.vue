@@ -179,6 +179,13 @@ export default class Login extends Vue {
     this.gradeItems = items;
   }
 
+  mounted() {
+    if (this.$route.query["unauthorized"] !== undefined) {
+      this.infoText = "please login";
+      this.hasInfo = true;
+    }
+  }
+
   check() {
     if (this.regPassword != this.repeat) this.againError = "密码不一致";
   }
@@ -214,8 +221,8 @@ export default class Login extends Vue {
         userId: res.data!.login.userId,
         role: res.data!.login.role
       });
-      sessionStorage.setItem("user_id", res.data!.login.userId);
-      sessionStorage.setItem("role", res.data!.login.role);
+      localStorage.setItem("user_id", res.data!.login.userId);
+      localStorage.setItem("role", res.data!.login.role);
       this.$router.replace("/");
     } catch (e) {
       this.loading = false;
