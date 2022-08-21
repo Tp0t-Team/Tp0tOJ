@@ -23,8 +23,11 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.BulletinPubResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.BulletinPubResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.BulletinPubResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.BulletinPubResult{Message: "not empty error"}
@@ -45,8 +48,11 @@ func (r *AdminMutationResolver) UserInfoUpdate(ctx context.Context, args struct{
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.UserInfoUpdateResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.UserInfoUpdateResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.UserInfoUpdateResult{Message: "forbidden"}
 	}
 	userId := session.Get("userId").(*uint64)
 	if !input.CheckPass() {
@@ -82,8 +88,11 @@ func (r *AdminMutationResolver) ChallengeMutate(ctx context.Context, args struct
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeMutateResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.ChallengeMutateResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ChallengeMutateResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.ChallengeMutateResult{Message: "Challenge format not available"}
@@ -109,8 +118,11 @@ func (r *AdminMutationResolver) ChallengeAction(ctx context.Context, args struct
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeActionResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.ChallengeActionResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ChallengeActionResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.ChallengeActionResult{Message: "action format error"}
@@ -160,8 +172,11 @@ func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ In
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.DeleteImageResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.DeleteImageResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteImageResult{Message: "forbidden"}
 	}
 	//can not delete image when some challenge is enabled
 	ok := resolvers.CheckEnabledChallengesByImage(input)
@@ -186,8 +201,11 @@ func (r *AdminMutationResolver) DeleteReplica(ctx context.Context, args struct{ 
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.DeleteReplicaResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.DeleteReplicaResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteReplicaResult{Message: "forbidden"}
 	}
 	kube.DeletingReplicas[replicaName] = nil
 	var deleted = func(status bool) {
@@ -218,8 +236,11 @@ func (r *AdminMutationResolver) AddEventAction(ctx context.Context, args struct{
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.AddEventResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.AddEventResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.AddEventResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.AddEventResult{Message: "event format error"}
@@ -243,8 +264,11 @@ func (r *AdminMutationResolver) UpdateEvent(ctx context.Context, args struct{ In
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.UpdateEventResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.UpdateEventResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.UpdateEventResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.UpdateEventResult{Message: "event format error"}
@@ -275,8 +299,11 @@ func (r *AdminMutationResolver) DeleteEvent(ctx context.Context, args struct{ In
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.DeleteEventResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.DeleteEventResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.DeleteEventResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.DeleteEventResult{Message: "event format error"}

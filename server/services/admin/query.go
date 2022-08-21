@@ -31,8 +31,11 @@ func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInf
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.AllUserInfoResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.AllUserInfoResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.AllUserInfoResult{Message: "forbidden"}
 	}
 	var userInfos []types.UserInfo
 	users := resolvers.FindAllUser()
@@ -50,8 +53,11 @@ func (r *AdminQueryResolver) ChallengeConfigs(ctx context.Context) *types.Challe
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ChallengeConfigsResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.ChallengeConfigsResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ChallengeConfigsResult{Message: "forbidden"}
 	}
 	challenges := resolvers.FindAllChallenges()
 	if challenges == nil {
@@ -80,8 +86,11 @@ func (r *AdminQueryResolver) SubmitHistory(ctx context.Context, args struct{ Use
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.SubmitHistoryResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.SubmitHistoryResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.SubmitHistoryResult{Message: "forbidden"}
 	}
 
 	id, err := strconv.ParseUint(userId, 10, 64)
@@ -112,8 +121,11 @@ func (r *AdminQueryResolver) WriteUpInfos(ctx context.Context) *types.WriteUpInf
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.WriteUpInfoResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.WriteUpInfoResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.WriteUpInfoResult{Message: "forbidden"}
 	}
 	ret := GetWriteUpInfos()
 	return &types.WriteUpInfoResult{Message: "", Infos: ret}
@@ -123,8 +135,11 @@ func (r *AdminQueryResolver) ImageInfos(ctx context.Context) *types.ImageInfoRes
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ImageInfoResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.ImageInfoResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ImageInfoResult{Message: "forbidden"}
 	}
 	ret := kube.ImgStatus()
 	if ret == nil {
@@ -137,8 +152,11 @@ func (r *AdminQueryResolver) ClusterInfo(ctx context.Context) *types.ClusterInfo
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.ClusterInfoResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.ClusterInfoResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.ClusterInfoResult{Message: "forbidden"}
 	}
 	nodeInfos, replicaInfos := kube.K8sStatus()
 	for _, infoItem := range replicaInfos {
@@ -158,8 +176,11 @@ func (r *AdminMutationResolver) AllEvents(ctx context.Context) *types.AllEventRe
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
-	if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
-		return &types.AllEventResult{Message: "forbidden or login timeout"}
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.AllEventResult{Message: "unauthorized"}
+	}
+	if isAdmin == nil || !*isAdmin.(*bool) {
+		return &types.AllEventResult{Message: "forbidden"}
 	}
 	var events []entity.GameEvent
 	events = resolvers.GetAllEvents()

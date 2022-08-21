@@ -118,6 +118,7 @@ func init() {
 	schema := graphql.MustParseSchema(schemaStr, &Resolver{}, graphql.UseFieldResolvers())
 	//http.Handle("/query", &relay.Handler{Schema: schema})
 	graphqlHandle := &relay.Handler{Schema: schema}
+
 	muxRouter.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		if !originCheck(r) {
 			w.WriteHeader(http.StatusForbidden)
@@ -157,7 +158,7 @@ func init() {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		if isLogin == nil || !*isLogin.(*bool) {
-			w.WriteHeader(http.StatusForbidden)
+			w.WriteHeader(http.StatusUnauthorized)
 			w.Write(nil)
 			return
 		}
@@ -178,7 +179,12 @@ func init() {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
-		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		if isLogin == nil || !*isLogin.(*bool) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(nil)
+			return
+		}
+		if isAdmin == nil || !*isAdmin.(*bool) {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write(nil)
 			return
@@ -201,7 +207,12 @@ func init() {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
-		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		if isLogin == nil || !*isLogin.(*bool) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(nil)
+			return
+		}
+		if isAdmin == nil || !*isAdmin.(*bool) {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write(nil)
 			return
@@ -221,7 +232,12 @@ func init() {
 		session := sessionManager.Start(w, r)
 		isLogin := session.Get("isLogin")
 		isAdmin := session.Get("isAdmin")
-		if isLogin == nil || !*isLogin.(*bool) || isAdmin == nil || !*isAdmin.(*bool) {
+		if isLogin == nil || !*isLogin.(*bool) {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(nil)
+			return
+		}
+		if isAdmin == nil || !*isAdmin.(*bool) {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write(nil)
 			return

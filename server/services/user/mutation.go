@@ -157,7 +157,7 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
 	if isLogin == nil || !*isLogin.(*bool) {
-		return &types.LogoutResult{Message: "not login yet"}
+		return &types.LogoutResult{Message: "unauthorized"}
 	}
 	session.Delete("isTeam")
 	session.Delete("isAdmin")
@@ -242,14 +242,14 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) {
-		return &types.SubmitResult{Message: "forbidden or login timeout"}
+		return &types.SubmitResult{Message: "unauthorized"}
 	}
 	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.SubmitResult{Message: "game is not running now"}
 	}
 	userId := *session.Get("userId").(*uint64)
 	if !kick.KickGuard(userId) {
-		return &types.SubmitResult{Message: "forbidden or login timeout"}
+		return &types.SubmitResult{Message: "forbidden"}
 	}
 	if !input.CheckPass() {
 		return &types.SubmitResult{Message: "not empty error"}
@@ -275,11 +275,11 @@ func (r *MutationResolver) StartReplica(ctx context.Context, args struct{ Input 
 	isLogin := session.Get("isLogin")
 	isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) {
-		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
+		return &types.StartReplicaResult{Message: "unauthorized"}
 	}
 	userId := *session.Get("userId").(*uint64)
 	if !kick.KickGuard(userId) {
-		return &types.StartReplicaResult{Message: "forbidden or login timeout"}
+		return &types.StartReplicaResult{Message: "forbidden"}
 	}
 	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
 		return &types.StartReplicaResult{Message: "game is not running now"}
