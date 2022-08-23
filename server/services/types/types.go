@@ -151,20 +151,21 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 	}
 	input.Description = strings.Join(lines, "\n")
 	//log.Println(input)
-	if input.NodeConfig != nil {
-		if len(*input.NodeConfig) == 0 {
-			input.Singleton = true
-		}
-		nodeNameSet := map[string]struct{}{}
-		for _, node := range *input.NodeConfig {
-			if !node.CheckPass() {
-				return false
-			}
-			nodeNameSet[node.Name] = struct{}{}
-		}
-		if len(nodeNameSet) != len(*input.NodeConfig) {
+	if input.NodeConfig == nil {
+		input.NodeConfig = &[]NodeConfigInput{}
+	}
+	if len(*input.NodeConfig) == 0 {
+		input.Singleton = true
+	}
+	nodeNameSet := map[string]struct{}{}
+	for _, node := range *input.NodeConfig {
+		if !node.CheckPass() {
 			return false
 		}
+		nodeNameSet[node.Name] = struct{}{}
+	}
+	if len(nodeNameSet) != len(*input.NodeConfig) {
+		return false
 	}
 	//log.Println(input)
 	return input.Name != "" && checkChallengeCategory(input.Category) && input.Score.CheckPass() && input.Flag.CheckPass() && checkChallengeState(input.State) && input.Score.CheckPass() && input.Flag.CheckPass()
