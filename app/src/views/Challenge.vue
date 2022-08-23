@@ -265,7 +265,7 @@ export default class Challenge extends Vue {
           query($input: String!) {
             watchDescription(challengeId: $input) {
               message
-              descriotion {
+              description {
                 challengeId
                 description
                 externalLink
