@@ -367,7 +367,7 @@ export default class Challenge extends Vue {
         {
           mutation: gql`
             query($input: String!) {
-              allocStatus(input: $input) {
+              allocStatus(challengeId: $input) {
                 message
                 allocated
               }
