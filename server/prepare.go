@@ -839,7 +839,7 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 		os.Exit(1)
 	}
 	if postgres {
-		err = os.MkdirAll(RegistryConfigPath+"/postgres", 0755)
+		err = os.MkdirAll(RegistryConfigPath+"/postgres", 0777)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
