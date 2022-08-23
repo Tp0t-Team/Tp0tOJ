@@ -338,14 +338,18 @@ type RankResultDesc struct {
 }
 
 type ChallengeInfo struct {
+	ChallengeId string
+	Category    string
+	Name        string
+	Score       string
+	Blood       []BloodInfo
+	Done        bool
+}
+
+type ChallengeDesc struct {
 	ChallengeId  string
-	Category     string
-	Name         string
-	Score        string
 	Description  string
 	ExternalLink []string
-	Blood        []BloodInfo
-	Done         bool
 	Manual       bool
 	Allocated    int32
 }
@@ -509,7 +513,8 @@ type ChallengeActionResult struct {
 }
 
 type WatchDescriptionResult struct {
-	Message string
+	Message     string
+	Description ChallengeDesc
 }
 
 type GameEvent struct {

@@ -175,45 +175,18 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			log.Println(err)
 			return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
 		}
-		replicaUrls := []string{}
-		var alloc *entity.ReplicaAlloc
-		alloc, err = resolvers.FindReplicaAllocByUserIdAndChallengeId(currentUserId, challenge.ChallengeId, nil)
-		if err != nil {
-			return &types.ChallengeInfosResult{Message: "Error"}
-		}
-		if alloc != nil {
-			for _, node := range config.NodeConfig {
-				replicaUrls = append(replicaUrls, kube.K8sServiceGetUrls(alloc.ReplicaId, node.Name)...)
-			}
-		}
-		replicaUrls = append(replicaUrls, config.ExternalLink...)
-		allocState := types.AllocatedUndone
-		if alloc != nil {
-			allocState = types.AllocatedDone
-		} else {
-			resolvers.AllocatingTableMtx.RLock()
-			if _, ok := resolvers.AllocatingTable[currentUserId]; ok {
-				if _, ok := resolvers.AllocatingTable[currentUserId][challenge.ChallengeId]; ok {
-					allocState = types.AllocatedDoing
-				}
-			}
-			resolvers.AllocatingTableMtx.RUnlock()
-		}
+
 		realScore := config.Score.BaseScore
 		if score, ok := scoreSet[challenge.ChallengeId]; ok {
 			realScore = strconv.FormatUint(score, 10)
 		}
 		item := types.ChallengeInfo{
-			ChallengeId:  strconv.FormatUint(challenge.ChallengeId, 10),
-			Category:     config.Category,
-			Name:         challenge.Name,
-			Score:        realScore,
-			Description:  config.Description,
-			ExternalLink: replicaUrls,
-			Blood:        bloodInfo,
-			Done:         correct,
-			Manual:       !config.Singleton && len(config.NodeConfig) > 0, // TODO: maybe need more conditions
-			Allocated:    allocState,
+			ChallengeId: strconv.FormatUint(challenge.ChallengeId, 10),
+			Category:    config.Category,
+			Name:        challenge.Name,
+			Score:       realScore,
+			Blood:       bloodInfo,
+			Done:        correct,
 		}
 		result.ChallengeInfos = append(result.ChallengeInfos, item)
 	}
@@ -244,6 +217,48 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 		resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
 		return &types.WatchDescriptionResult{Message: err.Error()}
 	}
+	challenge, err := resolvers.FindChallengeById(parsedChallengeId)
+	if err != nil {
+		log.Println(err)
+		return &types.WatchDescriptionResult{Message: "service error"}
+	}
+	var config types.ChallengeConfig
+	err = json.Unmarshal([]byte(challenge.Configuration), &config)
+	if err != nil {
+		log.Println(err)
+		return &types.WatchDescriptionResult{Message: "Get Challenge Description Error!"}
+	}
+	replicaUrls := []string{}
+	var alloc *entity.ReplicaAlloc
+	alloc, err = resolvers.FindReplicaAllocByUserIdAndChallengeId(currentUserId, parsedChallengeId, nil)
+	if err != nil {
+		return &types.WatchDescriptionResult{Message: "Error"}
+	}
+	if alloc != nil {
+		for _, node := range config.NodeConfig {
+			replicaUrls = append(replicaUrls, kube.K8sServiceGetUrls(alloc.ReplicaId, node.Name)...)
+		}
+	}
+	replicaUrls = append(replicaUrls, config.ExternalLink...)
+	allocState := types.AllocatedUndone
+	if alloc != nil {
+		allocState = types.AllocatedDone
+	} else {
+		resolvers.AllocatingTableMtx.RLock()
+		if _, ok := resolvers.AllocatingTable[currentUserId]; ok {
+			if _, ok := resolvers.AllocatingTable[currentUserId][challenge.ChallengeId]; ok {
+				allocState = types.AllocatedDoing
+			}
+		}
+		resolvers.AllocatingTableMtx.RUnlock()
+	}
+	description := types.ChallengeDesc{
+		ChallengeId:  strconv.FormatUint(parsedChallengeId, 10),
+		Description:  config.Description,
+		ExternalLink: replicaUrls,
+		Manual:       !config.Singleton && len(config.NodeConfig) > 0,
+		Allocated:    allocState,
+	}
 	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
-	return &types.WatchDescriptionResult{Message: ""}
+	return &types.WatchDescriptionResult{Message: "", Description: description}
 }
