@@ -20,20 +20,24 @@ export interface UserInfo {
   // rank: number
 }
 
-export interface ChallengeDesc {
+export interface ChallengeInfo {
   challengeId: string;
   category: string;
   name: string;
   score: string;
-  description: string;
-  externalLink: string[];
-  // hint: string[]
+  solvedNum: number;
   blood: {
     userId: string;
     name: string;
     avatar: string;
   }[];
   done: boolean;
+}
+
+export interface ChallengeDesc {
+  challengeId: string;
+  description: string;
+  externalLink: string[];
   manual: boolean;
   allocated: number;
 }
@@ -103,7 +107,7 @@ export type AllUserInfoResult = {
 
 // query challenges
 export type ChallengeResult = {
-  challengeInfos: { challengeInfos: ChallengeDesc[] } & Result;
+  challengeInfos: { challengeInfos: ChallengeInfo[] } & Result;
 };
 
 // query challengeConfig
@@ -273,7 +277,9 @@ export type ChallengeActionResult = {
   challengeAction: { successful: string[] } & Result;
 };
 
-export type WatchDescriptionResult = { watchDescription: Result };
+export type WatchDescriptionResult = {
+  watchDescription: { description: ChallengeDesc } & Result;
+};
 
 export interface GameEventWithId {
   eventId: string;
@@ -303,4 +309,8 @@ export type DeleteEventResult = { deleteEvent: Result };
 
 export type AllEventResult = {
   allEvents: { allEvents: GameEventWithId[] } & Result;
+};
+
+export type AllocStatusResult = {
+  allocStatus: { allocated: number } & Result;
 };

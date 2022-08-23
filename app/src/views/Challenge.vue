@@ -1,14 +1,14 @@
 <template>
   <v-container fluid class="scrollable">
-    <div v-for="type in challengeType" :key="type">
-      <div v-if="challenges.filter(v => v.category == type).length != 0">
-        <div class="type-title display-1 ml-4">{{ type }}</div>
+    <div v-for="category in challengeType" :key="category">
+      <div v-if="challenges.filter(v => v.category == category).length != 0">
+        <div class="type-title display-1 ml-4">{{ category }}</div>
         <v-divider color="primary"></v-divider>
       </div>
-      <v-row v-if="challenges.filter(v => v.category == type).length != 0">
+      <v-row v-if="challenges.filter(v => v.category == category).length != 0">
         <v-col
           sm="3"
-          v-for="item in challenges.filter(v => v.category == type)"
+          v-for="item in challenges.filter(v => v.category == category)"
           :key="item.challengeId"
         >
           <v-layout justify-center>
@@ -27,9 +27,9 @@
                   }}</v-card-title>
                 </v-badge>
                 <v-divider color="primary" class="divider"></v-divider>
-                <v-card-text class="description">{{
-                  item.description
-                }}</v-card-text>
+                <v-card-text class="description"
+                  >Solved: {{ item.solvedNum }}</v-card-text
+                >
                 <v-overlay
                   absolute
                   :value="item.done"
@@ -78,7 +78,7 @@
       v-model="showDialog"
       :persistent="loading"
       width="600px"
-      v-if="currentChallenge != null"
+      v-if="currentChallenge != null && currentDescription != null"
     >
       <v-card width="600px" height="400px">
         <v-sheet :elevation="2" class="title pr-4">
@@ -87,10 +87,7 @@
           </div>
           <span class="ml-2">{{ currentChallenge.name }}</span>
           <v-spacer></v-spacer>
-          <v-tooltip
-            right
-            v-if="currentChallenge.manual && currentChallenge.allocated == 0"
-          >
+          <v-tooltip right v-if="currentDescription.manual && allocStatus == 0">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 v-bind="attrs"
@@ -107,10 +104,8 @@
             </template>
             <span>Start This Challenge</span>
           </v-tooltip>
-          <v-icon class="doing" v-if="currentChallenge.allocated == 1"
-            >sync</v-icon
-          >
-          <v-icon v-if="currentChallenge.allocated == 2">cloud_done</v-icon>
+          <v-icon class="doing" v-if="allocStatus == 1">sync</v-icon>
+          <v-icon v-if="allocStatus == 2">cloud_done</v-icon>
         </v-sheet>
         <v-text-field
           v-model="sumbitFlag"
@@ -126,7 +121,7 @@
           @blur="check"
         ></v-text-field>
         <div class="dialog-discription pl-6 pr-6">
-          <pre>{{ currentChallenge.description }}</pre>
+          <pre>{{ currentDescription.description }}</pre>
         </div>
         <div class="url-list">
           <v-chip
@@ -134,7 +129,7 @@
             label
             outlined
             class="ma-4"
-            v-for="link in currentChallenge.externalLink"
+            v-for="link in currentDescription.externalLink"
             :key="link"
           >
             {{ link }}
@@ -162,11 +157,14 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
 import {
-  ChallengeDesc,
+  ChallengeInfo,
   ChallengeResult,
   SubmitResult,
   SubmitInput,
-  StartReplicaResult
+  StartReplicaResult,
+  ChallengeDesc,
+  WatchDescriptionResult,
+  AllocStatusResult
 } from "@/struct";
 import constValue from "@/constValue";
 
@@ -178,14 +176,16 @@ import constValue from "@/constValue";
 export default class Challenge extends Vue {
   private challengeType = constValue.challengeType;
 
-  private challenges: ChallengeDesc[] = [];
+  private challenges: ChallengeInfo[] = [];
 
   private sumbitFlag: string = "";
   private submitError: string = "";
   private valid: boolean = false;
 
   private showDialog: boolean = false;
-  private currentChallenge: ChallengeDesc | null = null;
+  private currentChallenge: ChallengeInfo | null = null;
+  private currentDescription: ChallengeDesc | null = null;
+  private allocStatus: number = 0;
   private loading: boolean = false;
 
   private replicaLoading: boolean = false;
@@ -218,17 +218,14 @@ export default class Challenge extends Vue {
                 challengeId
                 name
                 category
-                description
-                externalLink
                 score
+                solvedNum
                 blood {
                   userId
                   name
                   avatar
                 }
                 done
-                manual
-                allocated
               }
             }
           }
@@ -253,7 +250,7 @@ export default class Challenge extends Vue {
     }
   }
 
-  openDetail(id: string) {
+  async openDetail(id: string) {
     let c = this.challenges.find(v => v.challengeId == id);
     if (!c /* || c.done*/) return;
     this.currentChallenge = c;
@@ -262,22 +259,41 @@ export default class Challenge extends Vue {
     this.showDialog = true;
     // this.allocated = this.currentChallenge.allocated;
     this.replicaLoading = false;
-    this.timeoutTask = setTimeout(() => {
-      this.refreshAllocateState(id);
-    }, 10 * 1000);
-    this.$apollo.query<ChallengeResult>({
-      query: gql`
-        query($input: String!) {
-          watchDescription(challengeId: $input) {
-            message
+    try {
+      let res = await this.$apollo.query<WatchDescriptionResult>({
+        query: gql`
+          query($input: String!) {
+            watchDescription(challengeId: $input) {
+              message
+              descriotion {
+                challengeId
+                description
+                externalLink
+                manual
+                allocated
+              }
+            }
           }
-        }
-      `,
-      variables: {
-        input: id
-      },
-      fetchPolicy: "no-cache"
-    });
+        `,
+        variables: {
+          input: id
+        },
+        fetchPolicy: "no-cache"
+      });
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.watchDescription.message)
+        throw res.data!.watchDescription.message;
+      this.currentDescription = res.data!.watchDescription.description;
+      this.allocStatus = res.data!.watchDescription.description.allocated;
+    } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
+      this.infoText = e.toString();
+      this.hasInfo = true;
+    }
   }
 
   @Watch("showDialog")
@@ -285,6 +301,8 @@ export default class Challenge extends Vue {
     if (!value && this.timeoutTask != null) {
       clearTimeout(this.timeoutTask);
       this.timeoutTask = null;
+      this.currentChallenge = null;
+      this.currentDescription = null;
     }
   }
 
@@ -337,39 +355,47 @@ export default class Challenge extends Vue {
       this.hasInfo = true;
     }
 
-    await this.loadData();
-    let c = this.challenges.find(v => v.challengeId == id);
     this.sumbitFlag = "";
     this.submitError = "";
     this.replicaLoading = false;
-    if (!c /* || c.done*/) {
-      this.currentChallenge = null;
-      this.showDialog = false;
-      // this.allocated = 0;
-      return;
-    }
-    this.currentChallenge = c;
-    this.showDialog = true;
-    // this.allocated = this.currentChallenge.allocated;
-    this.timeoutTask = setTimeout(() => {
-      this.refreshAllocateState(id);
-    }, 3 * 1000);
+    this.refreshAllocateState(id);
   }
 
   async refreshAllocateState(id: string) {
-    await this.loadData();
-    let c = this.challenges.find(v => v.challengeId == id);
-    if (!c) {
-      this.currentChallenge = null;
-      this.showDialog = false;
-      return;
+    try {
+      let res = await this.$apollo.mutate<AllocStatusResult, { input: string }>(
+        {
+          mutation: gql`
+            query($input: String!) {
+              allocStatus(input: $input) {
+                message
+                allocated
+              }
+            }
+          `,
+          variables: {
+            input: id
+          }
+        }
+      );
+      if (res.errors) throw res.errors.map(v => v.message).join(",");
+      if (res.data!.allocStatus.message) throw res.data!.allocStatus.message;
+      this.allocStatus = res.data!.allocStatus.allocated;
+      if (res.data!.allocStatus.allocated == 1) {
+        this.timeoutTask = setTimeout(() => {
+          this.refreshAllocateState(id);
+        }, 3 * 1000);
+      }
+    } catch (e) {
+      if (e === "unauthorized") {
+        this.$store.commit("global/resetUserIdAndRole");
+        this.$router.push("/login?unauthorized");
+        return;
+      }
+      this.infoText = e.toString();
+      this.hasInfo = true;
     }
-    this.currentChallenge = c;
-    if (c.allocated == 1) {
-      this.timeoutTask = setTimeout(() => {
-        this.refreshAllocateState(id);
-      }, 3 * 1000);
-    }
+    return;
   }
 
   async submit() {
