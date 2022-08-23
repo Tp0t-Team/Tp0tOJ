@@ -47,7 +47,7 @@ jobs:
 
     - name: Build OJ
       working-directory: ./server
-      run: go run build.go
+      run: go run build.go --postgres
 
     - name: Build Prepare
       working-directory: ./server
