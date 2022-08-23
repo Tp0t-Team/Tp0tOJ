@@ -272,3 +272,68 @@ func (r *QueryResolver) WatchDescription(ctx context.Context, args struct{ Chall
 	resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
 	return &types.WatchDescriptionResult{Message: "", Description: description}
 }
+
+func (r *QueryResolver) AllocStatus(ctx context.Context, args struct{ ChallengeId string }) *types.AllocStatusResult {
+	session := ctx.Value("session").(*sessions.Session)
+	isLogin := session.Get("isLogin")
+	isAdmin := session.Get("isAdmin")
+	if isLogin == nil || !*isLogin.(*bool) {
+		return &types.AllocStatusResult{Message: "unauthorized"}
+	}
+	currentUserId := *session.Get("userId").(*uint64)
+	if !kick.KickGuard(currentUserId) {
+		return &types.AllocStatusResult{Message: "forbidden"}
+	}
+	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
+		return &types.AllocStatusResult{Message: "game is not running now"}
+	}
+	parsedChallengeId, err := strconv.ParseUint(args.ChallengeId, 10, 64)
+	if err != nil {
+		log.Println(err)
+		return &types.AllocStatusResult{Message: "service error"}
+	}
+	err = resolvers.AllocSingleton(parsedChallengeId, currentUserId)
+	if err != nil {
+		resolvers.BehaviorWatchDescription(parsedChallengeId, currentUserId, time.Now(), nil)
+		return &types.AllocStatusResult{Message: err.Error()}
+	}
+	challenge, err := resolvers.FindChallengeById(parsedChallengeId)
+	if err != nil {
+		log.Println(err)
+		return &types.AllocStatusResult{Message: "service error"}
+	}
+	var config types.ChallengeConfig
+	err = json.Unmarshal([]byte(challenge.Configuration), &config)
+	if err != nil {
+		log.Println(err)
+		return &types.AllocStatusResult{Message: "Get Challenge Description Error!"}
+	}
+	replicaUrls := []string{}
+	var alloc *entity.ReplicaAlloc
+	alloc, err = resolvers.FindReplicaAllocByUserIdAndChallengeId(currentUserId, parsedChallengeId, nil)
+	if err != nil {
+		return &types.AllocStatusResult{Message: "Error"}
+	}
+	if alloc != nil {
+		for _, node := range config.NodeConfig {
+			replicaUrls = append(replicaUrls, kube.K8sServiceGetUrls(alloc.ReplicaId, node.Name)...)
+		}
+	}
+	replicaUrls = append(replicaUrls, config.ExternalLink...)
+	allocState := types.AllocatedUndone
+	if alloc != nil {
+		allocState = types.AllocatedDone
+	} else {
+		resolvers.AllocatingTableMtx.RLock()
+		if _, ok := resolvers.AllocatingTable[currentUserId]; ok {
+			if _, ok := resolvers.AllocatingTable[currentUserId][challenge.ChallengeId]; ok {
+				allocState = types.AllocatedDoing
+			}
+		}
+		resolvers.AllocatingTableMtx.RUnlock()
+	}
+	return &types.AllocStatusResult{
+		Message:   "",
+		Allocated: allocState,
+	}
+}

@@ -518,6 +518,11 @@ type WatchDescriptionResult struct {
 	Description ChallengeDesc
 }
 
+type AllocStatusResult struct {
+	Message   string
+	Allocated int32
+}
+
 type GameEvent struct {
 	EventId string
 	Time    string
