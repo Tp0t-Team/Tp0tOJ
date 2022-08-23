@@ -1,9 +1,8 @@
 package utils
 
 type Config struct {
-	Server Server `yaml:"server"`
-	Email  Email  `yaml:"email"`
-	//Redis      Redis      `yaml:"redis"`
+	Server     Server     `yaml:"server"`
+	Email      Email      `yaml:"email"`
 	Challenge  Challenge  `yaml:"challenge"`
 	Kubernetes Kubernetes `yaml:"kubernetes"`
 	Database   Database   `yaml:"database"`
@@ -17,6 +16,7 @@ type Server struct {
 	Port        int    `yaml:"port"`
 	Salt        string `yaml:"salt"`
 	BehaviorLog bool   `yaml:"behaviorLog"`
+	Debug       bool   `yaml:"debug"`
 }
 
 type Email struct {
@@ -24,18 +24,6 @@ type Email struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 }
-
-//type Redis struct {
-//	Password  string `yaml:"password"`
-//	MaxActive int    `yaml:"maxActive"`
-//	MaxIdle   int    `yaml:"maxIdle"`
-//	Database  int    `yaml:"database"`
-//	Host      string `yaml:"host"`
-//	Port      int    `yaml:"port"`
-//	MaxWait   string `yaml:"maxWait"`
-//	MinIdle   int    `yaml:"minIdle"`
-//	Timeout   int    `yaml:"timeout"`
-//}
 
 type Database struct {
 	Dsn string `yaml:"dsn"`

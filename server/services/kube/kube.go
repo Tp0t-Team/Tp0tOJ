@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/heroku/docker-registry-client/registry"
@@ -434,7 +435,9 @@ func loadDockerState(rd io.Reader) error {
 	scanner := bufio.NewScanner(rd)
 	for scanner.Scan() {
 		lastLine = scanner.Text()
-		//fmt.Println(scanner.Text())
+		if configure.Configure.Server.Debug {
+			fmt.Println(scanner.Text())
+		}
 	}
 
 	errLine := &ErrorLine{}
