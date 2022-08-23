@@ -160,6 +160,7 @@ type Query {
     clusterInfo: ClusterInfoResult
     watchDescription(challengeId: String!): WatchDescriptionResult
     allEvents: AllEventResult
+    allocStatus(challengeId: String!): AllocStatusResult
 }
 type UserInfoResult {
     message: String!
@@ -204,10 +205,15 @@ type ChallengeInfo {
     name: String!
     category: String!
     score: String!
-    description: String!
-    externalLink: [String!]!
+    solvedNum: Int!
     blood: [BloodInfo!]!
     done: Boolean!
+}
+
+type ChallengeDesc {
+    challengeId: String!
+    description: String!
+    externalLink: [String!]!
     manual: Boolean!
     allocated: Int!
 }
@@ -353,6 +359,12 @@ type ChallengeActionResult {
 
 type WatchDescriptionResult {
     message: String!
+    description: ChallengeDesc!
+}
+
+type AllocStatusResult {
+    message: String!
+    allocated: Int!
 }
 
 input AddEventInput {

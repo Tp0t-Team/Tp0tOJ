@@ -385,6 +385,8 @@ export default class Challenge extends Vue {
         this.timeoutTask = setTimeout(() => {
           this.refreshAllocateState(id);
         }, 3 * 1000);
+      } else if (res.data!.allocStatus.allocated == 2) {
+        await this.openDetail(id);
       }
     } catch (e) {
       if (e === "unauthorized") {
