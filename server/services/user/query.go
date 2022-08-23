@@ -176,16 +176,26 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
 		}
 
-		realScore := config.Score.BaseScore
+		var realScore int32
 		if score, ok := scoreSet[challenge.ChallengeId]; ok {
-			realScore = strconv.FormatUint(score, 10)
+			realScore = int32(score)
+		} else {
+			tmp, _ := strconv.ParseInt(config.Score.BaseScore, 10, 32)
+			realScore = int32(tmp)
 		}
+		var solved int
+		submits := resolvers.FindSubmitCorrectByChallengeId(challenge.ChallengeId)
+		if submits == nil {
+			solved = 0
+		}
+		solved = len(submits)
 		item := types.ChallengeInfo{
 			ChallengeId: strconv.FormatUint(challenge.ChallengeId, 10),
 			Category:    config.Category,
 			Name:        challenge.Name,
 			Score:       realScore,
 			Blood:       bloodInfo,
+			SolvedNum:   int32(solved),
 			Done:        correct,
 		}
 		result.ChallengeInfos = append(result.ChallengeInfos, item)

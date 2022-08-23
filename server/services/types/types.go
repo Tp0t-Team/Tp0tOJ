@@ -341,7 +341,8 @@ type ChallengeInfo struct {
 	ChallengeId string
 	Category    string
 	Name        string
-	Score       string
+	Score       int32
+	SolvedNum   int32
 	Blood       []BloodInfo
 	Done        bool
 }
