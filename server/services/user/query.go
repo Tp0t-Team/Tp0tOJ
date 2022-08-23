@@ -112,7 +112,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfosResult {
 	session := ctx.Value("session").(*sessions.Session)
 	isLogin := session.Get("isLogin")
-	isAdmin := session.Get("isAdmin")
+	//isAdmin := session.Get("isAdmin")
 	if isLogin == nil || !*isLogin.(*bool) {
 		return &types.ChallengeInfosResult{Message: "unauthorized"}
 	}
@@ -120,9 +120,9 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 	if !kick.KickGuard(currentUserId) {
 		return &types.ChallengeInfosResult{Message: "forbidden"}
 	}
-	if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
-		return &types.ChallengeInfosResult{Message: "game is not running now"}
-	}
+	//if !resolvers.IsGameRunning(nil) && !*isAdmin.(*bool) {
+	//	return &types.ChallengeInfosResult{Message: "game is not running now"}
+	//}
 	challenges := resolvers.FindEnabledChallenges()
 	if challenges == nil {
 		return &types.ChallengeInfosResult{Message: "Get Challenge Info Error!"}
