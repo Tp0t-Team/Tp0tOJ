@@ -21,7 +21,8 @@ func main() {
 	tags := []string{"WithFrontEnd"}
 
 	if *postgres == *sqlite {
-		log.Panicln("you must choose one and only one database type.")
+		log.Println("you must choose one and only one database type.")
+		os.Exit(1)
 	}
 
 	if *postgres {

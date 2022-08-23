@@ -52,7 +52,11 @@ sudo systemctl restart docker
 
 ### 部署流程
 
+**由于SQLite对于多并发读写并不友好，所以在完成优化和测试前不再推荐使用SQLite，默认数据库更换为PostgresSQL**
+
 根据系统架构在release页面获取 prepare 二进制文件，如果所用系统架构没有对应的release，请参照contribution自行build
+
+
 
 ```shell
 ./prepare -MasterIP xxx.xxx.xxx.xxx
@@ -117,10 +121,10 @@ To uninstall K3s from an agent node, run:
 
 ```yaml
 server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #设置为Host，用于重置密码功能
+  host: 127.0.0.1                    #『必须更改』设置为Host，用于重置密码和CORS等
                                      #例如：平台地址：ctf.lordcasser.com开启SSL, host: https://ctf.lordcasser.com
   username: Tp0t                     #默认admin用户名
-  password: admin                    #默认admin账号密码
+  password: password                 #默认admin账号密码
   mail: admin@example.com            #默认admin账号邮箱
   port: 0                            #0时自动选择80/443，非0指定端口
   salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
@@ -182,6 +186,8 @@ $$RealScore=\left\lfloor\frac{BaseScore}{k+e^{-k}}\right\rfloor$$
 对于PWN题，推荐使用`xinetd`作为守护进程
 
 #### Dockerfile示例
+
+**新手请严格按照demo编写题目Dockerfile**
 
 > - **注意对于所有需要执行的文件，附加执行权限，否则镜像会build成功，但是用户申请创建实例的时候会失败**
 >   
@@ -327,7 +333,8 @@ npm install #必要情况下可以删除package-lock.json
 构建前后端一体化可执行文件：依赖golang，在server目录下执行
 
 ```shell
-go run build.go
+go run build.go --postgres  #postgres版本
+go run build.go --sqlite    #sqlite版本暂时弃用
 ```
 
 构建prepare可执行文件
