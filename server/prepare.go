@@ -432,7 +432,7 @@ func CreateCert(masterIP string) {
 	}
 }
 
-func CreateDefaultConfig(masterIP string, registryUsername string, registryPassword string) {
+func CreateDefaultConfig(masterIP string, registryUsername string, registryPassword string, dsn string) {
 	_, err := os.Stat("resources/config.yaml")
 	if err == nil {
 		return
@@ -467,6 +467,9 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 			Username:       registryUsername,
 			Password:       registryPassword,
 			RegistryHost:   fmt.Sprintf("%s:5000", masterIP),
+		},
+		Database: utils.Database{
+			Dsn: dsn,
 		},
 	}
 	configFile, err := os.Create("resources/config.yaml")
@@ -785,7 +788,7 @@ func PrepareRegistry(masterIP string, registryUsername string, registryPassword 
 	}
 }
 
-func GenerateStartScript() {
+func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 	_, err := os.Stat("start.sh")
 	if err == nil {
 		return
@@ -799,8 +802,8 @@ func GenerateStartScript() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fileName := fmt.Sprintf("./OJ_%s_%s\n", runtime.GOOS, runtime.GOARCH)
-	tempString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
+	startString := fmt.Sprintf("./OJ_%s_%s\n", runtime.GOOS, runtime.GOARCH)
+	registryFormatString := "if test -z \"$(docker ps | grep oj_registry_instance)\"; then\n" +
 		"\tdocker run -d --net=host --restart=always --name oj_registry_instance " +
 		"-v %s/data:/var/lib/registry " +
 		"-v %s/auth:/auth " +
@@ -812,15 +815,42 @@ func GenerateStartScript() {
 		"-e REGISTRY_HTTP_TLS_KEY=/certs/tls.key " +
 		"-e REGISTRY_STORAGE_DELETE_ENABLED=true " +
 		"registry\n" +
-		"fi\n" +
-		fileName
+		"fi\n"
+	postgresFormatString := "if test -z \"$(docker ps | grep oj_postgres)\"; then\n" +
+		"\tdocker run -d --restart=always --name oj_postgres " +
+		"-v %s/postgres:/data/postgres " +
+		"-e \"POSTGRES_USER=%s\" " +
+		"-e \"POSTGRES_PASSWORD=%s\" " +
+		"-e \"POSTGRES_DB=oj\" " +
+		"-e \"PGDATA=/data/postgres\" " +
+		"-p 5432:5432 " +
+		"postgres:12\n" +
+		"fi\n"
 	startSH, err := os.Create("start.sh")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	path := pwd + "/" + RegistryConfigPath
-	_, err = startSH.Write([]byte(fmt.Sprintf(tempString, path, path, path)))
+	_, err = startSH.Write([]byte(fmt.Sprintf(registryFormatString, path, path, path)))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if postgres {
+		err = os.MkdirAll(RegistryConfigPath+"/postgres", 0755)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		_, err = startSH.Write([]byte(fmt.Sprintf(postgresFormatString, path, dbUsername, dbPassword)))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+	_, err = startSH.Write([]byte(startString))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -843,7 +873,15 @@ func main() {
 	masterIP := flag.String("MasterIP", "", "master ip")
 	genAgentScript := flag.Bool("agent", false, "only generate agent script")
 	enableTraefik := flag.Bool("enable-traefik", false, "do not disable traefik")
+	postgres := flag.Bool("postgres", false, "")
+	sqlite := flag.Bool("sqlite", false, "")
 	flag.Parse()
+
+	if *postgres == *sqlite {
+		log.Println("you must choose one and only one database type.")
+		os.Exit(1)
+	}
+
 	if *enableTraefik {
 		k3sExec = ""
 	}
@@ -872,11 +910,15 @@ func main() {
 
 	registryUsername := ""
 	registryPassword := ""
+	dbUsername := ""
+	dbPassword := ""
 	if _, err := os.Stat("resources/.prepare"); os.IsNotExist(err) {
 		rd.Seed(time.Now().UnixNano())
 		registryUsername = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
 		registryPassword = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
-		err := os.WriteFile("resources/.prepare", []byte(registryUsername+registryPassword), 0777)
+		dbUsername = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+		dbPassword = fmt.Sprintf("%02x", md5.Sum([]byte(strconv.FormatInt(rd.Int63(), 10))))[:8]
+		err := os.WriteFile("resources/.prepare", []byte(registryUsername+registryPassword+dbUsername+dbPassword), 0777)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -890,6 +932,13 @@ func main() {
 		data := string(dataRaw)
 		registryUsername = data[0:8]
 		registryPassword = data[8:16]
+		dbUsername = data[16:24]
+		dbPassword = data[24:32]
+	}
+
+	dsn := ""
+	if *postgres {
+		dsn = fmt.Sprintf("host=localhost user=%s password=%s dbname=oj port=5432 sslmode=disable TimeZone=Asia/Shanghai", dbUsername, dbPassword)
 	}
 
 	log.Println(" - install K3S:")
@@ -899,15 +948,19 @@ func main() {
 	log.Println(" - config registry:")
 	ConfigK3SRegistry(*masterIP, registryUsername, registryPassword)
 	log.Println(" - download binary:")
-	DownloadBinary()
+	if *postgres {
+		DownloadBinary()
+	} else if *sqlite {
+		fmt.Println("\033[31mYou should build a sqlite version yourself.\033[0m")
+	}
 	log.Println(" - generate default config:")
-	CreateDefaultConfig(*masterIP, registryUsername, registryPassword)
+	CreateDefaultConfig(*masterIP, registryUsername, registryPassword, dsn)
 	log.Println(" - generate agent script:")
 	GenerateAgentScript(*masterIP, k3sExec)
 	log.Println(" - prepare registry:")
 	PrepareRegistry(*masterIP, registryUsername, registryPassword)
 	log.Println(" - generate start script:")
-	GenerateStartScript()
+	GenerateStartScript(*postgres, dbUsername, dbPassword)
 
 	if err := os.Remove("registries-config.yaml"); err != nil {
 		fmt.Println(err)
