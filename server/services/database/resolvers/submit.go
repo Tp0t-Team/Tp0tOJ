@@ -53,6 +53,24 @@ func FindSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
 	return submits
 }
 
+func FindNotAdminSubmitCorrectByChallengeId(challengeId uint64) []entity.Submit {
+	var submits []entity.Submit
+	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"challenge_id": challengeId, "correct": true, "available": true}).Find(&submits)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return []entity.Submit{}
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return nil
+	}
+	var results []entity.Submit
+	for _, submit := range submits {
+		if !CheckAdminByUserId(submit.UserId) {
+			results = append(results, submit)
+		}
+	}
+	return results
+}
+
 func FindSubmitCorrectByUserId(userId uint64) []entity.Submit {
 	var submits []entity.Submit
 	result := db.Preload("User").Preload("Challenge").Where(map[string]interface{}{"user_id": userId, "correct": true, "available": true}).Find(&submits)

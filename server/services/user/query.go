@@ -184,7 +184,7 @@ func (r *QueryResolver) ChallengeInfos(ctx context.Context) *types.ChallengeInfo
 			realScore = int32(tmp)
 		}
 		var solved int
-		submits := resolvers.FindSubmitCorrectByChallengeId(challenge.ChallengeId)
+		submits := resolvers.FindNotAdminSubmitCorrectByChallengeId(challenge.ChallengeId)
 		if submits == nil {
 			solved = 0
 		}
