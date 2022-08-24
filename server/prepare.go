@@ -442,7 +442,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 	}
 	newConfig := utils.Config{
 		Server: utils.Server{
-			Host:        fmt.Sprintf("%s", masterIP),
+			Host:        fmt.Sprintf("http://%s", masterIP),
 			Username:    "Tp0t",
 			Password:    "admin123",
 			Mail:        "admin@example.com",
