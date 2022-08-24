@@ -659,6 +659,7 @@ func GenerateAgentScript(masterIP string, k3sExec string) {
 }
 
 const RegistryConfigPath = "resources/docker-registry"
+const PostgresConfigPath = "resources/postgres"
 
 func PrepareRegistry(masterIP string, registryUsername string, registryPassword string) {
 	_, err := os.Stat(fmt.Sprintf("/etc/docker/certs.d/%s:5000/ca.crt", masterIP))
@@ -832,20 +833,21 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	path := pwd + "/" + RegistryConfigPath
-	_, err = startSH.Write([]byte(fmt.Sprintf(registryFormatString, path, path, path)))
+	registryPath := pwd + "/" + RegistryConfigPath
+	_, err = startSH.Write([]byte(fmt.Sprintf(registryFormatString, registryPath, registryPath, registryPath)))
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 	if postgres {
-		err = os.MkdirAll(RegistryConfigPath+"/postgres", 0777)
+		postgresPath := pwd + "/" + PostgresConfigPath
+		err = os.MkdirAll(postgresPath, 0777)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		_, err = startSH.Write([]byte(fmt.Sprintf(postgresFormatString, path, dbUsername, dbPassword)))
+		_, err = startSH.Write([]byte(fmt.Sprintf(postgresFormatString, postgresPath, dbUsername, dbPassword)))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
