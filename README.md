@@ -122,8 +122,7 @@ To uninstall K3s from an agent node, run:
 
 ```yaml
 server:                              #平台服务器的配置参数
-  host: http://127.0.0.1             #『必须更改』设置为Host，用于重置密码和CORS等
-                                     #例如：平台地址：ctf.lordcasser.com开启SSL, host: https://ctf.lordcasser.com
+  host: 127.0.0.1                    #设置为Host，用于重置密码和CORS等（仅hostname部分不含协议端口和路径）
   username: Tp0t                     #默认admin用户名
   password: password                 #默认admin账号密码
   mail: admin@example.com            #默认admin账号邮箱

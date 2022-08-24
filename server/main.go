@@ -54,6 +54,7 @@ func main() {
 	_, crtErr := os.Stat("resources/https.crt")
 	_, keyErr := os.Stat("resources/https.key")
 	if crtErr == nil && keyErr == nil {
+		configure.Configure.Server.Host = "https://" + configure.Configure.Server.Host
 		if configure.Configure.Server.Port == 0 {
 			configure.Configure.Server.Port = 443
 		}
@@ -69,6 +70,7 @@ func main() {
 
 		log.Fatal(http.ListenAndServeTLS(portString, "resources/https.crt", "resources/https.key", nil))
 	} else {
+		configure.Configure.Server.Host = "http://" + configure.Configure.Server.Host
 		if configure.Configure.Server.Port == 0 {
 			configure.Configure.Server.Port = 80
 		}
