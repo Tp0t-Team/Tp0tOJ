@@ -829,8 +829,12 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 		"-e \"POSTGRES_PASSWORD=%s\" " +
 		"-e \"POSTGRES_DB=oj\" " +
 		"-e \"PGDATA=/data/postgres\" " +
-		"-p 5432:5432 " +
+		"-p 127.0.0.1:5432:5432 " +
 		"postgres:12\n" +
+		"\tuntil docker exec -it oj_postgres psql -c '\\l' -U %s -d oj; do\n" +
+		"\t\techo 'waiting for postgres ready...'\n" +
+		"\t\tsleep 1\n" +
+		"\tdone\n" +
 		"fi\n"
 	startSH, err := os.Create("start.sh")
 	if err != nil {
@@ -851,7 +855,7 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 			os.Exit(1)
 		}
 
-		_, err = startSH.Write([]byte(fmt.Sprintf(postgresFormatString, postgresPath, dbUsername, dbPassword)))
+		_, err = startSH.Write([]byte(fmt.Sprintf(postgresFormatString, postgresPath, dbUsername, dbPassword, dbUsername)))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
