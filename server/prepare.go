@@ -309,7 +309,7 @@ func DownloadBinary() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	err = os.Chmod("OJ", 0755)
+	err = os.Chmod(binaryName, 0755)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
