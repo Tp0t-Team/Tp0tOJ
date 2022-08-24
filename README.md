@@ -59,8 +59,8 @@ sudo systemctl restart docker
 
 
 ```shell
-./prepare -MasterIP xxx.xxx.xxx.xxx
-INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
+./prepare -MasterIP xxx.xxx.xxx.xxx --postgres
+INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx --postgres #for CHINA
 ```
 
 **中国用户请使用Mirror的参数执行**
@@ -84,7 +84,8 @@ INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx #for CHINA
 │   │   │   ├── tls.crt  #镜像仓库证书
 │   │   │   └── tls.key  #镜像仓库私钥
 │   │   └── data         #镜像仓库数据存储目录
-│   ├── [https.crt]      #「非自动生成」网站TLS证书
+|   ├── [postgres]       #postgres数据目录
+│   ├── [https.crt]      #「非自动生成」网站TLS证书
 │   ├── [https.key]      #「非自动生成」网站TLS私钥
 │   ├── k3s.yaml         #自动生成的k3s配置文件，不需要修改
 |   ├── [home.html]      #「非自动生成」如果存在，会加载该网页做为主页面
@@ -121,7 +122,7 @@ To uninstall K3s from an agent node, run:
 
 ```yaml
 server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #『必须更改』设置为Host，用于重置密码和CORS等
+  host: http://127.0.0.1             #『必须更改』设置为Host，用于重置密码和CORS等
                                      #例如：平台地址：ctf.lordcasser.com开启SSL, host: https://ctf.lordcasser.com
   username: Tp0t                     #默认admin用户名
   password: password                 #默认admin账号密码
@@ -144,7 +145,9 @@ kubernetes:                          #k8s集群配置参数
   portAllocEnd: 31000                #自动分配端口终点
   username: xxxxxxxx                 #「不可修改」镜像仓库用户名
   password: xxxxxxxx                 #「不可修改」镜像仓库密码
-  registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致） 
+  registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致）
+database:                            #数据库连接参数
+  dsn: "..."                         #数据库连接配置，自动生成
 ```
 
 邮件服务配置为必要配置，用户重置和修改密码依赖于邮件服务，**未配置邮件服务将导致用户无法修改密码**
@@ -329,6 +332,12 @@ go build -tags DatabasePostgres -o expost server/exporter
 
 ```shell
 npm install #必要情况下可以删除package-lock.json
+```
+
+如需要参与开发（向公开的git提交代码），请配置好自动lint，即在app目录下执行
+
+```shell
+npm run prepare
 ```
 
 构建前后端一体化可执行文件：依赖golang，在server目录下执行
