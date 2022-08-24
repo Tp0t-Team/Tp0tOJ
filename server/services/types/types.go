@@ -152,6 +152,9 @@ func (input *ChallengeMutateInput) CheckPass() bool {
 	input.Description = strings.Join(lines, "\n")
 	//log.Println(input)
 	if input.NodeConfig == nil {
+		if input.Flag.Type == Dynamic {
+			return false
+		}
 		input.NodeConfig = &[]NodeConfigInput{}
 	}
 	if len(*input.NodeConfig) == 0 {
