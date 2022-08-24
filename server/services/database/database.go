@@ -36,6 +36,9 @@ func createTables() {
 		log.Panicln("DB connect error", err.Error())
 		return
 	}
+	if configure.Configure.Server.Debug.DBOpDetail {
+		DataBase = DataBase.Debug()
+	}
 }
 
 func createDefaultUser() {

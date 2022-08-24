@@ -129,7 +129,10 @@ server:                              #平台服务器的配置参数
   port: 0                            #0时自动选择80/443，非0指定端口
   salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
   behaviorLog: false                 #用于记录选手关键行为，默认不开启
-  debug: false                       #开启debug可以查看容器构建和下发的问题
+  debug:                             #debug相关功能，生产环境请勿开启
+    dockerOpDetail: false            #开启可以查看容器构建和下发的问题
+    noOriginCheck: false             #开启禁用orgin检查，禁用csrf检查，禁用CSP
+    dbOpDetail: false                #开启查看所有数据库请求
 email:                               #邮件服务配置
   host: smtp.example.com             #邮件服务提供商服务器
   username: exampleUsername          #邮件发送账号

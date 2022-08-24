@@ -52,7 +52,7 @@ func getOrigin() string {
 }
 
 func originCheck(r *http.Request) bool {
-	return r.Header.Get("Origin") == getOrigin()
+	return configure.Configure.Server.Debug.NoOriginCheck || r.Header.Get("Origin") == getOrigin()
 }
 
 func FrameControlMiddleware(handler http.Handler) http.Handler {
@@ -104,6 +104,11 @@ func init() {
 			return false
 		}
 		return session.Get("token").(string) == r.Header.Get("X-CSRF-Token")
+	}
+	if configure.Configure.Server.Debug.NoOriginCheck {
+		csrfTokenCheck = func(w http.ResponseWriter, r *http.Request) bool {
+			return true
+		}
 	}
 	ratelimit := func(w http.ResponseWriter, r *http.Request) bool {
 		session := sessionManager.Start(w, r)
@@ -329,12 +334,14 @@ func init() {
 		muxRouter.PathPrefix("/").Handler(withGzipped).Methods(http.MethodGet)
 	}
 
-	muxRouter.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Access-Control-Allow-Origin", getOrigin())
-		writer.Header().Set("Access-Control-Max-Age", "86400")
-	}).Methods(http.MethodOptions)
+	if !configure.Configure.Server.Debug.NoOriginCheck {
+		muxRouter.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			writer.Header().Set("Access-Control-Allow-Origin", getOrigin())
+			writer.Header().Set("Access-Control-Max-Age", "86400")
+		}).Methods(http.MethodOptions)
 
-	muxRouter.Use(mux.CORSMethodMiddleware(muxRouter), FrameControlMiddleware, CSPMiddleware)
+		muxRouter.Use(mux.CORSMethodMiddleware(muxRouter), FrameControlMiddleware, CSPMiddleware)
+	}
 	//muxRouter.Use(CSRFMiddleware)
 	http.Handle("/", muxRouter)
 }

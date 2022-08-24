@@ -435,7 +435,7 @@ func loadDockerState(rd io.Reader) error {
 	scanner := bufio.NewScanner(rd)
 	for scanner.Scan() {
 		lastLine = scanner.Text()
-		if configure.Configure.Server.Debug {
+		if configure.Configure.Server.Debug.DockerOpDetail {
 			fmt.Println(scanner.Text())
 		}
 	}

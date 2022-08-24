@@ -449,7 +449,11 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 			Port:        0,
 			Salt:        strconv.FormatInt(rd.Int63(), 10),
 			BehaviorLog: false,
-			Debug:       false,
+			Debug: utils.Debug{
+				DockerOpDetail: false,
+				NoOriginCheck:  false,
+				DBOpDetail:     false,
+			},
 		},
 		Email: utils.Email{
 			Host:     "smtp.example.com",

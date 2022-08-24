@@ -16,7 +16,7 @@ type Server struct {
 	Port        int    `yaml:"port"`
 	Salt        string `yaml:"salt"`
 	BehaviorLog bool   `yaml:"behaviorLog"`
-	Debug       bool   `yaml:"debug"`
+	Debug       Debug  `yaml:"debug"`
 }
 
 type Email struct {
@@ -42,4 +42,10 @@ type Kubernetes struct {
 	Username       string `yaml:"username"`
 	Password       string `yaml:"password"`
 	RegistryHost   string `yaml:"registryHost"`
+}
+
+type Debug struct {
+	DockerOpDetail bool `yaml:"dockerOpDetail"`
+	NoOriginCheck  bool `yaml:"noOriginCheck"`
+	DBOpDetail     bool `yaml:"dbOpDetail"`
 }
