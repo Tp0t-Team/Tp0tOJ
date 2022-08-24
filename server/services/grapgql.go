@@ -48,6 +48,10 @@ func getIP(r *http.Request) string {
 }
 
 func getOrigin() string {
+	if (configure.Configure.Server.Host[0:5] == "http:" && configure.Configure.Server.Port == 80) ||
+		(configure.Configure.Server.Host[0:5] == "https" && configure.Configure.Server.Port == 443) {
+		return configure.Configure.Server.Host
+	}
 	return fmt.Sprintf("%s:%d", configure.Configure.Server.Host, configure.Configure.Server.Port)
 }
 
