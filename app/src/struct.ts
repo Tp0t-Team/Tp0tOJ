@@ -50,6 +50,7 @@ export interface RankDesc {
 }
 
 export interface BulletinItem {
+  style: string;
   title: string;
   content: string;
   publishTime: string;

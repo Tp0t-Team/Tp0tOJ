@@ -428,7 +428,13 @@ type BulletinResult struct {
 	Bulletins []Bulletin
 }
 
+const BulletinStyleCommon = "common"
+const BulletinStyleBlood1st = "first"
+const BulletinStyleBlood2nd = "second"
+const BulletinStyleBlood3rd = "third"
+
 type Bulletin struct {
+	Style       string
 	Title       string
 	Content     string
 	PublishTime string

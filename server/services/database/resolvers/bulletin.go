@@ -20,8 +20,8 @@ func GetAllBulletin() []entity.Bulletin {
 	return allBulletin
 }
 
-func AddBulletin(title string, content string, topping bool) bool {
-	newBulletin := entity.Bulletin{Title: title, Content: content, Topping: topping, PublishTime: time.Now()}
+func AddBulletin(title string, content string, style string, topping bool) bool {
+	newBulletin := entity.Bulletin{Title: title, Content: content, Style: style, Topping: topping, PublishTime: time.Now()}
 	result := db.Create(&newBulletin)
 	if result.Error != nil {
 		log.Println(result.Error)

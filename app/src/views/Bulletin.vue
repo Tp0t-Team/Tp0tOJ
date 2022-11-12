@@ -2,7 +2,36 @@
   <div class="content-col">
     <v-container fluid>
       <div class="content">
-        <v-card class="ma-4" v-for="item in bulletins" :key="item.time">
+        <v-card
+          :class="`ma-4 bulletin bulletin-${item.style}`"
+          v-for="item in bulletins"
+          :key="item.time"
+        >
+          <svg
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            height="1em"
+            width="1em"
+          >
+            <path
+              d="M14.272 10.445 18 2m-8.684 8.632L5 2m7.761 8.048L8.835 2m5.525 0-1.04 2.5M6 16a6 6 0 1 0 12 0 6 6 0 0 0-12 0Z"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <text
+              x="9"
+              y="19.5"
+              fill="white"
+              style="font-size: 10px; font-weight: bold;"
+            >
+              {{
+                item.style == "first" ? "1" : item.style == "second" ? "2" : "3"
+              }}
+            </text>
+          </svg>
           <span class="bulletin-time ma-4">{{
             new Date(item.publishTime).toLocaleString()
           }}</span>
@@ -108,6 +137,7 @@ export default class Bulletin extends Vue {
             allBulletin {
               message
               bulletins {
+                style
                 title
                 content
                 publishTime
@@ -212,5 +242,64 @@ export default class Bulletin extends Vue {
   right: 0;
   font-size: 12px;
   opacity: 0.4;
+}
+
+.bulletin > svg {
+  display: none;
+  border: 1px solid transparent;
+}
+
+.bulletin-first > svg,
+.bulletin-second > svg,
+.bulletin-third > svg {
+  display: flex;
+  position: absolute;
+  left: 8px;
+  width: 32px;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.bulletin-first,
+.bulletin-second,
+.bulletin-third {
+  padding-left: 32px;
+}
+
+.bulletin-first {
+  border: 1px solid rgba(255, 193, 7, 0.5);
+}
+
+.bulletin-second {
+  border: 1px solid rgba(3, 169, 244, 0.5);
+}
+
+.bulletin-third {
+  border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+.bulletin-first > svg {
+  color: #ffc107;
+}
+
+.bulletin-first > svg > text {
+  fill: #ffc107;
+}
+
+.bulletin-second > svg {
+  color: #03a9f4;
+}
+
+.bulletin-second > svg > text {
+  fill: #03a9f4;
+}
+
+.bulletin-third > svg {
+  color: #4caf50;
+}
+
+.bulletin-third > svg > text {
+  fill: #4caf50;
 }
 </style>

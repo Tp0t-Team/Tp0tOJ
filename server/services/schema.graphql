@@ -276,6 +276,7 @@ type BulletinResult {
 }
 
 type Bulletin {
+    style: String!
     title: String!
     content: String!
     publishTime: String!

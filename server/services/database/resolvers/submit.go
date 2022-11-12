@@ -195,7 +195,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		} else {
 			title := fmt.Sprintf("%s %s blood", challengeName, BloodName[bloodIndex])
 			info := fmt.Sprintf("Congratulations! %s get the %s blood of %s", user.Name, BloodName[bloodIndex], challengeName)
-			ok := AddBulletin(title, info, false)
+			ok := AddBulletin(title, info, BloodName[bloodIndex], false)
 			if !ok {
 				log.Println("blood info bulletin create failed")
 			}

@@ -32,7 +32,7 @@ func (r *AdminMutationResolver) BulletinPub(ctx context.Context, args struct{ In
 	if !input.CheckPass() {
 		return &types.BulletinPubResult{Message: "not empty error"}
 	}
-	ok := resolvers.AddBulletin(input.Title, input.Content, input.Topping)
+	ok := resolvers.AddBulletin(input.Title, input.Content, "common", input.Topping)
 	if !ok {
 		return &types.BulletinPubResult{Message: "resolvers addition Error!"}
 	}
