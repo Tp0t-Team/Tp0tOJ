@@ -5,6 +5,10 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import { createApolloProvider } from "./plugins/vue-apollo";
 import "@/main.scss";
+import VueApexCharts from "vue-apexcharts";
+
+Vue.use(VueApexCharts);
+Vue.component("apex-chart", VueApexCharts);
 
 Vue.config.productionTip = false;
 

@@ -17,3 +17,30 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
+
+
+.chart-container svg {
+    background: transparent !important;
+}
+
+.apexcharts-tooltip {
+    box-shadow: unset !important;
+}
+
+.apexcharts-tooltip.apexcharts-theme-dark {
+    background-color: rgb(54 54 54) !important;
+}
+.apexcharts-tooltip.apexcharts-theme-dark>.apexcharts-tooltip-title {
+// .apexcharts-tooltip>.apexcharts-tooltip-title {
+    background-color: rgb(39 39 39) !important;
+}
+.apexcharts-xaxistooltip.apexcharts-theme-dark {
+    background-color: rgb(39 39 39) !important;
+    border-color: rgb(54 54 54) !important;
+}
+.apexcharts-xaxistooltip.apexcharts-theme-dark::before {
+    border-bottom-color: rgb(54 54 54) !important;
+}
+.apexcharts-xaxistooltip.apexcharts-theme-dark::after {
+    border-bottom-color: rgb(39 39 39) !important;
+}

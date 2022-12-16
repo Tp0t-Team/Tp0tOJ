@@ -2,6 +2,17 @@
   <div class="content-col">
     <v-container>
       <v-row>
+        <div class="chart-container">
+          <apex-chart
+            type="line"
+            height="350"
+            width="100%"
+            :options="chartOptions"
+            :series="series"
+          ></apex-chart>
+        </div>
+      </v-row>
+      <!-- <v-row>
         <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
           <v-hover v-slot:default="{ hover }">
             <v-card
@@ -15,7 +26,6 @@
             >
               <div class="pa-2 align-self-center">
                 <v-avatar size="64" color="blue">
-                  <!-- <span class="headline">{{ r.name[0] }}</span> -->
                   <user-avatar
                     class="headline white--text"
                     :url="r.avatar"
@@ -41,7 +51,7 @@
             </v-card>
           </v-hover>
         </v-col>
-      </v-row>
+      </v-row> -->
       <v-simple-table class="ma-4">
         <thead>
           <tr>
@@ -110,7 +120,7 @@ export default class Rank extends Vue {
   private CountMax = constValue.CountMax;
   private sseSource: EventSource | undefined;
 
-  private rankColor = ["amber", "light-blue", "green"];
+  // private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
 
   private ranks: RankDesc[] = [];
@@ -119,11 +129,59 @@ export default class Rank extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private get topRank() {
-    return this.ranks.slice(0, 3);
+  private series = [
+    {
+      name: "High - 2013",
+      data: [28, 29, 33, 36, 32, 32, 33]
+    },
+    {
+      name: "Low - 2013",
+      data: [12, 11, 14, 18, 17, 13, 13]
+    }
+  ];
+
+  get chartOptions() {
+    let isDark = this.$vuetify.theme.dark;
+    return {
+      chart: {
+        type: "line",
+        zoom: {
+          enabled: false
+        }
+      },
+      theme: {
+        mode: isDark ? "dark" : "light"
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        width: 2,
+        curve: "stepline",
+        dashArray: 0
+      },
+      // legend: {
+      //   tooltipHoverFormatter: function(val: any, opts: any) {
+      //     return val + ' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + ''
+      //   }
+      // },
+      markers: {
+        size: 0,
+        hover: {
+          sizeOffset: 6
+        }
+      },
+      grid: {
+        borderColor: "#7f7f7f"
+      }
+    };
   }
+
+  // private get topRank() {
+  //   return this.ranks.slice(0, 3);
+  // }
   private get pageBase() {
-    return (this.page - 1) * 10 + 3;
+    return (this.page - 1) * 10; // + 3;
   }
   private get pageRank() {
     return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
@@ -173,7 +231,7 @@ export default class Rank extends Vue {
         (a, b) => parseInt(b.score) - parseInt(a.score)
       );
       this.pageCount = Math.floor(
-        (this.ranks.length - 3 + UserPerPage - 1) / UserPerPage
+        (this.ranks.length /*- 3*/ + UserPerPage - 1) / UserPerPage
       );
     } catch (e) {
       this.infoText = e.toString();
@@ -184,6 +242,13 @@ export default class Rank extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.chart-container {
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: rgb(127 127 127 / 0.1);
+}
+
 .content-col {
   height: calc(100vh - 96px);
   overflow-y: auto;
