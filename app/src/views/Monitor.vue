@@ -239,6 +239,12 @@ export default class Monitor extends Vue {
       );
       let originChartData: ChartData = await chartRes.json();
       let seriesList = [];
+      let now = Math.max(
+        Date.now(),
+        originChartData.x.length > 0
+          ? originChartData.x[originChartData.x.length - 1]
+          : 0
+      );
       for (let series of originChartData.y) {
         let seriesItem = {
           name: series.name,
@@ -246,6 +252,14 @@ export default class Monitor extends Vue {
         };
         for (let index = 0; index < series.score.length; index++) {
           seriesItem.data.push([originChartData.x[index], series.score[index]]);
+        }
+        if (seriesItem.data.length > 0) {
+          seriesItem.data.push([
+            now,
+            seriesItem.data[seriesItem.data.length - 1][1]
+          ]);
+        } else {
+          seriesItem.data.push([now, 0]);
         }
         seriesList.push(seriesItem);
       }

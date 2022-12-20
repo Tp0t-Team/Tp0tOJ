@@ -297,7 +297,7 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 
 	if _, ok := newFrame.Users[userId]; !ok {
 		newFrame.Users[userId] = &UserFrame{
-			Solved: []uint64{challengeId},
+			Solved: []uint64{},
 			Blood:  map[uint64]int{},
 		}
 	}
@@ -315,6 +315,7 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 
 	cache.frames = append(cache.frames, newFrame)
 	cache.rankNodes = append(cache.rankNodes, ScoreItems{})
+	cache.refreshRank(len(cache.frames) - 1)
 
 	cache.chartCache = nil
 

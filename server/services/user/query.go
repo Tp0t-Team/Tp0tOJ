@@ -38,6 +38,7 @@ func (r *QueryResolver) AllBulletin() *types.BulletinResult {
 		result.Bulletins = append(result.Bulletins, types.Bulletin{
 			Title:       bulletin.Title,
 			Content:     bulletin.Content,
+			Style:       bulletin.Style,
 			PublishTime: bulletin.PublishTime.In(timeZone).Format(time.RFC3339),
 		})
 	}
