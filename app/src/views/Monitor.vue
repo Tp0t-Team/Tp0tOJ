@@ -109,6 +109,11 @@ import constValue from "../constValue";
 
 const UserPerPage = 10;
 
+const userLocale =
+  navigator.languages && navigator.languages.length
+    ? navigator.languages[0]
+    : navigator.language;
+
 @Component({
   components: {
     UserAvatar
@@ -151,6 +156,16 @@ export default class Monitor extends Vue {
         curve: "stepline",
         dashArray: 0
       },
+      tooltip: {
+        x: {
+          formatter: function(val: number) {
+            return Intl.DateTimeFormat(userLocale, {
+              dateStyle: "short",
+              timeStyle: "medium"
+            } as Intl.DateTimeFormatOptions).format(val);
+          }
+        }
+      },
       // legend: {
       //   tooltipHoverFormatter: function(val: any, opts: any) {
       //     return val + ' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + ''
@@ -166,7 +181,10 @@ export default class Monitor extends Vue {
         borderColor: "#7f7f7f"
       },
       xaxis: {
-        type: "datetime"
+        type: "datetime",
+        labels: {
+          datetimeUTC: false
+        }
       }
     };
   }
@@ -229,7 +247,7 @@ export default class Monitor extends Vue {
       );
 
       let chartRes = await fetch(
-        `/chart?num=${this.$route.query["num"] ?? "10"}`,
+        `/chart/?num=${this.$route.query["num"] ?? "10"}`,
         {
           cache: "no-cache",
           headers: {
