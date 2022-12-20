@@ -11,8 +11,9 @@ type ChartCurve struct {
 }
 
 type ChartData struct {
-	X []int64       `json:"x"`
-	Y []*ChartCurve `json:"y"`
+	X    []int64       `json:"x"`
+	Y    []*ChartCurve `json:"y"`
+	TopN uint64        `json:"topN"`
 }
 
 type RankCache interface {

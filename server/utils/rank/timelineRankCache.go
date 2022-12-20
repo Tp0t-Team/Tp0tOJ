@@ -392,13 +392,14 @@ func (cache *TimelineRankCache) Load(filename string) error {
 func (cache *TimelineRankCache) Chart(topN uint64) *utils.ChartData {
 	cache.mutex.RLock()
 	defer cache.mutex.RUnlock()
-	if cache.chartCache != nil {
+	if cache.chartCache != nil && topN == cache.chartCache.TopN {
 		return cache.chartCache
 	}
 
 	ret := &utils.ChartData{
-		X: []int64{},
-		Y: []*utils.ChartCurve{},
+		X:    []int64{},
+		Y:    []*utils.ChartCurve{},
+		TopN: topN,
 	}
 	if len(cache.rankNodes) == 0 {
 		cache.chartCache = ret
