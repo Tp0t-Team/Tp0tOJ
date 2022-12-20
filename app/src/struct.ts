@@ -315,3 +315,12 @@ export type AllEventResult = {
 export type AllocStatusResult = {
   allocStatus: { allocated: number } & Result;
 };
+
+export interface ChartData {
+  x: number[];
+  y: {
+    id: number;
+    name: string;
+    score: number[];
+  }[];
+}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/ugorji/go/codec"
 	"io"
+	"log"
 	"os"
 	"server/services/database/resolvers"
 	"server/services/types"
@@ -41,7 +42,8 @@ type TimelineRankCache struct {
 	challengeScore   map[uint64]uint64
 	userState        map[uint64]bool
 
-	fileCache *FileCache
+	fileCache  *FileCache
+	chartCache *utils.ChartData
 }
 
 type ScoreItem struct {
@@ -126,6 +128,7 @@ func init() {
 		challengeScore:   nil,
 		userState:        nil,
 		fileCache:        nil,
+		chartCache:       nil,
 	}
 }
 
@@ -233,6 +236,8 @@ func (cache *TimelineRankCache) MutateUser(userId uint64, state bool) {
 			}
 		}
 	}
+
+	cache.chartCache = nil
 }
 
 func (cache *TimelineRankCache) MutateChallenge(challengeId uint64, state bool, dynamic bool, baseScore uint64) {
@@ -247,6 +252,8 @@ func (cache *TimelineRankCache) MutateChallenge(challengeId uint64, state bool, 
 			cache.refreshRank(index)
 		}
 	}
+
+	cache.chartCache = nil
 }
 
 func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp time.Time) error {
@@ -308,6 +315,9 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 
 	cache.frames = append(cache.frames, newFrame)
 	cache.rankNodes = append(cache.rankNodes, ScoreItems{})
+
+	cache.chartCache = nil
+
 	return nil
 }
 
@@ -376,4 +386,54 @@ func (cache *TimelineRankCache) Load(filename string) error {
 	}
 
 	return nil
+}
+
+func (cache *TimelineRankCache) Chart(topN uint64) *utils.ChartData {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
+	if cache.chartCache != nil {
+		return cache.chartCache
+	}
+
+	ret := &utils.ChartData{
+		X: []int64{},
+		Y: []*utils.ChartCurve{},
+	}
+	if len(cache.rankNodes) == 0 {
+		cache.chartCache = ret
+		return ret
+	}
+
+	for index, user := range cache.rankNodes[len(cache.rankNodes)-1] {
+		if topN == 0 || uint64(index) < topN {
+			userEntity, err := resolvers.FindUser(user.userId)
+			if err != nil {
+				log.Panicln(err)
+			}
+			ret.Y = append(ret.Y, &utils.ChartCurve{
+				Id:    user.userId,
+				Name:  userEntity.Name,
+				Score: []uint64{},
+			})
+		}
+	}
+
+	for index, node := range cache.rankNodes {
+		ret.X = append(ret.X, cache.frames[index].Stamp.UnixMilli())
+		userScore := map[uint64]uint64{}
+		for _, item := range node {
+			userScore[item.userId] = item.score
+		}
+
+		for _, curve := range ret.Y {
+			if score, ok := userScore[curve.Id]; ok {
+				curve.Score = append(curve.Score, score)
+			} else {
+				curve.Score = append(curve.Score, 0)
+			}
+		}
+	}
+
+	cache.chartCache = ret
+	return ret
 }

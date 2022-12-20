@@ -4,6 +4,17 @@ import (
 	"time"
 )
 
+type ChartCurve struct {
+	Id    uint64   `json:"id"`
+	Name  string   `json:"name"`
+	Score []uint64 `json:"score"`
+}
+
+type ChartData struct {
+	X []int64       `json:"x"`
+	Y []*ChartCurve `json:"y"`
+}
+
 type RankCache interface {
 	SetCalculator(calculator ScoreCalculator)
 	GetRank() []RankItem
@@ -16,6 +27,8 @@ type RankCache interface {
 	GetCurrentScores() map[uint64]uint64
 	//WarmUp() error
 	Load(filename string) error
+
+	Chart(topN uint64) *ChartData
 }
 
 type RankItem struct {

@@ -8,9 +8,9 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>{{ title }}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click="WarmUp" v-if="$store.state.global.role === 'admin'">
+      <!-- <v-btn icon @click="WarmUp" v-if="$store.state.global.role === 'admin'">
         <v-icon color="primary">whatshot</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-app-bar>
 
     <v-content>

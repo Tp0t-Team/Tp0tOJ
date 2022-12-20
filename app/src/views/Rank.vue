@@ -104,7 +104,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { RankDesc, RankResult } from "@/struct";
+import { RankDesc, RankResult, ChartData } from "@/struct";
 import constValue from "../constValue";
 
 const UserPerPage = 10;
@@ -129,16 +129,7 @@ export default class Rank extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private series = [
-    {
-      name: "High - 2013",
-      data: [28, 29, 33, 36, 32, 32, 33]
-    },
-    {
-      name: "Low - 2013",
-      data: [12, 11, 14, 18, 17, 13, 13]
-    }
-  ];
+  private series: { name: string; data: number[][] }[] = [];
 
   get chartOptions() {
     let isDark = this.$vuetify.theme.dark;
@@ -173,6 +164,9 @@ export default class Rank extends Vue {
       },
       grid: {
         borderColor: "#7f7f7f"
+      },
+      xaxis: {
+        type: "datetime"
       }
     };
   }
@@ -233,6 +227,29 @@ export default class Rank extends Vue {
       this.pageCount = Math.floor(
         (this.ranks.length /*- 3*/ + UserPerPage - 1) / UserPerPage
       );
+
+      let chartRes = await fetch(
+        `/chart?num=${this.$route.query["num"] ?? "10"}`,
+        {
+          cache: "no-cache",
+          headers: {
+            "X-CSRF-Token": (globalThis as any).CsrfToken as string
+          }
+        }
+      );
+      let originChartData: ChartData = await chartRes.json();
+      let seriesList = [];
+      for (let series of originChartData.y) {
+        let seriesItem = {
+          name: series.name,
+          data: [] as number[][]
+        };
+        for (let index = 0; index < series.score.length; index++) {
+          seriesItem.data.push([originChartData.x[index], series.score[index]]);
+        }
+        seriesList.push(seriesItem);
+      }
+      this.series = seriesList;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
