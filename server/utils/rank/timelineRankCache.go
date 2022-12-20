@@ -323,6 +323,8 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 }
 
 func (cache *TimelineRankCache) GetCurrentScores() map[uint64]uint64 {
+	cache.mutex.RLock()
+	defer cache.mutex.RUnlock()
 	ret := map[uint64]uint64{}
 	for id, _ := range cache.challengeState {
 		solved := uint64(0)
@@ -390,8 +392,8 @@ func (cache *TimelineRankCache) Load(filename string) error {
 }
 
 func (cache *TimelineRankCache) Chart(topN uint64) *utils.ChartData {
-	cache.mutex.RLock()
-	defer cache.mutex.RUnlock()
+	cache.mutex.Lock()
+	defer cache.mutex.Unlock()
 	if cache.chartCache != nil && topN == cache.chartCache.TopN {
 		return cache.chartCache
 	}
