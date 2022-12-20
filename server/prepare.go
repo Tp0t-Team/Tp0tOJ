@@ -476,6 +476,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 		Database: utils.Database{
 			Dsn: dsn,
 		},
+		TimelineFile: "resources/timeline.save",
 	}
 	configFile, err := os.Create("resources/config.yaml")
 	if err != nil {
