@@ -1,11 +1,12 @@
 package utils
 
 type Config struct {
-	Server     Server     `yaml:"server"`
-	Email      Email      `yaml:"email"`
-	Challenge  Challenge  `yaml:"challenge"`
-	Kubernetes Kubernetes `yaml:"kubernetes"`
-	Database   Database   `yaml:"database"`
+	Server       Server     `yaml:"server"`
+	Email        Email      `yaml:"email"`
+	Challenge    Challenge  `yaml:"challenge"`
+	Kubernetes   Kubernetes `yaml:"kubernetes"`
+	Database     Database   `yaml:"database"`
+	TimelineFile string     `yaml:"timelineFile"`
 }
 
 type Server struct {

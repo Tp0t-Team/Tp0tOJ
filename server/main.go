@@ -32,7 +32,7 @@ func main() {
 
 	// TODO: provide --prepare flags to check environment and install k3s server and other requirement
 	utils.Cache.SetCalculator(&calculator.BasicScoreCalculator{})
-	err := utils.Cache.WarmUp()
+	err := utils.Cache.Load(configure.Configure.TimelineFile)
 	if err != nil {
 		log.Panicln(err)
 	}

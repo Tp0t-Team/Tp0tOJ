@@ -1,12 +1,8 @@
 package calculator
 
 import (
-	"encoding/json"
 	"math"
-	"server/services/database/resolvers"
-	"server/services/types"
 	"server/utils/configure"
-	"strconv"
 )
 
 type BasicScoreCalculator struct{}
@@ -21,26 +17,34 @@ func (c *BasicScoreCalculator) curve(baseScore uint64, count uint64) uint64 {
 	return uint64(result)
 }
 
-func (c *BasicScoreCalculator) GetScore(challengeId uint64, count uint64) uint64 {
-	// step 1: from challengeId, get curve parameters
-	challenge, err := resolvers.FindChallengeById(challengeId)
-	if err != nil {
-		return 0
-	}
-	var config types.ChallengeConfig
-	err = json.Unmarshal([]byte(challenge.Configuration), &config)
-	if err != nil {
-		return 0
-	}
-	// step 2: use curve(), parameters & count, calc the score
-	score, err := strconv.ParseUint(config.Score.BaseScore, 10, 64)
-	if err != nil {
-		return 0
-	}
-	if config.Score.Dynamic {
-		return c.curve(score, count)
+//func (c *BasicScoreCalculator) GetScore(challengeId uint64, count uint64) uint64 {
+//	// step 1: from challengeId, get curve parameters
+//	challenge, err := resolvers.FindChallengeById(challengeId)
+//	if err != nil {
+//		return 0
+//	}
+//	var config types.ChallengeConfig
+//	err = json.Unmarshal([]byte(challenge.Configuration), &config)
+//	if err != nil {
+//		return 0
+//	}
+//	// step 2: use curve(), parameters & count, calc the score
+//	score, err := strconv.ParseUint(config.Score.BaseScore, 10, 64)
+//	if err != nil {
+//		return 0
+//	}
+//	if config.Score.Dynamic {
+//		return c.curve(score, count)
+//	} else {
+//		return score
+//	}
+//}
+
+func (c *BasicScoreCalculator) GetScore(baseScore uint64, count uint64, dynamic bool) uint64 {
+	if dynamic {
+		return c.curve(baseScore, count)
 	} else {
-		return score
+		return baseScore
 	}
 }
 

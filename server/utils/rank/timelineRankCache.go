@@ -9,6 +9,7 @@ import (
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -19,8 +20,9 @@ type ChallengeFrame struct {
 }
 
 type UserFrame struct {
-	Solved []uint64
-	Blood  map[uint64]int
+	Solved    []uint64
+	Blood     map[uint64]int
+	LastSolve time.Time
 }
 
 type TimeFrame struct {
@@ -40,6 +42,30 @@ type TimelineRankCache struct {
 	userState        map[uint64]bool
 
 	fileCache *FileCache
+}
+
+type ScoreItem struct {
+	userId uint64
+	score  uint64
+	stamp  time.Time
+}
+
+type ScoreItems = []*ScoreItem
+
+type RankSorter struct {
+	ScoreItems
+}
+
+func (items RankSorter) Len() int {
+	return len(items.ScoreItems)
+}
+
+func (items RankSorter) Swap(i, j int) {
+	items.ScoreItems[i], items.ScoreItems[j] = items.ScoreItems[j], items.ScoreItems[i]
+}
+
+func (items RankSorter) Less(i, j int) bool {
+	return items.ScoreItems[i].score > items.ScoreItems[j].score || (items.ScoreItems[i].score == items.ScoreItems[j].score && items.ScoreItems[i].stamp.Before(items.ScoreItems[j].stamp))
 }
 
 type FileCache struct {
@@ -90,8 +116,17 @@ func (cache *FileCache) Append(frame *TimeFrame) error {
 
 func init() {
 	//calculator need to be init before usage
-	// TODO:
-	//utils.Cache = &RAMRankCache{rank: []uint64{}, challengeScore: map[uint64]uint64{}, challengeSolve: map[uint64][]uint64{}, userScore: map[uint64]uint64{}, userTime: map[uint64]time.Time{}}
+	utils.Cache = &TimelineRankCache{
+		calculator:       nil,
+		mutex:            sync.RWMutex{},
+		rankNodes:        nil,
+		frames:           nil,
+		challengeState:   nil,
+		challengeDynamic: nil,
+		challengeScore:   nil,
+		userState:        nil,
+		fileCache:        nil,
+	}
 }
 
 func (cache *TimelineRankCache) SetCalculator(calculator utils.ScoreCalculator) {
@@ -130,7 +165,59 @@ func (cache *TimelineRankCache) GetUserScore(userId uint64) uint64 {
 
 func (cache *TimelineRankCache) refreshRank(index int) {
 	// TODO: step 1 re-calculate
+	rank := []*ScoreItem{}
+	frame := &cache.frames[index]
+
+	bannedCount := map[uint64]uint64{}
+	for id, user := range frame.Users {
+		if len(user.Solved) == 0 {
+			continue
+		}
+		if state, ok := cache.userState[id]; ok && state {
+			continue
+		}
+
+		for _, challenge := range user.Solved {
+			if _, ok := bannedCount[challenge]; !ok {
+				bannedCount[challenge] = 0
+			}
+			bannedCount[challenge] = bannedCount[challenge] + 1
+		}
+	}
+
+	realScore := map[uint64]uint64{}
+	for id, challenge := range frame.Challenges {
+		if state, ok := cache.challengeState[id]; ok && state {
+			bc := uint64(0)
+			if realBan, ok := bannedCount[id]; ok {
+				bc = realBan
+			}
+			realScore[id] = cache.calculator.GetScore(cache.challengeScore[id], challenge.Solved-bc, cache.challengeDynamic[id])
+		}
+	}
+
+	for id, user := range frame.Users {
+		score := uint64(0)
+		for _, challenge := range user.Solved {
+			if _, ok := realScore[challenge]; !ok {
+				continue
+			}
+			if index, ok := user.Blood[challenge]; ok {
+				score += cache.calculator.GetIncrementScore(realScore[challenge], uint64(index))
+			} else {
+				score += realScore[challenge]
+			}
+		}
+		rank = append(rank, &ScoreItem{
+			userId: id,
+			score:  score,
+			stamp:  user.LastSolve,
+		})
+	}
 	// TODO: step 2 sort
+	sort.Sort(RankSorter{rank})
+
+	cache.rankNodes[index] = rank
 }
 
 func (cache *TimelineRankCache) MutateUser(userId uint64, state bool) {
@@ -211,6 +298,7 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 	if solveIndex < 3 {
 		newFrame.Users[userId].Blood[challengeId] = int(solveIndex)
 	}
+	newFrame.Users[userId].LastSolve = stamp
 
 	err := cache.fileCache.Append(&newFrame)
 	if err != nil {
@@ -231,12 +319,17 @@ func (cache *TimelineRankCache) GetCurrentScores() map[uint64]uint64 {
 				solved = challenge.Solved
 			}
 		}
-		ret[id] = cache.calculator.GetScore(cache.challengeScore[id], solved)
+		ret[id] = cache.calculator.GetScore(cache.challengeScore[id], solved, cache.challengeDynamic[id])
 	}
 	return ret
 }
 
-func (cache *TimelineRankCache) Load() error {
+func (cache *TimelineRankCache) Load(filename string) error {
+	var err error
+	cache.fileCache, err = NewFileCache(filename)
+	if err != nil {
+		return err
+	}
 	data, err := cache.fileCache.Load()
 	if err != nil {
 		return err
