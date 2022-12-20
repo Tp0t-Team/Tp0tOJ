@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	_ "embed"
 	"encoding/binary"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/graph-gophers/graphql-go"
@@ -20,8 +22,10 @@ import (
 	"server/services/admin"
 	"server/services/sse"
 	"server/services/user"
+	"server/utils"
 	"server/utils/configure"
 	"server/utils/kick"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -337,6 +341,38 @@ func init() {
 		}))
 		muxRouter.PathPrefix("/").Handler(withGzipped).Methods(http.MethodGet)
 	}
+	muxRouter.HandleFunc("/chart", func(w http.ResponseWriter, r *http.Request) {
+		//if !originCheck(r) {
+		//	w.WriteHeader(http.StatusForbidden)
+		//	return
+		//}
+
+		params := r.URL.Query()
+		n := params.Get("num")
+		if n == "" {
+			n = "10"
+		}
+		num, err := strconv.ParseUint(n, 10, 64)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if num == 0 || num > 50 {
+			log.Panicln(errors.New("chart num out of range"))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		data := utils.Cache.Chart(num)
+		jdata, err := json.Marshal(data)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(jdata)
+
+	}).Methods(http.MethodGet)
 
 	if !configure.Configure.Server.Debug.NoOriginCheck {
 		muxRouter.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
