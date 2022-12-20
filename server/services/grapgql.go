@@ -259,6 +259,38 @@ func init() {
 		admin.UploadImage(w, r)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP).Methods(http.MethodGet)
+	muxRouter.HandleFunc("/chart", func(w http.ResponseWriter, r *http.Request) {
+		//if !originCheck(r) {
+		//	w.WriteHeader(http.StatusForbidden)
+		//	return
+		//}
+
+		params := r.URL.Query()
+		n := params.Get("num")
+		if n == "" {
+			n = "10"
+		}
+		num, err := strconv.ParseUint(n, 10, 64)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if num == 0 || num > 50 {
+			log.Panicln(errors.New("chart num out of range"))
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		data := utils.Cache.Chart(num)
+		jdata, err := json.Marshal(data)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Write(jdata)
+
+	}).Methods(http.MethodGet)
 	if HasFrontEnd {
 		root, err := fs.Sub(staticFolder, "static")
 		if err != nil {
@@ -341,38 +373,6 @@ func init() {
 		}))
 		muxRouter.PathPrefix("/").Handler(withGzipped).Methods(http.MethodGet)
 	}
-	muxRouter.HandleFunc("/chart", func(w http.ResponseWriter, r *http.Request) {
-		//if !originCheck(r) {
-		//	w.WriteHeader(http.StatusForbidden)
-		//	return
-		//}
-
-		params := r.URL.Query()
-		n := params.Get("num")
-		if n == "" {
-			n = "10"
-		}
-		num, err := strconv.ParseUint(n, 10, 64)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		if num == 0 || num > 50 {
-			log.Panicln(errors.New("chart num out of range"))
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		data := utils.Cache.Chart(num)
-		jdata, err := json.Marshal(data)
-		if err != nil {
-			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Write(jdata)
-
-	}).Methods(http.MethodGet)
 
 	if !configure.Configure.Server.Debug.NoOriginCheck {
 		muxRouter.PathPrefix("/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

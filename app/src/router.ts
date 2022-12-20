@@ -138,8 +138,9 @@ export default new Router({
     },
     {
       path: "/monitor/:page",
-      name: "rank",
-      component: () => import(/* webpackChunkName: "rank" */ "@/views/Rank.vue")
+      name: "monitor",
+      component: () =>
+        import(/* webpackChunkName: "monitor" */ "@/views/Monitor.vue")
     },
     {
       path: "*",

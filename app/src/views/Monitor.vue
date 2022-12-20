@@ -2,6 +2,17 @@
   <div class="content-col">
     <v-container>
       <v-row>
+        <div class="chart-container">
+          <apex-chart
+            type="line"
+            height="350"
+            width="100%"
+            :options="chartOptions"
+            :series="series"
+          ></apex-chart>
+        </div>
+      </v-row>
+      <!-- <v-row>
         <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
           <v-hover v-slot:default="{ hover }">
             <v-card
@@ -15,7 +26,6 @@
             >
               <div class="pa-2 align-self-center">
                 <v-avatar size="64" color="blue">
-                  <!-- <span class="headline">{{ r.name[0] }}</span> -->
                   <user-avatar
                     class="headline white--text"
                     :url="r.avatar"
@@ -41,7 +51,7 @@
             </v-card>
           </v-hover>
         </v-col>
-      </v-row>
+      </v-row> -->
       <v-simple-table class="ma-4">
         <thead>
           <tr>
@@ -94,7 +104,7 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { RankDesc, RankResult } from "@/struct";
+import { RankDesc, RankResult, ChartData } from "@/struct";
 import constValue from "../constValue";
 
 const UserPerPage = 10;
@@ -104,13 +114,13 @@ const UserPerPage = 10;
     UserAvatar
   }
 })
-export default class Rank extends Vue {
+export default class Monitor extends Vue {
   private monitorMode = false;
   private renewCounter = 0;
   private CountMax = constValue.CountMax;
   private sseSource: EventSource | undefined;
 
-  private rankColor = ["amber", "light-blue", "green"];
+  // private rankColor = ["amber", "light-blue", "green"];
   private page: number = 1;
 
   private ranks: RankDesc[] = [];
@@ -119,11 +129,53 @@ export default class Rank extends Vue {
   private infoText: string = "";
   private hasInfo: boolean = false;
 
-  private get topRank() {
-    return this.ranks.slice(0, 3);
+  private series: { name: string; data: number[][] }[] = [];
+
+  get chartOptions() {
+    let isDark = this.$vuetify.theme.dark;
+    return {
+      chart: {
+        type: "line",
+        zoom: {
+          enabled: false
+        }
+      },
+      theme: {
+        mode: isDark ? "dark" : "light"
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        width: 2,
+        curve: "stepline",
+        dashArray: 0
+      },
+      // legend: {
+      //   tooltipHoverFormatter: function(val: any, opts: any) {
+      //     return val + ' - ' + opts.w.globals.series[opts.seriesIndex][opts.dataPointIndex] + ''
+      //   }
+      // },
+      markers: {
+        size: 0,
+        hover: {
+          sizeOffset: 6
+        }
+      },
+      grid: {
+        borderColor: "#7f7f7f"
+      },
+      xaxis: {
+        type: "datetime"
+      }
+    };
   }
+
+  // private get topRank() {
+  //   return this.ranks.slice(0, 3);
+  // }
   private get pageBase() {
-    return (this.page - 1) * 10 + 3;
+    return (this.page - 1) * 10; // + 3;
   }
   private get pageRank() {
     return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
@@ -173,8 +225,31 @@ export default class Rank extends Vue {
         (a, b) => parseInt(b.score) - parseInt(a.score)
       );
       this.pageCount = Math.floor(
-        (this.ranks.length - 3 + UserPerPage - 1) / UserPerPage
+        (this.ranks.length /*- 3*/ + UserPerPage - 1) / UserPerPage
       );
+
+      let chartRes = await fetch(
+        `/chart?num=${this.$route.query["num"] ?? "10"}`,
+        {
+          cache: "no-cache",
+          headers: {
+            "X-CSRF-Token": (globalThis as any).CsrfToken as string
+          }
+        }
+      );
+      let originChartData: ChartData = await chartRes.json();
+      let seriesList = [];
+      for (let series of originChartData.y) {
+        let seriesItem = {
+          name: series.name,
+          data: [] as number[][]
+        };
+        for (let index = 0; index < series.score.length; index++) {
+          seriesItem.data.push([originChartData.x[index], series.score[index]]);
+        }
+        seriesList.push(seriesItem);
+      }
+      this.series = seriesList;
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;
@@ -184,6 +259,13 @@ export default class Rank extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.chart-container {
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: rgb(127 127 127 / 0.1);
+}
+
 .content-col {
   height: calc(100vh - 96px);
   overflow-y: auto;
