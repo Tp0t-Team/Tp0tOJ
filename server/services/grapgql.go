@@ -259,7 +259,7 @@ func init() {
 		admin.UploadImage(w, r)
 	}).Methods(http.MethodPost)
 	muxRouter.HandleFunc("/sse", sse.SSE.ServeHTTP).Methods(http.MethodGet)
-	muxRouter.HandleFunc("/chart", func(w http.ResponseWriter, r *http.Request) {
+	muxRouter.HandleFunc("/chart/", func(w http.ResponseWriter, r *http.Request) {
 		//if !originCheck(r) {
 		//	w.WriteHeader(http.StatusForbidden)
 		//	return
