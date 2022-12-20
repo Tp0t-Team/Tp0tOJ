@@ -17,7 +17,6 @@ type Mutation {
     userInfoUpdate(input: UserInfoUpdateInput!): UserInfoUpdateResult!
     challengeMutate(input: ChallengeMutateInput!): ChallengeMutateResult!
     challengeAction(input: ChallengeActionInput!): ChallengeActionResult!
-    warmUp: Boolean!
     startReplica(input: String!): StartReplicaResult!
     deleteImage(input: String!): DeleteImageResult!
     deleteReplica(input: String!): DeleteReplicaResult!
@@ -149,7 +148,6 @@ type ChallengeRemoveResult {
 type Query {
     allUserInfos: AllUserInfoResult
     userInfo(userId: String!) : UserInfoResult
-    #    test: String
     challengeInfos: ChallengeInfosResult
     challengeConfigs: ChallengeConfigsResult
     rank: RankResult

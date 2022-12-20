@@ -110,7 +110,7 @@ func main() {
 	if err != nil {
 		log.Panicln(err)
 	}
-	goModTidyCmd := exec.Command("go", "mod", "tidy")
+	goModTidyCmd := exec.Command("go", "mod", "tidy", "-compat=1.17")
 	err = goModTidyCmd.Run()
 	if err != nil {
 		log.Panicln(err)
