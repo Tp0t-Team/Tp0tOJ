@@ -136,7 +136,7 @@ func AddChallenge(input types.ChallengeMutateInput) bool {
 
 // UpdateChallenge we don't allow update challenge name/singleton/[isDynamic]Flag/[isDynamic]Score/status
 func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we should checkout if the value need to be update
-	needWarmUp := false
+	warmUp := func() {}
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var challenge entity.Challenge
 		inputChallengeId, err := strconv.ParseUint(input.ChallengeId, 10, 64)
@@ -194,18 +194,19 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		challenge.Configuration = string(marshalConfig)
 		//  if change score or state, warm up all rank
 		if oldConfig.Score.BaseScore != input.Score.BaseScore {
-			needWarmUp = true
+			warmUp = func() {
+				baseScore, err := strconv.ParseUint(newChallengeConfig.Score.BaseScore, 10, 64)
+				if err != nil {
+					log.Panicln(err)
+				}
+				utils.Cache.MutateChallenge(challenge.ChallengeId, challenge.State != "disabled", newChallengeConfig.Score.Dynamic, baseScore)
+			}
 		}
 
 		if challenge.State == "enabled" && oldConfig.Flag.Value != input.Flag.Value {
 			return errors.New("can't change flag for enabled challenge")
 		}
-		//if nodeRefreshFlag && challenge.State == "enabled" {
-		//	ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx)
-		//	if !ok {
-		//		return errors.New("delete replica error")
-		//	}
-		//}
+
 		result := tx.Save(&challenge)
 		if result.Error != nil {
 			log.Println(result.Error)
@@ -217,13 +218,7 @@ func UpdateChallenge(input types.ChallengeMutateInput) bool { //TODO: maybe we s
 		log.Println(err)
 		return false
 	}
-	if needWarmUp {
-		err = utils.Cache.WarmUp()
-		if err != nil {
-			log.Println("warm up error:\n" + err.Error())
-			return false
-		}
-	}
+	warmUp()
 	return true
 }
 
@@ -243,9 +238,9 @@ func EnableChallengeById(challengeId string) bool {
 	if challenge.State == "enabled" {
 		return true
 	}
-	var oldConfig types.ChallengeConfig
+	var config types.ChallengeConfig
 	//we don't allow user to change singleton
-	err = json.Unmarshal([]byte(challenge.Configuration), &oldConfig)
+	err = json.Unmarshal([]byte(challenge.Configuration), &config)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -254,30 +249,9 @@ func EnableChallengeById(challengeId string) bool {
 		challenge.State = "enabled"
 		tx.Save(&challenge)
 
-		if oldConfig.Singleton {
+		if config.Singleton {
 			replicaId := new(uint64)
 			replica := AddReplica(challenge.ChallengeId, tx, nil)
-			//replica := AddReplica(challenge.ChallengeId, tx, func(status bool) {
-			//err := db.Transaction(func(tx *gorm.DB) error {
-			//	users := FindAllUser()
-			//	if users == nil {
-			//		return errors.New("find users error")
-			//	}
-			//	for _, user := range users {
-			//		ok := AddReplicaAlloc(*replicaId, user.UserId, tx)
-			//		if !ok {
-			//			return errors.New("add replica alloc error")
-			//		}
-			//	}
-			//	return nil
-			//})
-			//if err != nil {
-			//	log.Println(err)
-			//
-			//	challenge.State = "enabled"
-			//	db.Save(&challenge)
-			//}
-			//})
 			if replica == nil {
 				return errors.New("add replica error")
 			}
@@ -296,11 +270,12 @@ func EnableChallengeById(challengeId string) bool {
 		log.Println("challenge enable error: ", err)
 		return false
 	}
-	err = utils.Cache.WarmUp()
+	baseScore, err := strconv.ParseUint(config.Score.BaseScore, 10, 64)
 	if err != nil {
-		log.Println("warm up error:\n" + err.Error())
-		return false
+		log.Panicln(err)
 	}
+	utils.Cache.MutateChallenge(challenge.ChallengeId, true, config.Score.Dynamic, baseScore)
+
 	return true
 }
 
@@ -320,9 +295,9 @@ func DisableChallengeById(challengeId string) bool {
 	if challenge.State == "disabled" {
 		return true
 	}
-	var oldConfig types.ChallengeConfig
+	var config types.ChallengeConfig
 	//we don't allow user to change singleton
-	err = json.Unmarshal([]byte(challenge.Configuration), &oldConfig)
+	err = json.Unmarshal([]byte(challenge.Configuration), &config)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -332,6 +307,7 @@ func DisableChallengeById(challengeId string) bool {
 		tx.Save(&challenge)
 
 		ok := DeleteReplicaByChallengeId(challenge.ChallengeId, tx, nil)
+
 		if !ok {
 			return errors.New("delete replica error")
 		}
@@ -347,11 +323,12 @@ func DisableChallengeById(challengeId string) bool {
 		log.Println("challenge disable error: ", err)
 		return false
 	}
-	err = utils.Cache.WarmUp()
+	baseScore, err := strconv.ParseUint(config.Score.BaseScore, 10, 64)
 	if err != nil {
-		log.Println("warm up error:\n" + err.Error())
-		return false
+		log.Panicln(err)
 	}
+	utils.Cache.MutateChallenge(challenge.ChallengeId, false, config.Score.Dynamic, baseScore)
+
 	return true
 }
 
@@ -405,6 +382,13 @@ func DeleteChallenge(challengeId string) bool {
 		log.Println("can't find challenge by challenge id", challengeId)
 		return false
 	}
+	var config types.ChallengeConfig
+
+	err = json.Unmarshal([]byte(challenge.Configuration), &config)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
 
 	ok := DeleteReplicaByChallengeId(id, nil, func(status bool) {
 		var err error
@@ -418,11 +402,12 @@ func DeleteChallenge(challengeId string) bool {
 		}
 		//Delete Challenge
 		db.Delete(&challenge)
-		err = utils.Cache.WarmUp()
+		baseScore, err := strconv.ParseUint(config.Score.BaseScore, 10, 64)
 		if err != nil {
-			log.Println("warm up error:\n" + err.Error())
-			return
+			log.Panicln(err)
 		}
+		utils.Cache.MutateChallenge(id, false, config.Score.Dynamic, baseScore)
+
 	})
 	if !ok {
 		err = errors.New("delete replica by challengeId error")

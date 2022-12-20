@@ -220,6 +220,7 @@ func (cache *TimelineRankCache) refreshRank(index int) {
 	cache.rankNodes[index] = rank
 }
 
+// MutateUser @state: true -> user is valid , false -> user is invalid
 func (cache *TimelineRankCache) MutateUser(userId uint64, state bool) {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()

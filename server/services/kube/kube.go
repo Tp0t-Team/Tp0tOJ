@@ -31,7 +31,7 @@ import (
 	"time"
 )
 
-//var kubeConfig *rest.Config
+// var kubeConfig *rest.Config
 var clientSet *kubernetes.Clientset
 var dockerClient *client.Client
 var dockerPushAuth string
@@ -144,9 +144,9 @@ func ParseProtocol(name string) corev1.Protocol {
 //	return &corev1.ContainerPort{Name: "port-" + strconv.FormatInt(int64(containerPort), 10), Protocol: protocol, ContainerPort: containerPort}
 //}
 
-//NewServicePortConfig
-//portName is like 'ssh'\'ftp' etc. ,this can be anyone you like, but must be unique for same pod.
-//externalPort is exposed port for container, and internalPort is service port inside of container, podPort is port you can visit it on the internet.
+// NewServicePortConfig
+// portName is like 'ssh'\'ftp' etc. ,this can be anyone you like, but must be unique for same pod.
+// externalPort is exposed port for container, and internalPort is service port inside of container, podPort is port you can visit it on the internet.
 func NewServicePortConfig(portName string, protocol corev1.Protocol, externalPort int32, internalPort int32, podPort int32) *corev1.ServicePort {
 	return &corev1.ServicePort{Name: portName, Protocol: protocol, Port: externalPort, TargetPort: intstr.IntOrString{Type: intstr.Int, IntVal: internalPort}, NodePort: podPort}
 }

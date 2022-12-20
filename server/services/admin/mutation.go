@@ -8,7 +8,6 @@ import (
 	"server/services/kube"
 	"server/services/sse"
 	"server/services/types"
-	"server/utils"
 	"server/utils/kick"
 	"strconv"
 	"strings"
@@ -159,13 +158,13 @@ func (r *AdminMutationResolver) ChallengeAction(ctx context.Context, args struct
 	return &types.ChallengeActionResult{Message: ""}
 }
 
-func (r *AdminMutationResolver) WarmUp() (bool, error) {
-	err := utils.Cache.WarmUp()
-	if err != nil {
-		return false, nil
-	}
-	return true, nil
-}
+//func (r *AdminMutationResolver) WarmUp() (bool, error) {
+//	err := utils.Cache.WarmUp()
+//	if err != nil {
+//		return false, nil
+//	}
+//	return true, nil
+//}
 
 func (r *AdminMutationResolver) DeleteImage(ctx context.Context, args struct{ Input string }) *types.DeleteImageResult {
 	input := args.Input

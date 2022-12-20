@@ -20,7 +20,7 @@ func AddUser(name string, password string, mail string, role string, state strin
 				return result.Error
 			}
 			if role != "admin" {
-				utils.Cache.AddUser(newUser.UserId)
+				utils.Cache.MutateUser(newUser.UserId, true)
 			}
 		} else if checkResult.Error != nil {
 			return checkResult.Error
@@ -106,11 +106,7 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 		return false
 	}
 	if needWarmUp {
-		err := utils.Cache.WarmUp()
-		if err != nil {
-			log.Println(err)
-			return false
-		}
+		utils.Cache.MutateUser(userId, role != "admin")
 	}
 	return true
 }

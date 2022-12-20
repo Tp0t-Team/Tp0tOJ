@@ -16,6 +16,7 @@ require (
 	github.com/kataras/go-sessions/v3 v3.3.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/r3labs/sse/v2 v2.8.1
+	github.com/ugorji/go v1.1.4
 	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
