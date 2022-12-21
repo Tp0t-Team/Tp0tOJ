@@ -29,6 +29,7 @@ type BulletinJSON struct {
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 	Title       string `json:"title"`
+	Style       string `json:"style"`
 	PublishTime string `json:"publishTime"`
 }
 
@@ -39,7 +40,8 @@ func newBulletinJSON(input entity.Bulletin) BulletinJSON {
 		Topping:     input.Topping,
 		CreatedAt:   input.CreatedAt.In(timeZone).Format(time.RFC3339),
 		UpdatedAt:   input.UpdatedAt.In(timeZone).Format(time.RFC3339),
-		Title:       "",
+		Title:       input.Title,
+		Style:       input.Style,
 		PublishTime: input.PublishTime.In(timeZone).Format(time.RFC3339),
 	}
 }
@@ -81,10 +83,10 @@ func newChallengeJSON(input entity.Challenge) ChallengeJSON {
 type ReplicaJSON struct {
 	ReplicaId   string `json:"replicaId"`
 	ChallengeId string `json:"challengeId"`
-	Singleton   bool
+	Singleton   bool   `json:"singleton"`
 	Status      string `json:"status"`
 	Flag        string `json:"flag"`
-	FlagType    string
+	FlagType    string `json:"flagType"`
 	CreatedAt   string `json:"createdAt"`
 	UpdatedAt   string `json:"updatedAt"`
 }
