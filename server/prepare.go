@@ -591,7 +591,8 @@ func GenerateAgentScript(masterIP string, k3sExec string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	cmdBlock := "sudo mkdir /etc/rancher; sudo mkdir /etc/rancher/k3s\n" +
+	cmdBlock := "if [ ! -e /etc/rancher ]; then sudo mkdir /etc/rancher; fi\n" +
+		"if [ ! -e /etc/rancher ]; then sudo mkdir /etc/rancher/k3s; fi\n" +
 		"sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\n" +
 		"sudo cp -r OJRegistry /etc/rancher/k3s\n" +
 		"rm registries-config.yaml\n" +
@@ -881,6 +882,7 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 
 func main() {
 	k3sExec := "--disable=traefik"
+	agentK3sExec := ""
 
 	masterIP := flag.String("MasterIP", "", "master ip")
 	genAgentScript := flag.Bool("agent", false, "only generate agent script")
@@ -899,7 +901,7 @@ func main() {
 	}
 	if *genAgentScript {
 		log.Println("generate agent script...")
-		GenerateAgentScript(*masterIP, k3sExec)
+		GenerateAgentScript(*masterIP, agentK3sExec)
 		log.Println("[*]done")
 		return
 	}
