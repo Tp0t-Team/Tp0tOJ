@@ -275,8 +275,9 @@ func (cache *TimelineRankCache) Submit(userId uint64, challengeId uint64, stamp 
 		}
 		for k, user := range lastFrame.Users {
 			item := &UserFrame{
-				Solved: []uint64{},
-				Blood:  map[uint64]int{},
+				Solved:    []uint64{},
+				Blood:     map[uint64]int{},
+				LastSolve: user.LastSolve,
 			}
 			for _, it := range user.Solved {
 				item.Solved = append(item.Solved, it)
