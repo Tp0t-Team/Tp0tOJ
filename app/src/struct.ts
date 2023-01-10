@@ -49,6 +49,11 @@ export interface RankDesc {
   score: string;
 }
 
+export interface RankWithIndex {
+  index: number; // base 0
+  desc: RankDesc;
+}
+
 export interface BulletinItem {
   style: string;
   title: string;

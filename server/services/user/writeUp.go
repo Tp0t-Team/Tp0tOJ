@@ -2,10 +2,12 @@ package user
 
 import (
 	"io"
+	"io/fs"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"path/filepath"
 	"server/services/database/resolvers"
 	"server/utils/configure"
 	"strconv"
@@ -39,8 +41,34 @@ func WriteUpHandle(w http.ResponseWriter, req *http.Request, userId uint64) {
 	defer file.Close()
 	fileNameParts := strings.Split(fileHandle.Filename, ".")
 	extname := fileHandle.Filename[len(fileNameParts[0]):]
-	// TODO: add more check, remove the old one
-	outFile, err := os.Create(configure.WriteUpPath + "/" + strconv.FormatUint(userId, 10) + extname)
+	// remove the old writeup
+	fileName := strconv.FormatUint(userId, 10)
+	removeList := []string{}
+	err = filepath.Walk(configure.WriteUpPath, func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		if strings.Split(info.Name(), ".")[0] == fileName {
+			removeList = append(removeList, path)
+		}
+		return nil
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(nil)
+		log.Println(err)
+		return
+	}
+	for _, f := range removeList {
+		err := os.Remove(f)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(nil)
+			log.Println(err)
+			return
+		}
+	}
+	outFile, err := os.Create(configure.WriteUpPath + "/" + fileName + extname)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write(nil)

@@ -2,7 +2,7 @@
   <div class="content-col">
     <v-container>
       <v-row>
-        <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
+        <v-col v-for="r in topRank" :key="r.desc.userId" cols="4">
           <v-hover v-slot:default="{ hover }">
             <v-card
               :elevation="hover ? 12 : 2"
@@ -10,7 +10,7 @@
               class="mx-auto d-flex flex-row mb-6 px-4"
               @click="
                 if (!!$store.state.global.userId)
-                  $router.push(`/profile/${r.userId}`);
+                  $router.push(`/profile/${r.desc.userId}`);
               "
             >
               <div class="pa-2 align-self-center">
@@ -18,9 +18,9 @@
                   <!-- <span class="headline">{{ r.name[0] }}</span> -->
                   <user-avatar
                     class="headline white--text"
-                    :url="r.avatar"
+                    :url="r.desc.avatar"
                     :size="64"
-                    :name="r.name"
+                    :name="r.desc.name"
                   ></user-avatar>
                 </v-avatar>
               </div>
@@ -33,46 +33,16 @@
                       :class="rankColor[index] + ' white--text'"
                       >{{ index + 1 }}</v-avatar
                     >
-                    {{ r.name.toUpperCase() }}
+                    {{ r.desc.name.toUpperCase() }}
                   </v-chip>
                 </v-card-title>
-                <v-card-text>{{ r.score }}pt</v-card-text>
+                <v-card-text>{{ r.desc.score }}pt</v-card-text>
               </div>
             </v-card>
           </v-hover>
         </v-col>
       </v-row>
-      <v-simple-table class="ma-4">
-        <thead>
-          <tr>
-            <th class="text-left">Rank</th>
-            <th class="text-left">Name</th>
-            <th class="text-left">Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            class="table-item"
-            v-for="(r, index) in pageRank"
-            :key="r.rank"
-            @click="
-              if ($store.state.global.role == 'admin')
-                $router.push(`/profile/${r.userId}`);
-            "
-          >
-            <td>{{ pageBase + index + 1 }}</td>
-            <td>{{ r.name }}</td>
-            <td>{{ r.score }}</td>
-          </tr>
-        </tbody>
-      </v-simple-table>
-      <v-row justify="center">
-        <v-pagination
-          v-model="page"
-          :page="page"
-          :length="pageCount"
-        ></v-pagination>
-      </v-row>
+      <rank-table :value="commonRank" :userPerPage="10" :pageInit="page" />
       <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
         {{ infoText }}
         <!-- <v-spacer></v-spacer> -->
@@ -82,10 +52,6 @@
           </v-btn>
         </template>
       </v-snackbar>
-      <div
-        class="progress-bar"
-        :style="`width:${(renewCounter * 100) / CountMax}%;`"
-      ></div>
     </v-container>
   </div>
 </template>
@@ -94,27 +60,20 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { RankDesc, RankResult } from "@/struct";
-import constValue from "../constValue";
-
-const UserPerPage = 10;
+import RankTable from "@/components/RankTable.vue";
+import { RankWithIndex, RankResult } from "@/struct";
 
 @Component({
   components: {
-    UserAvatar
+    UserAvatar,
+    RankTable
   }
 })
 export default class Rank extends Vue {
-  private monitorMode = false;
-  private renewCounter = 0;
-  private CountMax = constValue.CountMax;
-  private sseSource: EventSource | undefined;
-
   private rankColor = ["amber", "light-blue", "green"];
-  private page: number = 1;
+  private page: number = 1; // only for init
 
-  private ranks: RankDesc[] = [];
-  private pageCount: number = 1;
+  private ranks: RankWithIndex[] = [];
 
   private infoText: string = "";
   private hasInfo: boolean = false;
@@ -122,31 +81,13 @@ export default class Rank extends Vue {
   private get topRank() {
     return this.ranks.slice(0, 3);
   }
-  private get pageBase() {
-    return (this.page - 1) * 10 + 3;
-  }
-  private get pageRank() {
-    return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
+  private get commonRank() {
+    return this.ranks.slice(3);
   }
 
   async mounted() {
-    this.monitorMode = this.$route.path.split("/")[1] == "monitor";
     this.page = Math.max(parseInt(this.$route.params.page), 1);
     await this.loadData();
-    if (this.monitorMode) {
-      this.sseSource = new EventSource("/sse?stream=message");
-      this.sseSource.addEventListener("message", async () => {
-        await this.loadData();
-      });
-      setInterval(this.renew, 500);
-    }
-  }
-
-  async renew() {
-    this.renewCounter = (this.renewCounter % this.CountMax) + 1;
-    if (this.renewCounter == this.CountMax) {
-      await this.loadData();
-    }
   }
 
   async loadData() {
@@ -169,12 +110,11 @@ export default class Rank extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
-      this.ranks = res.data!.rank.rankResultDescs.sort(
-        (a, b) => parseInt(b.score) - parseInt(a.score)
-      );
-      this.pageCount = Math.floor(
-        (this.ranks.length - 3 + UserPerPage - 1) / UserPerPage
-      );
+      this.ranks = res
+        .data!.rank.rankResultDescs.sort(
+          (a, b) => parseInt(b.score) - parseInt(a.score)
+        )
+        .map((it, index) => ({ index, desc: it } as RankWithIndex));
     } catch (e) {
       this.infoText = e.toString();
       this.hasInfo = true;

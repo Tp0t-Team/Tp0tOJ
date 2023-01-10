@@ -12,77 +12,10 @@
           ></apex-chart>
         </div>
       </v-row>
-      <!-- <v-row>
-        <v-col v-for="(r, index) in topRank" :key="r.userId" cols="4">
-          <v-hover v-slot:default="{ hover }">
-            <v-card
-              :elevation="hover ? 12 : 2"
-              max-width="300"
-              class="mx-auto d-flex flex-row mb-6 px-4"
-              @click="
-                if (!!$store.state.global.userId)
-                  $router.push(`/profile/${r.userId}`);
-              "
-            >
-              <div class="pa-2 align-self-center">
-                <v-avatar size="64" color="blue">
-                  <user-avatar
-                    class="headline white--text"
-                    :url="r.avatar"
-                    :size="64"
-                    :name="r.name"
-                  ></user-avatar>
-                </v-avatar>
-              </div>
-              <div class="pa-2">
-                <v-card-title>
-                  <v-chip>
-                    <v-avatar
-                      large
-                      left
-                      :class="rankColor[index] + ' white--text'"
-                      >{{ index + 1 }}</v-avatar
-                    >
-                    {{ r.name.toUpperCase() }}
-                  </v-chip>
-                </v-card-title>
-                <v-card-text>{{ r.score }}pt</v-card-text>
-              </div>
-            </v-card>
-          </v-hover>
-        </v-col>
-      </v-row> -->
-      <v-simple-table class="ma-4">
-        <thead>
-          <tr>
-            <th class="text-left">Rank</th>
-            <th class="text-left">Name</th>
-            <th class="text-left">Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            class="table-item"
-            v-for="(r, index) in pageRank"
-            :key="r.rank"
-            @click="
-              if ($store.state.global.role == 'admin')
-                $router.push(`/profile/${r.userId}`);
-            "
-          >
-            <td>{{ pageBase + index + 1 }}</td>
-            <td>{{ r.name }}</td>
-            <td>{{ r.score }}</td>
-          </tr>
-        </tbody>
-      </v-simple-table>
-      <v-row justify="center">
-        <v-pagination
-          v-model="page"
-          :page="page"
-          :length="pageCount"
-        ></v-pagination>
-      </v-row>
+      <rank-table :value="ranks" :userPerPage="10" :pageInit="page" />
+      <v-btn fab absolute right bottom color="primary" @click="pause = !pause">
+        <v-icon>{{ pause ? "play_arrow" : "pause" }}</v-icon>
+      </v-btn>
       <v-snackbar v-model="hasInfo" right bottom :timeout="3000">
         {{ infoText }}
         <!-- <v-spacer></v-spacer> -->
@@ -104,10 +37,9 @@
 import { Component, Vue } from "vue-property-decorator";
 import gql from "graphql-tag";
 import UserAvatar from "@/components/UserAvatar.vue";
-import { RankDesc, RankResult, ChartData } from "@/struct";
+import RankTable from "@/components/RankTable.vue";
+import { RankWithIndex, RankResult, ChartData } from "@/struct";
 import constValue from "../constValue";
-
-const UserPerPage = 10;
 
 const userLocale =
   navigator.languages && navigator.languages.length
@@ -116,7 +48,8 @@ const userLocale =
 
 @Component({
   components: {
-    UserAvatar
+    UserAvatar,
+    RankTable
   }
 })
 export default class Monitor extends Vue {
@@ -125,11 +58,11 @@ export default class Monitor extends Vue {
   private CountMax = constValue.CountMax;
   private sseSource: EventSource | undefined;
 
-  // private rankColor = ["amber", "light-blue", "green"];
-  private page: number = 1;
+  private page: number = 1; // only for init
 
-  private ranks: RankDesc[] = [];
-  private pageCount: number = 1;
+  private ranks: RankWithIndex[] = [];
+
+  private pause: boolean = false;
 
   private infoText: string = "";
   private hasInfo: boolean = false;
@@ -145,6 +78,18 @@ export default class Monitor extends Vue {
           enabled: false
         }
       },
+      colors: [
+        "#1f77b4", // muted blue
+        "#ff7f0e", // safety orange
+        "#2ca02c", // cooked asparagus green
+        "#d62728", // brick red
+        "#9467bd", // muted purple
+        "#8c564b", // chestnut brown
+        "#e377c2", // raspberry yogurt pink
+        "#7f7f7f", // middle gray
+        "#bcbd22", // curry yellow-green
+        "#17becf" // blue-teal
+      ],
       theme: {
         mode: isDark ? "dark" : "light"
       },
@@ -189,16 +134,6 @@ export default class Monitor extends Vue {
     };
   }
 
-  // private get topRank() {
-  //   return this.ranks.slice(0, 3);
-  // }
-  private get pageBase() {
-    return (this.page - 1) * 10; // + 3;
-  }
-  private get pageRank() {
-    return this.ranks.slice(this.pageBase, this.pageBase + UserPerPage);
-  }
-
   async mounted() {
     this.monitorMode = this.$route.path.split("/")[1] == "monitor";
     this.page = Math.max(parseInt(this.$route.params.page), 1);
@@ -206,6 +141,10 @@ export default class Monitor extends Vue {
     if (this.monitorMode) {
       this.sseSource = new EventSource("/sse?stream=message");
       this.sseSource.addEventListener("message", async () => {
+        if (this.pause) {
+          this.renewCounter = this.CountMax - 1;
+          return;
+        }
         await this.loadData();
       });
       setInterval(this.renew, 500);
@@ -213,6 +152,9 @@ export default class Monitor extends Vue {
   }
 
   async renew() {
+    if (this.pause) {
+      return;
+    }
     this.renewCounter = (this.renewCounter % this.CountMax) + 1;
     if (this.renewCounter == this.CountMax) {
       await this.loadData();
@@ -239,12 +181,11 @@ export default class Monitor extends Vue {
       });
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.rank.message) throw res.data!.rank.message;
-      this.ranks = res.data!.rank.rankResultDescs.sort(
-        (a, b) => parseInt(b.score) - parseInt(a.score)
-      );
-      this.pageCount = Math.floor(
-        (this.ranks.length /*- 3*/ + UserPerPage - 1) / UserPerPage
-      );
+      this.ranks = res
+        .data!.rank.rankResultDescs.sort(
+          (a, b) => parseInt(b.score) - parseInt(a.score)
+        )
+        .map((it, index) => ({ index, desc: it } as RankWithIndex));
 
       let chartRes = await fetch(
         `/chart/?num=${this.$route.query["num"] ?? "10"}`,
@@ -293,8 +234,7 @@ export default class Monitor extends Vue {
 <style lang="scss" scoped>
 .chart-container {
   width: 100%;
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin: 16px 24px;
   background-color: rgb(127 127 127 / 0.1);
 }
 
