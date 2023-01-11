@@ -219,6 +219,7 @@ export default class Profile extends Vue {
                 joinTime
                 score
                 state
+                rank
               }
             }
           }
