@@ -53,6 +53,7 @@ func (r *AdminQueryResolver) AllUserInfos(ctx context.Context) *types.AllUserInf
 			Score:    int32(utils.Cache.GetUserScore(v.UserId)),
 			Role:     v.Role,
 			State:    v.State,
+			Rank:     0, // don't provide rank in all user info now.
 		})
 	}
 	return &types.AllUserInfoResult{Message: "", AllUserInfos: userInfos}

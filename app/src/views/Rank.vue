@@ -2,7 +2,7 @@
   <div class="content-col">
     <v-container>
       <v-row>
-        <v-col v-for="r in topRank" :key="r.desc.userId" cols="4">
+        <v-col v-for="(r, index) in topRank" :key="r.desc.userId" cols="4">
           <v-hover v-slot:default="{ hover }">
             <v-card
               :elevation="hover ? 12 : 2"

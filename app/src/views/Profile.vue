@@ -38,7 +38,20 @@
                     <v-subheader>
                       <span class="text-center">
                         <br />
-                        {{ userInfo.score }}pt
+                        <v-chip>
+                          <v-avatar
+                            v-if="userInfo.score > 0"
+                            left
+                            class="font-weight-bold"
+                            :color="
+                              rankColor[
+                                userInfo.rank > 3 ? 3 : userInfo.rank - 1
+                              ]
+                            "
+                            >{{ userInfo.rank }}</v-avatar
+                          >
+                          {{ userInfo.score }}pt
+                        </v-chip>
                       </span>
                     </v-subheader>
                   </div>
@@ -152,6 +165,8 @@ import gql from "graphql-tag";
   }
 })
 export default class Profile extends Vue {
+  private rankColor = ["amber", "light-blue", "green", "grey"];
+
   private loading: boolean = false;
   private userInfo: UserInfo = {
     userId: "",
@@ -160,8 +175,9 @@ export default class Profile extends Vue {
     role: "",
     mail: "",
     joinTime: "",
-    score: "0",
-    state: ""
+    score: 0,
+    state: "",
+    rank: 0
   };
 
   private infoText: string = "";

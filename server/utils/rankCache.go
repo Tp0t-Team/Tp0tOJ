@@ -19,6 +19,7 @@ type ChartData struct {
 type RankCache interface {
 	SetCalculator(calculator ScoreCalculator)
 	GetRank() []RankItem
+	GetUserRank(userId uint64) int
 	GetUserScore(userId uint64) uint64
 	//AddUser(userId uint64)
 	MutateUser(userId uint64, state bool)

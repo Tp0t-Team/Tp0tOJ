@@ -100,7 +100,7 @@ export default class UserEditor extends Vue {
     this.name = this.user.name;
     this.role = this.user.role;
     this.state = this.user.state;
-    this.score = parseInt(this.user.score);
+    this.score = this.user.score;
     this.mail = this.user.mail;
     this.joinTime = new Date(
       this.user.joinTime //.replace(/\//g, "-") + "+00:00"
@@ -115,8 +115,9 @@ export default class UserEditor extends Vue {
       role: this.role,
       mail: this.mail,
       joinTime: this.user!.joinTime,
-      score: this.user!.score.toString(),
-      state: this.state
+      score: this.user!.score,
+      state: this.state,
+      rank: this.user!.rank
     } as UserInfo;
   }
 }

@@ -91,6 +91,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 	if user == nil {
 		return &types.UserInfoResult{Message: "No such user."}
 	}
+	rank := utils.Cache.GetUserRank(parsedUserId) + 1
 	result := types.UserInfoResult{
 		Message: "",
 		UserInfo: types.UserInfo{
@@ -102,7 +103,7 @@ func (r *QueryResolver) UserInfo(ctx context.Context, args struct{ UserId string
 			Score:    int32(utils.Cache.GetUserScore(user.UserId)),
 			Role:     user.Role,
 			State:    user.State,
-			//Rank:     0, //
+			Rank:     int32(rank),
 		}}
 	if *session.Get("isAdmin").(*bool) || parsedUserId == currentUserId {
 		result.UserInfo.Mail = user.Mail

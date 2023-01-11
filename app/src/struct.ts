@@ -15,9 +15,9 @@ export interface UserInfo {
   mail: string;
   // topRank: string
   joinTime: string;
-  score: string;
+  score: number;
   state: string;
-  // rank: number
+  rank: number;
 }
 
 export interface ChallengeInfo {
