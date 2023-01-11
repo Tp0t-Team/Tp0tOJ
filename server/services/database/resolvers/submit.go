@@ -97,12 +97,13 @@ func FindSubmitCorrectSorted() []entity.Submit {
 
 var BloodName = []string{"first", "second", "third"}
 
-func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time, setBlood bool) bool {
+func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.Time, setBlood bool) (success bool, isCorrect bool) {
 	submitCache := false
 	deleteReplica := new(uint64)
 	// blood infos
 	bloodIndex := -1
 	challengeName := ""
+	var correct = false
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if CheckSubmitCorrectByUserIdAndChallengeId(userId, challengeId, tx) {
 			return errors.New("already finish this challenge")
@@ -125,7 +126,6 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			return err
 		}
 		var newSubmit entity.Submit
-		var correct = false
 		if alloc.Replica.FlagType == types.Multiple {
 			flags := strings.Split(alloc.Replica.Flag, "\n")
 			for _, i := range flags {
@@ -186,7 +186,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 	})
 	if err != nil {
 		log.Println(err)
-		return false
+		return false, false
 	}
 	if bloodIndex >= 0 {
 		user, err := FindUser(userId)
@@ -209,7 +209,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		err := utils.Cache.Submit(userId, challengeId, submitTime)
 		if err != nil {
 			log.Println(err)
-			return false
+			return false, false
 		}
 		if deleteReplica != nil {
 			if !DeleteReplicaById(*deleteReplica, nil) {
@@ -217,7 +217,7 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 			}
 		}
 	}
-	return true
+	return true, correct
 
 }
 

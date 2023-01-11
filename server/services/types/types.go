@@ -86,6 +86,7 @@ func (input *SubmitInput) CheckPass() bool {
 
 type SubmitResult struct {
 	Message string
+	Correct bool
 }
 
 type BulletinPubInput struct {

@@ -256,11 +256,11 @@ func (r *MutationResolver) Submit(ctx context.Context, args struct{ Input types.
 	}
 	submitTime := time.Now()
 	resolvers.BehaviorSubmit(challengeId, userId, input.Flag, submitTime, nil)
-	ok := resolvers.AddSubmit(userId, challengeId, input.Flag, submitTime, !*isAdmin.(*bool))
+	ok, correct := resolvers.AddSubmit(userId, challengeId, input.Flag, submitTime, !*isAdmin.(*bool))
 	if !ok {
 		return &types.SubmitResult{Message: "Submit Service Error!"}
 	}
-	return &types.SubmitResult{Message: ""}
+	return &types.SubmitResult{Message: "", Correct: correct}
 
 }
 

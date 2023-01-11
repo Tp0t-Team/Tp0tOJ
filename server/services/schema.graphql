@@ -71,6 +71,7 @@ input SubmitInput {
 
 type SubmitResult {
     message: String!
+    correct: Boolean!
 }
 
 input BulletinPubInput {

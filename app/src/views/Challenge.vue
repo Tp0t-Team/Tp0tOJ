@@ -149,6 +149,22 @@
         </v-btn>
       </template>
     </v-snackbar>
+    <v-dialog v-model="dialog" width="360" persistent>
+      <v-card>
+        <v-card-title class="text-h5">
+          {{ alertInfo }}
+        </v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="closeDialog">
+            close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -195,6 +211,9 @@ export default class Challenge extends Vue {
   private hasInfo: boolean = false;
 
   private timeoutTask: ReturnType<typeof setTimeout> | null = null;
+
+  private dialog: boolean = true;
+  private alertInfo = "";
 
   async mounted() {
     await this.loadData();
@@ -414,6 +433,7 @@ export default class Challenge extends Vue {
           mutation($input: SubmitInput!) {
             submit(input: $input) {
               message
+              correct
             }
           }
         `,
@@ -427,10 +447,10 @@ export default class Challenge extends Vue {
       if (res.errors) throw res.errors.map(v => v.message).join(",");
       if (res.data!.submit.message) throw res.data!.submit.message;
       // throw "提交成功";
-      this.$router.replace({
-        path: "/challenge",
-        query: { time: Date.now().toLocaleString() }
-      });
+      this.alertInfo = res.data!.submit.correct
+        ? "Flag is correct!"
+        : "Flag is wrong.";
+      this.dialog = true;
     } catch (e) {
       this.loading = false;
       if (e === "unauthorized") {
@@ -441,6 +461,14 @@ export default class Challenge extends Vue {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
+  }
+
+  closeDialog() {
+    this.dialog = false;
+    this.$router.replace({
+      path: "/challenge",
+      query: { time: Date.now().toLocaleString() }
+    });
   }
 }
 </script>

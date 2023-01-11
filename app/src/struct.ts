@@ -187,7 +187,7 @@ export interface SubmitInput {
   };
 }
 export type SubmitResult = {
-  submit: Result;
+  submit: { correct: boolean } & Result;
 };
 
 // mutation bulletinPub
