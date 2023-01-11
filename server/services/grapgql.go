@@ -91,6 +91,10 @@ func CSPMiddleware(handler http.Handler) http.Handler {
 
 func init() {
 	muxRouter := mux.NewRouter()
+	expires := time.Duration(configure.Configure.Server.CookieTime)
+	if configure.Configure.Server.CookieTime > 0 {
+		expires = time.Second * expires
+	}
 	sessionManager := sessions.New(sessions.Config{
 		// Cookie string, the session's client cookie name, for example: "mysessionid"
 		//
@@ -100,7 +104,7 @@ func init() {
 		// 0 means no expire.
 		// -1 means expire when browser closes
 		// or set a value, like 2 hours:
-		Expires: time.Hour * 1,
+		Expires: expires,
 		// if you want to invalid cookies on different subdomains
 		// of the same host, then enable it
 		DisableSubdomainPersistence: false,

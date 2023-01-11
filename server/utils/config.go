@@ -18,6 +18,7 @@ type Server struct {
 	Salt        string `yaml:"salt"`
 	BehaviorLog bool   `yaml:"behaviorLog"`
 	Debug       Debug  `yaml:"debug"`
+	CookieTime  int    `yaml:"cookieExpiresSeconds"`
 }
 
 type Email struct {

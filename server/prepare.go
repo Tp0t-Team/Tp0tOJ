@@ -454,6 +454,7 @@ func CreateDefaultConfig(masterIP string, registryUsername string, registryPassw
 				NoOriginCheck:  false,
 				DBOpDetail:     false,
 			},
+			CookieTime: 3600,
 		},
 		Email: utils.Email{
 			Host:     "smtp.example.com",

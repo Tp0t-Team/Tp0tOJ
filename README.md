@@ -133,6 +133,7 @@ server:                              #平台服务器的配置参数
     dockerOpDetail: false            #开启可以查看容器构建和下发的问题
     noOriginCheck: false             #开启禁用orgin检查，禁用csrf检查，禁用CSP
     dbOpDetail: false                #开启查看所有数据库请求
+  cookieExpiresSeconds: 3600         #cookie过期秒数，0表示不会过期，-1表示在关闭浏览器时过期
 email:                               #邮件服务配置
   host: smtp.example.com             #邮件服务提供商服务器
   username: exampleUsername          #邮件发送账号
