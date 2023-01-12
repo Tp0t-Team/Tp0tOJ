@@ -1,7 +1,10 @@
 <template>
   <v-app id="app">
     <v-navigation-drawer v-model="drawer" app clipped>
-      <nav-list :isLogin="!!$store.state.global.userId"></nav-list>
+      <nav-list
+        :isLogin="!!$store.state.global.userId"
+        @writeup-result="alertAction"
+      ></nav-list>
     </v-navigation-drawer>
 
     <v-app-bar app clipped-left class="higher pr-2">
@@ -36,6 +39,26 @@
       </template>
     </v-snackbar>
 
+    <v-snackbar
+      v-model="hasAlert"
+      centered
+      top
+      multi-line
+      :color="alertInfo.color"
+      :timeout="5000"
+      class="sse-info"
+    >
+      <strong>{{ alertInfo.title }}</strong
+      ><br />
+      <span>{{ alertInfo.detail }}</span>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="hasAlert = false">close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
+
     <v-footer app padless class="higher">
       <v-col class="text-center pa-1">
         <span>
@@ -54,6 +77,7 @@ import { Component, Vue, Watch } from "vue-property-decorator";
 import gql from "graphql-tag";
 import NavList from "@/components/NavList.vue";
 import constValue from "./constValue";
+import { AlertInfo } from "./struct";
 
 @Component({
   components: {
@@ -69,6 +93,9 @@ export default class App extends Vue {
   private hasSSEInfo: boolean = false;
   private sseSource: EventSource = new EventSource("/sse?stream=message");
   private timer: number | null = null;
+
+  private hasAlert = false;
+  private alertInfo: AlertInfo = { color: "", title: "", detail: "" };
 
   @Watch("$route.path")
   async isMonitor() {
@@ -119,6 +146,11 @@ export default class App extends Vue {
       }
       console.log(e);
     }
+  }
+
+  alertAction(e: AlertInfo) {
+    this.alertInfo = e;
+    this.hasAlert = true;
   }
 }
 </script>

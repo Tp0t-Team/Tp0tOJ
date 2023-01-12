@@ -149,22 +149,23 @@
         </v-btn>
       </template>
     </v-snackbar>
-    <v-dialog v-model="dialog" width="360" persistent>
-      <v-card>
-        <v-card-title class="text-h5">
-          {{ alertInfo }}
-        </v-card-title>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="closeDialog">
-            close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <v-snackbar
+      v-model="dialog"
+      centered
+      top
+      multi-line
+      :color="alertColor"
+      :timeout="5000"
+      class="sse-info"
+    >
+      <strong>{{ alertInfo }}</strong>
+      <!-- <v-spacer></v-spacer> -->
+      <template v-slot:action="{ attrs }">
+        <v-btn icon>
+          <v-icon v-bind="attrs" @click="dialog = false">close</v-icon>
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -214,6 +215,7 @@ export default class Challenge extends Vue {
 
   private dialog: boolean = false;
   private alertInfo = "";
+  private alertColor = "";
 
   async mounted() {
     await this.loadData();
@@ -450,7 +452,10 @@ export default class Challenge extends Vue {
       this.alertInfo = res.data!.submit.correct
         ? "Flag is correct!"
         : "Flag is wrong.";
+      this.alertColor = res.data!.submit.correct ? "success" : "error";
       this.dialog = true;
+      this.showDialog = false;
+      await this.loadData();
     } catch (e) {
       this.loading = false;
       if (e === "unauthorized") {
@@ -461,14 +466,6 @@ export default class Challenge extends Vue {
       this.infoText = e.toString();
       this.hasInfo = true;
     }
-  }
-
-  closeDialog() {
-    this.dialog = false;
-    this.$router.replace({
-      path: "/challenge",
-      query: { time: Date.now().toLocaleString() }
-    });
   }
 }
 </script>
@@ -547,5 +544,10 @@ export default class Challenge extends Vue {
   animation-name: doing;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+}
+
+.sse-info * {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 </style>

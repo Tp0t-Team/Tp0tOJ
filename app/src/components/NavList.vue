@@ -201,42 +201,18 @@
         @change="uploadWriteup"
       />
     </v-tooltip>
-    <v-dialog v-model="dialog" width="360" persistent>
-      <v-card>
-        <v-card-title class="text-h5">
-          {{ alertTitle }}
-        </v-card-title>
-
-        <v-card-text>
-          {{ alertInfo }}
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialog = false">
-            close
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator";
+import { Component, Vue, Watch, Prop, Emit } from "vue-property-decorator";
 import gql from "graphql-tag";
-import { LogoutResult } from "@/struct";
+import { AlertInfo, LogoutResult } from "@/struct";
 
 @Component
 export default class NavList extends Vue {
   @Prop() isLogin!: boolean;
   private settings: string[] = [];
-
-  private dialog = false;
-  private alertTitle: string = "";
-  private alertInfo: string = "";
 
   mounted() {
     if (this.$vuetify.theme.dark) {
@@ -297,15 +273,25 @@ export default class NavList extends Vue {
         throw res.statusText;
       }
     } catch (err) {
-      this.dialog = true;
-      this.alertTitle = "upload writeup failed";
-      this.alertInfo = err!.toString();
+      this.writeupResult({
+        color: "error",
+        title: "upload writeup failed",
+        detail: err!.toString()
+      });
       e.target.value = "";
       return;
     }
-    this.dialog = true;
-    this.alertTitle = "upload writeup success";
+    this.writeupResult({
+      color: "success",
+      title: "upload writeup success",
+      detail: ""
+    });
     e.target.value = "";
+  }
+
+  @Emit("writeup-result")
+  writeupResult(e: AlertInfo) {
+    return e;
   }
 }
 </script>

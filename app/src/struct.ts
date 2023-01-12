@@ -329,3 +329,9 @@ export interface ChartData {
     score: number[];
   }[];
 }
+
+export interface AlertInfo {
+  color: string;
+  title: string;
+  detail: string;
+}
