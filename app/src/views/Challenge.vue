@@ -212,7 +212,7 @@ export default class Challenge extends Vue {
 
   private timeoutTask: ReturnType<typeof setTimeout> | null = null;
 
-  private dialog: boolean = true;
+  private dialog: boolean = false;
   private alertInfo = "";
 
   async mounted() {

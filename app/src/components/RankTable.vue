@@ -33,6 +33,7 @@
           dense
           hide-details
           append-icon="search"
+          @keydown.enter.prevent="updateFilter()"
           @click:append="updateFilter()"
           v-model="input"
         ></v-text-field>

@@ -85,7 +85,10 @@
                   </v-col>
                   <v-col
                     cols="6"
-                    v-if="$store.state.global.userId == $route.params.user_id"
+                    v-if="
+                      $store.state.global.userId == $route.params.user_id ||
+                        $store.state.global.role == 'admin'
+                    "
                   >
                     <v-text-field
                       :loading="loading"
