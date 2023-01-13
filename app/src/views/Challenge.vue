@@ -455,6 +455,7 @@ export default class Challenge extends Vue {
       this.alertColor = res.data!.submit.correct ? "success" : "error";
       this.dialog = true;
       this.showDialog = false;
+      this.loading = false;
       await this.loadData();
     } catch (e) {
       this.loading = false;
