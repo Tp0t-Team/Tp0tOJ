@@ -4,9 +4,25 @@
       <v-col cols="6" class="content-col">
         <v-data-table
           :headers="headers"
-          :items="users"
+          :items="filteredUsers"
           @click:row="select"
-        ></v-data-table>
+        >
+          <template v-slot:footer.prepend>
+            <div>
+              <v-text-field
+                style="width: 16vw"
+                label="Search"
+                outlined
+                dense
+                hide-details
+                append-icon="search"
+                @keydown.enter.prevent="updateFilter()"
+                @click:append="updateFilter()"
+                v-model="input"
+              ></v-text-field>
+            </div>
+          </template>
+        </v-data-table>
       </v-col>
       <v-col cols="6" class="content-col">
         <v-divider class="avatar-divider" color="primary"></v-divider>
@@ -107,6 +123,26 @@ export default class User extends Vue {
 
   private infoText: string = "";
   private hasInfo: boolean = false;
+
+  private input = "";
+  private filterRE: RegExp = /(.*)/;
+
+  private updateFilter() {
+    this.filterRE = new RegExp(
+      ["", ...Array.from(this.input.matchAll(/./gu)).map(it => it[0]), ""].join(
+        "(.*)"
+      ),
+      "iu"
+    );
+  }
+
+  private filter(it: UserInfo) {
+    return this.filterRE.test(it.name);
+  }
+
+  get filteredUsers(): UserInfo[] {
+    return this.users.filter(it => this.filter(it));
+  }
 
   async mounted() {
     await this.loadAll();
