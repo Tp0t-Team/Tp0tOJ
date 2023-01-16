@@ -206,10 +206,18 @@ func AddSubmit(userId uint64, challengeId uint64, flag string, submitTime time.T
 		}
 	}
 	if submitCache {
-		err := utils.Cache.Submit(userId, challengeId, submitTime)
+		user, err := FindUser(userId)
 		if err != nil {
 			log.Println(err)
 			return false, false
+		}
+		// FIXME: latent condition competition
+		if user.Role != "admin" {
+			err := utils.Cache.Submit(userId, challengeId, submitTime)
+			if err != nil {
+				log.Println(err)
+				return false, false
+			}
 		}
 		if deleteReplica != nil {
 			if !DeleteReplicaById(*deleteReplica, nil) {

@@ -94,7 +94,7 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 		log.Println(result.Error)
 		return false
 	}
-	needWarmUp := user.Role != role && (user.Role == "admin" || role == "admin")
+	needWarmUp := user.Role != role && (user.Role == "admin" || role == "admin") || user.State != state
 	user.Name = name
 	user.Role = role
 	user.Mail = mail
@@ -106,7 +106,7 @@ func UpdateUserInfo(userId uint64, name string, role string, mail string, state 
 		return false
 	}
 	if needWarmUp {
-		utils.Cache.MutateUser(userId, role != "admin")
+		utils.Cache.MutateUser(userId, role != "admin" && state != "disabled")
 	}
 	return true
 }
