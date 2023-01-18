@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>score curve</title>
+    <script src="https://cdn.plot.ly/plotly-2.13.3.min.js"></script>
+    <style>
+        .form {
+            display: inline-grid;
+            grid-template-columns: 80px 5rem;
+            align-items: center;
+            gap: 8px;
+            background-color: #eee;
+            padding: 8px;
+            position: absolute;
+            top: 8px;
+            left: 8px;
+        }
+
+        input {
+            height: 20px;
+            /* outline: none; */
+            border: 1px solid rgb(50 50 150);
+            border-radius: 0;
+            background-color: rgb(223, 223, 245);
+        }
+
+        .refresh {
+            grid-column: 1 / 3;
+            cursor: pointer;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #canv {
+            width: 800px;
+            height: 600px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div id="canv"></div>
+        <div class="form">
+            <label>最大人数:</label>
+            <input id="max" value="100">
+            <label>base score:</label>
+            <input id="baseScore" value="1000">
+            <label>half life:</label>
+            <input id="halfLife" value="20">
+            <input class="refresh" type="button" value="refresh">
+        </div>
+    </div>
+    <script>
+        let data = [
+            {
+                "x": [],
+                "y": [],
+                type: 'scatter',
+                mode: "lines",
+            }];
+        Plotly.newPlot("canv", {
+            "data": data,
+            "layout": { "width": 800, "height": 600 }
+        });
+
+        function UpdateData() {
+            console.log('update');
+            let max = parseInt(document.getElementById("max").value)
+            let baseScore = parseFloat(document.getElementById("baseScore").value)
+            let halfLife = parseFloat(document.getElementById("halfLife").value)
+            max = Math.max(max, 1);
+            baseScore = Math.max(baseScore, 0);
+            halfLife = Math.max(0, halfLife);
+
+            let x = [];
+            let y = [];
+            for (let i = 1; i < max; i++) {
+                x.push(i);
+                let coefficient = 1.8414 * (i - 1.0) / halfLife;
+                y.push(Math.floor(baseScore / (coefficient + Math.exp(-coefficient))));
+            }
+            data[0].x = x;
+            data[0].y = y;
+            Plotly.redraw("canv");
+        }
+        document.getElementsByClassName("refresh")[0].addEventListener('click', UpdateData);
+        UpdateData();
+    </script>
+</body>
+
+</html>
