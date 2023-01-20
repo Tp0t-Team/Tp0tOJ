@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"server/cli/exporter"
+	"server/cli/export"
+	"server/cli/load"
 	"server/cli/prepare"
 	_ "server/services/database"
 )
@@ -16,6 +17,7 @@ func help() {
 	fmt.Println("valid cmd:")
 	fmt.Println("  prepare: prepare Tp0tOJ environment.")
 	fmt.Println("  export: export OJ data to file.")
+	fmt.Println("  load: auto register users from file.")
 	fmt.Println("  help: show help information.")
 	fmt.Printf("Use `%s help <cmd>` for detailed help information.\n", cliName)
 }
@@ -23,7 +25,8 @@ func help() {
 func main() {
 	cmdList := map[string]func(args []string){
 		"prepare": prepare.Run,
-		"export":  exporter.Run,
+		"export":  export.Run,
+		"load":    load.Run,
 	}
 
 	if len(os.Args) == 1 {

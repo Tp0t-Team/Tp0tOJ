@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// AddUser support role[admin|member|team] state[banned|disabled|normal]
+// AddUser support role[admin|member|team] state[disabled|normal]
 func AddUser(name string, password string, mail string, role string, state string) bool {
 	err := db.Transaction(func(tx *gorm.DB) error {
 		checkResult := tx.Where(map[string]interface{}{"mail": mail}).First(&entity.User{})
