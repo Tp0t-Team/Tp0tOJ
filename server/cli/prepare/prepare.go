@@ -1,4 +1,4 @@
-package main
+package prepare
 
 import (
 	"archive/tar"
@@ -881,16 +881,21 @@ func GenerateStartScript(postgres bool, dbUsername string, dbPassword string) {
 	}
 }
 
-func main() {
+func Run(args []string) {
 	k3sExec := "--disable=traefik"
 	agentK3sExec := ""
 
-	masterIP := flag.String("MasterIP", "", "master ip")
-	genAgentScript := flag.Bool("agent", false, "only generate agent script")
-	enableTraefik := flag.Bool("enable-traefik", false, "do not disable traefik")
-	postgres := flag.Bool("postgres", false, "")
-	sqlite := flag.Bool("sqlite", false, "")
-	flag.Parse()
+	cli := flag.NewFlagSet("prepare", flag.ExitOnError)
+
+	masterIP := cli.String("MasterIP", "", "master ip")
+	genAgentScript := cli.Bool("agent", false, "only generate agent script")
+	enableTraefik := cli.Bool("enable-traefik", false, "do not disable traefik")
+	postgres := cli.Bool("postgres", false, "")
+	sqlite := cli.Bool("sqlite", false, "")
+	err := cli.Parse(args)
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	if *postgres == *sqlite {
 		log.Println("you must choose one and only one database type.")

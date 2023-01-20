@@ -1,4 +1,4 @@
-package main
+package exporter
 
 import (
 	"encoding/json"
@@ -299,9 +299,19 @@ func newGameEventJSON(input entity.GameEvent) GameEventJSON {
 	}
 }
 
-func main() {
-	dir := flag.String("dir", "./data", "export directory")
-	flag.Parse()
+func Run(args []string) {
+	cli := flag.NewFlagSet("export", flag.ExitOnError)
+
+	dir := cli.String("dir", "./data", "export directory")
+	err := cli.Parse(args)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	if configure.LoadConfigError != nil {
+		log.Printf("load config error: %s", configure.LoadConfigError.Error())
+		os.Exit(1)
+	}
 
 	if _, err := os.Stat(*dir); os.IsNotExist(err) {
 		err := os.MkdirAll(*dir, 0777)

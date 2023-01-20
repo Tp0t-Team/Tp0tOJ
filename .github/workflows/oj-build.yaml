@@ -49,14 +49,10 @@ jobs:
       working-directory: ./server
       run: go run build.go --postgres
 
-    - name: Build Prepare
-      working-directory: ./server
-      run: CGO_ENABLED=0 go build -o prepare_$(go env GOOS)_$(go env GOARCH) prepare.go
-    
     - name: Archive results
       uses: actions/upload-artifact@v3
       with:
         name: output
         path: |
           ./server/OJ_*
-          ./server/prepare_*
+          ./server/ojtool_*

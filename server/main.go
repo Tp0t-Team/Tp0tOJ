@@ -26,6 +26,10 @@ func Redirect(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	if configure.LoadConfigError != nil {
+		log.Printf("load config error: %s", configure.LoadConfigError.Error())
+		os.Exit(1)
+	}
 	// setup database connection
 	database.InitDB(configure.Configure.Database.Dsn)
 	resolvers.InitDB(database.DataBase)

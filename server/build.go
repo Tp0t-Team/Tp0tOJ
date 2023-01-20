@@ -16,6 +16,7 @@ import (
 func main() {
 	postgres := flag.Bool("postgres", false, "")
 	sqlite := flag.Bool("sqlite", false, "")
+	buildTool := flag.Bool("tool", true, "build cli tool")
 	flag.Parse()
 
 	tags := []string{"WithFrontEnd"}
@@ -121,6 +122,15 @@ func main() {
 	err = serverCmd.Run()
 	if err != nil {
 		log.Panicln(err)
+	}
+
+	if *buildTool {
+		cliToolCmd := exec.Command("go", "build", "-tags", strings.Join(tags, ","), "-o", fmt.Sprintf("ojtool_%s_%s", runtime.GOOS, runtime.GOARCH), "./cli")
+		log.Println("build CLI tool...")
+		err = cliToolCmd.Run()
+		if err != nil {
+			log.Panicln(err)
+		}
 	}
 
 	err = os.RemoveAll("services/static")
