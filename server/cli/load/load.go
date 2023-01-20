@@ -5,14 +5,20 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/badoux/checkmail"
+	"github.com/google/uuid"
+	"github.com/jordan-wright/email"
 	"golang.org/x/text/unicode/norm"
 	"gorm.io/gorm"
 	"log"
+	"net/smtp"
 	"os"
 	"regexp"
 	"server/entity"
 	"server/services/database"
 	"server/utils/configure"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -60,13 +66,56 @@ func addUser(info Item) (uint64, error) {
 	return user.UserId, nil
 }
 
+func makeToken() (string, error) {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	return id.String() + "-" + strconv.FormatInt(time.Now().UnixMilli(), 16), nil
+}
+
+func sendMail(address string, subject string, content string) error {
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
+	mail := email.NewEmail()
+	err := checkmail.ValidateFormat(configure.Configure.Email.Username)
+	if err != nil {
+		log.Println("mail check failed ", err)
+	}
+	mail.From = strings.Split(configure.Configure.Email.Username, "@")[0] + fmt.Sprintf("<%s>", configure.Configure.Email.Username)
+	mail.To = []string{address}
+	mail.Subject = subject
+	mail.Text = []byte(content)
+
+	err = mail.Send(fmt.Sprintf("%s:25", configure.Configure.Email.Host), smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func resetPassword(id uint64, mail string) error {
+	token, err := makeToken()
+	if err != nil {
+		return err
+	}
+	resetToken := entity.ResetToken{
+		Token:  token,
+		UserId: id,
+	}
+	database.DataBase.Create(&resetToken)
+	err = sendMail(mail, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\n %s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), token))
+	return err
+}
+
 func Run(args []string) {
 	cli := flag.NewFlagSet("load", flag.ExitOnError)
 
 	cli.Usage = func() {
 		fmt.Println("Usage: load <file>")
 		fmt.Println("  <file> is a csv file with [mail,username] format and no header")
+		cli.PrintDefaults()
 	}
+	reset := cli.Bool("reset", false, "auto send a reset password email for each user.")
 	err := cli.Parse(args)
 	if err != nil {
 		log.Panicln(err)
@@ -128,6 +177,15 @@ func Run(args []string) {
 		database.DataBase.Delete(&entity.User{}, added)
 		log.Panicln(err)
 	}
-	// TODO: maybe need send mail here?
+
+	if *reset {
+		for index, id := range added {
+			err := resetPassword(id, items[index].mail)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+
 	log.Println("Load success.")
 }
