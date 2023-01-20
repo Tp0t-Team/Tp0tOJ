@@ -61,7 +61,7 @@ func addUser(info Item) (uint64, error) {
 }
 
 func Run(args []string) {
-	cli := flag.NewFlagSet("export", flag.ExitOnError)
+	cli := flag.NewFlagSet("load", flag.ExitOnError)
 
 	cli.Usage = func() {
 		fmt.Println("Usage: load <file>")
