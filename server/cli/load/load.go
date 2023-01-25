@@ -22,6 +22,8 @@ import (
 	"server/utils/email"
 	"strconv"
 	"time"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var blankRegexp *regexp.Regexp
@@ -117,6 +119,41 @@ func sendPassword(info email.WelcomeInfo, url string, reward string, halfLife st
 	return err
 }
 
+type NullableBoolValue struct {
+	Value *bool
+}
+
+func (v NullableBoolValue) String() string {
+	if v.Value == nil {
+		return ""
+	}
+	if *v.Value {
+		return "true"
+	} else {
+		return "false"
+	}
+}
+
+func (v *NullableBoolValue) Set(s string) error {
+	v.Value = nil
+	if s == "" {
+		return nil
+	}
+	var value bool
+	if s == "true" {
+		value = true
+		v.Value = &value
+	}
+	if s == "false" {
+		value = false
+		v.Value = &value
+	}
+	if v.Value == nil {
+		return errors.New("must be `true` or `false`")
+	}
+	return nil
+}
+
 func Run(args []string) {
 	cli := flag.NewFlagSet("load", flag.ExitOnError)
 
@@ -125,10 +162,15 @@ func Run(args []string) {
 		fmt.Println("  <file> is a csv file with [mail,username] format and no header")
 		cli.PrintDefaults()
 	}
-	welcome := cli.Bool("welcome", true, "auto send a welcome email for each user.")
+	var welcome NullableBoolValue
+	cli.Var(&welcome, "welcome", "auto send welcome emails for each user.")
 	err := cli.Parse(args)
 	if err != nil {
 		log.Panicln(err)
+	}
+
+	if welcome.Value == nil {
+		log.Panicln("You must specify whether to send welcome emails.")
 	}
 
 	if len(cli.Args()) != 1 {
@@ -188,6 +230,8 @@ func Run(args []string) {
 		database.DataBase.Delete(&entity.User{}, added)
 		log.Panicln(err)
 	}
+	fmt.Println("Users has been loaded into the database. Start sending welcome emails...")
+
 	url := fmt.Sprintf("%s:%s/", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port))
 	reward := fmt.Sprintf(
 		"%g%%, %g%%, %g%%",
@@ -195,11 +239,17 @@ func Run(args []string) {
 		configure.Configure.Challenge.SecondBloodReward*100,
 		configure.Configure.Challenge.ThirdBloodReward*100)
 	halfLife := fmt.Sprintf("%d", configure.Configure.Challenge.HalfLife)
-	if *welcome {
+
+	const barTemplate = `{{with string . "prefix"}}{{.}} {{end}}[SENDING MAIL {{percent . }}] {{counters . }}{{with string . "suffix"}} {{.}}{{end}}`
+	bar := pb.ProgressBarTemplate(barTemplate).Start(len(added))
+
+	if *welcome.Value {
 		for index, _ := range added {
+			bar.Increment()
 			err := sendPassword(*addedInfo[index], url, reward, halfLife)
 			if err != nil {
 				log.Println(err)
+				log.Printf("[SEND MAIL ERROR] User: %s, Mail: %s, Password: %s\n", addedInfo[index].Username, addedInfo[index].Mail, addedInfo[index].Password)
 			}
 		}
 	}
