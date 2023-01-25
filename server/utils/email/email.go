@@ -33,9 +33,14 @@ func SendMail(address string, subject string, content []byte) error {
 //go:embed reset.html
 var embedResetTemplate string
 
+//go:embed welcome.html
+var embedWelcomeTemplate string
+
 var resetTemplate *template.Template
+var welcomeTemplate *template.Template
 
 const resetTemplatePath = "resources/emails/reset.html"
+const welcomeTemplatePath = "resources/emails/welcome.html"
 
 func loadTemplate(file string, defaultText string) (*template.Template, error) {
 	if _, err := os.Stat(file); err == nil {
@@ -43,15 +48,19 @@ func loadTemplate(file string, defaultText string) (*template.Template, error) {
 		if err != nil {
 			return nil, err
 		}
-		return template.New("reset").Parse(string(text))
+		return template.New("template").Parse(string(text))
 	} else {
-		return template.New("reset").Parse(defaultText)
+		return template.New("template").Parse(defaultText)
 	}
 }
 
 func init() {
 	var err error
 	resetTemplate, err = loadTemplate(resetTemplatePath, embedResetTemplate)
+	if err != nil {
+		log.Panicln(err)
+	}
+	welcomeTemplate, err = loadTemplate(welcomeTemplatePath, embedWelcomeTemplate)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -70,7 +79,19 @@ func RenderResetEmail(info ResetInfo) ([]byte, error) {
 	return ret.Bytes(), nil
 }
 
-func RenderWelcomeEmail(info ResetInfo) ([]byte, error) {
-	// TODO:
-	return RenderResetEmail(info)
+type WelcomeInfo struct {
+	Username string
+	Mail     string
+	Password string
+	Url      string
+	Reward   string
+	HalfLife string
+}
+
+func RenderWelcomeEmail(info WelcomeInfo) ([]byte, error) {
+	var ret bytes.Buffer
+	if err := welcomeTemplate.Execute(&ret, info); err != nil {
+		return nil, err
+	}
+	return ret.Bytes(), nil
 }

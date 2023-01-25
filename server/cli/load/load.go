@@ -1,14 +1,19 @@
 package load
 
 import (
+	"crypto/md5"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 	"encoding/csv"
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/google/uuid"
 	"golang.org/x/text/unicode/norm"
 	"gorm.io/gorm"
+	"io"
 	"log"
+	unsafeRand "math/rand"
 	"os"
 	"regexp"
 	"server/entity"
@@ -41,9 +46,42 @@ func (input *Item) checkPass() bool {
 	return lengthLimit(input.name, 1, 20) && lengthLimit(input.mail, 1, 50)
 }
 
-func addUser(info Item) (uint64, string, error) {
-	user := entity.User{Name: info.name, Password: "", Mail: info.mail, Role: "member", State: "normal", JoinTime: time.Now()}
-	err := database.DataBase.Transaction(func(tx *gorm.DB) error {
+func makePassword() (string, error) {
+	seed := make([]byte, 8)
+	_, err := rand.Read(seed)
+	if err != nil {
+		return "", err
+	}
+	unsafeRand.Seed(int64(binary.BigEndian.Uint64(seed)))
+	init := make([]byte, 8)
+	_, err = unsafeRand.Read(init)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%02x", md5.Sum(init))[:8], nil
+}
+
+func passwordHash(password string) string {
+	hash1 := sha256.New()
+	_, err := io.WriteString(hash1, configure.Configure.Server.Salt+password)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+	hash2 := sha256.New()
+	_, err = io.WriteString(hash2, configure.Configure.Server.Salt+fmt.Sprintf("%02x", hash1.Sum(nil)))
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+	return fmt.Sprintf("%02x", hash2.Sum(nil))
+}
+
+func addUser(info Item) (uint64, *email.WelcomeInfo, error) {
+	password, err := makePassword()
+	if err != nil {
+		return 0, nil, err
+	}
+	user := entity.User{Name: info.name, Password: passwordHash(password), Mail: info.mail, Role: "member", State: "normal", JoinTime: time.Now()}
+	err = database.DataBase.Transaction(func(tx *gorm.DB) error {
 		checkResult := tx.Where(map[string]interface{}{"mail": info.mail}).First(&entity.User{})
 		if errors.Is(checkResult.Error, gorm.ErrRecordNotFound) {
 			result := tx.Create(&user)
@@ -58,38 +96,24 @@ func addUser(info Item) (uint64, string, error) {
 		return nil
 	})
 	if err != nil {
-		return 0, "", err
+		return 0, nil, err
 	}
-	return user.UserId, user.Name, nil
+	return user.UserId, &email.WelcomeInfo{
+		Username: user.Name,
+		Mail:     user.Mail,
+		Password: password,
+	}, nil
 }
 
-func makeToken() (string, error) {
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return "", err
-	}
-	return id.String() + "-" + strconv.FormatInt(time.Now().UnixMilli(), 16), nil
-}
-
-func resetPassword(id uint64, name string, mail string) error {
-	token, err := makeToken()
+func sendPassword(info email.WelcomeInfo, url string, reward string, halfLife string) error {
+	content, err := email.RenderWelcomeEmail(info)
 	if err != nil {
 		return err
 	}
-	resetToken := entity.ResetToken{
-		Token:  token,
-		UserId: id,
-	}
-	database.DataBase.Create(&resetToken)
-
-	content, err := email.RenderWelcomeEmail(email.ResetInfo{
-		Username: name,
-		Url:      fmt.Sprintf("%s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), token),
-	})
-	if err != nil {
-		return err
-	}
-	err = email.SendMail(mail, "password reset", content)
+	info.Url = url
+	info.Reward = reward
+	info.HalfLife = halfLife
+	err = email.SendMail(info.Mail, "Welcome to Tp0t OJ", content)
 	return err
 }
 
@@ -101,7 +125,7 @@ func Run(args []string) {
 		fmt.Println("  <file> is a csv file with [mail,username] format and no header")
 		cli.PrintDefaults()
 	}
-	reset := cli.Bool("reset", false, "auto send a reset password email for each user.")
+	welcome := cli.Bool("welcome", true, "auto send a welcome email for each user.")
 	err := cli.Parse(args)
 	if err != nil {
 		log.Panicln(err)
@@ -151,23 +175,29 @@ func Run(args []string) {
 
 	err = nil
 	added := []uint64{}
-	addedName := []string{}
+	addedInfo := []*email.WelcomeInfo{}
 	for _, item := range items {
-		id, name, err := addUser(item)
+		id, info, err := addUser(item)
 		if err != nil {
 			break
 		}
 		added = append(added, id)
-		addedName = append(addedName, name)
+		addedInfo = append(addedInfo, info)
 	}
 	if err != nil {
 		database.DataBase.Delete(&entity.User{}, added)
 		log.Panicln(err)
 	}
-
-	if *reset {
-		for index, id := range added {
-			err := resetPassword(id, addedName[index], items[index].mail)
+	url := fmt.Sprintf("%s:%s/", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port))
+	reward := fmt.Sprintf(
+		"%g%%, %g%%, %g%%",
+		configure.Configure.Challenge.FirstBloodReward*100,
+		configure.Configure.Challenge.SecondBloodReward*100,
+		configure.Configure.Challenge.ThirdBloodReward*100)
+	halfLife := fmt.Sprintf("%d", configure.Configure.Challenge.HalfLife)
+	if *welcome {
+		for index, _ := range added {
+			err := sendPassword(*addedInfo[index], url, reward, halfLife)
 			if err != nil {
 				log.Println(err)
 			}
