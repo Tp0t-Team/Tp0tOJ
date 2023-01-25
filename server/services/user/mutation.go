@@ -4,16 +4,14 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/badoux/checkmail"
-	"github.com/jordan-wright/email"
 	"github.com/kataras/go-sessions/v3"
 	"io"
 	"log"
-	"net/smtp"
 	"regexp"
 	"server/services/database/resolvers"
 	"server/services/types"
 	"server/utils/configure"
+	"server/utils/email"
 	"server/utils/kick"
 	"strconv"
 	"strings"
@@ -162,28 +160,6 @@ func (r *MutationResolver) Logout(ctx context.Context) *types.LogoutResult {
 	return &types.LogoutResult{Message: ""}
 }
 
-func sendMail(address string, subject string, content string) bool {
-
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	mail := email.NewEmail()
-	err := checkmail.ValidateFormat(configure.Configure.Email.Username)
-	if err != nil {
-		log.Println("mail check failed ", err)
-	}
-	mail.From = strings.Split(configure.Configure.Email.Username, "@")[0] + fmt.Sprintf("<%s>", configure.Configure.Email.Username)
-	mail.To = []string{address}
-	mail.Subject = subject
-	mail.Text = []byte(content)
-
-	err = mail.Send(fmt.Sprintf("%s:25", configure.Configure.Email.Host), smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host))
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	log.Println("send successfully ... ")
-	return true
-}
-
 func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResult {
 	input := args.Input
 	if input == "" {
@@ -208,9 +184,20 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 	if result == nil {
 		return &types.ForgetResult{Message: "failed"}
 	}
-	if !sendMail(input, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\n %s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), result.Token)) {
+	content, err := email.RenderResetEmail(email.ResetInfo{
+		Username: user.Name,
+		Url:      fmt.Sprintf("%s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), result.Token),
+	})
+	if err != nil {
+		log.Println(err)
 		return &types.ForgetResult{Message: "send mail failed"}
 	}
+	err = email.SendMail(input, "password reset", content)
+	if err != nil {
+		log.Println(err)
+		return &types.ForgetResult{Message: "send mail failed"}
+	}
+	log.Println("send successfully ... ")
 	return &types.ForgetResult{Message: ""}
 }
 

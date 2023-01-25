@@ -5,20 +5,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/badoux/checkmail"
 	"github.com/google/uuid"
-	"github.com/jordan-wright/email"
 	"golang.org/x/text/unicode/norm"
 	"gorm.io/gorm"
 	"log"
-	"net/smtp"
 	"os"
 	"regexp"
 	"server/entity"
 	"server/services/database"
 	"server/utils/configure"
+	"server/utils/email"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -44,7 +41,7 @@ func (input *Item) checkPass() bool {
 	return lengthLimit(input.name, 1, 20) && lengthLimit(input.mail, 1, 50)
 }
 
-func addUser(info Item) (uint64, error) {
+func addUser(info Item) (uint64, string, error) {
 	user := entity.User{Name: info.name, Password: "", Mail: info.mail, Role: "member", State: "normal", JoinTime: time.Now()}
 	err := database.DataBase.Transaction(func(tx *gorm.DB) error {
 		checkResult := tx.Where(map[string]interface{}{"mail": info.mail}).First(&entity.User{})
@@ -61,9 +58,9 @@ func addUser(info Item) (uint64, error) {
 		return nil
 	})
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
-	return user.UserId, nil
+	return user.UserId, user.Name, nil
 }
 
 func makeToken() (string, error) {
@@ -74,26 +71,7 @@ func makeToken() (string, error) {
 	return id.String() + "-" + strconv.FormatInt(time.Now().UnixMilli(), 16), nil
 }
 
-func sendMail(address string, subject string, content string) error {
-	log.SetFlags(log.Lshortfile | log.LstdFlags)
-	mail := email.NewEmail()
-	err := checkmail.ValidateFormat(configure.Configure.Email.Username)
-	if err != nil {
-		log.Println("mail check failed ", err)
-	}
-	mail.From = strings.Split(configure.Configure.Email.Username, "@")[0] + fmt.Sprintf("<%s>", configure.Configure.Email.Username)
-	mail.To = []string{address}
-	mail.Subject = subject
-	mail.Text = []byte(content)
-
-	err = mail.Send(fmt.Sprintf("%s:25", configure.Configure.Email.Host), smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host))
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func resetPassword(id uint64, mail string) error {
+func resetPassword(id uint64, name string, mail string) error {
 	token, err := makeToken()
 	if err != nil {
 		return err
@@ -103,7 +81,15 @@ func resetPassword(id uint64, mail string) error {
 		UserId: id,
 	}
 	database.DataBase.Create(&resetToken)
-	err = sendMail(mail, "password reset", fmt.Sprintf("Please use the follow link to reset your password.\n %s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), token))
+
+	content, err := email.RenderWelcomeEmail(email.ResetInfo{
+		Username: name,
+		Url:      fmt.Sprintf("%s:%s/reset?token=%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port), token),
+	})
+	if err != nil {
+		return err
+	}
+	err = email.SendMail(mail, "password reset", content)
 	return err
 }
 
@@ -165,13 +151,14 @@ func Run(args []string) {
 
 	err = nil
 	added := []uint64{}
+	addedName := []string{}
 	for _, item := range items {
-		var id uint64
-		id, err = addUser(item)
+		id, name, err := addUser(item)
 		if err != nil {
 			break
 		}
 		added = append(added, id)
+		addedName = append(addedName, name)
 	}
 	if err != nil {
 		database.DataBase.Delete(&entity.User{}, added)
@@ -180,7 +167,7 @@ func Run(args []string) {
 
 	if *reset {
 		for index, id := range added {
-			err := resetPassword(id, items[index].mail)
+			err := resetPassword(id, addedName[index], items[index].mail)
 			if err != nil {
 				log.Println(err)
 			}
