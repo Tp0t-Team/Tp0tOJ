@@ -192,7 +192,7 @@ func (r *MutationResolver) Forget(args struct{ Input string }) *types.ForgetResu
 		log.Println(err)
 		return &types.ForgetResult{Message: "send mail failed"}
 	}
-	err = email.SendMail(input, "password reset", content)
+	err = email.SendMail(input, "[Tp0tOJ] Reset your password", content)
 	if err != nil {
 		log.Println(err)
 		return &types.ForgetResult{Message: "send mail failed"}

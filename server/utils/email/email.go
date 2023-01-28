@@ -25,8 +25,7 @@ func SendMail(address string, subject string, content []byte) error {
 	mail.From = strings.Split(configure.Configure.Email.Username, "@")[0] + fmt.Sprintf("<%s>", configure.Configure.Email.Username)
 	mail.To = []string{address}
 	mail.Subject = subject
-	mail.Text = content
-
+	mail.HTML = content
 	return mail.Send(fmt.Sprintf("%s:25", configure.Configure.Email.Host), smtp.PlainAuth("", configure.Configure.Email.Username, configure.Configure.Email.Password, configure.Configure.Email.Host))
 }
 

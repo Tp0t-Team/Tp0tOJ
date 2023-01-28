@@ -155,9 +155,11 @@ func (cache *TimelineRankCache) GetRank() []utils.RankItem {
 func (cache *TimelineRankCache) GetUserRank(userId uint64) int {
 	cache.mutex.RLock()
 	defer cache.mutex.RUnlock()
-	for index, item := range cache.rankNodes[len(cache.rankNodes)-1] {
-		if item.userId == userId {
-			return index
+	if len(cache.rankNodes) > 0 {
+		for index, item := range cache.rankNodes[len(cache.rankNodes)-1] {
+			if item.userId == userId {
+				return index
+			}
 		}
 	}
 	return -1

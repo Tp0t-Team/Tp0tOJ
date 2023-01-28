@@ -1,11 +1,16 @@
 server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #不用更改
+  host: 127.0.0.1                    #设置为Host，用于重置密码和CORS等（仅hostname部分不含协议端口和路径）
   username: Tp0t                     #默认admin用户名
-  password: admin                    #默认admin账号密码
+  password: password                 #默认admin账号密码
   mail: admin@example.com            #默认admin账号邮箱
   port: 0                            #0时自动选择80/443，非0指定端口
   salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
-  debug: false                       #无用参数
+  behaviorLog: false                 #用于记录选手关键行为，默认不开启
+  debug:                             #debug相关功能，生产环境请勿开启
+    dockerOpDetail: false            #开启可以查看容器构建和下发的问题
+    noOriginCheck: false             #开启禁用orgin检查，禁用csrf检查，禁用CSP
+    dbOpDetail: false                #开启查看所有数据库请求
+  cookieExpiresSeconds: 3600         #cookie过期秒数，0表示不会过期，-1表示在关闭浏览器时过期
 email:                               #邮件服务配置
   host: smtp.example.com             #邮件服务提供商服务器
   username: exampleUsername          #邮件发送账号
@@ -21,6 +26,5 @@ kubernetes:                          #k8s集群配置参数
   username: xxxxxxxx                 #「不可修改」镜像仓库用户名
   password: xxxxxxxx                 #「不可修改」镜像仓库密码
   registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致）
-database:
-  dsn: "host=localhost user=postgres password=admin dbname=oj port=5432 sslmode=disable TimeZone=Asia/Shanghai" # postgre dsn
-  
+database:                            #数据库连接参数
+  dsn: "..."                         #数据库连接配置，自动生成
