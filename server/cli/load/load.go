@@ -197,7 +197,7 @@ func Run(args []string) {
 
 	csvData, err := csv.NewReader(csvFile).ReadAll()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 
 	items := []Item{}
@@ -212,7 +212,7 @@ func Run(args []string) {
 		if !item.checkPass() {
 			log.Panicf("Invalid user info:\n%s,%s\n", line[0], line[1])
 		}
-		items = append(items)
+		items = append(items, item)
 	}
 
 	err = nil
