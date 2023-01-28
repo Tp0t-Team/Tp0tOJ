@@ -2,6 +2,8 @@
 
 [![Tp0tOJ](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml/badge.svg?branch=master)](https://github.com/Tp0t-Team/Tp0tOJ/actions/workflows/oj-build.yaml)
 
+![Alt](https://repobeats.axiom.co/api/embed/08537827caf3f05d3823e8e8b3619c97229a8a4f.svg "Repobeats analytics image")
+
 延续老版本的Tp0t OJ，前端继承并优化了视觉效果，后端从JAVA切换为Golang，定位也从一个面向校内的持续性训练平台，转向于一个比CTFd更好用的CTF比赛平台
 
 欢迎非盈利性质的比赛使用我们的平台，比如各大学校的校赛等，也欢迎大家提PR和ISSUE
@@ -19,6 +21,7 @@
 | 动态积分+一二三血 | :heavy_check_mark: | :x: | :x: |
 | 容器调度，避免算力浪费 | :heavy_check_mark: | :x: | :x: |
 | 合理的动态积分曲线 | :heavy_check_mark: | :x: | :x: |
+
 
 ## 平台部署指南
 
