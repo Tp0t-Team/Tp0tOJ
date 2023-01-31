@@ -86,6 +86,9 @@ func (r *MutationResolver) Register(ctx context.Context, args struct{ Input type
 	if isLogin != nil && *isLogin.(*bool) {
 		return &types.RegisterResult{Message: "already login cannot register"}
 	}
+	if !resolvers.IsRegistryAllow(nil) {
+		return &types.RegisterResult{Message: "no new user registration allowed"}
+	}
 	if !input.CheckPass() {
 		return &types.RegisterResult{Message: "invalid information"}
 	}

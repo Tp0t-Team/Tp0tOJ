@@ -13,5 +13,7 @@ type GameEvent struct {
 const (
 	PauseEvent = iota
 	ResumeEvent
+	AllowRegistrationEvent
+	DenyRegistrationEvent
 	EventMax
 )

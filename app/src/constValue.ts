@@ -3,7 +3,12 @@ const constValue = {
   roleType: ["member", "admin"],
   stateType: ["normal", "disabled"],
   flagType: ["Single", "Multiple", "Regexp", "Dynamic"],
-  eventType: ["Stop", "Start"],
+  eventType: [
+    "Stop competition",
+    "Start competition",
+    "Allow registration",
+    "Deny registration"
+  ],
   navTitle: "Tp0t OJ",
   CountMax: (30 * 1000) / 500
 };

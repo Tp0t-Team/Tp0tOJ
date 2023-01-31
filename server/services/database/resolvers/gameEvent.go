@@ -102,3 +102,37 @@ func IsGameRunning(outsideTX *gorm.DB) bool {
 	}
 
 }
+
+func IsRegistryAllow(outsideTX *gorm.DB) bool {
+	if outsideTX == nil {
+		outsideTX = db
+	}
+	currentTime := time.Now()
+	var currentEvent entity.GameEvent
+	var events []entity.GameEvent
+	result := outsideTX.Where(map[string]interface{}{"action": entity.AllowRegistrationEvent}).Or(map[string]interface{}{"action": entity.DenyRegistrationEvent}).Find(&events)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return true
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return false
+	}
+	if len(events) == 0 {
+		return true
+	}
+	result = outsideTX.Where(
+		outsideTX.Where(map[string]interface{}{"action": entity.AllowRegistrationEvent}).Or(map[string]interface{}{"action": entity.DenyRegistrationEvent}),
+	).Where("time <= ?", currentTime).Order("time desc").First(&currentEvent)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false
+	} else if result.Error != nil {
+		log.Println(result.Error)
+		return false
+	}
+	if currentEvent.Action == entity.AllowRegistrationEvent {
+		return true
+	} else {
+		return false
+	}
+
+}
