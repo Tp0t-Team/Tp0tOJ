@@ -57,44 +57,49 @@ sudo systemctl restart docker
 
 **由于SQLite对于多并发读写并不友好，所以在完成优化和测试前不再推荐使用SQLite，默认数据库更换为PostgresSQL**
 
-根据系统架构在release页面获取 prepare 二进制文件，如果所用系统架构没有对应的release，请参照contribution自行build
+根据系统架构在release页面获取 ojtool 二进制文件，如果所用系统架构没有对应的release，请参照contribution自行build
 
 
 
 ```shell
-./prepare -MasterIP xxx.xxx.xxx.xxx --postgres
-INSTALL_K3S_MIRROR=cn ./prepare -MasterIP xxx.xxx.xxx.xxx --postgres #for CHINA
+./ojtool prepare -MasterIP xxx.xxx.xxx.xxx --postgres
+INSTALL_K3S_MIRROR=cn ./ojtool prepare -MasterIP xxx.xxx.xxx.xxx --postgres #for CHINA
 ```
 
 **中国用户请使用Mirror的参数执行**
 
-执行`prepare` 会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
+执行`ojtool prepare` 会在当前目录下生成配置文件目录`resources`，安装完成后目录应该如下所示，其中`https.crt`、`https.key` 文件不会默认生成。平台启动时会自动检测这两个文件，如果存在，就自动启用https模式，否则采用http模式
 
 `home.html`为提供了主页面定制化的功能，在前后端一体化的单文件模式下，如果平台`resources` 目录中存在`home.html` 会将其作为平台主页展示
 
 ```
 .
-├── agent-install.sh     #「在从节点服务器上使用」从节点安装文件
-├── OJ                   #平台二进制文件
-├── prepare              #部署器二进制文件
-├── resources            #配置文件目录
-│   ├── ca.crt           #镜像仓库自签名根证书备份
-│   ├── config.yaml      #「平台启动前请修改」平台配置文件模板
-│   ├── docker-registry  #镜像仓库相关目录
-│   │   ├── auth         #镜像仓库授权文件目录
-│   │   │   └── htpasswd #授权文件
-│   │   ├── certs        #镜像仓库证书目录
-│   │   │   ├── tls.crt  #镜像仓库证书
-│   │   │   └── tls.key  #镜像仓库私钥
-│   │   └── data         #镜像仓库数据存储目录
-|   ├── [postgres]       #postgres数据目录
-│   ├── [https.crt]      #「非自动生成」网站TLS证书
-│   ├── [https.key]      #「非自动生成」网站TLS私钥
-│   ├── k3s.yaml         #自动生成的k3s配置文件，不需要修改
-|   ├── [home.html]      #「非自动生成」如果存在，会加载该网页做为主页面
-│   ├── tls.crt          #镜像仓库公私钥备份
-│   └── tls.key          #镜像仓库公私钥备份
-└── start.sh             #「配置完毕后启动」启动脚本
+├── agent-install.sh        #「在从节点服务器上使用」从节点安装文件
+├── OJ                      #平台二进制文件
+├── ojtool                  #命令行工具二进制文件
+├── resources               #配置文件目录
+│   ├── ca.crt              #镜像仓库自签名根证书备份
+│   ├── config.yaml         #「平台启动前请修改」平台配置文件模板
+│   ├── docker-registry     #镜像仓库相关目录
+│   │   ├── auth            #镜像仓库授权文件目录
+│   │   │   └── htpasswd    #授权文件
+│   │   ├── certs           #镜像仓库证书目录
+│   │   │   ├── tls.crt     #镜像仓库证书
+│   │   │   └── tls.key     #镜像仓库私钥
+│   │   └── data            #镜像仓库数据存储目录
+|   ├── [postgres]          #postgres数据目录
+│   ├── [https.crt]         #「非自动生成」网站TLS证书
+│   ├── [https.key]         #「非自动生成」网站TLS私钥
+│   ├── k3s.yaml            #自动生成的k3s配置文件，不需要修改
+|   ├── [home.html]         #「非自动生成」如果存在，会加载该网页做为主页面
+|   ├── [timeline.save]     #「启动后生成」排行榜历史数据存储文件
+|   ├── [emails]            #「非自动生成」邮件模板目录
+│   │   ├── [reset.html]    #「非自动生成」密码重置邮件模板
+│   │   └── [welcome.html]  #「非自动生成」导入账户初始化邮件模板
+│   ├── tls.crt             #镜像仓库公私钥备份
+│   └── tls.key             #镜像仓库公私钥备份
+├── [writeup]               #「启动后生成」writeup存储目录
+└── start.sh                #「配置完毕后启动」启动脚本
 ```
 
 然后使用 `start.sh`启动平台
@@ -124,36 +129,37 @@ To uninstall K3s from an agent node, run:
 #### 平台配置说明
 
 ```yaml
-server:                              #平台服务器的配置参数
-  host: 127.0.0.1                    #设置为Host，用于重置密码和CORS等（仅hostname部分不含协议端口和路径）
-  username: Tp0t                     #默认admin用户名
-  password: password                 #默认admin账号密码
-  mail: admin@example.com            #默认admin账号邮箱
-  port: 0                            #0时自动选择80/443，非0指定端口
-  salt: "xxxxxxxxxx"                 #用于密码保护的salt，自动生成
-  behaviorLog: false                 #用于记录选手关键行为，默认不开启
-  debug:                             #debug相关功能，生产环境请勿开启
-    dockerOpDetail: false            #开启可以查看容器构建和下发的问题
-    noOriginCheck: false             #开启禁用orgin检查，禁用csrf检查，禁用CSP
-    dbOpDetail: false                #开启查看所有数据库请求
-  cookieExpiresSeconds: 3600         #cookie过期秒数，0表示不会过期，-1表示在关闭浏览器时过期
-email:                               #邮件服务配置
-  host: smtp.example.com             #邮件服务提供商服务器
-  username: exampleUsername          #邮件发送账号
-  password: examplePassword          #邮件发送账号密码（可能为授权码）
-challenge:                           #题目分数控制参数
-  firstBloodReward: 0.1              #一血分数奖励比例
-  secondBloodReward: 0.08            #二血分数奖励比例
-  thirdBloodReward: 0.05             #三血分数奖励比例
-  halfLife: 20                       #题目分值减半所需解题人数
-kubernetes:                          #k8s集群配置参数
-  portAllocBegin: 30000              #自动分配端口范围起点
-  portAllocEnd: 31000                #自动分配端口终点
-  username: xxxxxxxx                 #「不可修改」镜像仓库用户名
-  password: xxxxxxxx                 #「不可修改」镜像仓库密码
-  registryHost: xxx.xxx.xxx.xxx:5000 #「不可修改」镜像仓库地址（与平台一致）
-database:                            #数据库连接参数
-  dsn: "..."                         #数据库连接配置，自动生成
+server:                                 #平台服务器的配置参数
+  host: 127.0.0.1                       #设置为Host，用于重置密码和CORS等（仅hostname部分不含协议端口和路径）
+  username: Tp0t                        #默认admin用户名
+  password: password                    #默认admin账号密码
+  mail: admin@example.com               #默认admin账号邮箱
+  port: 0                               #0时自动选择80/443，非0指定端口
+  salt: "xxxxxxxxxx"                    #用于密码保护的salt，自动生成
+  behaviorLog: false                    #用于记录选手关键行为，默认不开启
+  debug:                                #debug相关功能，生产环境请勿开启
+    dockerOpDetail: false               #开启可以查看容器构建和下发的问题
+    noOriginCheck: false                #开启禁用orgin检查，禁用csrf检查，禁用CSP
+    dbOpDetail: false                   #开启查看所有数据库请求
+  cookieExpiresSeconds: 3600            #cookie过期秒数，0表示不会过期，-1表示在关闭浏览器时过期
+email:                                  #邮件服务配置
+  host: smtp.example.com                #邮件服务提供商服务器
+  username: exampleUsername             #邮件发送账号
+  password: examplePassword             #邮件发送账号密码（可能为授权码）
+challenge:                              #题目分数控制参数
+  firstBloodReward: 0.1                 #一血分数奖励比例
+  secondBloodReward: 0.08               #二血分数奖励比例
+  thirdBloodReward: 0.05                #三血分数奖励比例
+  halfLife: 20                          #题目分值减半所需解题人数
+kubernetes:                             #k8s集群配置参数
+  portAllocBegin: 30000                 #自动分配端口范围起点
+  portAllocEnd: 31000                   #自动分配端口终点
+  username: xxxxxxxx                    #「不可修改」镜像仓库用户名
+  password: xxxxxxxx                    #「不可修改」镜像仓库密码
+  registryHost: xxx.xxx.xxx.xxx:5000    #「不可修改」镜像仓库地址（与平台一致）
+database:                               #数据库连接参数
+  dsn: "..."                            #数据库连接配置，自动生成
+timelineFile: "resources/timeline.save" #「不建议修改」排行榜历史数据存储文件路径
 ```
 
 邮件服务配置为必要配置，用户重置和修改密码依赖于邮件服务，**未配置邮件服务将导致用户无法修改密码**
@@ -301,17 +307,24 @@ nodeConfig:
 
 ### 数据库导出或备份
 
-提供exporter工具，使用以下命令编译
+命令行工具`ojtool`提供导出功能（需要在平台启动后使用）
 
-```bash
-go build -tags DatabasePostgres -o expost server/exporter
+```shell
+./ojtool export [-dir <export folder>]
 ```
 
-切换到平台启动目录使用（也就是perpare运行初始化的目录）
+通过 `-dir` 指定导出到的目录，默认导出到`data`目录
 
-通过 `-dir` 指定导出到的目录 
+### 用户批量导入
 
-##
+命令行工具`ojtool`提供从csv文件批量导入用户的功能（需要在平台启动后使用）
+
+```shell
+./ojtool load -welcome=<true/false> <csv file>
+```
+
+- `welcome`参数用于指定在导入用户后是否向用户发送初始化邮件
+- `<csv file>`为包含需要导入的用户数据的csv文件，格式为`<mail>,<username>`，不含表头
 
 ## 开发指南
 
@@ -327,7 +340,7 @@ go build -tags DatabasePostgres -o expost server/exporter
 
 ### 接口相关
 
-- GraphQL的schema文件定义在`server/src/resources/schema`目录下
+- GraphQL的schema文件定义在`server/services/schema.graphql`目录下
   
 - 请求成功返回message 为空字符串（没有消息就是好消息）
   
@@ -346,15 +359,9 @@ npm install #必要情况下可以删除package-lock.json
 npm run prepare
 ```
 
-构建前后端一体化可执行文件：依赖golang，在server目录下执行
+构建命令行工具和前后端一体化可执行文件：依赖golang，在server目录下执行
 
 ```shell
 go run build.go --postgres  #postgres版本
 go run build.go --sqlite    #sqlite版本暂时弃用
-```
-
-构建prepare可执行文件
-
-```shell
-go build prepare.go
 ```
