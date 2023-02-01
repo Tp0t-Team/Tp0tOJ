@@ -4,8 +4,8 @@ const constValue = {
   stateType: ["normal", "disabled"],
   flagType: ["Single", "Multiple", "Regexp", "Dynamic"],
   eventType: [
-    "Stop competition",
-    "Start competition",
+    "Stop game",
+    "Start game",
     "Allow registration",
     "Deny registration"
   ],
