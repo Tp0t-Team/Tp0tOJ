@@ -108,13 +108,13 @@ func addUser(info Item) (uint64, *email.WelcomeInfo, error) {
 }
 
 func sendPassword(info email.WelcomeInfo, url string, reward string, halfLife string) error {
+	info.Url = url
+	info.Reward = reward
+	info.HalfLife = halfLife
 	content, err := email.RenderWelcomeEmail(info)
 	if err != nil {
 		return err
 	}
-	info.Url = url
-	info.Reward = reward
-	info.HalfLife = halfLife
 	err = email.SendMail(info.Mail, "Welcome to Tp0t OJ", content)
 	return err
 }
@@ -232,7 +232,28 @@ func Run(args []string) {
 	}
 	fmt.Println("Users has been loaded into the database. Start sending welcome emails...")
 
-	url := fmt.Sprintf("%s:%s/", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port))
+	var url string
+	_, crtErr := os.Stat("resources/https.crt")
+	_, keyErr := os.Stat("resources/https.key")
+	if crtErr == nil && keyErr == nil {
+		configure.Configure.Server.Host = "https://" + configure.Configure.Server.Host
+		if configure.Configure.Server.Port == 0 {
+			configure.Configure.Server.Port = 443
+		}
+	} else {
+		configure.Configure.Server.Host = "http://" + configure.Configure.Server.Host
+		if configure.Configure.Server.Port == 0 {
+			configure.Configure.Server.Port = 80
+		}
+	}
+	if configure.Configure.Server.Port == 443 || configure.Configure.Server.Port == 80 {
+		url = fmt.Sprintf("%s", configure.Configure.Server.Host)
+	} else if configure.Configure.Server.Port == 0 {
+		log.Panicln("[X] You should start the server first!")
+	} else {
+		url = fmt.Sprintf("%s:%s", configure.Configure.Server.Host, strconv.Itoa(configure.Configure.Server.Port))
+	}
+	//log.Println("url:  ", url)
 	reward := fmt.Sprintf(
 		"%g%%, %g%%, %g%%",
 		configure.Configure.Challenge.FirstBloodReward*100,
