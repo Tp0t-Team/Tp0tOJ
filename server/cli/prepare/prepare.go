@@ -593,7 +593,7 @@ func GenerateAgentScript(masterIP string, k3sExec string) {
 		os.Exit(1)
 	}
 	cmdBlock := "if [ ! -e /etc/rancher ]; then sudo mkdir /etc/rancher; fi\n" +
-		"if [ ! -e /etc/rancher ]; then sudo mkdir /etc/rancher/k3s; fi\n" +
+		"if [ ! -e /etc/rancher/k3s ]; then sudo mkdir /etc/rancher/k3s; fi\n" +
 		"sudo cp registries-config.yaml /etc/rancher/k3s/registries.yaml\n" +
 		"sudo cp -r OJRegistry /etc/rancher/k3s\n" +
 		"rm registries-config.yaml\n" +
@@ -976,7 +976,7 @@ func Run(args []string) {
 	log.Println(" - generate default config:")
 	CreateDefaultConfig(*masterIP, registryUsername, registryPassword, dsn)
 	log.Println(" - generate agent script:")
-	GenerateAgentScript(*masterIP, k3sExec)
+	GenerateAgentScript(*masterIP, agentK3sExec)
 	log.Println(" - prepare registry:")
 	PrepareRegistry(*masterIP, registryUsername, registryPassword)
 	log.Println(" - generate start script:")

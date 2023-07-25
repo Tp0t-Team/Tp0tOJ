@@ -17,6 +17,7 @@ import (
 
 func Redirect(w http.ResponseWriter, req *http.Request) {
 	url := *req.URL
+	url.Host = req.Host
 	url.Scheme = "https"
 	target := url.String()
 	//log.Println(target)
