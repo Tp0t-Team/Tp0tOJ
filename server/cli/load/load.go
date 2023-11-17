@@ -26,6 +26,8 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
+var ErrUserExist = errors.New("exists")
+
 var blankRegexp *regexp.Regexp
 
 func init() {
@@ -93,7 +95,7 @@ func addUser(info Item) (uint64, *email.WelcomeInfo, error) {
 		} else if checkResult.Error != nil {
 			return checkResult.Error
 		} else {
-			return errors.New("exists")
+			return ErrUserExist
 		}
 		return nil
 	})
@@ -215,18 +217,25 @@ func Run(args []string) {
 		items = append(items, item)
 	}
 
-	err = nil
+	var outErr error
 	added := []uint64{}
 	addedInfo := []*email.WelcomeInfo{}
 	for _, item := range items {
 		id, info, err := addUser(item)
+		outErr = err
 		if err != nil {
+			if errors.Is(err, ErrUserExist) {
+				log.Println(fmt.Sprintf("user %s/%s already exists", item.name, item.mail))
+				outErr = nil
+				continue
+			}
+			outErr = err
 			break
 		}
 		added = append(added, id)
 		addedInfo = append(addedInfo, info)
 	}
-	if err != nil {
+	if outErr != nil {
 		database.DataBase.Delete(&entity.User{}, added)
 		log.Panicln(err)
 	}
