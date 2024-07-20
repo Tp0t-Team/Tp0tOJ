@@ -97,7 +97,7 @@ func InstallK3S(masterIP string, k3sExec string) {
 	}
 	log.Println("download k3s install script...")
 	client := &http.Client{}
-	k3sReq, _ := http.NewRequest("GET", "https://rancher-mirror.oss-cn-beijing.aliyuncs.com/k3s/k3s-install.sh", nil)
+	k3sReq, _ := http.NewRequest("GET", "https://rancher-mirror.rancher.cn/k3s/k3s-install.sh", nil)
 	k3sReq.Header.Set("Accept-Encoding", "*")
 	k3sRes, err := client.Do(k3sReq)
 	if err != nil {
